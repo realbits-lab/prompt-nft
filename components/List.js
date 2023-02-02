@@ -536,6 +536,16 @@ function List({ mode }) {
   }
 
   function ImageCardList() {
+    if (allImageDataArray.length === 0) {
+      return (
+        <NoContentPage
+          message={
+            "This service is just stareted. Soon, image list with prompt will be updated."
+          }
+        />
+      );
+    }
+
     return allImageDataArray.map((imageData, idx) => {
       // console.log("idx: ", idx);
       // console.log("pageIndex.image: ", pageIndex.image);
@@ -573,7 +583,7 @@ function List({ mode }) {
   }
 
   function RegisterCardList() {
-    if (allRegisterDataCount === 0) {
+    if (allRegisterDataArray.length === 0) {
       return <NoContentPage message={"No registered a image prompt NFT."} />;
     }
 
@@ -687,7 +697,7 @@ function List({ mode }) {
     // console.log("call OwnCardList()");
     // console.log("allMyOwnDataCount: ", allMyOwnDataCount);
 
-    if (allMyOwnDataCount === 0) {
+    if (allMyOwnDataArray.length === 0) {
       return (
         <NoContentPage message={"You do not have any image prompt NFT."} />
       );
@@ -793,7 +803,7 @@ function List({ mode }) {
   }
 
   function RentCardList() {
-    if (allMyRentDataCount === 0) {
+    if (allMyRentDataArray.length === 0) {
       return (
         <NoContentPage
           message={"You have not yet rented any image prompt NFT."}
@@ -981,14 +991,16 @@ function List({ mode }) {
         alignItems="center"
         minHeight="100vh"
       >
-        <Grid container spacing={2} justifyContent="space-around" padding={2}>
-          <Grid item>
-            <Web3Button />
+        {mode !== "image" ? (
+          <Grid container spacing={2} justifyContent="space-around" padding={2}>
+            <Grid item>
+              <Web3Button />
+            </Grid>
+            <Grid item>
+              <Web3NetworkSwitch />
+            </Grid>
           </Grid>
-          <Grid item>
-            <Web3NetworkSwitch />
-          </Grid>
-        </Grid>
+        ) : null}
         <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
           <CardMedia component="img" image={PLACEHOLDER_IMAGE_URL} />
           <CardContent
