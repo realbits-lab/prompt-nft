@@ -112,7 +112,12 @@ function List({ mode }) {
     own: 1,
     rent: 1,
   });
-  const [allPageCount, setAllPageCount] = React.useState(0);
+  const [allPageCount, setAllPageCount] = React.useState({
+    image: 1,
+    nft: 1,
+    own: 1,
+    rent: 1,
+  });
   const handlePageIndexChange = (event, value) => {
     setPageIndex((prevState) => {
       return {
@@ -150,26 +155,38 @@ function List({ mode }) {
   }, [mode, selectedChain, address, isConnected, signer, promptNftContract]);
 
   async function initializeImageData() {
-    // console.log("call initializeImageData()");
+    console.log("call initializeImageData()");
 
     try {
       //* Get all image prompt and image data.
       const getAllResult = await fetch(API_ALL_URL);
-      // console.log("getAllResult: ", getAllResult);
+      console.log("getAllResult: ", getAllResult);
       let allUnencyptedPromptImages;
       if (getAllResult.status !== 200) {
         setAllImageDataArray([]);
         setAllImageDataCount(0);
-        setAllPageCount(0);
+        // setAllPageCount(0);
+        setAllPageCount((prevState) => {
+          return {
+            ...prevState,
+            [mode]: 0,
+          };
+        });
         return;
       }
 
       allUnencyptedPromptImages = await getAllResult.json();
-      // console.log("allUnencyptedPromptImages: ", allUnencyptedPromptImages);
+      console.log("allUnencyptedPromptImages: ", allUnencyptedPromptImages);
       if (!allUnencyptedPromptImages) {
         setAllImageDataArray([]);
         setAllImageDataCount(0);
-        setAllPageCount(0);
+        // setAllPageCount(0);
+        setAllPageCount((prevState) => {
+          return {
+            ...prevState,
+            [mode]: 0,
+          };
+        });
         return;
       }
 
@@ -190,7 +207,13 @@ function List({ mode }) {
       const totalCount = Math.ceil(allCount / NUMBER_PER_PAGE);
       // console.log("totalCount: ", totalCount);
       // console.log("mode: ", mode);
-      setAllPageCount(totalCount);
+      // setAllPageCount(totalCount);
+      setAllPageCount((prevState) => {
+        return {
+          ...prevState,
+          [mode]: totalCount,
+        };
+      });
     } catch (error) {
       throw error;
     }
@@ -258,7 +281,13 @@ function List({ mode }) {
       const totalCount = Math.ceil(allCount / NUMBER_PER_PAGE);
       // console.log("totalCount: ", totalCount);
       // console.log("mode: ", mode);
-      setAllPageCount(totalCount);
+      // setAllPageCount(totalCount);
+      setAllPageCount((prevState) => {
+        return {
+          ...prevState,
+          [mode]: totalCount,
+        };
+      });
     } catch (error) {
       throw error;
     }
@@ -1002,7 +1031,7 @@ function List({ mode }) {
 
         <Box sx={{ m: 5 }}>
           <Pagination
-            count={allPageCount}
+            count={allPageCount[mode]}
             page={pageIndex[mode]}
             onChange={handlePageIndexChange}
             variant="outlined"
