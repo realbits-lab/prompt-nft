@@ -48,41 +48,6 @@ function ListPage(props) {
   const SELECTED_BUTTON_BACKGROUND_COLOR = "#21b6ae";
   const SELECTED_BUTTON_PADDING = "2px 2px";
 
-  let chains = [];
-  if (
-    getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK }) ===
-    "matic"
-  ) {
-    chains = [polygon];
-  } else if (
-    getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK }) ===
-    "maticmum"
-  ) {
-    chains = [polygonMumbai];
-  } else if (
-    getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK }) ===
-    "localhost"
-  ) {
-    chains = [localhost];
-  } else {
-    chains = [];
-  }
-
-  //* Wagmi client
-  const { provider } = configureChains(chains, [
-    walletConnectProvider({
-      projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
-    }),
-  ]);
-  const wagmiClient = createClient({
-    autoConnect: true,
-    connectors: modalConnectors({ appName: "web3Modal", chains }),
-    provider,
-  });
-
-  //* Web3Modal Ethereum Client
-  const ethereumClient = new EthereumClient(wagmiClient, chains);
-
   const AppBarButton = ({ buttonMode }) => {
     return (
       <Button
@@ -107,36 +72,29 @@ function ListPage(props) {
   //* Propagate wagmi client into List component.
   return (
     <React.Fragment>
-      <WagmiConfig client={wagmiClient}>
-        <HideOnScroll {...props}>
-          <AppBar>
-            <Toolbar>
-              <Box sx={{ flexGrow: 1, display: "block" }}></Box>
-              <Box sx={{ flexDirection: "row", flexGrow: 1 }}>
-                <AppBarButton buttonMode="image" />
-                <AppBarButton buttonMode="nft" />
-                <AppBarButton buttonMode="own" />
-                <AppBarButton buttonMode="rent" />
-              </Box>
+      <HideOnScroll {...props}>
+        <AppBar>
+          <Toolbar>
+            <Box sx={{ flexGrow: 1, display: "block" }}></Box>
+            <Box sx={{ flexDirection: "row", flexGrow: 1 }}>
+              <AppBarButton buttonMode="image" />
+              <AppBarButton buttonMode="nft" />
+              <AppBarButton buttonMode="own" />
+              <AppBarButton buttonMode="rent" />
+            </Box>
 
-              {/* <Box sx={{ flexGrow: 0 }}>
+            {/* <Box sx={{ flexGrow: 0 }}>
                 <User />
               </Box> */}
-            </Toolbar>
-          </AppBar>
-        </HideOnScroll>
+          </Toolbar>
+        </AppBar>
+      </HideOnScroll>
 
-        <Container>
-          <Box sx={{ my: 2 }}>
-            <List mode={mode} />
-          </Box>
-        </Container>
-      </WagmiConfig>
-
-      <Web3Modal
-        projectId={process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID}
-        ethereumClient={ethereumClient}
-      />
+      <Container>
+        <Box sx={{ my: 2 }}>
+          <List mode={mode} />
+        </Box>
+      </Container>
     </React.Fragment>
   );
 }

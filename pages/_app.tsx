@@ -48,6 +48,14 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
   } else {
     chains = [];
   }
+  console.log(
+    "process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK: ",
+    process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK
+  );
+  console.log(
+    "process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ",
+    process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID
+  );
 
   // * Wagmi client
   const { provider } = configureChains(chains, [
