@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export default async function handler(req, res) {
-  console.log("call /api/post");
+  // console.log("call /api/post");
 
   // Check method error.
   if (req.method !== "POST") {
@@ -20,7 +20,7 @@ export default async function handler(req, res) {
       imageUrl: imageUrl,
     },
   });
-  console.log("prisma.post.create result: ", result);
+  // console.log("prisma.post.create result: ", result);
 
   // Send 200 OK response.
   res.status(200).json({ data: "ok" });

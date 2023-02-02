@@ -18,7 +18,7 @@ export default async function handler(req, res) {
         isEncrypted: false,
       },
     });
-    console.log("findUniqueResult: ", findUniqueResult);
+    // console.log("findUniqueResult: ", findUniqueResult);
 
     if (findUniqueResult === null) {
       res.status(500).json({ data: "nok" });

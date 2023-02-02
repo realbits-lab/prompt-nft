@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   }
 
   const inputImageUrl = req.body.inputImageUrl;
-  console.log("inputImageUrl: ", inputImageUrl);
+  // console.log("inputImageUrl: ", inputImageUrl);
 
   const prisma = new PrismaClient();
 
@@ -20,19 +20,19 @@ export default async function handler(req, res) {
       isEncrypted: true,
     },
   });
-  console.log("findManyResult: ", findManyResult);
+  // console.log("findManyResult: ", findManyResult);
 
   if (
     findManyResult === undefined ||
     findManyResult === null ||
     findManyResult.length === 0
   ) {
-    console.log("send 500 error");
+    // console.log("send 500 error");
     res.status(200).json({ data: "nok" });
     return;
   }
 
   //* Send 200 OK response.
-  console.log("send 200 success");
+  // console.log("send 200 success");
   res.status(200).json({ data: "ok" });
 }

@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
 export default async function handler(req, res) {
-  console.log("call /api/nonce");
+  // console.log("call /api/nonce");
 
   //* Check method error.
   if (req.method !== "GET") {
@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
   //* GET /api/user/{publicAddress}
   const params = req.query.nonce;
-  console.log("params: ", params);
+  // console.log("params: ", params);
 
   //* Check params error.
   if (
@@ -27,14 +27,14 @@ export default async function handler(req, res) {
 
   //* Get publicAddress
   const inputPublicAddress = params[0];
-  console.log("inputPublicAddress: ", inputPublicAddress);
+  // console.log("inputPublicAddress: ", inputPublicAddress);
 
   let findUniqueResult = await prisma.user.findUnique({
     where: {
       publicAddress: inputPublicAddress,
     },
   });
-  console.log("findUniqueResult: ", findUniqueResult);
+  // console.log("findUniqueResult: ", findUniqueResult);
 
   if (!findUniqueResult || findUniqueResult.length === 0) {
     //* Add new user with random nonce.
@@ -45,7 +45,7 @@ export default async function handler(req, res) {
         nonce: nonce,
       },
     });
-    console.log("createResult: ", createResult);
+    // console.log("createResult: ", createResult);
     findUniqueResult = createResult;
   }
 

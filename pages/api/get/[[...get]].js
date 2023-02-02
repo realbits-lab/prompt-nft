@@ -27,8 +27,8 @@ export default async function handler(req, res) {
   // Get prompt and imageUrl.
   const inputPrompt = params[0];
   const inputImageUrl = params[1];
-  console.log("inputPrompt: ", inputPrompt);
-  console.log("inputImageUrl: ", inputImageUrl);
+  // console.log("inputPrompt: ", inputPrompt);
+  // console.log("inputImageUrl: ", inputImageUrl);
 
   // Check imageUrl and prompt was saved in sqlite already.
   const findUniqueResult = await prisma.post.findUnique({
@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       imageUrl: inputImageUrl,
     },
   });
-  console.log("findUniqueResult: ", findUniqueResult);
+  // console.log("findUniqueResult: ", findUniqueResult);
   if (findUniqueResult === null) {
     res.status(500).json({ data: "nok" });
   }

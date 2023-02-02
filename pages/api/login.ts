@@ -9,7 +9,7 @@ const sigUtil = require("@metamask/eth-sig-util");
 const prisma = new PrismaClient();
 
 async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
-  console.log("call /api/login");
+  // console.log("call /api/login");
 
   const { publicAddress, signature } = await req.body;
 
@@ -61,8 +61,8 @@ async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
       signature: signature,
       version: sigUtil.SignTypedDataVersion.V4,
     });
-    console.log("recovered: ", recovered);
-    console.log("publicAddress: ", publicAddress);
+    // console.log("recovered: ", recovered);
+    // console.log("publicAddress: ", publicAddress);
 
     if (
       ethUtil.toChecksumAddress(recovered) ===

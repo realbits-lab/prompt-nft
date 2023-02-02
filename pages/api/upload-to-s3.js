@@ -18,20 +18,20 @@ export default async function handler(req, res) {
   const name = req.body.name;
   const description = req.body.description;
   const inputImageUrl = req.body.inputImageUrl;
-  console.log("name: ", name);
-  console.log("description: ", description);
-  console.log("inputImageUrl: ", inputImageUrl);
+  // console.log("name: ", name);
+  // console.log("description: ", description);
+  // console.log("inputImageUrl: ", inputImageUrl);
 
   try {
     //* Get image data from cdn.discordapp.com server.
     const fetchResult = await fetch(inputImageUrl, { mode: "no-cors" });
-    console.log("fetchResult: ", fetchResult);
+    // console.log("fetchResult: ", fetchResult);
     if (!fetchResult.ok) {
       throw new Error("Network response was not OK");
     }
 
     const imageBlobData = await fetchResult.blob();
-    console.log("imageBlobData: ", imageBlobData);
+    // console.log("imageBlobData: ", imageBlobData);
 
     // Set s3 client.
     // console.log(
@@ -55,7 +55,7 @@ export default async function handler(req, res) {
     };
 
     const s3Client = new S3Client(config);
-    console.log("s3Client: ", s3Client);
+    // console.log("s3Client: ", s3Client);
 
     //* Get unique id.
     const uuid = uuidv4();
@@ -70,7 +70,7 @@ export default async function handler(req, res) {
       null,
       2
     );
-    console.log("bodyData: ", bodyData);
+    // console.log("bodyData: ", bodyData);
 
     //* Put json metadata to s3.
     const jsonBucketParams = {
@@ -81,7 +81,7 @@ export default async function handler(req, res) {
     };
     const jsonPutCommand = new PutObjectCommand(jsonBucketParams);
     const jsonPutCommandResult = await s3Client.send(jsonPutCommand);
-    console.log("jsonPutCommandResult: ", jsonPutCommandResult);
+    // console.log("jsonPutCommandResult: ", jsonPutCommandResult);
 
     //* Put image file to s3.
     const imageArrayBuffer = await imageBlobData.arrayBuffer();
@@ -93,7 +93,7 @@ export default async function handler(req, res) {
     };
     const imagePutCommand = new PutObjectCommand(imageBucketParams);
     const imagePutCommandResult = await s3Client.send(imagePutCommand);
-    console.log("imagePutCommandResult: ", imagePutCommandResult);
+    // console.log("imagePutCommandResult: ", imagePutCommandResult);
 
     //* Send 200 OK response with url.
     res.status(200).json({
