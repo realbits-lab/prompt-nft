@@ -17,6 +17,8 @@ import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
 import { getChainName } from "./Util";
 import fetchJson from "../lib/fetchJson";
@@ -52,6 +54,19 @@ function Mint({ inputImageUrl, inputPrompt }) {
   const CARD_MIN_WIDTH = 375;
 
   //*---------------------------------------------------------------------------
+  //* Handle snackbar.
+  //*---------------------------------------------------------------------------
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
+  const [openSnackbar, setOpenSnackbar] = React.useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState("info");
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
+  //*---------------------------------------------------------------------------
   //* Handle text input change.
   //*---------------------------------------------------------------------------
   const [formValue, setFormValue] = React.useState({
@@ -82,6 +97,10 @@ function Mint({ inputImageUrl, inputPrompt }) {
   const promptNftContractRef = React.useRef();
   const [imageUrl, setImageUrl] = React.useState();
   const [promptText, setPromptText] = React.useState("");
+  const [buttonMessage, setButtonMessage] = React.useState(
+    <Typography>MINT</Typography>
+  );
+  const [buttonDisabled, setButtonDisabled] = React.useState(false);
 
   React.useEffect(() => {
     // console.log("call useEffect()");
@@ -359,7 +378,11 @@ function Mint({ inputImageUrl, inputPrompt }) {
           <CardActions>
             <Button
               variant="contained"
-              disabled={isWalletConnected() === true ? false : true}
+              disabled={
+                isWalletConnected() === true && buttonDisabled === false
+                  ? false
+                  : true
+              }
               style={{
                 width: "100%",
                 paddingRight: "15px",
@@ -370,6 +393,26 @@ function Mint({ inputImageUrl, inputPrompt }) {
                 // console.log("call onClick()");
 
                 if (isWalletConnected() === false) {
+                  return;
+                }
+
+                //* Check image url is already minted (crypt flag)
+                const checkCryptResponse = await fetchJson("/api/check-crypt", {
+                  method: "POST",
+                  headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    inputImageUrl: imageUrl,
+                  }),
+                });
+                console.log("checkCryptResponse: ", checkCryptResponse);
+                if (checkCryptResponse.data === "ok") {
+                  setButtonDisabled(true);
+                  setSnackbarSeverity("warning");
+                  setSnackbarMessage("This image prompt is already minted.");
+                  setOpenSnackbar(true);
                   return;
                 }
 
@@ -397,30 +440,42 @@ function Mint({ inputImageUrl, inputPrompt }) {
                   // console.log("fetchResponse: ", fetchResponse);
 
                   //* Mint prompt NFT.
-                  const tx = await mintPromptNft({
+                  mintPromptNft({
                     prompt: promptText,
                     tokenURI: tokenURI,
                     contractOwnerEncryptData:
                       fetchResponse.contractOwnerEncryptData,
+                  }).then(function (tx) {
+                    // console.log("tx: ", tx);
+                    console.log("tx.transactionHash: ", tx.transactionHash);
+                    //* Go to thanks page.
+                    const imageUrlEncodedString = encodeURIComponent(imageUrl);
+                    router.push(`${THANKS_PAGE}${imageUrlEncodedString}`);
                   });
-                  // console.log("tx: ", tx);
-                  // console.log("tx.transactionHash: ", tx.transactionHash);
+
+                  setButtonDisabled(true);
+                  setButtonMessage(<CircularProgress />);
 
                   //* TODO: If mint failed, revert encrypted prompt to plain prompt(use flag).
-
-                  //* Go to thanks page.
-                  const imageUrlEncodedString = encodeURIComponent(imageUrl);
-                  router.push(`${THANKS_PAGE}${imageUrlEncodedString}`);
+                  //* TODO: Sync cypto flag and event logs later.
                 } catch (error) {
                   console.error(error);
                 }
               }}
             >
-              MINT
+              {buttonMessage}
             </Button>
           </CardActions>
         </Card>
       </Box>
+
+      <MessageSnackbar
+        open={openSnackbar}
+        autoHideDuration={10000}
+        onClose={handleCloseSnackbar}
+        severity={snackbarSeverity}
+        message={snackbarMessage}
+      />
     </div>
   );
 }
