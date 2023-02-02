@@ -634,16 +634,11 @@ function List({ mode }) {
                 <Button
                   size="small"
                   onClick={async () => {
-                    if (
-                      status !== "connected" ||
-                      checkBlockchainNetwork({ inputChainId: chainId }) ===
-                        false
-                    ) {
-                      // TODO: Change or add blockchain network.
+                    if (isWalletConnected() === false) {
                       // console.log("chainName: ", getChainName({ chainId }));
                       setSnackbarSeverity("warning");
                       setSnackbarMessage(
-                        `Change metamask network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
+                        `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
                       );
                       setOpenSnackbar(true);
                       return;
@@ -656,18 +651,27 @@ function List({ mode }) {
                       return;
                     }
 
-                    // Rent this nft with rent fee.
-                    const tx = await rentMarketContract
-                      .connect(signer)
-                      .rentNFT(
-                        process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-                        nftData.tokenId,
-                        process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS,
-                        {
-                          value: nftData.rentFee,
-                        }
+                    //* Rent this nft with rent fee.
+                    try {
+                      const tx = await rentMarketContract
+                        .connect(signer)
+                        .rentNFT(
+                          process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
+                          nftData.tokenId,
+                          process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS,
+                          {
+                            value: nftData.rentFee,
+                          }
+                        );
+                      const txResult = await tx.wait();
+                    } catch (error) {
+                      console.error(error);
+                      setSnackbarSeverity("error");
+                      setSnackbarMessage(
+                        error.data.message ? error.data.message : error.message
                       );
-                    const txResult = await tx.wait();
+                      setOpenSnackbar(true);
+                    }
                   }}
                 >
                   RENT
