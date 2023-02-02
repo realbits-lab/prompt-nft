@@ -129,18 +129,18 @@ function List({ mode }) {
 
   //* TODO: Fix multiple calls.
   React.useEffect(() => {
-    console.log("call useEffect()");
-    console.log("mode: ", mode);
-    console.log("selectedChain: ", selectedChain);
-    console.log("address: ", address);
-    console.log("isConnected: ", isConnected);
+    // console.log("call useEffect()");
+    // console.log("mode: ", mode);
+    // console.log("selectedChain: ", selectedChain);
+    // console.log("address: ", address);
+    // console.log("isConnected: ", isConnected);
 
     async function initialize() {
       await initializeImageData();
-      // if (isWalletConnected() === true) {
-      //   await initializeNftData();
-      // }
-      console.log("initialize done");
+      if (isWalletConnected() === true) {
+        await initializeNftData();
+      }
+      // console.log("initialize done");
     }
     try {
       initialize();
@@ -150,12 +150,12 @@ function List({ mode }) {
   }, [mode, selectedChain, address, isConnected, signer, promptNftContract]);
 
   async function initializeImageData() {
-    console.log("call initializeImageData()");
+    // console.log("call initializeImageData()");
 
     try {
       //* Get all image prompt and image data.
       const getAllResult = await fetch(API_ALL_URL);
-      console.log("getAllResult: ", getAllResult);
+      // console.log("getAllResult: ", getAllResult);
       let allUnencyptedPromptImages;
       if (getAllResult.status !== 200) {
         setAllImageDataArray([]);
@@ -175,10 +175,10 @@ function List({ mode }) {
 
       setAllImageDataArray(allUnencyptedPromptImages.data);
       setAllImageDataCount(allUnencyptedPromptImages.data.length);
-      console.log(
-        "allUnencyptedPromptImages.data.length: ",
-        allUnencyptedPromptImages.data.length
-      );
+      // console.log(
+      //   "allUnencyptedPromptImages.data.length: ",
+      //   allUnencyptedPromptImages.data.length
+      // );
 
       //* Get total page count not from useState but variable directly.
       let allCount = 0;
@@ -188,8 +188,8 @@ function List({ mode }) {
           break;
       }
       const totalCount = Math.ceil(allCount / NUMBER_PER_PAGE);
-      console.log("totalCount: ", totalCount);
-      console.log("mode: ", mode);
+      // console.log("totalCount: ", totalCount);
+      // console.log("mode: ", mode);
       setAllPageCount(totalCount);
     } catch (error) {
       throw error;
@@ -197,14 +197,14 @@ function List({ mode }) {
   }
 
   async function initializeNftData() {
-    console.log("call initializeNftData()");
+    // console.log("call initializeNftData()");
 
     try {
       //* Get all nft data.
       const { allNftDataCountResult, allNftDataArrayResult } =
         await getAllNftData();
-      console.log("allNftDataCountResult: ", allNftDataCountResult);
-      console.log("allNftDataArrayResult: ", allNftDataArrayResult);
+      // console.log("allNftDataCountResult: ", allNftDataCountResult);
+      // console.log("allNftDataArrayResult: ", allNftDataArrayResult);
       setAllNftDataCount(allNftDataCountResult);
       setAllNftDataArray(allNftDataArrayResult.reverse());
 
@@ -286,15 +286,15 @@ function List({ mode }) {
   }
 
   async function getAllNftData() {
-    console.log("call getAllNftData()");
-    console.log("signer: ", signer);
-    console.log("promptNftContract: ", promptNftContract);
+    // console.log("call getAllNftData()");
+    // console.log("signer: ", signer);
+    // console.log("promptNftContract: ", promptNftContract);
 
     //* If no signer, return zero data.
     if (!promptNftContract || !signer) {
-      console.log("promptNftContract or signer is null or undefined.");
-      console.log("promptNftContract: ", promptNftContract);
-      console.log("signer: ", signer);
+      // console.log("promptNftContract or signer is null or undefined.");
+      // console.log("promptNftContract: ", promptNftContract);
+      // console.log("signer: ", signer);
       //* Return error.
       return {
         allNftDataCountResult: 0,
@@ -306,9 +306,9 @@ function List({ mode }) {
     const totalSupplyBigNumber = await promptNftContract
       .connect(signer)
       .totalSupply();
-    console.log("totalSupplyBigNumber: ", totalSupplyBigNumber);
+    // console.log("totalSupplyBigNumber: ", totalSupplyBigNumber);
     const allNftCountResult = totalSupplyBigNumber.toNumber();
-    console.log("allNftCountResult: ", allNftCountResult);
+    // console.log("allNftCountResult: ", allNftCountResult);
 
     //* Get all metadata per each token as to token uri.
     let allNftDataResultArray = [];
@@ -859,19 +859,19 @@ function List({ mode }) {
   }
 
   function isWalletConnected() {
-    console.log("call isWalletConnected()");
-    console.log("isConnected: ", isConnected);
-    console.log("selectedChain: ", selectedChain);
-    if (selectedChain) {
-      console.log(
-        "getChainName({ chainId: selectedChain.id }): ",
-        getChainName({ chainId: selectedChain.id })
-      );
-    }
-    console.log(
-      "getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK }): ",
-      getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK })
-    );
+    // console.log("call isWalletConnected()");
+    // console.log("isConnected: ", isConnected);
+    // console.log("selectedChain: ", selectedChain);
+    // if (selectedChain) {
+    //   console.log(
+    //     "getChainName({ chainId: selectedChain.id }): ",
+    //     getChainName({ chainId: selectedChain.id })
+    //   );
+    // }
+    // console.log(
+    //   "getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK }): ",
+    //   getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK })
+    // );
     if (
       isConnected === false ||
       selectedChain === undefined ||
@@ -880,16 +880,16 @@ function List({ mode }) {
           chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
         })
     ) {
-      console.log("return false");
+      // console.log("return false");
       return false;
     } else {
-      console.log("return true");
+      // console.log("return true");
       return true;
     }
   }
 
   function NoLoginPage() {
-    console.log("theme: ", theme);
+    // console.log("theme: ", theme);
     return (
       <Box
         sx={{
