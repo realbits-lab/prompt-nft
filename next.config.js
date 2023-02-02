@@ -11,12 +11,12 @@ const nextConfig = {
   },
   reactStrictMode: false,
   productionBrowserSourceMaps: true,
-  webpack: (config) => {
-    return {
-      ...config,
-      devtool: "inline-source-map",
-    };
-  },
+  // webpack: (config) => {
+  //   return {
+  //     ...config,
+  //     devtool: "inline-source-map",
+  //   };
+  // },
 };
 
 module.exports = nextConfig;

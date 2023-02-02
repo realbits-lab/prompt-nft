@@ -90,7 +90,7 @@ function ListPage(props) {
         style={{
           borderRadius: BUTTON_BORDER_RADIUS,
           backgroundColor:
-            mode === buttonMode && SELECTED_BUTTON_BACKGROUND_COLOR,
+            mode === buttonMode ? SELECTED_BUTTON_BACKGROUND_COLOR : null,
           padding: SELECTED_BUTTON_PADDING,
         }}
         sx={{ my: 2, color: "white" }}
