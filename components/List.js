@@ -57,6 +57,7 @@ function List({ mode }) {
     abi: rentmarketABI["abi"],
   });
   // console.log("rentMarketContract: ", rentMarketContract);
+  const CARD_MARGIN_TOP = "50px";
 
   const { user } = useUser();
   // console.log("user: ", user);
@@ -66,7 +67,7 @@ function List({ mode }) {
   const API_ALL_URL = process.env.NEXT_PUBLIC_API_ALL_URL;
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
-  const NUMBER_PER_PAGE = 1;
+  const NUMBER_PER_PAGE = 5;
   const CARD_PADDING = 1;
 
   //*---------------------------------------------------------------------------
@@ -139,6 +140,8 @@ function List({ mode }) {
     // console.log("selectedChain: ", selectedChain);
     // console.log("address: ", address);
     // console.log("isConnected: ", isConnected);
+    // console.log("signer: ", signer);
+    // console.log("promptNftContract: ", promptNftContract);
 
     async function initialize() {
       await initializeImageData();
@@ -545,7 +548,7 @@ function List({ mode }) {
         idx < pageIndex.image * NUMBER_PER_PAGE
       ) {
         return (
-          <Box sx={{ m: CARD_PADDING }} key={idx}>
+          <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }} key={idx}>
             <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
               <CardMedia
                 component="img"
@@ -585,15 +588,11 @@ function List({ mode }) {
         idx < pageIndex.nft * NUMBER_PER_PAGE
       ) {
         return (
-          <Box
-            marginTop={"20px"}
-            sx={{ m: CARD_PADDING, marginTop: "20px" }}
-            key={getUniqueKey()}
-          >
+          <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }} key={idx}>
             <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
               <CardMedia
                 component="img"
-                width={100}
+                // width={100}
                 image={nftData.metadata.image}
                 onError={handleCardMediaImageError}
               />
@@ -706,7 +705,7 @@ function List({ mode }) {
         idx < pageIndex.own * NUMBER_PER_PAGE
       ) {
         return (
-          <Box sx={{ m: CARD_PADDING }} key={idx}>
+          <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }} key={idx}>
             <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
               <CardMedia
                 component="img"
@@ -814,7 +813,7 @@ function List({ mode }) {
         idx < pageIndex.rent * NUMBER_PER_PAGE
       ) {
         return (
-          <Box sx={{ m: CARD_PADDING }} key={idx}>
+          <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }} key={idx}>
             <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
               <CardMedia
                 component="img"
@@ -1013,11 +1012,12 @@ function List({ mode }) {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        minHeight="100vh"
         flexDirection="column"
       >
         {mode === "image" ? (
-          <ImageCardList />
+          <div>
+            <ImageCardList />
+          </div>
         ) : mode === "nft" ? (
           <div>
             {isWalletConnected() === false ? (
@@ -1035,7 +1035,9 @@ function List({ mode }) {
             {isWalletConnected() === false ? <NoLoginPage /> : <RentCardList />}
           </div>
         ) : (
-          <ImageCardList />
+          <div>
+            <ImageCardList />
+          </div>
         )}
 
         <Box sx={{ m: 5 }}>
