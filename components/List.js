@@ -155,12 +155,12 @@ function List({ mode }) {
   }, [mode, selectedChain, address, isConnected, signer, promptNftContract]);
 
   async function initializeImageData() {
-    console.log("call initializeImageData()");
+    // console.log("call initializeImageData()");
 
     try {
       //* Get all image prompt and image data.
       const getAllResult = await fetch(API_ALL_URL);
-      console.log("getAllResult: ", getAllResult);
+      // console.log("getAllResult: ", getAllResult);
       let allUnencyptedPromptImages;
       if (getAllResult.status !== 200) {
         setAllImageDataArray([]);
@@ -176,7 +176,7 @@ function List({ mode }) {
       }
 
       allUnencyptedPromptImages = await getAllResult.json();
-      console.log("allUnencyptedPromptImages: ", allUnencyptedPromptImages);
+      // console.log("allUnencyptedPromptImages: ", allUnencyptedPromptImages);
       if (!allUnencyptedPromptImages) {
         setAllImageDataArray([]);
         setAllImageDataCount(0);
@@ -207,7 +207,6 @@ function List({ mode }) {
       const totalCount = Math.ceil(allCount / NUMBER_PER_PAGE);
       // console.log("totalCount: ", totalCount);
       // console.log("mode: ", mode);
-      // setAllPageCount(totalCount);
       setAllPageCount((prevState) => {
         return {
           ...prevState,
@@ -266,6 +265,10 @@ function List({ mode }) {
       //* Get total page count not from useState but variable directly.
       let allCount = 0;
       switch (mode) {
+        case "image":
+          allCount = allImageDataCount;
+          break;
+
         case "nft":
           allCount = allNftDataCountResult;
           break;
@@ -281,7 +284,6 @@ function List({ mode }) {
       const totalCount = Math.ceil(allCount / NUMBER_PER_PAGE);
       // console.log("totalCount: ", totalCount);
       // console.log("mode: ", mode);
-      // setAllPageCount(totalCount);
       setAllPageCount((prevState) => {
         return {
           ...prevState,
