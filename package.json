@@ -1,6 +1,10 @@
 {
   "name": "prompt-nft",
   "version": "0.0.1",
+  "engines": {
+    "node": "16.x",
+    "npm": "8.x"
+  },
   "private": true,
   "scripts": {
     "dev": "next dev",
