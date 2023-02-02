@@ -571,7 +571,7 @@ function List({ mode }) {
 
   function RegisterCardList() {
     if (allRegisterDataCount === 0) {
-      return <NoContentPage />;
+      return <NoContentPage message={"No registered a image prompt NFT."} />;
     }
 
     return allRegisterDataArray.map((nftData, idx) => {
@@ -685,7 +685,9 @@ function List({ mode }) {
     // console.log("allMyOwnDataCount: ", allMyOwnDataCount);
 
     if (allMyOwnDataCount === 0) {
-      return <NoContentPage />;
+      return (
+        <NoContentPage message={"You do not have any image prompt NFT."} />
+      );
     }
 
     return allMyOwnDataArray.map((nftData, idx) => {
@@ -789,7 +791,11 @@ function List({ mode }) {
 
   function RentCardList() {
     if (allMyRentDataCount === 0) {
-      return <NoContentPage />;
+      return (
+        <NoContentPage
+          message={"You have not yet rented any image prompt NFT."}
+        />
+      );
     }
 
     return allMyRentDataArray.map((nftData, idx) => {
@@ -960,7 +966,7 @@ function List({ mode }) {
     );
   }
 
-  function NoContentPage() {
+  function NoContentPage({ message }) {
     return (
       <Box
         sx={{
@@ -987,10 +993,7 @@ function List({ mode }) {
               padding: "10",
             }}
           >
-            <Typography variant="h7">
-              Now, we're gathering prompt NFT from people who want to draw
-              prompt image with NFT.
-            </Typography>
+            <Typography variant="h7">{message}</Typography>
           </CardContent>
         </Card>
       </Box>
