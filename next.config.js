@@ -5,7 +5,7 @@ const nextConfig = {
       {
         source: "/",
         destination: "/list",
-        permanent: true,
+        permanent: false,
       },
     ];
   },
