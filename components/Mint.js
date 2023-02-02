@@ -45,28 +45,11 @@ function Mint({ inputImageUrl, inputPrompt }) {
   });
   // console.log("promptNftContract: ", promptNftContract);
 
-  // const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
-  // const BUCKET_NAME = processs.env.NEXT_PUBLIC_BUCKET_NAME;
   const PLACEHOLDER_IMAGE_URL =
     "https://placehold.co/600x400?text=No+image&font=source-sans-pro";
-  const BUCKET_NAME = "prompt-nft";
   const THANKS_PAGE = "/thanks/";
-  const BLOCKCHAIN_NETWORK = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
-
-  //*----------------------------------------------------------------------------
-  //* Handle snackbar.
-  //*---------------------------------------------------------------------------
-  const [snackbarMessage, setSnackbarMessage] = React.useState("");
-  const [openSnackbar, setOpenSnackbar] = React.useState(false);
-  const [snackbarSeverity, setSnackbarSeverity] = React.useState("info");
-  const handleCloseSnackbar = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setOpenSnackbar(false);
-  };
 
   //*---------------------------------------------------------------------------
   //* Handle text input change.
@@ -121,17 +104,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
       try {
         await getMetamaskAccount();
 
-        if (
-          isConnected === false ||
-          selectedChain === undefined ||
-          getChainName({ chainId: selectedChain.id }) !==
-            getChainName({ chainId: BLOCKCHAIN_NETWORK })
-        ) {
-          setSnackbarSeverity("warning");
-          setSnackbarMessage(
-            `Change metamask network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
-          );
-          setOpenSnackbar(true);
+        if (isWalletConnected() === false) {
           return;
         }
       } catch (error) {
@@ -231,7 +204,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
   async function mintPromptNft({ prompt, tokenURI, contractOwnerEncryptData }) {
     // console.log("call mintPromptNft()");
 
-		//* Check undefined error.
+    //* Check undefined error.
     if (!prompt || !tokenURI || !contractOwnerEncryptData) {
       return;
     }
@@ -290,6 +263,36 @@ function Mint({ inputImageUrl, inputPrompt }) {
     // console.log("imageUrl: ", imageUrl);
     e.target.onerror = null;
     e.target.src = PLACEHOLDER_IMAGE_URL;
+  }
+
+  function isWalletConnected() {
+    console.log("call isWalletConnected()");
+    console.log("isConnected: ", isConnected);
+    console.log("selectedChain: ", selectedChain);
+    if (selectedChain) {
+      console.log(
+        "getChainName({ chainId: selectedChain.id }): ",
+        getChainName({ chainId: selectedChain.id })
+      );
+    }
+    console.log(
+      "getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK }): ",
+      getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK })
+    );
+    if (
+      isConnected === false ||
+      selectedChain === undefined ||
+      getChainName({ chainId: selectedChain.id }) !==
+        getChainName({
+          chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
+        })
+    ) {
+      console.log("return false");
+      return false;
+    } else {
+      console.log("return true");
+      return true;
+    }
   }
 
   return (
@@ -356,6 +359,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
           <CardActions>
             <Button
               variant="contained"
+              disabled={isWalletConnected() === true ? false : true}
               style={{
                 width: "100%",
                 paddingRight: "15px",
@@ -365,18 +369,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
               onClick={async function () {
                 // console.log("call onClick()");
 
-                if (
-                  isConnected === false ||
-                  selectedChain === undefined ||
-                  getChainName({ chainId: selectedChain.id }) !==
-                    getChainName({ chainId: BLOCKCHAIN_NETWORK })
-                ) {
-                  // console.log("chainName: ", getChainName({ chainId }));
-                  setSnackbarSeverity("warning");
-                  setSnackbarMessage(
-                    `Change metamask network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
-                  );
-                  setOpenSnackbar(true);
+                if (isWalletConnected() === false) {
                   return;
                 }
 
@@ -428,14 +421,6 @@ function Mint({ inputImageUrl, inputPrompt }) {
           </CardActions>
         </Card>
       </Box>
-
-      <MessageSnackbar
-        open={openSnackbar}
-        autoHideDuration={10000}
-        onClose={handleCloseSnackbar}
-        severity={snackbarSeverity}
-        message={snackbarMessage}
-      />
     </div>
   );
 }

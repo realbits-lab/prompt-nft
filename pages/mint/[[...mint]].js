@@ -167,30 +167,37 @@ const MintPage = () => {
           sx={{
             marginTop: "20px",
             display: "flex",
-            flexDirection: "row",
+            flexDirection: "column",
             justifyContent: "center",
           }}
         >
-          <Button variant="text">Click the connect wallet button</Button>
+          <Button variant="text">
+            Click the Connect Wallet or Wrong Network button
+          </Button>
+          {buildContentPage()}
         </Box>
       );
     }
 
+    return buildContentPage();
+  };
+
+  function buildContentPage() {
     if (errorStatus === undefined) {
       return <Mint inputImageUrl={imageUrl} inputPrompt={prompt} />;
     } else {
       return <ErrorPage errorStatus={errorStatus} />;
     }
-  };
+  }
 
   return (
     <Grid container direction="column">
       <Grid item>
-        <Grid container spacing={2}>
-          <Grid item xs={6}>
+        <Grid container justifyContent="space-around" marginTop={2}>
+          <Grid item>
             <Web3Button />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item>
             <Web3NetworkSwitch />
           </Grid>
         </Grid>

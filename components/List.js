@@ -137,9 +137,9 @@ function List({ mode }) {
 
     async function initialize() {
       await initializeImageData();
-      if (isWalletConnected() === true) {
-        await initializeNftData();
-      }
+      // if (isWalletConnected() === true) {
+      //   await initializeNftData();
+      // }
       console.log("initialize done");
     }
     try {

@@ -68,7 +68,7 @@ function ListPage(props) {
     chains = [];
   }
 
-  // * Wagmi client
+  //* Wagmi client
   const { provider } = configureChains(chains, [
     walletConnectProvider({
       projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
@@ -80,7 +80,7 @@ function ListPage(props) {
     provider,
   });
 
-  // * Web3Modal Ethereum Client
+  //* Web3Modal Ethereum Client
   const ethereumClient = new EthereumClient(wagmiClient, chains);
 
   const AppBarButton = ({ buttonMode }) => {
