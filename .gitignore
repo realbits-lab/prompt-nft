@@ -1,5 +1,6 @@
 #Prisma
 dev.db
+dev.db-journal
 prisma/**/migrations/
 
 # Logs
