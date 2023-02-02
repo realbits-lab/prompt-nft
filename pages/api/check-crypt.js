@@ -21,10 +21,18 @@ export default async function handler(req, res) {
     },
   });
   console.log("findManyResult: ", findManyResult);
-  if (findManyResult === null) {
-    res.status(500).json({ data: "nok" });
+
+  if (
+    findManyResult === undefined ||
+    findManyResult === null ||
+    findManyResult.length === 0
+  ) {
+    console.log("send 500 error");
+    res.status(200).json({ data: "nok" });
+    return;
   }
 
   //* Send 200 OK response.
+  console.log("send 200 success");
   res.status(200).json({ data: "ok" });
 }

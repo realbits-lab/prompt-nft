@@ -338,6 +338,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
           >
             <TextField
               required
+              error={inputName === "" ? true : false}
               id="outlined-required"
               label="Name"
               name="inputName"
@@ -348,9 +349,11 @@ function Mint({ inputImageUrl, inputPrompt }) {
                 width: "100%",
                 paddingRight: "15px",
               }}
+              helperText="Input name."
             />
             <TextField
               required
+              error={inputDescription === "" ? true : false}
               id="outlined-required"
               label="Description"
               name="inputDescription"
@@ -361,6 +364,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
                 width: "100%",
                 paddingRight: "15px",
               }}
+              helperText="Input description."
             />
             <TextField
               required
@@ -391,24 +395,49 @@ function Mint({ inputImageUrl, inputPrompt }) {
               }}
               onClick={async function () {
                 // console.log("call onClick()");
+                if (inputName === "") {
+                  setSnackbarSeverity("warning");
+                  setSnackbarMessage("Input NFT name.");
+                  setOpenSnackbar(true);
+                  return;
+                }
+
+                if (inputDescription === "") {
+                  setSnackbarSeverity("warning");
+                  setSnackbarMessage("Input NFT description.");
+                  setOpenSnackbar(true);
+                  return;
+                }
 
                 if (isWalletConnected() === false) {
                   return;
                 }
 
                 //* Check image url is already minted (crypt flag)
-                const checkCryptResponse = await fetchJson("/api/check-crypt", {
-                  method: "POST",
-                  headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    inputImageUrl: imageUrl,
-                  }),
-                });
-                console.log("checkCryptResponse: ", checkCryptResponse);
-                if (checkCryptResponse.data === "ok") {
+                try {
+                  const checkCryptResponse = await fetchJson(
+                    "/api/check-crypt",
+                    {
+                      method: "POST",
+                      headers: {
+                        Accept: "application/json",
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        inputImageUrl: imageUrl,
+                      }),
+                    }
+                  );
+                  console.log("checkCryptResponse: ", checkCryptResponse);
+                  if (checkCryptResponse.data === "ok") {
+                    setButtonDisabled(true);
+                    setSnackbarSeverity("warning");
+                    setSnackbarMessage("This image prompt is already minted.");
+                    setOpenSnackbar(true);
+                    return;
+                  }
+                } catch (error) {
+                  console.error(error);
                   setButtonDisabled(true);
                   setSnackbarSeverity("warning");
                   setSnackbarMessage("This image prompt is already minted.");
