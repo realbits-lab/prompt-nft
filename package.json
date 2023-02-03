@@ -12,6 +12,9 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "cacheDirectories": [
+    ".next/cache"
+  ],
   "dependencies": {
     "@aws-sdk/client-s3": "^3.231.0",
     "@emotion/react": "^11.10.5",

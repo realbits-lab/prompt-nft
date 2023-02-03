@@ -1,2 +1,2 @@
-release: npx prisma migrate dev --name init
+release: npx prisma migrate deploy --name init
 web: npx next start
