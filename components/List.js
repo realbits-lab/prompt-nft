@@ -5,6 +5,7 @@ import {
   useWeb3ModalNetwork,
 } from "@web3modal/react";
 import { useAccount, useSigner, useContract } from "wagmi";
+import useSWR from "swr";
 import { Buffer } from "buffer";
 import { Base64 } from "js-base64";
 import dynamic from "next/dynamic";
@@ -23,7 +24,6 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Pagination from "@mui/material/Pagination";
-import useUser from "../lib/useUser";
 import fetchJson from "../lib/fetchJson";
 import { checkBlockchainNetwork, getChainName, getUniqueKey } from "./Util";
 //* Copy abi file from rent-market repository.
@@ -61,8 +61,6 @@ function List({ mode }) {
   // console.log("rentMarketContract: ", rentMarketContract);
   const CARD_MARGIN_TOP = "50px";
 
-  const { user } = useUser();
-  // console.log("user: ", user);
   const theme = useTheme();
 
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
@@ -71,6 +69,12 @@ function List({ mode }) {
   const CARD_MIN_WIDTH = 375;
   const NUMBER_PER_PAGE = 5;
   const CARD_PADDING = 1;
+
+  //*---------------------------------------------------------------------------
+  //* Define fetcher hook.
+  //*---------------------------------------------------------------------------
+  const { getAllResult } = useSWR(API_ALL_URL, fetchJson);
+  console.log("-- getAllResult: ", getAllResult);
 
   //*---------------------------------------------------------------------------
   //* Handle snackbar.
@@ -164,10 +168,9 @@ function List({ mode }) {
 
     try {
       //* Get all image prompt and image data.
-      const getAllResult = await fetchJson(API_ALL_URL);
+      // const getAllResult = await fetchJson(API_ALL_URL);
       console.log("getAllResult: ", getAllResult);
-      let allUnencyptedPromptImages;
-      if (getAllResult.status !== 200) {
+      if (!getAllResult || getAllResult.length === 0) {
         setAllImageDataArray([]);
         setAllImageDataCount(0);
         // setAllPageCount(0);
@@ -180,42 +183,21 @@ function List({ mode }) {
         return;
       }
 
-      allUnencyptedPromptImages = await getAllResult.json();
-      // console.log("allUnencyptedPromptImages: ", allUnencyptedPromptImages);
-      if (!allUnencyptedPromptImages) {
-        setAllImageDataArray([]);
-        setAllImageDataCount(0);
-        // setAllPageCount(0);
-        setAllPageCount((prevState) => {
-          return {
-            ...prevState,
-            [mode]: 0,
-          };
-        });
-        return;
-      }
-
-      setAllImageDataArray(allUnencyptedPromptImages.data);
-      setAllImageDataCount(allUnencyptedPromptImages.data.length);
+      setAllImageDataArray(getAllResult.data);
+      setAllImageDataCount(getAllResult.data.length);
       // console.log(
       //   "allUnencyptedPromptImages.data.length: ",
       //   allUnencyptedPromptImages.data.length
       // );
 
       //* Get total page count not from useState but variable directly.
-      let allCount = 0;
-      switch (mode) {
-        case "image":
-          allCount = allUnencyptedPromptImages.data.length;
-          break;
-      }
-      const totalCount = Math.ceil(allCount / NUMBER_PER_PAGE);
+      const totalCount = Math.ceil(getAllResult.data.length / NUMBER_PER_PAGE);
       // console.log("totalCount: ", totalCount);
       // console.log("mode: ", mode);
       setAllPageCount((prevState) => {
         return {
           ...prevState,
-          [mode]: totalCount,
+          ["image"]: totalCount,
         };
       });
     } catch (error) {
