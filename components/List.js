@@ -643,7 +643,7 @@ function List({ mode }) {
                   <Button
                     size="small"
                     onClick={async () => {
-                      if (isWalletConnected() === false) {
+                      if (mode === "nft" && isWalletConnected() === false) {
                         // console.log("chainName: ", getChainName({ chainId }));
                         setSnackbarSeverity("warning");
                         setSnackbarMessage(
@@ -764,7 +764,7 @@ function List({ mode }) {
                   <Button
                     size="small"
                     onClick={async () => {
-                      if (mode !== "image" && isWalletConnected() === true) {
+                      if (mode === "own" && isWalletConnected() === false) {
                         // console.log("chainName: ", getChainName({ chainId }));
                         setSnackbarSeverity("warning");
                         setSnackbarMessage(
@@ -875,12 +875,7 @@ function List({ mode }) {
                   <Button
                     size="small"
                     onClick={async () => {
-                      if (
-                        status !== "connected" ||
-                        checkBlockchainNetwork({ inputChainId: chainId }) ===
-                          false
-                      ) {
-                        // TODO: Change or add blockchain network.
+                      if (mode === "rent" && isWalletConnected() === false) {
                         // console.log("chainName: ", getChainName({ chainId }));
                         setSnackbarSeverity("warning");
                         setSnackbarMessage(
@@ -896,11 +891,11 @@ function List({ mode }) {
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(body),
                       });
-                      // console.log("promptResult:", promptResult);
+                      console.log("promptResult:", promptResult);
                       const decodedPrompt = Base64.decode(
                         promptResult.prompt
                       ).toString();
-                      // console.log("decodedPrompt:", decodedPrompt);
+                      console.log("decodedPrompt:", decodedPrompt);
 
                       setDecryptedPrompt(decodedPrompt);
                       setOpenDialog(true);

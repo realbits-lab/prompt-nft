@@ -20,6 +20,7 @@ async function promptRoute(
 ) {
   // console.log("req.session.user: ", req.session.user);
 
+	//* TODO: Fix user authentication method.
   if (req.session.user) {
     const user = req.session.user;
     const publicAddress = user.publicAddress;
