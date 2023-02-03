@@ -35,7 +35,7 @@ const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
 });
 
 function List({ mode }) {
-  console.log("call List()");
+  // console.log("call List()");
 
   //*---------------------------------------------------------------------------
   //* Define constant or hook variables.
@@ -137,7 +137,7 @@ function List({ mode }) {
 
   //* TODO: Fix multiple calls.
   React.useEffect(() => {
-    console.log("call useEffect()");
+    // console.log("call useEffect()");
     // console.log("mode: ", mode);
     // console.log("selectedChain: ", selectedChain);
     // console.log("address: ", address);
@@ -157,15 +157,15 @@ function List({ mode }) {
     } catch (error) {
       console.error(error);
     }
-  }, [mode, selectedChain, address, isConnected, signer, promptNftContract]);
+  }, [selectedChain, address, isConnected, signer, promptNftContract]);
 
   async function initializeImageData() {
-    // console.log("call initializeImageData()");
+    console.log("call initializeImageData()");
 
     try {
       //* Get all image prompt and image data.
-      const getAllResult = await fetch(API_ALL_URL);
-      // console.log("getAllResult: ", getAllResult);
+      const getAllResult = await fetchJson(API_ALL_URL);
+      console.log("getAllResult: ", getAllResult);
       let allUnencyptedPromptImages;
       if (getAllResult.status !== 200) {
         setAllImageDataArray([]);
