@@ -41,7 +41,7 @@ HideOnScroll.propTypes = {
 };
 
 function ListPage(props) {
-  // console.log("call ListPage()");
+  console.log("call ListPage()");
 
   const [mode, setMode] = React.useState("image");
   const BUTTON_BORDER_RADIUS = 25;
