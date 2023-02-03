@@ -1,13 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import {
-  EthereumClient,
-  modalConnectors,
-  walletConnectProvider,
-} from "@web3modal/ethereum";
-import { Web3Modal } from "@web3modal/react";
-import { configureChains, createClient, WagmiConfig } from "wagmi";
-import { polygon, polygonMumbai, localhost } from "wagmi/chains";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
@@ -16,8 +8,6 @@ import Container from "@mui/material/Container";
 import Slide from "@mui/material/Slide";
 import Button from "@mui/material/Button";
 import List from "../components/List";
-import User from "../components/User";
-import { getChainName } from "../components/Util";
 
 function HideOnScroll(props) {
   const { children, window } = props;
@@ -82,10 +72,6 @@ function ListPage(props) {
               <AppBarButton buttonMode="own" />
               <AppBarButton buttonMode="rent" />
             </Box>
-
-            {/* <Box sx={{ flexGrow: 0 }}>
-                <User />
-              </Box> */}
           </Toolbar>
         </AppBar>
       </HideOnScroll>
