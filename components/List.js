@@ -25,7 +25,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Pagination from "@mui/material/Pagination";
 import fetchJson from "../lib/fetchJson";
-import { checkBlockchainNetwork, getChainName, getUniqueKey } from "./Util";
+import { checkBlockchainNetwork, getChainName, getUniqueKey } from "../lib/util";
 //* Copy abi file from rent-market repository.
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
@@ -875,6 +875,7 @@ function List({ mode }) {
                   <Button
                     size="small"
                     onClick={async () => {
+                      //* Check the wallet connection.
                       if (mode === "rent" && isWalletConnected() === false) {
                         // console.log("chainName: ", getChainName({ chainId }));
                         setSnackbarSeverity("warning");
@@ -885,6 +886,7 @@ function List({ mode }) {
                         return;
                       }
 
+                      //* Get the prompt.
                       const body = { tokenId: nftData.tokenId.toNumber() };
                       const promptResult = await fetchJson("/api/prompt", {
                         method: "POST",
@@ -897,6 +899,7 @@ function List({ mode }) {
                       ).toString();
                       console.log("decodedPrompt:", decodedPrompt);
 
+                      //* Show the prompt dialog
                       setDecryptedPrompt(decodedPrompt);
                       setOpenDialog(true);
                     }}

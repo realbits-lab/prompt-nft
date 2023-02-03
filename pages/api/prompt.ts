@@ -1,10 +1,8 @@
 import { ethers } from "ethers";
 import { withIronSessionApiRoute } from "iron-session/next";
 import { NextApiRequest, NextApiResponse } from "next";
-
 import { sessionOptions } from "../../lib/session";
 import promptNFTABI from "../../contracts/promptNFT.json";
-
 import type { User } from "../../user/user";
 
 const { decrypt } = require("@metamask/eth-sig-util");

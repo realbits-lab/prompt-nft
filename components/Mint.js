@@ -19,7 +19,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
-import { getChainName } from "./Util";
+import { getChainName } from "../lib/util";
 import fetchJson from "../lib/fetchJson";
 
 const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
