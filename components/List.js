@@ -25,11 +25,16 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Pagination from "@mui/material/Pagination";
 import fetchJson from "../lib/fetchJson";
-import { checkBlockchainNetwork, getChainName, getUniqueKey } from "../lib/util";
+import {
+  checkBlockchainNetwork,
+  getChainName,
+  getUniqueKey,
+} from "../lib/util";
 //* Copy abi file from rent-market repository.
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
 import { CircularProgress } from "@mui/material";
+import useUser from "../lib/useUser";
 
 const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
   ssr: false,
@@ -37,6 +42,10 @@ const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
 
 function List({ mode }) {
   // console.log("call List()");
+  //*---------------------------------------------------------------------------
+  //* Define user login.
+  //*---------------------------------------------------------------------------
+  const { user, mutateUser } = useUser();
 
   //*---------------------------------------------------------------------------
   //* Define constant or hook variables.
@@ -884,6 +893,10 @@ function List({ mode }) {
                         );
                         setOpenSnackbar(true);
                         return;
+                      }
+
+                      //* Check user login session.
+                      if(user.isLoggedIn === false) {
                       }
 
                       //* Get the prompt.
