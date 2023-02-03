@@ -4,7 +4,6 @@ import { PrismaClient } from "@prisma/client";
 import { sessionOptions } from "../../lib/session";
 import { getChainId } from "../../lib/util";
 import type { User } from "./user";
-
 const ethUtil = require("ethereumjs-util");
 const sigUtil = require("@metamask/eth-sig-util");
 const prisma = new PrismaClient();
@@ -45,7 +44,7 @@ async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
           { name: "name", type: "string" },
           { name: "chainId", type: "uint256" },
         ],
-        // Refer to PrimaryType
+        //* Refer to PrimaryType
         Login: [{ name: "contents", type: "string" }],
       },
     });
@@ -62,7 +61,7 @@ async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
       ethUtil.toChecksumAddress(recovered) ===
       ethUtil.toChecksumAddress(publicAddress)
     ) {
-      const user = { isLoggedIn: true, publicAddress: "" } as User;
+      const user = { isLoggedIn: true, publicAddress: publicAddress } as User;
       req.session.user = user;
       await req.session.save();
 

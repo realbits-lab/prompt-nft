@@ -1,7 +1,5 @@
 import { useMetaMask } from "metamask-react";
-
 import Button from "@mui/material/Button";
-
 import useUser from "../lib/useUser";
 import fetchJson, { FetchError } from "../lib/fetchJson";
 

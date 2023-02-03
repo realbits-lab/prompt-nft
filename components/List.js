@@ -29,6 +29,7 @@ import {
   checkBlockchainNetwork,
   getChainName,
   getUniqueKey,
+  handleLogin,
 } from "../lib/util";
 //* Copy abi file from rent-market repository.
 import promptNFTABI from "../contracts/promptNFT.json";
@@ -883,7 +884,7 @@ function List({ mode }) {
                 <CardActions>
                   <Button
                     size="small"
-                    onClick={async () => {
+                    onClick={async function () {
                       //* Check the wallet connection.
                       if (mode === "rent" && isWalletConnected() === false) {
                         // console.log("chainName: ", getChainName({ chainId }));
@@ -896,7 +897,20 @@ function List({ mode }) {
                       }
 
                       //* Check user login session.
-                      if(user.isLoggedIn === false) {
+                      if (user.isLoggedIn === false) {
+                        try {
+                          await handleLogin({
+                            mutateUser: mutateUser,
+                            address: address,
+                            chainId: selectedChain,
+                          });
+                        } catch (error) {
+                          console.error(error);
+                          setSnackbarSeverity("error");
+                          setSnackbarMessage(`Login error: ${error}`);
+                          setOpenSnackbar(true);
+                          return;
+                        }
                       }
 
                       //* Get the prompt.
