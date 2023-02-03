@@ -2,6 +2,7 @@ import { withIronSessionApiRoute } from "iron-session/next";
 import { NextApiRequest, NextApiResponse } from "next";
 import { PrismaClient } from "@prisma/client";
 import { sessionOptions } from "../../lib/session";
+import { getChainId } from "../../lib/util";
 import type { User } from "../user";
 
 const ethUtil = require("ethereumjs-util");
@@ -21,16 +22,9 @@ async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
     });
     console.log("findUniqueResult: ", findUniqueResult);
 
-    let chainId;
-    if (process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK === "localhost") {
-      chainId = 1337;
-    } else if (process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK === "maticmum") {
-      chainId = 80001;
-    } else if (process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK === "matic") {
-      chainId = 137;
-    } else {
-      chainId = 0;
-    }
+    const chainId = getChainId({
+      chainName: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
+    });
 
     const msgParams = JSON.stringify({
       domain: {

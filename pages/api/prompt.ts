@@ -3,8 +3,6 @@ import { withIronSessionApiRoute } from "iron-session/next";
 import { NextApiRequest, NextApiResponse } from "next";
 import { sessionOptions } from "../../lib/session";
 import promptNFTABI from "../../contracts/promptNFT.json";
-import type { User } from "../../user/user";
-
 const { decrypt } = require("@metamask/eth-sig-util");
 
 export type PromptResult = {
@@ -18,7 +16,7 @@ async function promptRoute(
 ) {
   // console.log("req.session.user: ", req.session.user);
 
-	//* TODO: Fix user authentication method.
+  //* TODO: Fix user authentication method.
   if (req.session.user) {
     const user = req.session.user;
     const publicAddress = user.publicAddress;
@@ -48,7 +46,7 @@ async function promptRoute(
       version: contractOwnerEncryptDataResult["version"],
     };
 
-    // TODO: Decrypt the contract owner encrypted prompt.
+    //* Decrypt the contract owner encrypted prompt.
     const contractOwnerDecryptResult = decrypt({
       encryptedData: contractOwnerEncryptData,
       privateKey: process.env.NEXT_PUBLIC_CONTRACT_OWNER_PRIVATE_KEY,
