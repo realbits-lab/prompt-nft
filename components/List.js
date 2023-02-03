@@ -902,7 +902,7 @@ function List({ mode }) {
                           await handleLogin({
                             mutateUser: mutateUser,
                             address: address,
-                            chainId: selectedChain,
+                            chainId: selectedChain.id,
                           });
                         } catch (error) {
                           console.error(error);
