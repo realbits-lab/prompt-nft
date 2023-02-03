@@ -29,6 +29,7 @@ import { checkBlockchainNetwork, getChainName, getUniqueKey } from "./Util";
 //* Copy abi file from rent-market repository.
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
+import { CircularProgress } from "@mui/material";
 
 const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
   ssr: false,
@@ -73,8 +74,16 @@ function List({ mode }) {
   //*---------------------------------------------------------------------------
   //* Define fetcher hook.
   //*---------------------------------------------------------------------------
-  const { getAllResult } = useSWR(API_ALL_URL, fetchJson);
-  console.log("-- getAllResult: ", getAllResult);
+  const {
+    data: getAllResult,
+    error,
+    isValidating,
+    mutate,
+  } = useSWR(API_ALL_URL);
+  // console.log("-- getAllResult: ", getAllResult);
+  // console.log("-- error: ", error);
+  console.log("-- isValidating: ", isValidating);
+  // console.log("-- mutate: ", mutate);
 
   //*---------------------------------------------------------------------------
   //* Handle snackbar.
@@ -149,19 +158,17 @@ function List({ mode }) {
     // console.log("signer: ", signer);
     // console.log("promptNftContract: ", promptNftContract);
 
-    async function initialize() {
-      await initializeImageData();
-      if (isWalletConnected() === true) {
-        await initializeNftData();
-      }
-      // console.log("initialize done");
-    }
-    try {
-      initialize();
-    } catch (error) {
-      console.error(error);
+    if (isWalletConnected() === true) {
+      initializeNftData();
     }
   }, [selectedChain, address, isConnected, signer, promptNftContract]);
+
+  React.useEffect(
+    function () {
+      initializeImageData();
+    },
+    [getAllResult]
+  );
 
   async function initializeImageData() {
     console.log("call initializeImageData()");
@@ -169,6 +176,7 @@ function List({ mode }) {
     try {
       //* Get all image prompt and image data.
       // const getAllResult = await fetchJson(API_ALL_URL);
+      // const getAllResult = data;
       console.log("getAllResult: ", getAllResult);
       if (!getAllResult || getAllResult.length === 0) {
         setAllImageDataArray([]);
@@ -521,6 +529,10 @@ function List({ mode }) {
 
   const ImageCardList = React.useCallback(
     function ImageCardList(props) {
+      if (isValidating === true) {
+        return <LoadingPage />;
+      }
+
       if (allImageDataArray.length === 0) {
         return (
           <NoContentPage
@@ -973,6 +985,33 @@ function List({ mode }) {
             </Typography>
           </CardContent>
         </Card>
+      </Box>
+    );
+  }
+
+  function LoadingPage() {
+    return (
+      <Box
+        sx={{
+          "& .MuiTextField-root": { m: 1, width: "25ch" },
+        }}
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+      >
+        {mode !== "image" ? (
+          <Grid container spacing={2} justifyContent="space-around" padding={2}>
+            <Grid item>
+              <Web3Button />
+            </Grid>
+            <Grid item>
+              <Web3NetworkSwitch />
+            </Grid>
+          </Grid>
+        ) : null}
+        <CircularProgress sx={{ width: "50vw" }} />
       </Box>
     );
   }
