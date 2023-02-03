@@ -4,7 +4,6 @@ import { useWeb3ModalNetwork } from "@web3modal/react";
 import { useAccount, useSigner, useContract } from "wagmi";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { isMobile } from "react-device-detect";
-import detectEthereumProvider from "@metamask/detect-provider";
 import { encrypt } from "@metamask/eth-sig-util";
 import { Buffer } from "buffer";
 import { Base64 } from "js-base64";
@@ -92,9 +91,6 @@ function Mint({ inputImageUrl, inputPrompt }) {
   //*---------------------------------------------------------------------------
   //* Other variables.
   //*---------------------------------------------------------------------------
-  const signerRef = React.useRef();
-  const signerAddressRef = React.useRef();
-  const promptNftContractRef = React.useRef();
   const [imageUrl, setImageUrl] = React.useState();
   const [promptText, setPromptText] = React.useState("");
   const [buttonMessage, setButtonMessage] = React.useState(
@@ -121,8 +117,6 @@ function Mint({ inputImageUrl, inputPrompt }) {
       }
 
       try {
-        await getMetamaskAccount();
-
         if (isWalletConnected() === false) {
           return;
         }
@@ -133,46 +127,6 @@ function Mint({ inputImageUrl, inputPrompt }) {
 
     initialize();
   }, [inputImageUrl, inputPrompt]);
-
-  async function getMetamaskAccount() {
-    //* Get provider.
-    const metamaskProvider = await detectEthereumProvider({
-      mustBeMetaMask: true,
-    });
-    // console.log("metamaskProvider: ", metamaskProvider);
-    if (metamaskProvider === null) {
-      throw new Error("Metamask in not installed.");
-    }
-    const provider = new ethers.providers.Web3Provider(metamaskProvider);
-    // console.log("provider: ", provider);
-    // console.log("promptNFTABI[abi]: ", promptNFTABI["abi"]);
-    // console.log(
-    //   "process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS: ",
-    //   process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS
-    // );
-
-    try {
-      //* Get contract.
-      promptNftContractRef.current = new ethers.Contract(
-        process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-        promptNFTABI["abi"],
-        provider
-      );
-    } catch (error) {
-      throw error;
-    }
-    // console.log("promptNftContractRef.current: ", promptNftContractRef.current);
-
-    try {
-      // Get signer.
-      signerRef.current = provider.getSigner();
-      signerAddressRef.current = await signerRef.current.getAddress();
-    } catch (error) {
-      throw error;
-    }
-    // console.log("signerRef.current: ", signerRef.current);
-    // console.log("signerAddressRef.current: ", signerAddressRef.current);
-  }
 
   async function uploadMetadata({ name, description, inputImageUrl }) {
     // console.log("call uploadMetadata()");

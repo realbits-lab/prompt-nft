@@ -1,6 +1,10 @@
 {
   "name": "prompt-nft",
   "version": "0.0.1",
+  "engines": {
+    "node": "16.x",
+    "npm": "8.x"
+  },
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,6 +12,9 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "cacheDirectories": [
+    ".next/cache"
+  ],
   "dependencies": {
     "@aws-sdk/client-s3": "^3.231.0",
     "@emotion/react": "^11.10.5",
@@ -39,6 +46,7 @@
     "wagmi": "^0.11.2"
   },
   "devDependencies": {
+    "eslint": "^8.33.0",
     "prisma": "^4.7.1",
     "typescript": "4.9.4"
   }

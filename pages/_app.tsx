@@ -1,5 +1,4 @@
 import { AppProps } from "next/app";
-import { MetaMaskProvider } from "metamask-react";
 import {
   EthereumClient,
   modalConnectors,
@@ -83,17 +82,15 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
     >
       <CacheProvider value={emotionCache}>
         <ThemeProvider theme={theme}>
-          <MetaMaskProvider>
-            <CssBaseline />
-            <WagmiConfig client={wagmiClient}>
-              <Component {...pageProps} />
-            </WagmiConfig>
+          <CssBaseline />
+          <WagmiConfig client={wagmiClient}>
+            <Component {...pageProps} />
+          </WagmiConfig>
 
-            <Web3Modal
-              projectId={process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID}
-              ethereumClient={ethereumClient}
-            />
-          </MetaMaskProvider>
+          <Web3Modal
+            projectId={process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID}
+            ethereumClient={ethereumClient}
+          />
         </ThemeProvider>
       </CacheProvider>
     </SWRConfig>
