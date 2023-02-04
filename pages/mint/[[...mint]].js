@@ -183,21 +183,25 @@ const MintPage = () => {
 
   return (
     <Box
-      sx={{
-        "& .MuiTextField-root": { m: 1, width: "25ch" },
-      }}
       display="flex"
+      flexDirection="column"
       justifyContent="center"
       alignItems="center"
-      flexDirection="column"
     >
-      <Grid container direction="column">
+      <Grid
+        container
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        spacing={2}
+      >
         <Grid item>
-          <Grid container justifyContent="space-around" marginTop={2}>
-            <Grid item>
+          <Grid container marginTop={2}>
+            <Grid item xs={6}>
               <Web3Button />
             </Grid>
-            <Grid item>
+            <Grid item xs={6}>
               <Web3NetworkSwitch />
             </Grid>
           </Grid>

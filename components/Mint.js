@@ -1,6 +1,10 @@
 import * as React from "react";
 import { ethers } from "ethers";
-import { useWeb3ModalNetwork } from "@web3modal/react";
+import {
+  Web3Button,
+  Web3NetworkSwitch,
+  useWeb3ModalNetwork,
+} from "@web3modal/react";
 import { useAccount, useSigner, useContract } from "wagmi";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { isMobile } from "react-device-detect";
@@ -11,6 +15,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
+import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
@@ -48,8 +53,6 @@ function Mint({ inputImageUrl, inputPrompt }) {
 
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const THANKS_PAGE = "/thanks/";
-  const CARD_MAX_WIDTH = 420;
-  const CARD_MIN_WIDTH = 375;
 
   //*---------------------------------------------------------------------------
   //* Handle snackbar.
@@ -245,16 +248,21 @@ function Mint({ inputImageUrl, inputPrompt }) {
           "& .MuiTextField-root": { m: 1, width: "25ch" },
         }}
         display="flex"
+        flexDirection="row"
         justifyContent="center"
         alignItems="center"
-        minHeight="100vh"
       >
-        <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
+        <Card>
           {inputImageUrl ? (
             <CardMedia
               component="img"
               image={imageUrl}
               onError={handleCardMediaImageError}
+              sx={{
+                height: 350,
+                width: "100%",
+                objectFit: "cover",
+              }}
             />
           ) : (
             <Box
