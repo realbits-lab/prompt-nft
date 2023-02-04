@@ -11,6 +11,7 @@ export type PromptResult = {
   prompt: string;
 };
 
+//* TODO: Check caller address is owner or renter from contract.
 async function promptRoute(
   req: NextApiRequest,
   res: NextApiResponse<PromptResult>
