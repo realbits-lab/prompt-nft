@@ -92,7 +92,7 @@ function List({ mode }) {
   } = useSWR(API_ALL_URL);
   // console.log("-- getAllResult: ", getAllResult);
   // console.log("-- error: ", error);
-  console.log("-- isValidating: ", isValidating);
+  // console.log("-- isValidating: ", isValidating);
   // console.log("-- mutate: ", mutate);
 
   //*---------------------------------------------------------------------------
@@ -181,13 +181,13 @@ function List({ mode }) {
   );
 
   async function initializeImageData() {
-    console.log("call initializeImageData()");
+    // console.log("call initializeImageData()");
 
     try {
       //* Get all image prompt and image data.
       // const getAllResult = await fetchJson(API_ALL_URL);
       // const getAllResult = data;
-      console.log("getAllResult: ", getAllResult);
+      // console.log("getAllResult: ", getAllResult);
       if (!getAllResult || getAllResult.length === 0) {
         setAllImageDataArray([]);
         setAllImageDataCount(0);
@@ -920,11 +920,11 @@ function List({ mode }) {
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(body),
                       });
-                      console.log("promptResult:", promptResult);
+                      // console.log("promptResult:", promptResult);
                       const decodedPrompt = Base64.decode(
                         promptResult.prompt
                       ).toString();
-                      console.log("decodedPrompt:", decodedPrompt);
+                      // console.log("decodedPrompt:", decodedPrompt);
 
                       //* Show the prompt dialog
                       setDecryptedPrompt(decodedPrompt);

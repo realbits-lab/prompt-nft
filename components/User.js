@@ -1,16 +1,30 @@
-import { useMetaMask } from "metamask-react";
+// import { useMetaMask } from "metamask-react";
+import { useWeb3ModalNetwork } from "@web3modal/react";
+import { useAccount, useSigner } from "wagmi";
 import Button from "@mui/material/Button";
 import useUser from "../lib/useUser";
 import fetchJson, { FetchError } from "../lib/fetchJson";
 
 const User = () => {
+  //*----------------------------------------------------------------------------
+  //* Define constance variables.
+  //*----------------------------------------------------------------------------
+  const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
+  // console.log("selectedChain: ", selectedChain);
+  const { address, isConnected } = useAccount();
+  // console.log("address: ", address);
+  // console.log("isConnected: ", isConnected);
+  const { data: signer, isError, isLoading } = useSigner();
+  // console.log("signer: ", signer);
+  // console.log("isError: ", isError);
+  // console.log("isLoading: ", isLoading);
   const { user, mutateUser } = useUser();
-  const { status, connect, account, chainId, ethereum } = useMetaMask();
+  // const { status, connect, account, chainId, ethereum } = useMetaMask();
 
   // console.log("user: ", user);
 
   const handleLoginClick = async () => {
-    const publicAddress = account.toLowerCase();
+    const publicAddress = address.toLowerCase();
     // console.log("publicAddress: ", publicAddress);
 
     // Check user with public address and receive nonce as to user.
@@ -33,10 +47,10 @@ const User = () => {
   };
 
   const handleSignMessage = async ({ publicAddress, nonce }) => {
-    // console.log("chainId: ", chainId);
+    // console.log("selectedChain.id: ", selectedChain.id);
     const msgParams = JSON.stringify({
       domain: {
-        chainId: chainId,
+        chainId: selectedChain.id,
         name: "Realbits",
       },
 
@@ -57,7 +71,7 @@ const User = () => {
       },
     });
 
-    const params = [account, msgParams];
+    const params = [address, msgParams];
     const method = "eth_signTypedData_v4";
 
     const requestResult = await ethereum.request({

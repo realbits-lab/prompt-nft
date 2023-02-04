@@ -239,19 +239,19 @@ function Mint({ inputImageUrl, inputPrompt }) {
   }
 
   function isWalletConnected() {
-    console.log("call isWalletConnected()");
-    console.log("isConnected: ", isConnected);
-    console.log("selectedChain: ", selectedChain);
-    if (selectedChain) {
-      console.log(
-        "getChainName({ chainId: selectedChain.id }): ",
-        getChainName({ chainId: selectedChain.id })
-      );
-    }
-    console.log(
-      "getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK }): ",
-      getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK })
-    );
+    // console.log("call isWalletConnected()");
+    // console.log("isConnected: ", isConnected);
+    // console.log("selectedChain: ", selectedChain);
+    // if (selectedChain) {
+    //   console.log(
+    //     "getChainName({ chainId: selectedChain.id }): ",
+    //     getChainName({ chainId: selectedChain.id })
+    //   );
+    // }
+    // console.log(
+    //   "getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK }): ",
+    //   getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK })
+    // );
     if (
       isConnected === false ||
       selectedChain === undefined ||
@@ -260,10 +260,10 @@ function Mint({ inputImageUrl, inputPrompt }) {
           chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
         })
     ) {
-      console.log("return false");
+      // console.log("return false");
       return false;
     } else {
-      console.log("return true");
+      // console.log("return true");
       return true;
     }
   }
@@ -382,7 +382,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
                       }),
                     }
                   );
-                  console.log("checkCryptResponse: ", checkCryptResponse);
+                  // console.log("checkCryptResponse: ", checkCryptResponse);
                   if (checkCryptResponse.data === "ok") {
                     setButtonDisabled(true);
                     setSnackbarSeverity("warning");
@@ -430,7 +430,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
                       fetchResponse.contractOwnerEncryptData,
                   }).then(function (tx) {
                     // console.log("tx: ", tx);
-                    console.log("tx.transactionHash: ", tx.transactionHash);
+                    // console.log("tx.transactionHash: ", tx.transactionHash);
                     //* Go to thanks page.
                     const imageUrlEncodedString = encodeURIComponent(imageUrl);
                     router.push(`${THANKS_PAGE}${imageUrlEncodedString}`);

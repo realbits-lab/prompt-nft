@@ -16,7 +16,7 @@ import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import Mint from "../../components/Mint";
-import { getChainName } from "../../components/Util";
+import { getChainName } from "../../lib/util";
 
 function ErrorPage({ errorStatus }) {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
