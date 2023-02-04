@@ -775,7 +775,7 @@ function List({ mode }) {
                 <CardActions>
                   <Button
                     size="small"
-                    onClick={async () => {
+                    onClick={async function () {
                       if (mode === "own" && isWalletConnected() === false) {
                         // console.log("chainName: ", getChainName({ chainId }));
                         setSnackbarSeverity("warning");

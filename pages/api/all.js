@@ -8,6 +8,7 @@ export default async function handler(req, res) {
   }
 
   const prisma = new PrismaClient();
+  // await prisma.$connect();
 
   //* GET /api/all
   //* Check imageUrl and prompt was saved in sqlite already.
