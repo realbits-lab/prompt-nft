@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   }
 
   const prisma = new PrismaClient();
-  // await prisma.$connect();
+  await prisma.$connect();
 
   //* GET /api/all
   //* Check imageUrl and prompt was saved in sqlite already.
@@ -25,13 +25,16 @@ export default async function handler(req, res) {
     // console.log("findUniqueResult: ", findUniqueResult);
 
     if (findUniqueResult === null) {
-      res.status(500).json({ data: "nok" });
+      await prisma.$disconnect();
+      return res.status(500).json({ data: "nok" });
     }
 
     // Send 200 OK response.
-    res.status(200).json({ data: findUniqueResult });
+    await prisma.$disconnect();
+    return res.status(200).json({ data: findUniqueResult });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ data: "nok" });
+    await prisma.$disconnect();
+    return res.status(500).json({ data: "nok" });
   }
 }
