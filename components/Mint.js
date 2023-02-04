@@ -19,7 +19,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
-import { getChainName } from "../lib/util";
+import { isWalletConnected } from "../lib/util";
 import fetchJson from "../lib/fetchJson";
 
 const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
@@ -117,7 +117,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
       }
 
       try {
-        if (isWalletConnected() === false) {
+        if (isWalletConnected({ isConnected, selectedChain }) === false) {
           return;
         }
       } catch (error) {
@@ -238,36 +238,6 @@ function Mint({ inputImageUrl, inputPrompt }) {
     e.target.src = PLACEHOLDER_IMAGE_URL;
   }
 
-  function isWalletConnected() {
-    // console.log("call isWalletConnected()");
-    // console.log("isConnected: ", isConnected);
-    // console.log("selectedChain: ", selectedChain);
-    // if (selectedChain) {
-    //   console.log(
-    //     "getChainName({ chainId: selectedChain.id }): ",
-    //     getChainName({ chainId: selectedChain.id })
-    //   );
-    // }
-    // console.log(
-    //   "getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK }): ",
-    //   getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK })
-    // );
-    if (
-      isConnected === false ||
-      selectedChain === undefined ||
-      getChainName({ chainId: selectedChain.id }) !==
-        getChainName({
-          chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
-        })
-    ) {
-      // console.log("return false");
-      return false;
-    } else {
-      // console.log("return true");
-      return true;
-    }
-  }
-
   return (
     <div>
       <Box
@@ -337,7 +307,8 @@ function Mint({ inputImageUrl, inputPrompt }) {
             <Button
               variant="contained"
               disabled={
-                isWalletConnected() === true && buttonDisabled === false
+                isWalletConnected({ isConnected, selectedChain }) === true &&
+                buttonDisabled === false
                   ? false
                   : true
               }
@@ -363,7 +334,9 @@ function Mint({ inputImageUrl, inputPrompt }) {
                   return;
                 }
 
-                if (isWalletConnected() === false) {
+                if (
+                  isWalletConnected({ isConnected, selectedChain }) === false
+                ) {
                   return;
                 }
 

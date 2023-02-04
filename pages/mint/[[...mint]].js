@@ -90,12 +90,12 @@ const MintPage = () => {
 
   //* For async function, we use useEffect function.
   React.useEffect(() => {
-    console.log("call useEffect()");
+    // console.log("call useEffect()");
 
     const initialize = async () => {
       // console.log("router.query: ", router.query);
       const params = router.query.mint;
-      console.log("params: ", params);
+      // console.log("params: ", params);
 
       // Check params error.
       if (
@@ -121,7 +121,7 @@ const MintPage = () => {
       const response = await fetch(
         `${GET_API_URL}/${promptEncodedString}/${imageUrlEncodedString}`
       );
-      console.log("response: ", response);
+      // console.log("response: ", response);
 
       if (response.status !== 200) {
         setErrorStatus(
@@ -139,8 +139,8 @@ const MintPage = () => {
   }, [router.query]);
   // console.log("errorStatus: ", errorStatus);
 
-  const buildMintPage = () => {
-    console.log("call buildMintPage()");
+  function buildMintPage() {
+    // console.log("call buildMintPage()");
 
     if (
       isConnected === false ||
@@ -148,19 +148,19 @@ const MintPage = () => {
       getChainName({ chainId: selectedChain.id }) !==
         getChainName({ chainId: BLOCKCHAIN_NETWORK })
     ) {
-      console.log("isConnected: ", isConnected);
-      console.log("selectedChain: ", selectedChain);
-      if (selectedChain) {
-        console.log(
-          "getChainName({ chainId: selectedChain.id }): ",
-          getChainName({ chainId: selectedChain.id })
-        );
-      }
-      console.log("BLOCKCHAIN_NETWORK: ", BLOCKCHAIN_NETWORK);
-      console.log(
-        "getChainName({ chainId: BLOCKCHAIN_NETWORK }): ",
-        getChainName({ chainId: BLOCKCHAIN_NETWORK })
-      );
+      // console.log("isConnected: ", isConnected);
+      // console.log("selectedChain: ", selectedChain);
+      // if (selectedChain) {
+      //   console.log(
+      //     "getChainName({ chainId: selectedChain.id }): ",
+      //     getChainName({ chainId: selectedChain.id })
+      //   );
+      // }
+      // console.log("BLOCKCHAIN_NETWORK: ", BLOCKCHAIN_NETWORK);
+      // console.log(
+      //   "getChainName({ chainId: BLOCKCHAIN_NETWORK }): ",
+      //   getChainName({ chainId: BLOCKCHAIN_NETWORK })
+      // );
 
       return (
         <Box
@@ -191,19 +191,29 @@ const MintPage = () => {
   }
 
   return (
-    <Grid container direction="column">
-      <Grid item>
-        <Grid container justifyContent="space-around" marginTop={2}>
-          <Grid item>
-            <Web3Button />
-          </Grid>
-          <Grid item>
-            <Web3NetworkSwitch />
+    <Box
+      sx={{
+        "& .MuiTextField-root": { m: 1, width: "25ch" },
+      }}
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      flexDirection="column"
+    >
+      <Grid container direction="column">
+        <Grid item>
+          <Grid container justifyContent="space-around" marginTop={2}>
+            <Grid item>
+              <Web3Button />
+            </Grid>
+            <Grid item>
+              <Web3NetworkSwitch />
+            </Grid>
           </Grid>
         </Grid>
+        <Grid item>{buildMintPage()}</Grid>
       </Grid>
-      <Grid item>{buildMintPage()}</Grid>
-    </Grid>
+    </Box>
   );
 };
 
