@@ -19,56 +19,6 @@ import Mint from "../../components/Mint";
 import { isWalletConnected } from "../../lib/util";
 import { CircularProgress } from "@mui/material";
 
-function ErrorPage({ errorStatus }) {
-  const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
-  const CARD_MAX_WIDTH = 420;
-  const CARD_MIN_WIDTH = 375;
-
-  function handleCardMediaImageError(e) {
-    // console.log("call handleCardMediaImageError()");
-    // console.log("imageUrl: ", imageUrl);
-    e.target.onerror = null;
-    e.target.src = PLACEHOLDER_IMAGE_URL;
-  }
-
-  return (
-    <Box
-      sx={{
-        "& .MuiTextField-root": { m: 1, width: "25ch" },
-      }}
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      minHeight="100vh"
-    >
-      <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-        <CardMedia
-          component="img"
-          image={PLACEHOLDER_IMAGE_URL}
-          onError={handleCardMediaImageError}
-        />
-        <CardContent
-          sx={{
-            padding: "10",
-          }}
-        >
-          <Typography variant="caption">
-            Thanks for trying to mint your image with prompt. But error happened
-            to post image url and prompt. {errorStatus}
-          </Typography>
-        </CardContent>
-        <CardActions>
-          <Button size="small" onClick={async () => {}}>
-            <Typography variant="h5">
-              <Link href="/list">Go to view other images</Link>
-            </Typography>
-          </Button>
-        </CardActions>
-      </Card>
-    </Box>
-  );
-}
-
 const MintPage = () => {
   //*---------------------------------------------------------------------------
   //* Define constance variables.
@@ -145,6 +95,56 @@ const MintPage = () => {
     initialize();
   }, [router.query]);
   // console.log("errorStatus: ", errorStatus);
+
+  function ErrorPage({ inputErrorStatus }) {
+    const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
+    const CARD_MAX_WIDTH = 420;
+    const CARD_MIN_WIDTH = 375;
+
+    function handleCardMediaImageError(e) {
+      // console.log("call handleCardMediaImageError()");
+      // console.log("imageUrl: ", imageUrl);
+      e.target.onerror = null;
+      e.target.src = PLACEHOLDER_IMAGE_URL;
+    }
+
+    return (
+      <Box
+        sx={{
+          "& .MuiTextField-root": { m: 1, width: "25ch" },
+        }}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+      >
+        <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
+          <CardMedia
+            component="img"
+            image={PLACEHOLDER_IMAGE_URL}
+            onError={handleCardMediaImageError}
+          />
+          <CardContent
+            sx={{
+              padding: "10",
+            }}
+          >
+            <Typography variant="caption">
+              Thanks for trying to mint your image with prompt. But error
+              happened to post image url and prompt. {inputErrorStatus}
+            </Typography>
+          </CardContent>
+          <CardActions>
+            <Button size="small" onClick={async () => {}}>
+              <Typography variant="h5">
+                <Link href="/list">Go to view other images</Link>
+              </Typography>
+            </Button>
+          </CardActions>
+        </Card>
+      </Box>
+    );
+  }
 
   function buildMintPage() {
     // console.log("call buildMintPage()");

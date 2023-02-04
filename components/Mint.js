@@ -108,8 +108,6 @@ function Mint({ inputImageUrl, inputPrompt }) {
     const initialize = async () => {
       if (inputImageUrl !== undefined) {
         setImageUrl(inputImageUrl);
-      } else {
-        setImageUrl(PLACEHOLDER_IMAGE_URL);
       }
 
       if (inputPrompt !== undefined) {
@@ -340,7 +338,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
               }}
               onClick={async function () {
                 // console.log("call onClick()");
-                
+
                 //* Check name field is empty.
                 if (inputName === "") {
                   setSnackbarSeverity("warning");
@@ -401,7 +399,9 @@ function Mint({ inputImageUrl, inputPrompt }) {
                   //* Add waiting message to snackbar.
                   //* Upload metadata and image to s3.
                   setSnackbarSeverity("info");
-                  setSnackbarMessage("Uploading image data to metadata repository...");
+                  setSnackbarMessage(
+                    "Uploading image data to metadata repository..."
+                  );
                   setOpenSnackbar(true);
                   const tokenURI = await uploadMetadata({
                     name: inputName,
