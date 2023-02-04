@@ -340,6 +340,8 @@ function Mint({ inputImageUrl, inputPrompt }) {
               }}
               onClick={async function () {
                 // console.log("call onClick()");
+                
+                //* Check name field is empty.
                 if (inputName === "") {
                   setSnackbarSeverity("warning");
                   setSnackbarMessage("Input NFT name.");
@@ -347,6 +349,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
                   return;
                 }
 
+                //* Check description field is empty.
                 if (inputDescription === "") {
                   setSnackbarSeverity("warning");
                   setSnackbarMessage("Input NFT description.");
@@ -354,13 +357,14 @@ function Mint({ inputImageUrl, inputPrompt }) {
                   return;
                 }
 
+                //* Check wallet is connected.
                 if (
                   isWalletConnected({ isConnected, selectedChain }) === false
                 ) {
                   return;
                 }
 
-                //* Check image url is already minted (crypt flag)
+                //* Check image url is already minted with crypt flag.
                 try {
                   const checkCryptResponse = await fetchJson(
                     "/api/check-crypt",
@@ -392,9 +396,13 @@ function Mint({ inputImageUrl, inputPrompt }) {
                   return;
                 }
 
+                //* Upload image to s3.
                 try {
-                  //* TODO: Add waiting message to snackbar.
+                  //* Add waiting message to snackbar.
                   //* Upload metadata and image to s3.
+                  setSnackbarSeverity("info");
+                  setSnackbarMessage("Uploading image data to metadata repository...");
+                  setOpenSnackbar(true);
                   const tokenURI = await uploadMetadata({
                     name: inputName,
                     description: inputDescription,
@@ -417,6 +425,9 @@ function Mint({ inputImageUrl, inputPrompt }) {
                   // console.log("fetchResponse: ", fetchResponse);
 
                   //* Mint prompt NFT.
+                  setSnackbarSeverity("info");
+                  setSnackbarMessage("Minting a prompt nft...");
+                  setOpenSnackbar(true);
                   mintPromptNft({
                     prompt: promptText,
                     tokenURI: tokenURI,
