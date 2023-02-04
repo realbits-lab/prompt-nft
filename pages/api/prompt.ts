@@ -35,7 +35,7 @@ async function promptRoute(
     );
 
     const signer = new ethers.Wallet(
-      process.env.NEXT_PUBLIC_CONTRACT_OWNER_PRIVATE_KEY ?? "",
+      process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY ?? "",
       provider
     );
     console.log("signer: ", signer);
@@ -56,7 +56,7 @@ async function promptRoute(
     //* Decrypt the contract owner encrypted prompt.
     const contractOwnerDecryptResult = decrypt({
       encryptedData: contractOwnerEncryptData,
-      privateKey: process.env.NEXT_PUBLIC_CONTRACT_OWNER_PRIVATE_KEY,
+      privateKey: process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY,
     });
     // console.log("contractOwnerDecryptResult:", contractOwnerDecryptResult);
 

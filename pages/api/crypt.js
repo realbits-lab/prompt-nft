@@ -21,11 +21,11 @@ export default async function handler(req, res) {
   // console.log("imageUrl: ", imageUrl);
 
   // console.log(
-  //   "process.env.NEXT_PUBLIC_CONTRACT_OWNER_PRIVATE_KEY: ",
-  //   process.env.NEXT_PUBLIC_CONTRACT_OWNER_PRIVATE_KEY
+  //   "process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY: ",
+  //   process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY
   // );
   const encryptionPublicKey = getEncryptionPublicKey(
-    process.env.NEXT_PUBLIC_CONTRACT_OWNER_PRIVATE_KEY
+    process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY
   );
   // console.log("encryptionPublicKey: ", encryptionPublicKey);
 
