@@ -15,8 +15,8 @@ async function promptRoute(
   req: NextApiRequest,
   res: NextApiResponse<PromptResult>
 ) {
-  console.log("call /api/prompt");
-  console.log("req.session.user: ", req.session.user);
+  // console.log("call /api/prompt");
+  // console.log("req.session.user: ", req.session.user);
 
   if (req.session.user) {
     const user = req.session.user;
@@ -38,7 +38,7 @@ async function promptRoute(
       process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY ?? "",
       provider
     );
-    console.log("signer: ", signer);
+    // console.log("signer: ", signer);
     const contractOwnerEncryptDataResult = await promptNftContract
       .connect(signer)
       .getContractOwnerPrompt(tokenId);

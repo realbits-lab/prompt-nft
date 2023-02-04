@@ -346,6 +346,9 @@ function List({ mode }) {
     const allNftCountResult = totalSupplyBigNumber.toNumber();
     // console.log("allNftCountResult: ", allNftCountResult);
 
+    //* TODO: Make async later.
+    //* TODO: Archieve metadata whenever minting and use it in this initial process.
+    //* TODO: Get total data from prompt market contract with getAllRegisterData function.
     //* Get all metadata per each token as to token uri.
     let allNftDataResultArray = [];
     for (let i = 0; i < allNftCountResult; i++) {
@@ -356,7 +359,6 @@ function List({ mode }) {
         .tokenURI(tokenId);
 
       //* Get token metadata from token uri.
-      //* TODO: Make async later.
       const fetchResult = await fetch(tokenURI);
       const tokenMetadata = await fetchResult.blob();
       const metadataJsonTextData = await tokenMetadata.text();
@@ -390,7 +392,7 @@ function List({ mode }) {
     const allRegisterDataArray = await rentMarketContract
       .connect(signer)
       .getAllRegisterData();
-    // console.log("allRegisterDataArray: ", allRegisterDataArray);
+    console.log("allRegisterDataArray: ", allRegisterDataArray);
 
     const allRegisterDataWithMetadataArray = allRegisterDataArray
       .map((registerElement) => {
