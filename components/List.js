@@ -392,7 +392,7 @@ function List({ mode }) {
     const allRegisterDataArray = await rentMarketContract
       .connect(signer)
       .getAllRegisterData();
-    console.log("allRegisterDataArray: ", allRegisterDataArray);
+    // console.log("allRegisterDataArray: ", allRegisterDataArray);
 
     const allRegisterDataWithMetadataArray = allRegisterDataArray
       .map((registerElement) => {
