@@ -337,6 +337,10 @@ function Mint({ inputImageUrl, inputPrompt }) {
               onClick={async function () {
                 // console.log("call onClick()");
 
+                setSnackbarSeverity("info");
+                setSnackbarMessage("Checking image files...");
+                setOpenSnackbar(true);
+
                 //* Check name field is empty.
                 if (inputName === "") {
                   setSnackbarSeverity("warning");
@@ -357,6 +361,12 @@ function Mint({ inputImageUrl, inputPrompt }) {
                 if (
                   isWalletConnected({ isConnected, selectedChain }) === false
                 ) {
+                  setSnackbarSeverity("warning");
+                  setSnackbarMessage(
+                    "No wallet connection. Please connect wallet."
+                  );
+                  setOpenSnackbar(true);
+
                   return;
                 }
 
@@ -396,11 +406,14 @@ function Mint({ inputImageUrl, inputPrompt }) {
                 try {
                   //* Add waiting message to snackbar.
                   //* Upload metadata and image to s3.
+                  setButtonDisabled(true);
+
                   setSnackbarSeverity("info");
                   setSnackbarMessage(
                     "Uploading image data to metadata repository..."
                   );
                   setOpenSnackbar(true);
+
                   const tokenURI = await uploadMetadata({
                     name: inputName,
                     description: inputDescription,
@@ -424,8 +437,11 @@ function Mint({ inputImageUrl, inputPrompt }) {
 
                   //* Mint prompt NFT.
                   setSnackbarSeverity("info");
-                  setSnackbarMessage("Minting a prompt nft...");
+                  setSnackbarMessage(
+                    "Minting a prompt nft is just started. Please wait about 30 seconds for transaction. Even if you close this window, transaction will be going on."
+                  );
                   setOpenSnackbar(true);
+
                   mintPromptNft({
                     prompt: promptText,
                     tokenURI: tokenURI,
@@ -434,12 +450,12 @@ function Mint({ inputImageUrl, inputPrompt }) {
                   }).then(function (tx) {
                     // console.log("tx: ", tx);
                     // console.log("tx.transactionHash: ", tx.transactionHash);
+
                     //* Go to thanks page.
                     const imageUrlEncodedString = encodeURIComponent(imageUrl);
                     router.push(`${THANKS_PAGE}${imageUrlEncodedString}`);
                   });
 
-                  setButtonDisabled(true);
                   setButtonMessage(<CircularProgress />);
 
                   //* TODO: If mint failed, revert encrypted prompt to plain prompt(use flag).

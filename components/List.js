@@ -549,7 +549,7 @@ function List({ mode }) {
         return (
           <NoContentPage
             message={
-              "This service is just stareted. Soon, image list with prompt will be updated."
+              "This service is just started. Soon, image list with prompt will be updated."
             }
           />
         );
