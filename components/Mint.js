@@ -1,6 +1,10 @@
 import * as React from "react";
 import { ethers } from "ethers";
-import { useWeb3ModalNetwork } from "@web3modal/react";
+import {
+  Web3Button,
+  Web3NetworkSwitch,
+  useWeb3ModalNetwork,
+} from "@web3modal/react";
 import { useAccount, useSigner, useContract } from "wagmi";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { isMobile } from "react-device-detect";
@@ -11,6 +15,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
+import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
@@ -19,7 +24,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
-import { getChainName } from "./Util";
+import { isWalletConnected } from "../lib/util";
 import fetchJson from "../lib/fetchJson";
 
 const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
@@ -46,11 +51,8 @@ function Mint({ inputImageUrl, inputPrompt }) {
   });
   // console.log("promptNftContract: ", promptNftContract);
 
-  const PLACEHOLDER_IMAGE_URL =
-    "https://placehold.co/600x400?text=No+image&font=source-sans-pro";
+  const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const THANKS_PAGE = "/thanks/";
-  const CARD_MAX_WIDTH = 420;
-  const CARD_MIN_WIDTH = 375;
 
   //*---------------------------------------------------------------------------
   //* Handle snackbar.
@@ -99,15 +101,13 @@ function Mint({ inputImageUrl, inputPrompt }) {
   const [buttonDisabled, setButtonDisabled] = React.useState(false);
 
   React.useEffect(() => {
-    // console.log("call useEffect()");
-    // console.log("inputImageUrl: ", inputImageUrl);
-    // console.log("inputPrompt: ", inputPrompt);
+    console.log("call useEffect()");
+    console.log("inputImageUrl: ", inputImageUrl);
+    console.log("inputPrompt: ", inputPrompt);
 
     const initialize = async () => {
       if (inputImageUrl !== undefined) {
         setImageUrl(inputImageUrl);
-      } else {
-        setImageUrl(PLACEHOLDER_IMAGE_URL);
       }
 
       if (inputPrompt !== undefined) {
@@ -117,7 +117,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
       }
 
       try {
-        if (isWalletConnected() === false) {
+        if (isWalletConnected({ isConnected, selectedChain }) === false) {
           return;
         }
       } catch (error) {
@@ -232,40 +232,11 @@ function Mint({ inputImageUrl, inputPrompt }) {
   }
 
   function handleCardMediaImageError(e) {
-    // console.log("call handleCardMediaImageError()");
+    console.log("call handleCardMediaImageError()");
     // console.log("imageUrl: ", imageUrl);
+
     e.target.onerror = null;
     e.target.src = PLACEHOLDER_IMAGE_URL;
-  }
-
-  function isWalletConnected() {
-    console.log("call isWalletConnected()");
-    console.log("isConnected: ", isConnected);
-    console.log("selectedChain: ", selectedChain);
-    if (selectedChain) {
-      console.log(
-        "getChainName({ chainId: selectedChain.id }): ",
-        getChainName({ chainId: selectedChain.id })
-      );
-    }
-    console.log(
-      "getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK }): ",
-      getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK })
-    );
-    if (
-      isConnected === false ||
-      selectedChain === undefined ||
-      getChainName({ chainId: selectedChain.id }) !==
-        getChainName({
-          chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
-        })
-    ) {
-      console.log("return false");
-      return false;
-    } else {
-      console.log("return true");
-      return true;
-    }
   }
 
   return (
@@ -275,16 +246,31 @@ function Mint({ inputImageUrl, inputPrompt }) {
           "& .MuiTextField-root": { m: 1, width: "25ch" },
         }}
         display="flex"
+        flexDirection="row"
         justifyContent="center"
         alignItems="center"
-        minHeight="100vh"
       >
-        <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-          <CardMedia
-            component="img"
-            image={imageUrl}
-            onError={handleCardMediaImageError}
-          />
+        <Card>
+          {inputImageUrl ? (
+            <CardMedia
+              component="img"
+              image={imageUrl}
+              onError={handleCardMediaImageError}
+              sx={{
+                objectFit: "cover",
+              }}
+            />
+          ) : (
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              minHeight="50vh"
+              sx={{ height: "50vh" }}
+            >
+              <CircularProgress />
+            </Box>
+          )}
           <CardContent
             sx={{
               padding: "10",
@@ -337,7 +323,8 @@ function Mint({ inputImageUrl, inputPrompt }) {
             <Button
               variant="contained"
               disabled={
-                isWalletConnected() === true && buttonDisabled === false
+                isWalletConnected({ isConnected, selectedChain }) === true &&
+                buttonDisabled === false
                   ? false
                   : true
               }
@@ -349,6 +336,12 @@ function Mint({ inputImageUrl, inputPrompt }) {
               }}
               onClick={async function () {
                 // console.log("call onClick()");
+
+                setSnackbarSeverity("info");
+                setSnackbarMessage("Checking image files...");
+                setOpenSnackbar(true);
+
+                //* Check name field is empty.
                 if (inputName === "") {
                   setSnackbarSeverity("warning");
                   setSnackbarMessage("Input NFT name.");
@@ -356,6 +349,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
                   return;
                 }
 
+                //* Check description field is empty.
                 if (inputDescription === "") {
                   setSnackbarSeverity("warning");
                   setSnackbarMessage("Input NFT description.");
@@ -363,11 +357,20 @@ function Mint({ inputImageUrl, inputPrompt }) {
                   return;
                 }
 
-                if (isWalletConnected() === false) {
+                //* Check wallet is connected.
+                if (
+                  isWalletConnected({ isConnected, selectedChain }) === false
+                ) {
+                  setSnackbarSeverity("warning");
+                  setSnackbarMessage(
+                    "No wallet connection. Please connect wallet."
+                  );
+                  setOpenSnackbar(true);
+
                   return;
                 }
 
-                //* Check image url is already minted (crypt flag)
+                //* Check image url is already minted with crypt flag.
                 try {
                   const checkCryptResponse = await fetchJson(
                     "/api/check-crypt",
@@ -382,7 +385,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
                       }),
                     }
                   );
-                  console.log("checkCryptResponse: ", checkCryptResponse);
+                  // console.log("checkCryptResponse: ", checkCryptResponse);
                   if (checkCryptResponse.data === "ok") {
                     setButtonDisabled(true);
                     setSnackbarSeverity("warning");
@@ -399,8 +402,18 @@ function Mint({ inputImageUrl, inputPrompt }) {
                   return;
                 }
 
+                //* Upload image to s3.
                 try {
+                  //* Add waiting message to snackbar.
                   //* Upload metadata and image to s3.
+                  setButtonDisabled(true);
+
+                  setSnackbarSeverity("info");
+                  setSnackbarMessage(
+                    "Uploading image data to metadata repository..."
+                  );
+                  setOpenSnackbar(true);
+
                   const tokenURI = await uploadMetadata({
                     name: inputName,
                     description: inputDescription,
@@ -423,6 +436,12 @@ function Mint({ inputImageUrl, inputPrompt }) {
                   // console.log("fetchResponse: ", fetchResponse);
 
                   //* Mint prompt NFT.
+                  setSnackbarSeverity("info");
+                  setSnackbarMessage(
+                    "Minting a prompt nft is just started. Please wait about 30 seconds for transaction. Even if you close this window, transaction will be going on."
+                  );
+                  setOpenSnackbar(true);
+
                   mintPromptNft({
                     prompt: promptText,
                     tokenURI: tokenURI,
@@ -430,13 +449,13 @@ function Mint({ inputImageUrl, inputPrompt }) {
                       fetchResponse.contractOwnerEncryptData,
                   }).then(function (tx) {
                     // console.log("tx: ", tx);
-                    console.log("tx.transactionHash: ", tx.transactionHash);
+                    // console.log("tx.transactionHash: ", tx.transactionHash);
+
                     //* Go to thanks page.
                     const imageUrlEncodedString = encodeURIComponent(imageUrl);
                     router.push(`${THANKS_PAGE}${imageUrlEncodedString}`);
                   });
 
-                  setButtonDisabled(true);
                   setButtonMessage(<CircularProgress />);
 
                   //* TODO: If mint failed, revert encrypted prompt to plain prompt(use flag).

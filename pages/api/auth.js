@@ -1,18 +1,17 @@
 import { PrismaClient } from "@prisma/client";
-
 const ethUtil = require("ethereumjs-util");
 const sigUtil = require("@metamask/eth-sig-util");
 const prisma = new PrismaClient();
 
 export default async function handler(req, res) {
-  // Check method error.
+  //* Method should be POST.
   if (req.method !== "POST") {
     res.status(500).json({ error: "Invalid method. Support only POST." });
     return;
   }
 
-  // POST /api/auth
-  // Required fields in body: publicAddress, signature
+  //* POST /api/auth
+  //* Required fields in body: publicAddress, signature
   const { publicAddress, signature } = req.body;
   // console.log("publicAddress: ", publicAddress);
   // console.log("signature: ", signature);

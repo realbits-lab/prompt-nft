@@ -15,7 +15,7 @@ import fetchJson from "../lib/fetchJson";
 import "../styles/globals.css";
 import { theme } from "../utils/theme";
 import createEmotionCache from "../utils/createEmotionCache";
-import { getChainName } from "../components/Util";
+import { getChainName } from "../lib/util";
 
 interface MyAppProps extends AppProps {
   emotionCache?: EmotionCache;

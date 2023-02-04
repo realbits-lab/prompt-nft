@@ -4,7 +4,7 @@ import {
   Web3NetworkSwitch,
   useWeb3ModalNetwork,
 } from "@web3modal/react";
-import { useAccount, useSigner, useContract } from "wagmi";
+import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
 import useSWR from "swr";
 import { Buffer } from "buffer";
 import { Base64 } from "js-base64";
@@ -24,12 +24,14 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Pagination from "@mui/material/Pagination";
-import fetchJson from "../lib/fetchJson";
-import { checkBlockchainNetwork, getChainName, getUniqueKey } from "./Util";
+import CircularProgress from "@mui/material/CircularProgress";
+import { isMobile } from "react-device-detect";
+import { getChainId, getChainName } from "../lib/util";
+import useUser from "../lib/useUser";
+import fetchJson, { FetchError } from "../lib/fetchJson";
 //* Copy abi file from rent-market repository.
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
-import { CircularProgress } from "@mui/material";
 
 const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
   ssr: false,
@@ -46,8 +48,12 @@ function List({ mode }) {
   const { address, isConnected } = useAccount();
   // console.log("address: ", address);
   // console.log("isConnected: ", isConnected);
-  const { data: signer, isError, isLoading } = useSigner();
-  // console.log("signer: ", signer);
+  const {
+    data: dataSigner,
+    isError: isErrorSigner,
+    isLoading: isLoadingSigner,
+  } = useSigner();
+  // console.log("dataSigner: ", dataSigner);
   // console.log("isError: ", isError);
   // console.log("isLoading: ", isLoading);
   const promptNftContract = useContract({
@@ -60,16 +66,64 @@ function List({ mode }) {
     abi: rentmarketABI["abi"],
   });
   // console.log("rentMarketContract: ", rentMarketContract);
-  const CARD_MARGIN_TOP = "50px";
+
+  //*---------------------------------------------------------------------------
+  //* Define user login.
+  //*---------------------------------------------------------------------------
+  const { user, mutateUser } = useUser();
+  //* All properties on a domain are optional
+  const domain = {
+    chainId: getChainId({
+      chainName: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
+    }),
+    name: "Realbits",
+  };
+
+  const types = {
+    EIP712Domain: [
+      { name: "name", type: "string" },
+      { name: "chainId", type: "uint256" },
+    ],
+    //* Refer to PrimaryType
+    Login: [{ name: "contents", type: "string" }],
+  };
+
+  const value = {
+    contents: process.env.NEXT_PUBLIC_LOGIN_SIGN_MESSAGE,
+  };
+
+  const {
+    data: dataSignTypedData,
+    isError: isErrorSignTypedData,
+    isLoading: isLoadingSignTypedData,
+    isSuccess: isSuccessSignTypedData,
+    signTypedData,
+    signTypedDataAsync,
+  } = useSignTypedData({
+    domain: domain,
+    types: types,
+    value: value,
+  });
+  // console.log("dataSignTypedData: ", dataSignTypedData);
+  // console.log("isErrorSignTypedData: ", isErrorSignTypedData);
+  // console.log("isLoadingSignTypedData: ", isLoadingSignTypedData);
+  // console.log("isSuccessSignTypedData: ", isSuccessSignTypedData);
+  // console.log("signTypedData: ", signTypedData);
 
   const theme = useTheme();
 
+  //*---------------------------------------------------------------------------
+  //* Define constant variables.
+  //*---------------------------------------------------------------------------
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const API_ALL_URL = process.env.NEXT_PUBLIC_API_ALL_URL;
+
+  const CARD_MARGIN_TOP = "50px";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
-  const NUMBER_PER_PAGE = 5;
   const CARD_PADDING = 1;
+
+  const NUMBER_PER_PAGE = 5;
 
   //*---------------------------------------------------------------------------
   //* Define fetcher hook.
@@ -82,7 +136,7 @@ function List({ mode }) {
   } = useSWR(API_ALL_URL);
   // console.log("-- getAllResult: ", getAllResult);
   // console.log("-- error: ", error);
-  console.log("-- isValidating: ", isValidating);
+  // console.log("-- isValidating: ", isValidating);
   // console.log("-- mutate: ", mutate);
 
   //*---------------------------------------------------------------------------
@@ -148,20 +202,20 @@ function List({ mode }) {
   //*---------------------------------------------------------------------------
   const [openDialog, setOpenDialog] = React.useState(false);
 
-  //* TODO: Fix multiple calls.
+  //* TODO: Check the multiple calls.
   React.useEffect(() => {
     // console.log("call useEffect()");
     // console.log("mode: ", mode);
     // console.log("selectedChain: ", selectedChain);
     // console.log("address: ", address);
     // console.log("isConnected: ", isConnected);
-    // console.log("signer: ", signer);
+    // console.log("dataSigner: ", dataSigner);
     // console.log("promptNftContract: ", promptNftContract);
 
     if (isWalletConnected() === true) {
       initializeNftData();
     }
-  }, [selectedChain, address, isConnected, signer, promptNftContract]);
+  }, [selectedChain, address, isConnected, dataSigner, promptNftContract]);
 
   React.useEffect(
     function () {
@@ -171,13 +225,13 @@ function List({ mode }) {
   );
 
   async function initializeImageData() {
-    console.log("call initializeImageData()");
+    // console.log("call initializeImageData()");
 
     try {
       //* Get all image prompt and image data.
       // const getAllResult = await fetchJson(API_ALL_URL);
       // const getAllResult = data;
-      console.log("getAllResult: ", getAllResult);
+      // console.log("getAllResult: ", getAllResult);
       if (!getAllResult || getAllResult.length === 0) {
         setAllImageDataArray([]);
         setAllImageDataCount(0);
@@ -313,14 +367,14 @@ function List({ mode }) {
 
   async function getAllNftData() {
     // console.log("call getAllNftData()");
-    // console.log("signer: ", signer);
+    // console.log("dataSigner: ", dataSigner);
     // console.log("promptNftContract: ", promptNftContract);
 
     //* If no signer, return zero data.
-    if (!promptNftContract || !signer) {
+    if (!promptNftContract || !dataSigner) {
       // console.log("promptNftContract or signer is null or undefined.");
       // console.log("promptNftContract: ", promptNftContract);
-      // console.log("signer: ", signer);
+      // console.log("dataSigner: ", dataSigner);
       //* Return error.
       return {
         allNftDataCountResult: 0,
@@ -330,23 +384,27 @@ function List({ mode }) {
 
     //* Get all nft data from nft contract.
     const totalSupplyBigNumber = await promptNftContract
-      .connect(signer)
+      .connect(dataSigner)
       .totalSupply();
     // console.log("totalSupplyBigNumber: ", totalSupplyBigNumber);
     const allNftCountResult = totalSupplyBigNumber.toNumber();
     // console.log("allNftCountResult: ", allNftCountResult);
 
+    //* TODO: Make async later.
+    //* TODO: Archieve metadata whenever minting and use it in this initial process.
+    //* TODO: Get total data from prompt market contract with getAllRegisterData function.
     //* Get all metadata per each token as to token uri.
     let allNftDataResultArray = [];
     for (let i = 0; i < allNftCountResult; i++) {
       //* Get token id and uri.
-      const tokenId = await promptNftContract.connect(signer).tokenByIndex(i);
+      const tokenId = await promptNftContract
+        .connect(dataSigner)
+        .tokenByIndex(i);
       const tokenURI = await promptNftContract
-        .connect(signer)
+        .connect(dataSigner)
         .tokenURI(tokenId);
 
       //* Get token metadata from token uri.
-      //* TODO: Make async later.
       const fetchResult = await fetch(tokenURI);
       const tokenMetadata = await fetchResult.blob();
       const metadataJsonTextData = await tokenMetadata.text();
@@ -368,7 +426,7 @@ function List({ mode }) {
   }
 
   async function getAllRegisterData({ allNftDataArrayResult }) {
-    if (!rentMarketContract || !signer) {
+    if (!rentMarketContract || !dataSigner) {
       console.error("rentMarketContract or signer is null or undefined.");
       return {
         allRegisterDataCountResult: 0,
@@ -378,7 +436,7 @@ function List({ mode }) {
 
     //* Get all nft data from rentmarket contract.
     const allRegisterDataArray = await rentMarketContract
-      .connect(signer)
+      .connect(dataSigner)
       .getAllRegisterData();
     // console.log("allRegisterDataArray: ", allRegisterDataArray);
 
@@ -420,10 +478,10 @@ function List({ mode }) {
 
   async function getAllMyOwnData({ owner, allNftDataArrayResult }) {
     // console.log("call getAllMyOwnData()");
-    // console.log("signer: ", signer);
+    // console.log("dataSigner: ", dataSigner);
 
     //* If no signer, return zero data.
-    if (!promptNftContract || !signer) {
+    if (!promptNftContract || !dataSigner) {
       //* Return error.
       return {
         myOwnDataCountResult: 0,
@@ -433,7 +491,7 @@ function List({ mode }) {
 
     //* Get total supply of prompt nft.
     const totalSupplyBigNumber = await promptNftContract
-      .connect(signer)
+      .connect(dataSigner)
       .balanceOf(owner);
     // console.log("totalSupply: ", totalSupply);
     const totalSupply = totalSupplyBigNumber.toNumber();
@@ -443,10 +501,10 @@ function List({ mode }) {
     for (let i = 0; i < totalSupply; i++) {
       //* Get token id and uri.
       const tokenId = await promptNftContract
-        .connect(signer)
+        .connect(dataSigner)
         .tokenOfOwnerByIndex(owner, i);
       const tokenURI = await promptNftContract
-        .connect(signer)
+        .connect(dataSigner)
         .tokenURI(tokenId);
 
       //* Get token metadata from token uri.
@@ -472,7 +530,7 @@ function List({ mode }) {
   }
 
   async function getAllMyRentData({ myAccount, allNftDataArrayResult }) {
-    if (!rentMarketContract || !signer) {
+    if (!rentMarketContract || !dataSigner) {
       console.error("rentMarketContract or signer is null or undefined.");
       return {
         myRentDataCountResult: 0,
@@ -481,7 +539,7 @@ function List({ mode }) {
     }
 
     const allRentDataResult = await rentMarketContract
-      .connect(signer)
+      .connect(dataSigner)
       .getAllRentData();
 
     const allRentDataArrayWithMetadata = allRentDataResult
@@ -520,6 +578,72 @@ function List({ mode }) {
     };
   }
 
+  async function handleLogin({ mutateUser, address, chainId }) {
+    // console.log("call handleLogin()");
+    // console.log("chainId: ", chainId);
+
+    setSnackbarSeverity("info");
+    setSnackbarMessage("Checking user authentication...");
+    setOpenSnackbar(true);
+
+    const publicAddress = address.toLowerCase();
+    // console.log("publicAddress: ", publicAddress);
+
+    try {
+      //* Check user with public address and receive nonce as to user.
+      //* If user does not exist, back-end would add user data.
+      const jsonResult = await fetchJson(`/api/nonce/${publicAddress}`);
+      // console.log("jsonResult: ", jsonResult);
+    } catch (error) {
+      setOpenSnackbar(false);
+      setSnackbarMessage("Checking is finished.");
+      setOpenSnackbar(true);
+      throw error;
+    }
+
+    //* Popup MetaMask confirmation modal to sign message with nonce data.
+    const signMessageResult = await signTypedDataAsync();
+    // console.log("signMessageResult: ", signMessageResult);
+
+    //* Send signature to back-end on the /auth route.
+    //* Call /api/login and set mutate user data with response data.
+    const body = { publicAddress, signature: signMessageResult };
+    try {
+      mutateUser(
+        await fetchJson("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        })
+      );
+      setOpenSnackbar(false);
+      setSnackbarMessage("Checking is finished.");
+      setOpenSnackbar(true);
+    } catch (error) {
+      if (error instanceof FetchError) {
+        console.error(error.data.message);
+      } else {
+        console.error("An unexpected error happened:", error);
+      }
+      setOpenSnackbar(false);
+      setSnackbarMessage("Checking is finished.");
+      setOpenSnackbar(true);
+      throw error;
+    }
+  }
+
+  async function handleLogout({ mutateUser }) {
+    try {
+      mutateUser(await fetchJson("/api/logout", { method: "POST" }), false);
+    } catch (error) {
+      if (error instanceof FetchError) {
+        console.error(error.data.message);
+      } else {
+        console.error("An unexpected error happened:", error);
+      }
+      throw error;
+    }
+  }
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
     // console.log("imageUrl: ", imageUrl);
@@ -537,7 +661,7 @@ function List({ mode }) {
         return (
           <NoContentPage
             message={
-              "This service is just stareted. Soon, image list with prompt will be updated."
+              "This service is just started. Soon, image list with prompt will be updated."
             }
           />
         );
@@ -578,13 +702,13 @@ function List({ mode }) {
         }
       });
     },
-    [allImageDataArray.length, pageIndex.image]
+    [allImageDataArray.length, pageIndex.image, isValidating]
   );
 
   const RegisterCardList = React.useCallback(
     function RegisterCardList(props) {
       if (allRegisterDataArray.length === 0) {
-        return <NoContentPage message={"No registered a image prompt NFT."} />;
+        return <NoContentPage message={"No prompt NFT."} />;
       }
 
       return allRegisterDataArray.map((nftData, idx) => {
@@ -653,7 +777,7 @@ function List({ mode }) {
                         return;
                       }
 
-                      if (!rentMarketContract || !signer) {
+                      if (!rentMarketContract || !dataSigner) {
                         console.error(
                           "rentMarketContract or signer is null or undefined."
                         );
@@ -663,7 +787,7 @@ function List({ mode }) {
                       //* Rent this nft with rent fee.
                       try {
                         const tx = await rentMarketContract
-                          .connect(signer)
+                          .connect(dataSigner)
                           .rentNFT(
                             process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
                             nftData.tokenId,
@@ -763,7 +887,7 @@ function List({ mode }) {
                 <CardActions>
                   <Button
                     size="small"
-                    onClick={async () => {
+                    onClick={async function () {
                       if (mode === "own" && isWalletConnected() === false) {
                         // console.log("chainName: ", getChainName({ chainId }));
                         setSnackbarSeverity("warning");
@@ -774,27 +898,63 @@ function List({ mode }) {
                         return;
                       }
 
-                      const encryptPromptData = await promptNftContract
-                        .connect(signer)
-                        .getTokenOwnerPrompt(nftData.tokenId);
-                      // console.log("encryptPromptData: ", encryptPromptData);
+                      if (isMobile === true) {
+                        //* Set user login session.
+                        if (user.isLoggedIn === false) {
+                          try {
+                            await handleLogin({
+                              mutateUser: mutateUser,
+                              address: address,
+                              chainId: selectedChain.id,
+                            });
+                          } catch (error) {
+                            console.error(error);
+                            setSnackbarSeverity("error");
+                            setSnackbarMessage(`Login error: ${error}`);
+                            setOpenSnackbar(true);
+                            return;
+                          }
+                        }
 
-                      const encryptData = {
-                        ciphertext: encryptPromptData["ciphertext"],
-                        ephemPublicKey: encryptPromptData["ephemPublicKey"],
-                        nonce: encryptPromptData["nonce"],
-                        version: encryptPromptData["version"],
-                      };
-                      // console.log("encryptData: ", encryptData);
+                        //* Get the plain prompt from prompter.
+                        const body = { tokenId: nftData.tokenId.toNumber() };
+                        const promptResult = await fetchJson("/api/prompt", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify(body),
+                        });
+                        // console.log("promptResult:", promptResult);
 
-                      const prompt = await decryptData({
-                        encryptData: encryptData,
-                        decryptAddress: address,
-                      });
-                      // console.log("prompt: ", prompt);
+                        const decodedPrompt = Base64.decode(
+                          promptResult.prompt
+                        ).toString();
+                        // console.log("decodedPrompt:", decodedPrompt);
 
-                      setDecryptedPrompt(prompt);
-                      setOpenDialog(true);
+                        setDecryptedPrompt(decodedPrompt);
+                        setOpenDialog(true);
+                      } else {
+                        const encryptPromptData = await promptNftContract
+                          .connect(dataSigner)
+                          .getTokenOwnerPrompt(nftData.tokenId);
+                        // console.log("encryptPromptData: ", encryptPromptData);
+
+                        const encryptData = {
+                          ciphertext: encryptPromptData["ciphertext"],
+                          ephemPublicKey: encryptPromptData["ephemPublicKey"],
+                          nonce: encryptPromptData["nonce"],
+                          version: encryptPromptData["version"],
+                        };
+                        // console.log("encryptData: ", encryptData);
+
+                        const prompt = await decryptData({
+                          encryptData: encryptData,
+                          decryptAddress: address,
+                        });
+                        // console.log("prompt: ", prompt);
+
+                        setDecryptedPrompt(prompt);
+                        setOpenDialog(true);
+                      }
                     }}
                   >
                     PROMPT
@@ -874,7 +1034,8 @@ function List({ mode }) {
                 <CardActions>
                   <Button
                     size="small"
-                    onClick={async () => {
+                    onClick={async function () {
+                      //* Check the wallet connection.
                       if (mode === "rent" && isWalletConnected() === false) {
                         // console.log("chainName: ", getChainName({ chainId }));
                         setSnackbarSeverity("warning");
@@ -885,18 +1046,34 @@ function List({ mode }) {
                         return;
                       }
 
+                      //* Check user login session.
+                      if (user.isLoggedIn === false) {
+                        try {
+                          await handleLogin({
+                            mutateUser: mutateUser,
+                            address: address,
+                            chainId: selectedChain.id,
+                          });
+                        } catch (error) {
+                          console.error(error);
+                          return;
+                        }
+                      }
+
+                      //* Get the prompt.
                       const body = { tokenId: nftData.tokenId.toNumber() };
                       const promptResult = await fetchJson("/api/prompt", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(body),
                       });
-                      console.log("promptResult:", promptResult);
+                      // console.log("promptResult:", promptResult);
                       const decodedPrompt = Base64.decode(
                         promptResult.prompt
                       ).toString();
-                      console.log("decodedPrompt:", decodedPrompt);
+                      // console.log("decodedPrompt:", decodedPrompt);
 
+                      //* Show the prompt dialog
                       setDecryptedPrompt(decodedPrompt);
                       setOpenDialog(true);
                     }}

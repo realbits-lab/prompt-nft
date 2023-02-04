@@ -1,12 +1,9 @@
 import { ethers } from "ethers";
 import { withIronSessionApiRoute } from "iron-session/next";
 import { NextApiRequest, NextApiResponse } from "next";
-
 import { sessionOptions } from "../../lib/session";
 import promptNFTABI from "../../contracts/promptNFT.json";
-
-import type { User } from "../../user/user";
-
+import { getProvider } from "lib/util";
 const { decrypt } = require("@metamask/eth-sig-util");
 
 export type PromptResult = {
@@ -14,31 +11,38 @@ export type PromptResult = {
   prompt: string;
 };
 
+//* TODO: Check caller address is owner or renter from contract.
 async function promptRoute(
   req: NextApiRequest,
   res: NextApiResponse<PromptResult>
 ) {
+  // console.log("call /api/prompt");
   // console.log("req.session.user: ", req.session.user);
 
-	//* TODO: Fix user authentication method.
   if (req.session.user) {
     const user = req.session.user;
     const publicAddress = user.publicAddress;
     const { tokenId } = await req.body;
 
-    //* TODO: Get the contract owner encrypted prompt from nft contract with token id.
+    //* Get the contract owner encrypted prompt from nft contract with token id.
     //* Get prompt nft contract.
-    const provider = new ethers.providers.JsonRpcProvider(
-      "http://localhost:8545"
-    );
+    const provider = getProvider({
+      chainName: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
+    });
     const promptNftContract = new ethers.Contract(
       process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS!,
       promptNFTABI["abi"],
       provider
     );
 
-    const contractOwnerEncryptDataResult =
-      await promptNftContract.getContractOwnerPrompt(tokenId);
+    const signer = new ethers.Wallet(
+      process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY ?? "",
+      provider
+    );
+    // console.log("signer: ", signer);
+    const contractOwnerEncryptDataResult = await promptNftContract
+      .connect(signer)
+      .getContractOwnerPrompt(tokenId);
     // console.log(
     //   "contractOwnerEncryptDataResult:",
     //   contractOwnerEncryptDataResult
@@ -50,10 +54,10 @@ async function promptRoute(
       version: contractOwnerEncryptDataResult["version"],
     };
 
-    // TODO: Decrypt the contract owner encrypted prompt.
+    //* Decrypt the contract owner encrypted prompt.
     const contractOwnerDecryptResult = decrypt({
       encryptedData: contractOwnerEncryptData,
-      privateKey: process.env.NEXT_PUBLIC_CONTRACT_OWNER_PRIVATE_KEY,
+      privateKey: process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY,
     });
     // console.log("contractOwnerDecryptResult:", contractOwnerDecryptResult);
 

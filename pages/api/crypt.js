@@ -21,11 +21,11 @@ export default async function handler(req, res) {
   // console.log("imageUrl: ", imageUrl);
 
   // console.log(
-  //   "process.env.NEXT_PUBLIC_CONTRACT_OWNER_PRIVATE_KEY: ",
-  //   process.env.NEXT_PUBLIC_CONTRACT_OWNER_PRIVATE_KEY
+  //   "process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY: ",
+  //   process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY
   // );
   const encryptionPublicKey = getEncryptionPublicKey(
-    process.env.NEXT_PUBLIC_CONTRACT_OWNER_PRIVATE_KEY
+    process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY
   );
   // console.log("encryptionPublicKey: ", encryptionPublicKey);
 
@@ -46,8 +46,6 @@ export default async function handler(req, res) {
   });
   // console.log("updatePostResult: ", updatePostResult);
 
-  // TODO: Delete after minting transaction confirmation.
-
-  // Send 200 OK response.
+  //* Send 200 OK response.
   res.status(200).json({ contractOwnerEncryptData: contractOwnerEncryptData });
 }

@@ -16,64 +16,14 @@ import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import Mint from "../../components/Mint";
-import { getChainName } from "../../components/Util";
-
-function ErrorPage({ errorStatus }) {
-  const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
-  const CARD_MAX_WIDTH = 420;
-  const CARD_MIN_WIDTH = 375;
-
-  function handleCardMediaImageError(e) {
-    // console.log("call handleCardMediaImageError()");
-    // console.log("imageUrl: ", imageUrl);
-    e.target.onerror = null;
-    e.target.src = PLACEHOLDER_IMAGE_URL;
-  }
-
-  return (
-    <Box
-      sx={{
-        "& .MuiTextField-root": { m: 1, width: "25ch" },
-      }}
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      minHeight="100vh"
-    >
-      <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-        <CardMedia
-          component="img"
-          image={PLACEHOLDER_IMAGE_URL}
-          onError={handleCardMediaImageError}
-        />
-        <CardContent
-          sx={{
-            padding: "10",
-          }}
-        >
-          <Typography variant="caption">
-            Thanks for trying to mint your image with prompt. But error happened
-            to post image url and prompt. {errorStatus}
-          </Typography>
-        </CardContent>
-        <CardActions>
-          <Button size="small" onClick={async () => {}}>
-            <Typography variant="h5">
-              <Link href="/list">Go to view other images</Link>
-            </Typography>
-          </Button>
-        </CardActions>
-      </Card>
-    </Box>
-  );
-}
+import { isWalletConnected } from "../../lib/util";
+import { CircularProgress } from "@mui/material";
 
 const MintPage = () => {
   //*---------------------------------------------------------------------------
   //* Define constance variables.
   //*---------------------------------------------------------------------------
   const GET_API_URL = "/api/get";
-  const BLOCKCHAIN_NETWORK = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
   const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
   // console.log("selectedChain: ", selectedChain);
   const { address, isConnected } = useAccount();
@@ -90,18 +40,24 @@ const MintPage = () => {
 
   //* For async function, we use useEffect function.
   React.useEffect(() => {
-    console.log("call useEffect()");
+    // console.log("call useEffect()");
 
     const initialize = async () => {
-      // console.log("router.query: ", router.query);
-      const params = router.query.mint;
-      console.log("params: ", params);
+      // console.log("call initialize()");
 
-      // Check params error.
+      const params = router.query.mint;
+      // console.log("router.query: ", router.query);
+      // console.log("router.query.length: ", router.query.length);
+      // console.log("params: ", params);
+
+      if (!params) {
+        return;
+      }
+
+      //* Check params error.
       if (
-        params === undefined ||
-        Array.isArray(params) === false ||
-        params.length !== 2
+        params !== undefined &&
+        (Array.isArray(params) === false || params.length !== 2)
       ) {
         setErrorStatus(
           "Invalid paramters. You should make a url like /mint/{prompt}/{image_url}"
@@ -115,15 +71,16 @@ const MintPage = () => {
       // console.log("inputPrompt: ", inputPrompt);
       // console.log("inputImageUrl: ", inputImageUrl);
 
-      // Check imageUrl and prompt was saved in sqlite already.
+      //* Check imageUrl and prompt was saved in sqlite already.
+      //* Mint NFT only in case of pre-saved image.
       const promptEncodedString = encodeURIComponent(inputPrompt);
       const imageUrlEncodedString = encodeURIComponent(inputImageUrl);
-      const response = await fetch(
+      const fetchImageDatabaseResponse = await fetch(
         `${GET_API_URL}/${promptEncodedString}/${imageUrlEncodedString}`
       );
-      console.log("response: ", response);
+      // console.log("fetchImageDatabaseResponse: ", fetchImageDatabaseResponse);
 
-      if (response.status !== 200) {
+      if (fetchImageDatabaseResponse.status !== 200) {
         setErrorStatus(
           "Invalid image url and prompts. Image and prompt should be created in discord bot."
         );
@@ -139,29 +96,60 @@ const MintPage = () => {
   }, [router.query]);
   // console.log("errorStatus: ", errorStatus);
 
-  const buildMintPage = () => {
-    console.log("call buildMintPage()");
+  function ErrorPage({ inputErrorStatus }) {
+    const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
+    const CARD_MAX_WIDTH = 420;
+    const CARD_MIN_WIDTH = 375;
 
-    if (
-      isConnected === false ||
-      selectedChain === undefined ||
-      getChainName({ chainId: selectedChain.id }) !==
-        getChainName({ chainId: BLOCKCHAIN_NETWORK })
-    ) {
-      console.log("isConnected: ", isConnected);
-      console.log("selectedChain: ", selectedChain);
-      if (selectedChain) {
-        console.log(
-          "getChainName({ chainId: selectedChain.id }): ",
-          getChainName({ chainId: selectedChain.id })
-        );
-      }
-      console.log("BLOCKCHAIN_NETWORK: ", BLOCKCHAIN_NETWORK);
-      console.log(
-        "getChainName({ chainId: BLOCKCHAIN_NETWORK }): ",
-        getChainName({ chainId: BLOCKCHAIN_NETWORK })
-      );
+    function handleCardMediaImageError(e) {
+      // console.log("call handleCardMediaImageError()");
+      // console.log("imageUrl: ", imageUrl);
+      e.target.onerror = null;
+      e.target.src = PLACEHOLDER_IMAGE_URL;
+    }
 
+    return (
+      <Box
+        sx={{
+          "& .MuiTextField-root": { m: 1, width: "25ch" },
+        }}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+      >
+        <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
+          <CardMedia
+            component="img"
+            image={PLACEHOLDER_IMAGE_URL}
+            onError={handleCardMediaImageError}
+          />
+          <CardContent
+            sx={{
+              padding: "10",
+            }}
+          >
+            <Typography variant="caption">
+              Thanks for trying to mint your image with prompt. But error
+              happened to post image url and prompt. {inputErrorStatus}
+            </Typography>
+          </CardContent>
+          <CardActions>
+            <Button size="small" onClick={async () => {}}>
+              <Typography variant="h5">
+                <Link href="/list">Go to view other images</Link>
+              </Typography>
+            </Button>
+          </CardActions>
+        </Card>
+      </Box>
+    );
+  }
+
+  function buildMintPage() {
+    // console.log("call buildMintPage()");
+
+    if (isWalletConnected({ isConnected, selectedChain }) === false) {
       return (
         <Box
           sx={{
@@ -180,9 +168,12 @@ const MintPage = () => {
     }
 
     return buildContentPage();
-  };
+  }
 
   function buildContentPage() {
+    // console.log("call buildContentPage()");
+    // console.log("errorStatus: ", errorStatus);
+
     if (errorStatus === undefined) {
       return <Mint inputImageUrl={imageUrl} inputPrompt={prompt} />;
     } else {
@@ -191,19 +182,33 @@ const MintPage = () => {
   }
 
   return (
-    <Grid container direction="column">
-      <Grid item>
-        <Grid container justifyContent="space-around" marginTop={2}>
-          <Grid item>
-            <Web3Button />
-          </Grid>
-          <Grid item>
-            <Web3NetworkSwitch />
+    <Box
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"
+      alignItems="center"
+    >
+      <Grid
+        container
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        spacing={2}
+      >
+        <Grid item>
+          <Grid container marginTop={2}>
+            <Grid item xs={6}>
+              <Web3Button />
+            </Grid>
+            <Grid item xs={6}>
+              <Web3NetworkSwitch />
+            </Grid>
           </Grid>
         </Grid>
+        <Grid item>{buildMintPage()}</Grid>
       </Grid>
-      <Grid item>{buildMintPage()}</Grid>
-    </Grid>
+    </Box>
   );
 };
 
