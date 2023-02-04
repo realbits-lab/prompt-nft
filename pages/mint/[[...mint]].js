@@ -16,7 +16,8 @@ import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import Mint from "../../components/Mint";
-import { getChainName } from "../../lib/util";
+import { isWalletConnected } from "../../lib/util";
+import { CircularProgress } from "@mui/material";
 
 function ErrorPage({ errorStatus }) {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
@@ -73,7 +74,6 @@ const MintPage = () => {
   //* Define constance variables.
   //*---------------------------------------------------------------------------
   const GET_API_URL = "/api/get";
-  const BLOCKCHAIN_NETWORK = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
   const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
   // console.log("selectedChain: ", selectedChain);
   const { address, isConnected } = useAccount();
@@ -93,15 +93,21 @@ const MintPage = () => {
     // console.log("call useEffect()");
 
     const initialize = async () => {
-      // console.log("router.query: ", router.query);
+      // console.log("call initialize()");
+
       const params = router.query.mint;
+      // console.log("router.query: ", router.query);
+      // console.log("router.query.length: ", router.query.length);
       // console.log("params: ", params);
 
-      // Check params error.
+      if (!params) {
+        return;
+      }
+
+      //* Check params error.
       if (
-        params === undefined ||
-        Array.isArray(params) === false ||
-        params.length !== 2
+        params !== undefined &&
+        (Array.isArray(params) === false || params.length !== 2)
       ) {
         setErrorStatus(
           "Invalid paramters. You should make a url like /mint/{prompt}/{image_url}"
@@ -115,15 +121,16 @@ const MintPage = () => {
       // console.log("inputPrompt: ", inputPrompt);
       // console.log("inputImageUrl: ", inputImageUrl);
 
-      // Check imageUrl and prompt was saved in sqlite already.
+      //* Check imageUrl and prompt was saved in sqlite already.
+      //* Mint NFT only in case of pre-saved image.
       const promptEncodedString = encodeURIComponent(inputPrompt);
       const imageUrlEncodedString = encodeURIComponent(inputImageUrl);
-      const response = await fetch(
+      const fetchImageDatabaseResponse = await fetch(
         `${GET_API_URL}/${promptEncodedString}/${imageUrlEncodedString}`
       );
-      // console.log("response: ", response);
+      // console.log("fetchImageDatabaseResponse: ", fetchImageDatabaseResponse);
 
-      if (response.status !== 200) {
+      if (fetchImageDatabaseResponse.status !== 200) {
         setErrorStatus(
           "Invalid image url and prompts. Image and prompt should be created in discord bot."
         );
@@ -142,26 +149,7 @@ const MintPage = () => {
   function buildMintPage() {
     // console.log("call buildMintPage()");
 
-    if (
-      isConnected === false ||
-      selectedChain === undefined ||
-      getChainName({ chainId: selectedChain.id }) !==
-        getChainName({ chainId: BLOCKCHAIN_NETWORK })
-    ) {
-      // console.log("isConnected: ", isConnected);
-      // console.log("selectedChain: ", selectedChain);
-      // if (selectedChain) {
-      //   console.log(
-      //     "getChainName({ chainId: selectedChain.id }): ",
-      //     getChainName({ chainId: selectedChain.id })
-      //   );
-      // }
-      // console.log("BLOCKCHAIN_NETWORK: ", BLOCKCHAIN_NETWORK);
-      // console.log(
-      //   "getChainName({ chainId: BLOCKCHAIN_NETWORK }): ",
-      //   getChainName({ chainId: BLOCKCHAIN_NETWORK })
-      // );
-
+    if (isWalletConnected({ isConnected, selectedChain }) === false) {
       return (
         <Box
           sx={{
@@ -180,9 +168,12 @@ const MintPage = () => {
     }
 
     return buildContentPage();
-  };
+  }
 
   function buildContentPage() {
+    // console.log("call buildContentPage()");
+    // console.log("errorStatus: ", errorStatus);
+
     if (errorStatus === undefined) {
       return <Mint inputImageUrl={imageUrl} inputPrompt={prompt} />;
     } else {

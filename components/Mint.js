@@ -46,8 +46,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
   });
   // console.log("promptNftContract: ", promptNftContract);
 
-  const PLACEHOLDER_IMAGE_URL =
-    "https://placehold.co/600x400?text=No+image&font=source-sans-pro";
+  const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const THANKS_PAGE = "/thanks/";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
@@ -99,9 +98,9 @@ function Mint({ inputImageUrl, inputPrompt }) {
   const [buttonDisabled, setButtonDisabled] = React.useState(false);
 
   React.useEffect(() => {
-    // console.log("call useEffect()");
-    // console.log("inputImageUrl: ", inputImageUrl);
-    // console.log("inputPrompt: ", inputPrompt);
+    console.log("call useEffect()");
+    console.log("inputImageUrl: ", inputImageUrl);
+    console.log("inputPrompt: ", inputPrompt);
 
     const initialize = async () => {
       if (inputImageUrl !== undefined) {
@@ -232,8 +231,9 @@ function Mint({ inputImageUrl, inputPrompt }) {
   }
 
   function handleCardMediaImageError(e) {
-    // console.log("call handleCardMediaImageError()");
+    console.log("call handleCardMediaImageError()");
     // console.log("imageUrl: ", imageUrl);
+
     e.target.onerror = null;
     e.target.src = PLACEHOLDER_IMAGE_URL;
   }
@@ -250,11 +250,23 @@ function Mint({ inputImageUrl, inputPrompt }) {
         minHeight="100vh"
       >
         <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-          <CardMedia
-            component="img"
-            image={imageUrl}
-            onError={handleCardMediaImageError}
-          />
+          {inputImageUrl ? (
+            <CardMedia
+              component="img"
+              image={imageUrl}
+              onError={handleCardMediaImageError}
+            />
+          ) : (
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              minHeight="50vh"
+              sx={{ height: "50vh" }}
+            >
+              <CircularProgress />
+            </Box>
+          )}
           <CardContent
             sx={{
               padding: "10",
