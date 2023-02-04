@@ -1,4 +1,5 @@
 import React from "react";
+import { useRouter } from "next/router";
 import PropTypes from "prop-types";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
@@ -7,7 +8,7 @@ import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Slide from "@mui/material/Slide";
 import Button from "@mui/material/Button";
-import List from "../components/List";
+import List from "../../components/List";
 
 function HideOnScroll(props) {
   const { children, window } = props;
@@ -32,8 +33,12 @@ HideOnScroll.propTypes = {
 
 function ListPage(props) {
   // console.log("call ListPage()");
+  const router = useRouter();
+  const queryMode = router.query.mode;
+  console.log("router.query: ", router.query);
+  console.log("queryMode: ", queryMode);
 
-  const [mode, setMode] = React.useState("image");
+  const [mode, setMode] = React.useState(queryMode || "image");
   const BUTTON_BORDER_RADIUS = 25;
   const SELECTED_BUTTON_BACKGROUND_COLOR = "#21b6ae";
   const SELECTED_BUTTON_PADDING = "2px 2px";

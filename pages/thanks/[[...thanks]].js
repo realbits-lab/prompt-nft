@@ -58,7 +58,7 @@ function ThanksPage() {
         <CardActions>
           <Button size="small" onClick={async () => {}}>
             <Typography variant="h5">
-              <Link href="/list">Go to view other images</Link>
+              <Link href="/list/nft">Go to view other images</Link>
             </Typography>
           </Button>
         </CardActions>

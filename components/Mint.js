@@ -393,6 +393,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
                 }
 
                 try {
+                  //* TODO: Add waiting message to snackbar.
                   //* Upload metadata and image to s3.
                   const tokenURI = await uploadMetadata({
                     name: inputName,
