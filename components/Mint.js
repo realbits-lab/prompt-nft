@@ -257,8 +257,6 @@ function Mint({ inputImageUrl, inputPrompt }) {
               image={imageUrl}
               onError={handleCardMediaImageError}
               sx={{
-                height: 350,
-                width: "100%",
                 objectFit: "cover",
               }}
             />
