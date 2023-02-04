@@ -1034,34 +1034,26 @@ function List({ mode }) {
                       }
 
                       //* Check user login session.
-                      // if (user.isLoggedIn === false) {
-                      //   try {
-                      //     await handleLogin({
-                      //       mutateUser: mutateUser,
-                      //       address: address,
-                      //       chainId: selectedChain.id,
-                      //     });
-                      //   } catch (error) {
-                      //     console.error(error);
-                      //     setSnackbarSeverity("error");
-                      //     setSnackbarMessage(`Login error: ${error}`);
-                      //     setOpenSnackbar(true);
-                      //     return;
-                      //   }
-                      // }
-                      await handleLogout({ mutateUser: mutateUser });
-                      try {
-                        await handleLogin({
-                          mutateUser: mutateUser,
-                          address: address,
-                          chainId: selectedChain.id,
-                        });
-                      } catch (error) {
-                        console.error(error);
-                        setSnackbarSeverity("error");
-                        setSnackbarMessage(`Login error: ${error}`);
-                        setOpenSnackbar(true);
-                        return;
+                      if (user.isLoggedIn === false) {
+                        try {
+                          setSnackbarSeverity("info");
+                          setSnackbarMessage("Checking user authentication...");
+                          setOpenSnackbar(true);
+                          await handleLogin({
+                            mutateUser: mutateUser,
+                            address: address,
+                            chainId: selectedChain.id,
+                          });
+                          setOpenSnackbar(false);
+                          setSnackbarMessage("Checking is finished.");
+                          setOpenSnackbar(true);
+                        } catch (error) {
+                          console.error(error);
+                          setSnackbarSeverity("error");
+                          setSnackbarMessage(`Login error: ${error}`);
+                          setOpenSnackbar(true);
+                          return;
+                        }
                       }
 
                       //* Get the prompt.
