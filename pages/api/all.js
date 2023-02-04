@@ -18,6 +18,9 @@ export default async function handler(req, res) {
       where: {
         isEncrypted: false,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
     // console.log("findUniqueResult: ", findUniqueResult);
 
