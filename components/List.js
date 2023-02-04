@@ -594,7 +594,7 @@ function List({ mode }) {
   const RegisterCardList = React.useCallback(
     function RegisterCardList(props) {
       if (allRegisterDataArray.length === 0) {
-        return <NoContentPage message={"No registered a image prompt NFT."} />;
+        return <NoContentPage message={"No prompt NFT."} />;
       }
 
       return allRegisterDataArray.map((nftData, idx) => {
