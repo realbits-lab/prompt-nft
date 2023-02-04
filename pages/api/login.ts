@@ -45,9 +45,6 @@ async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
     },
 
     //* Defining the message signing data content.
-    // message: {
-    //   contents: `Login with ${findUniqueResult?.nonce} nonce number.`,
-    // },
     message: {
       contents: process.env.NEXT_PUBLIC_LOGIN_SIGN_MESSAGE,
     },

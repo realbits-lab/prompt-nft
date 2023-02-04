@@ -596,7 +596,7 @@ function List({ mode }) {
 
     //* Popup MetaMask confirmation modal to sign message with nonce data.
     const signMessageResult = await signTypedDataAsync();
-    console.log("signMessageResult: ", signMessageResult);
+    // console.log("signMessageResult: ", signMessageResult);
 
     //* Send signature to back-end on the /auth route.
     //* Call /api/login and set mutate user data with response data.
