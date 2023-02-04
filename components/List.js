@@ -588,7 +588,7 @@ function List({ mode }) {
         }
       });
     },
-    [allImageDataArray.length, pageIndex.image]
+    [allImageDataArray.length, pageIndex.image, isValidating]
   );
 
   const RegisterCardList = React.useCallback(
