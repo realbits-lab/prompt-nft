@@ -35,13 +35,33 @@ function ListPage(props) {
   // console.log("call ListPage()");
   const router = useRouter();
   const queryMode = router.query.mode;
-  console.log("router.query: ", router.query);
-  console.log("queryMode: ", queryMode);
+  // console.log("router.query: ", router.query);
+  // console.log("queryMode: ", queryMode);
 
   const [mode, setMode] = React.useState(queryMode || "image");
   const BUTTON_BORDER_RADIUS = 25;
   const SELECTED_BUTTON_BACKGROUND_COLOR = "#21b6ae";
   const SELECTED_BUTTON_PADDING = "2px 2px";
+
+  React.useEffect(
+    function () {
+      // console.log("call useEffect()");
+      // console.log("queryMode: ", queryMode);
+
+      if (
+        queryMode &&
+        Array.isArray(queryMode) === true &&
+        queryMode.length > 0
+      ) {
+        // console.log("setMode(queryMode[0])");
+        setMode(queryMode[0]);
+      } else {
+        // console.log("setMode(image)");
+        setMode("image");
+      }
+    },
+    [queryMode]
+  );
 
   const AppBarButton = ({ buttonMode }) => {
     return (
@@ -50,7 +70,7 @@ function ListPage(props) {
         style={{
           borderRadius: BUTTON_BORDER_RADIUS,
           backgroundColor:
-            mode === buttonMode ? SELECTED_BUTTON_BACKGROUND_COLOR : null,
+            buttonMode === mode ? SELECTED_BUTTON_BACKGROUND_COLOR : null,
           padding: SELECTED_BUTTON_PADDING,
         }}
         sx={{ my: 2, color: "white" }}

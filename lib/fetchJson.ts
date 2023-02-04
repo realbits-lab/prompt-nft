@@ -32,16 +32,16 @@ export default async function fetchJson<JSON = unknown>(
   input: RequestInfo,
   init?: RequestInit
 ): Promise<JSON> {
-  console.log("call fetchJson()");
-  console.log("input: ", input);
-  console.log("init: ", init);
+  // console.log("call fetchJson()");
+  // console.log("input: ", input);
+  // console.log("init: ", init);
 
   const response = await fetch(input, init);
 
   // if the server replies, there's always some data in json
   // if there's a network error, it will throw at the previous line
   const data = await response.json();
-  console.log("data: ", data);
+  // console.log("data: ", data);
 
   // response.ok is true when res.status is 2xx
   // https://developer.mozilla.org/en-US/docs/Web/API/Response/ok
