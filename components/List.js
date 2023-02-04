@@ -582,6 +582,10 @@ function List({ mode }) {
     // console.log("call handleLogin()");
     // console.log("chainId: ", chainId);
 
+    setSnackbarSeverity("info");
+    setSnackbarMessage("Checking user authentication...");
+    setOpenSnackbar(true);
+
     const publicAddress = address.toLowerCase();
     // console.log("publicAddress: ", publicAddress);
 
@@ -591,6 +595,9 @@ function List({ mode }) {
       const jsonResult = await fetchJson(`/api/nonce/${publicAddress}`);
       // console.log("jsonResult: ", jsonResult);
     } catch (error) {
+      setOpenSnackbar(false);
+      setSnackbarMessage("Checking is finished.");
+      setOpenSnackbar(true);
       throw error;
     }
 
@@ -609,12 +616,18 @@ function List({ mode }) {
           body: JSON.stringify(body),
         })
       );
+      setOpenSnackbar(false);
+      setSnackbarMessage("Checking is finished.");
+      setOpenSnackbar(true);
     } catch (error) {
       if (error instanceof FetchError) {
         console.error(error.data.message);
       } else {
         console.error("An unexpected error happened:", error);
       }
+      setOpenSnackbar(false);
+      setSnackbarMessage("Checking is finished.");
+      setOpenSnackbar(true);
       throw error;
     }
   }
@@ -1036,22 +1049,13 @@ function List({ mode }) {
                       //* Check user login session.
                       if (user.isLoggedIn === false) {
                         try {
-                          setSnackbarSeverity("info");
-                          setSnackbarMessage("Checking user authentication...");
-                          setOpenSnackbar(true);
                           await handleLogin({
                             mutateUser: mutateUser,
                             address: address,
                             chainId: selectedChain.id,
                           });
-                          setOpenSnackbar(false);
-                          setSnackbarMessage("Checking is finished.");
-                          setOpenSnackbar(true);
                         } catch (error) {
                           console.error(error);
-                          setSnackbarSeverity("error");
-                          setSnackbarMessage(`Login error: ${error}`);
-                          setOpenSnackbar(true);
                           return;
                         }
                       }
