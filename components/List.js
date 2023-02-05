@@ -32,6 +32,7 @@ import fetchJson, { FetchError } from "../lib/fetchJson";
 //* Copy abi file from rent-market repository.
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
+import ListNft from "./ListNft";
 
 const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
   ssr: false,
@@ -123,8 +124,6 @@ function List({ mode }) {
   const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;
 
-  const NUMBER_PER_PAGE = 5;
-
   //*---------------------------------------------------------------------------
   //* Define fetcher hook.
   //*---------------------------------------------------------------------------
@@ -176,6 +175,8 @@ function List({ mode }) {
   //* For pagination.
   //* Keep each page index per menu (image, nft, own, and rent).
   //*---------------------------------------------------------------------------
+  const NUMBER_PER_PAGE = 5;
+
   const [pageIndex, setPageIndex] = React.useState({
     image: 1,
     nft: 1,
@@ -644,6 +645,7 @@ function List({ mode }) {
       throw error;
     }
   }
+
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
     // console.log("imageUrl: ", imageUrl);
@@ -703,122 +705,6 @@ function List({ mode }) {
       });
     },
     [allImageDataArray.length, pageIndex.image, isValidating]
-  );
-
-  const RegisterCardList = React.useCallback(
-    function RegisterCardList(props) {
-      if (allRegisterDataArray.length === 0) {
-        return <NoContentPage message={"No prompt NFT."} />;
-      }
-
-      return allRegisterDataArray.map((nftData, idx) => {
-        // console.log("idx: ", idx);
-        // console.log("pageIndex.nft: ", pageIndex.nft);
-        //* Check idx is in pagination.
-        //* pageIndex.nft starts from 1.
-        //* idx starts from 0.
-        if (
-          idx >= (pageIndex.nft - 1) * NUMBER_PER_PAGE &&
-          idx < pageIndex.nft * NUMBER_PER_PAGE
-        ) {
-          return (
-            <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }} key={idx}>
-              <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-                <CardMedia
-                  component="img"
-                  // width={100}
-                  image={nftData.metadata.image}
-                  onError={handleCardMediaImageError}
-                />
-                <CardContent>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                  >
-                    token id: {nftData.tokenId.toNumber()}
-                  </Typography>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                    component="div"
-                  >
-                    name: {nftData.metadata.name}
-                  </Typography>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                    component="div"
-                  >
-                    description: {nftData.metadata.description}
-                  </Typography>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                    component="div"
-                  >
-                    rent fee: {nftData.rentFee / Math.pow(10, 18)} matic
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <Button
-                    size="small"
-                    onClick={async () => {
-                      if (mode === "nft" && isWalletConnected() === false) {
-                        // console.log("chainName: ", getChainName({ chainId }));
-                        setSnackbarSeverity("warning");
-                        setSnackbarMessage(
-                          `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
-                        );
-                        setOpenSnackbar(true);
-                        return;
-                      }
-
-                      if (!rentMarketContract || !dataSigner) {
-                        console.error(
-                          "rentMarketContract or signer is null or undefined."
-                        );
-                        return;
-                      }
-
-                      //* Rent this nft with rent fee.
-                      try {
-                        const tx = await rentMarketContract
-                          .connect(dataSigner)
-                          .rentNFT(
-                            process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-                            nftData.tokenId,
-                            process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS,
-                            {
-                              value: nftData.rentFee,
-                            }
-                          );
-                        const txResult = await tx.wait();
-                      } catch (error) {
-                        console.error(error);
-                        setSnackbarSeverity("error");
-                        setSnackbarMessage(
-                          error.data.message
-                            ? error.data.message
-                            : error.message
-                        );
-                        setOpenSnackbar(true);
-                      }
-                    }}
-                  >
-                    RENT
-                  </Button>
-                </CardActions>
-              </Card>
-            </Box>
-          );
-        }
-      });
-    },
-    [allRegisterDataArray.length, pageIndex.nft]
   );
 
   const OwnCardList = React.useCallback(
@@ -1252,7 +1138,10 @@ function List({ mode }) {
             {isWalletConnected() === false ? (
               <NoLoginPage />
             ) : (
-              <RegisterCardList />
+              <ListNft
+                allNftDataArray={allRegisterDataArray}
+                pageIndex={pageIndex[mode]}
+              />
             )}
           </div>
         ) : mode === "own" ? (
