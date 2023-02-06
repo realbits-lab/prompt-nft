@@ -34,8 +34,8 @@ export enum FetchType {
 }
 
 async function getMetadata({ tokenId, contract, signer }) {
-  console.log("call getMetadata()");
-  console.log("tokenId: ", tokenId);
+  // console.log("call getMetadata()");
+  // console.log("tokenId: ", tokenId);
 
   if (!contract || !signer || !tokenId) {
     console.error("contract or signer is null or undefined.");
@@ -48,7 +48,7 @@ async function getMetadata({ tokenId, contract, signer }) {
     const tokenURI = await contract
       .connect(signer)
       .tokenURI(tokenId.toNumber());
-    console.log("tokenURI: ", tokenURI);
+    // console.log("tokenURI: ", tokenURI);
 
     //* Get token metadata from token uri.
     const fetchResult = await fetch(tokenURI);
@@ -88,12 +88,12 @@ export default async function fetchJson<JSON = unknown>(
   [url, type, contract, signer, tokenId, ...remain]: [RequestInfo, FetchType],
   init?: RequestInit
 ): Promise<JSON> {
-  console.log("call fetchJson()");
-  console.log("url: ", url);
-  console.log("type: ", type);
-  console.log("contract: ", contract);
-  console.log("signer: ", signer);
-  console.log("remain: ", remain);
+  // console.log("call fetchJson()");
+  // console.log("url: ", url);
+  // console.log("type: ", type);
+  // console.log("contract: ", contract);
+  // console.log("signer: ", signer);
+  // console.log("remain: ", remain);
   // console.log("init: ", init);
 
   if (type === FetchType.PROVIDER) {
@@ -103,16 +103,23 @@ export default async function fetchJson<JSON = unknown>(
           contract: contract,
           signer: signer,
         });
-        console.log("getAllRegisterDataResult: ", getAllRegisterDataResult);
+        // console.log("getAllRegisterDataResult: ", getAllRegisterDataResult);
         return getAllRegisterDataResult;
 
       case "getMetadata":
+        // console.log("case getMetadata");
+        // console.log("url: ", url);
+        // console.log("type: ", type);
+        // console.log("contract: ", contract);
+        // console.log("signer: ", signer);
+        // console.log("tokenId: ", tokenId);
+        // console.log("remain: ", remain);
         const metadata = await getMetadata({
           contract: contract,
           signer: signer,
           tokenId: tokenId,
         });
-        console.log("metadata: ", metadata);
+        // console.log("metadata: ", metadata);
         return metadata;
 
       default:

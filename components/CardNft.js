@@ -1,7 +1,6 @@
-import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
+import { useSigner, useContract } from "wagmi";
 import useSWR from "swr";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
@@ -40,7 +39,13 @@ function CardNft({ nftData }) {
     data: metadataData,
     error: metadataError,
     isValidating: metadataIsValidating,
-  } = useSWR(["getMetadata", FetchType.PROVIDER]);
+  } = useSWR([
+    "getMetadata",
+    FetchType.PROVIDER,
+    promptNftContract,
+    dataSigner,
+    nftData.tokenId,
+  ]);
 
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
