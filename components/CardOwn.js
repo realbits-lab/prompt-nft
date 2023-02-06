@@ -101,47 +101,77 @@ function CardNft({ nftData }) {
         <CardActions>
           <Button
             size="small"
-            onClick={async () => {
-              if (isWalletConnected() === false) {
+            onClick={async function () {
+              if (mode === "own" && isWalletConnected() === false) {
+                // console.log("chainName: ", getChainName({ chainId }));
                 setSnackbarSeverity("warning");
                 setSnackbarMessage(
-                  `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
+                  `Change metamask network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
                 );
                 setOpenSnackbar(true);
                 return;
               }
 
-              if (!rentMarketContract || !dataSigner) {
-                console.error(
-                  "rentMarketContract or signer is null or undefined."
-                );
-                return;
-              }
+              if (isMobile === true) {
+                //* Set user login session.
+                if (user.isLoggedIn === false) {
+                  try {
+                    await handleLogin({
+                      mutateUser: mutateUser,
+                      address: address,
+                      chainId: selectedChain.id,
+                    });
+                  } catch (error) {
+                    console.error(error);
+                    setSnackbarSeverity("error");
+                    setSnackbarMessage(`Login error: ${error}`);
+                    setOpenSnackbar(true);
+                    return;
+                  }
+                }
 
-              //* Rent this nft with rent fee.
-              try {
-                const tx = await rentMarketContract
+                //* Get the plain prompt from prompter.
+                const body = { tokenId: nftData.tokenId.toNumber() };
+                const promptResult = await fetchJson(["/api/prompt"], {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(body),
+                });
+                // console.log("promptResult:", promptResult);
+
+                const decodedPrompt = Base64.decode(
+                  promptResult.prompt
+                ).toString();
+                // console.log("decodedPrompt:", decodedPrompt);
+
+                setDecryptedPrompt(decodedPrompt);
+                setOpenDialog(true);
+              } else {
+                const encryptPromptData = await promptNftContract
                   .connect(dataSigner)
-                  .rentNFT(
-                    process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-                    nftData.tokenId,
-                    process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS,
-                    {
-                      value: nftData.rentFee,
-                    }
-                  );
-                const txResult = await tx.wait();
-              } catch (error) {
-                console.error(error);
-                setSnackbarSeverity("error");
-                setSnackbarMessage(
-                  error.data.message ? error.data.message : error.message
-                );
-                setOpenSnackbar(true);
+                  .getTokenOwnerPrompt(nftData.tokenId);
+                // console.log("encryptPromptData: ", encryptPromptData);
+
+                const encryptData = {
+                  ciphertext: encryptPromptData["ciphertext"],
+                  ephemPublicKey: encryptPromptData["ephemPublicKey"],
+                  nonce: encryptPromptData["nonce"],
+                  version: encryptPromptData["version"],
+                };
+                // console.log("encryptData: ", encryptData);
+
+                const prompt = await decryptData({
+                  encryptData: encryptData,
+                  decryptAddress: address,
+                });
+                // console.log("prompt: ", prompt);
+
+                setDecryptedPrompt(prompt);
+                setOpenDialog(true);
               }
             }}
           >
-            RENT
+            PROMPT
           </Button>
         </CardActions>
       </Card>

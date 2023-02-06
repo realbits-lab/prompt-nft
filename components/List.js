@@ -32,6 +32,8 @@ import fetchJson, { FetchError, FetchType } from "../lib/fetchJson";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
 import ListNft from "./ListNft";
+import ListOwn from "./ListOwn";
+import ListRent from "./ListRent";
 
 const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
   ssr: false,
@@ -169,9 +171,6 @@ function List({ mode }) {
   const [allImageDataCount, setAllImageDataCount] = React.useState(0);
   const [allImageDataArray, setAllImageDataArray] = React.useState([]);
 
-  const [allNftDataCount, setAllNftDataCount] = React.useState(0);
-  const [allNftDataArray, setAllNftDataArray] = React.useState([]);
-
   const [allRegisterDataCount, setAllRegisterDataCount] = React.useState(0);
   const [allRegisterDataArray, setAllRegisterDataArray] = React.useState([]);
 
@@ -293,14 +292,6 @@ function List({ mode }) {
     // console.log("call initializeNftData()");
 
     try {
-      //* Get all nft data for metadata.
-      const { allNftDataCountResult, allNftDataArrayResult } =
-        await getAllNftData();
-      // console.log("allNftDataCountResult: ", allNftDataCountResult);
-      // console.log("allNftDataArrayResult: ", allNftDataArrayResult);
-      setAllNftDataCount(allNftDataCountResult);
-      setAllNftDataArray(allNftDataArrayResult.reverse());
-
       //* Get all my own data array.
       const { myOwnDataCountResult, myOwnDataArrayResult } =
         await getAllMyOwnData({
@@ -375,66 +366,6 @@ function List({ mode }) {
     });
 
     return Base64.decode(decrypt);
-  }
-
-  async function getAllNftData() {
-    // console.log("call getAllNftData()");
-    // console.log("dataSigner: ", dataSigner);
-    // console.log("promptNftContract: ", promptNftContract);
-
-    //* If no signer, return zero data.
-    if (!promptNftContract || !dataSigner) {
-      // console.log("promptNftContract or signer is null or undefined.");
-      // console.log("promptNftContract: ", promptNftContract);
-      // console.log("dataSigner: ", dataSigner);
-      //* Return error.
-      return {
-        allNftDataCountResult: 0,
-        allNftDataArrayResult: [],
-      };
-    }
-
-    //* Get all nft data from nft contract.
-    const totalSupplyBigNumber = await promptNftContract
-      .connect(dataSigner)
-      .totalSupply();
-    // console.log("totalSupplyBigNumber: ", totalSupplyBigNumber);
-    const allNftCountResult = totalSupplyBigNumber.toNumber();
-    // console.log("allNftCountResult: ", allNftCountResult);
-
-    //* TODO: Make async later.
-    //* TODO: Archieve metadata whenever minting and use it in this initial process.
-    //* TODO: Get total data from prompt market contract with getAllRegisterData function.
-    //* Get all metadata per each token as to token uri.
-    let allNftDataResultArray = [];
-    for (let i = 0; i < allNftCountResult; i++) {
-      //* Get token id and uri.
-      const tokenId = await promptNftContract
-        .connect(dataSigner)
-        .tokenByIndex(i);
-      const tokenURI = await promptNftContract
-        .connect(dataSigner)
-        .tokenURI(tokenId);
-
-      //* Get token metadata from token uri.
-      const fetchResult = await fetch(tokenURI);
-      const tokenMetadata = await fetchResult.blob();
-      const metadataJsonTextData = await tokenMetadata.text();
-      const metadataJsonData = JSON.parse(metadataJsonTextData);
-
-      //* Add token metadata.
-      allNftDataResultArray.push({
-        tokenId: tokenId,
-        metadata: metadataJsonData,
-      });
-    }
-    // console.log("allNftDataResultArray: ", allNftDataResultArray);
-
-    //* Return token data array.
-    return {
-      allNftDataCountResult: allNftDataResultArray.length,
-      allNftDataArrayResult: allNftDataResultArray,
-    };
   }
 
   async function getAllRegisterData({ allNftDataArrayResult }) {
@@ -718,154 +649,6 @@ function List({ mode }) {
     [allImageDataArray.length, pageIndex.image, getAllIsValidating]
   );
 
-  const OwnCardList = React.useCallback(
-    function OwnCardList(props) {
-      // console.log("call OwnCardList()");
-      // console.log("allMyOwnDataCount: ", allMyOwnDataCount);
-
-      if (allMyOwnDataArray.length === 0) {
-        return (
-          <NoContentPage message={"You do not have any image prompt NFT."} />
-        );
-      }
-
-      return allMyOwnDataArray.map((nftData, idx) => {
-        // console.log("nftData: ", nftData);
-        // console.log("idx: ", idx);
-        // console.log("pageIndex.own: ", pageIndex.own);
-        // Check idx is in pagination.
-        // pageIndex.own starts from 1.
-        // idx starts from 0.
-        if (
-          idx >= (pageIndex.own - 1) * NUMBER_PER_PAGE &&
-          idx < pageIndex.own * NUMBER_PER_PAGE
-        ) {
-          return (
-            <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }} key={idx}>
-              <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-                <CardMedia
-                  component="img"
-                  image={nftData.metadata.image}
-                  onError={handleCardMediaImageError}
-                />
-                <CardContent>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                  >
-                    token id: {nftData.tokenId.toNumber()}
-                  </Typography>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                    component="div"
-                  >
-                    name: {nftData.metadata.name}
-                  </Typography>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                    component="div"
-                  >
-                    description: {nftData.metadata.description}
-                  </Typography>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                    component="div"
-                  >
-                    rent fee: {nftData.rentFee / Math.pow(10, 18)} matic
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <Button
-                    size="small"
-                    onClick={async function () {
-                      if (mode === "own" && isWalletConnected() === false) {
-                        // console.log("chainName: ", getChainName({ chainId }));
-                        setSnackbarSeverity("warning");
-                        setSnackbarMessage(
-                          `Change metamask network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
-                        );
-                        setOpenSnackbar(true);
-                        return;
-                      }
-
-                      if (isMobile === true) {
-                        //* Set user login session.
-                        if (user.isLoggedIn === false) {
-                          try {
-                            await handleLogin({
-                              mutateUser: mutateUser,
-                              address: address,
-                              chainId: selectedChain.id,
-                            });
-                          } catch (error) {
-                            console.error(error);
-                            setSnackbarSeverity("error");
-                            setSnackbarMessage(`Login error: ${error}`);
-                            setOpenSnackbar(true);
-                            return;
-                          }
-                        }
-
-                        //* Get the plain prompt from prompter.
-                        const body = { tokenId: nftData.tokenId.toNumber() };
-                        const promptResult = await fetchJson(["/api/prompt"], {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify(body),
-                        });
-                        // console.log("promptResult:", promptResult);
-
-                        const decodedPrompt = Base64.decode(
-                          promptResult.prompt
-                        ).toString();
-                        // console.log("decodedPrompt:", decodedPrompt);
-
-                        setDecryptedPrompt(decodedPrompt);
-                        setOpenDialog(true);
-                      } else {
-                        const encryptPromptData = await promptNftContract
-                          .connect(dataSigner)
-                          .getTokenOwnerPrompt(nftData.tokenId);
-                        // console.log("encryptPromptData: ", encryptPromptData);
-
-                        const encryptData = {
-                          ciphertext: encryptPromptData["ciphertext"],
-                          ephemPublicKey: encryptPromptData["ephemPublicKey"],
-                          nonce: encryptPromptData["nonce"],
-                          version: encryptPromptData["version"],
-                        };
-                        // console.log("encryptData: ", encryptData);
-
-                        const prompt = await decryptData({
-                          encryptData: encryptData,
-                          decryptAddress: address,
-                        });
-                        // console.log("prompt: ", prompt);
-
-                        setDecryptedPrompt(prompt);
-                        setOpenDialog(true);
-                      }
-                    }}
-                  >
-                    PROMPT
-                  </Button>
-                </CardActions>
-              </Card>
-            </Box>
-          );
-        }
-      });
-    },
-    [allMyOwnDataArray.length, pageIndex.own]
-  );
-
   const RentCardList = React.useCallback(
     function RentCardList(props) {
       if (allMyRentDataArray.length === 0) {
@@ -1129,39 +912,6 @@ function List({ mode }) {
     [mode]
   );
 
-  const ListNftMemo = React.useMemo(function ListNftMemo(props) {
-    // console.log("call ListNftMemo()");
-    // console.log("props: ", props);
-    // console.log("allRegisterDataArray: ", allRegisterDataArray);
-    // console.log("pageIndex: ", pageIndex);
-    // console.log("mode: ", mode);
-
-    return (
-      <ListNft
-        // allRegisterDataArray={allRegisterDataArray}
-        allRegisterDataArray={props}
-        pageIndex={pageIndex[mode]}
-      />
-    );
-  });
-
-  const ListNftCallback = React.useCallback(
-    function ListNftCallback({ allRegisterDataArray }) {
-      // console.log("call ListNftCallback()");
-      // console.log("allRegisterDataArray: ", allRegisterDataArray);
-      // console.log("pageIndex: ", pageIndex);
-      // console.log("mode: ", mode);
-
-      return (
-        <ListNft
-          allRegisterDataArray={allRegisterDataArray}
-          pageIndex={pageIndex[mode]}
-        />
-      );
-    },
-    [allRegisterDataArray]
-  );
-
   return (
     <div>
       <Box
@@ -1182,17 +932,22 @@ function List({ mode }) {
             {isWalletConnected() === false ? (
               <NoLoginPage />
             ) : (
-              // <ListNft
-              //   allRegisterDataArray={allRegisterDataArray}
-              //   pageIndex={pageIndex[mode]}
-              // />
-              <ListNftCallback allRegisterDataArray={allRegisterDataArray} />
-              // {ListNftMemo}
+              <ListNft
+                allRegisterDataArray={allRegisterDataArray}
+                pageIndex={pageIndex[mode]}
+              />
             )}
           </div>
         ) : mode === "own" ? (
           <div>
-            {isWalletConnected() === false ? <NoLoginPage /> : <OwnCardList />}
+            {isWalletConnected() === false ? (
+              <NoLoginPage />
+            ) : (
+              <ListOwn
+                allMyOwnDataArray={allMyOwnDataArray}
+                pageIndex={pageIndex[mode]}
+              />
+            )}
           </div>
         ) : mode === "rent" ? (
           <div>

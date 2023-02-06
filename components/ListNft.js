@@ -3,10 +3,8 @@ import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import CardNft from "./CardNft";
 
@@ -86,101 +84,6 @@ function ListNft({ allRegisterDataArray, pageIndex }) {
           idx < pageIndex * NUMBER_PER_PAGE
         ) {
           return <CardNft nftData={nftData} />;
-          return (
-            <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }} key={idx}>
-              <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-                <CardMedia
-                  component="img"
-                  // width={100}
-                  // image={nftData.metadata.image}
-                  image={PLACEHOLDER_IMAGE_URL}
-                  onError={handleCardMediaImageError}
-                />
-                <CardContent>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                  >
-                    token id: {nftData.tokenId.toNumber()}
-                  </Typography>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                    component="div"
-                  >
-                    {/* name: {nftData.metadata.name} */}
-                  </Typography>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                    component="div"
-                  >
-                    {/* description: {nftData.metadata.description} */}
-                  </Typography>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                    component="div"
-                  >
-                    rent fee: {nftData.rentFee / Math.pow(10, 18)} matic
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <Button
-                    size="small"
-                    onClick={async () => {
-                      if (isWalletConnected() === false) {
-                        // console.log("chainName: ", getChainName({ chainId }));
-                        setSnackbarSeverity("warning");
-                        setSnackbarMessage(
-                          `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
-                        );
-                        setOpenSnackbar(true);
-                        return;
-                      }
-
-                      if (!rentMarketContract || !dataSigner) {
-                        console.error(
-                          "rentMarketContract or signer is null or undefined."
-                        );
-                        return;
-                      }
-
-                      //* Rent this nft with rent fee.
-                      try {
-                        const tx = await rentMarketContract
-                          .connect(dataSigner)
-                          .rentNFT(
-                            process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-                            nftData.tokenId,
-                            process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS,
-                            {
-                              value: nftData.rentFee,
-                            }
-                          );
-                        const txResult = await tx.wait();
-                      } catch (error) {
-                        console.error(error);
-                        setSnackbarSeverity("error");
-                        setSnackbarMessage(
-                          error.data.message
-                            ? error.data.message
-                            : error.message
-                        );
-                        setOpenSnackbar(true);
-                      }
-                    }}
-                  >
-                    RENT
-                  </Button>
-                </CardActions>
-              </Card>
-            </Box>
-          );
         }
       });
     },
