@@ -9,8 +9,8 @@ import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import promptNFTABI from "../contracts/promptNFT.json";
+import rentmarketABI from "../contracts/rentMarket.json";
 import { FetchType } from "../lib/fetchJson";
-import { getUniqueKey } from "../lib/util";
 
 function CardNft({ nftData }) {
   console.log("call CardNft()");
@@ -27,26 +27,33 @@ function CardNft({ nftData }) {
   //*---------------------------------------------------------------------------
   //* Define hook variables.
   //*---------------------------------------------------------------------------
-  // const {
-  //   data: dataSigner,
-  //   isError: isErrorSigner,
-  //   isLoading: isLoadingSigner,
-  // } = useSigner();
-  // const promptNftContract = useContract({
-  //   address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-  //   abi: promptNFTABI["abi"],
-  // });
-  // const {
-  //   data: metadataData,
-  //   error: metadataError,
-  //   isValidating: metadataIsValidating,
-  // } = useSWR([
-  //   "getMetadata",
-  //   FetchType.PROVIDER,
-  //   promptNftContract,
-  //   dataSigner,
-  //   nftData.tokenId,
-  // ]);
+  const {
+    data: dataSigner,
+    isError: isErrorSigner,
+    isLoading: isLoadingSigner,
+  } = useSigner();
+
+  const promptNftContract = useContract({
+    address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
+    abi: promptNFTABI["abi"],
+  });
+
+  const rentMarketContract = useContract({
+    address: process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS,
+    abi: rentmarketABI["abi"],
+  });
+
+  const {
+    data: metadataData,
+    error: metadataError,
+    isValidating: metadataIsValidating,
+  } = useSWR([
+    "getMetadata",
+    FetchType.PROVIDER,
+    promptNftContract,
+    dataSigner,
+    nftData.tokenId,
+  ]);
 
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
@@ -54,116 +61,12 @@ function CardNft({ nftData }) {
     e.target.src = PLACEHOLDER_IMAGE_URL;
   }
 
-  const CardMetadataCallback = React.useCallback(
-    function CardMetadataCallback({ metadata }) {
-      return (
-        <Box
-          sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}
-          key={getUniqueKey()}
-        >
-          <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-            <CardMedia
-              component="img"
-              // image={metadata ? metadata.image : ""}
-              image={PLACEHOLDER_IMAGE_URL}
-              onError={handleCardMediaImageError}
-            />
-            <CardContent>
-              <Typography
-                sx={{ fontSize: 14 }}
-                color="text.secondary"
-                gutterBottom
-              >
-                token id: {nftData.tokenId.toNumber()}
-              </Typography>
-              <Typography
-                sx={{ fontSize: 14 }}
-                color="text.secondary"
-                gutterBottom
-                component="div"
-              >
-                name: {metadata ? metadata.name : ""}
-              </Typography>
-              <Typography
-                sx={{ fontSize: 14 }}
-                color="text.secondary"
-                gutterBottom
-                component="div"
-              >
-                description: {metadata ? metadata.description : ""}
-              </Typography>
-              <Typography
-                sx={{ fontSize: 14 }}
-                color="text.secondary"
-                gutterBottom
-                component="div"
-              >
-                rent fee: {nftData.rentFee / Math.pow(10, 18)} matic
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Button
-                size="small"
-                onClick={async () => {
-                  if (isWalletConnected() === false) {
-                    // console.log("chainName: ", getChainName({ chainId }));
-                    setSnackbarSeverity("warning");
-                    setSnackbarMessage(
-                      `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
-                    );
-                    setOpenSnackbar(true);
-                    return;
-                  }
-
-                  if (!rentMarketContract || !dataSigner) {
-                    console.error(
-                      "rentMarketContract or signer is null or undefined."
-                    );
-                    return;
-                  }
-
-                  //* Rent this nft with rent fee.
-                  try {
-                    const tx = await rentMarketContract
-                      .connect(dataSigner)
-                      .rentNFT(
-                        process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-                        nftData.tokenId,
-                        process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS,
-                        {
-                          value: nftData.rentFee,
-                        }
-                      );
-                    const txResult = await tx.wait();
-                  } catch (error) {
-                    console.error(error);
-                    setSnackbarSeverity("error");
-                    setSnackbarMessage(
-                      error.data.message ? error.data.message : error.message
-                    );
-                    setOpenSnackbar(true);
-                  }
-                }}
-              >
-                RENT
-              </Button>
-            </CardActions>
-          </Card>
-        </Box>
-      );
-    },
-    [nftData]
-  );
-
   return (
-    // <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }} key={idx}>
     <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}>
       <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
         <CardMedia
           component="img"
-          // width={100}
-          // image={nftData.metadata.image}
-          image={PLACEHOLDER_IMAGE_URL}
+          image={metadataData ? metadataData.image : ""}
           onError={handleCardMediaImageError}
         />
         <CardContent>
@@ -176,7 +79,7 @@ function CardNft({ nftData }) {
             gutterBottom
             component="div"
           >
-            {/* name: {nftData.metadata.name} */}
+            name: {metadataData ? metadataData.name : PLACEHOLDER_IMAGE_URL}
           </Typography>
           <Typography
             sx={{ fontSize: 14 }}
@@ -184,7 +87,7 @@ function CardNft({ nftData }) {
             gutterBottom
             component="div"
           >
-            {/* description: {nftData.metadata.description} */}
+            description: {metadataData ? metadataData.description : ""}
           </Typography>
           <Typography
             sx={{ fontSize: 14 }}
@@ -200,98 +103,6 @@ function CardNft({ nftData }) {
             size="small"
             onClick={async () => {
               if (isWalletConnected() === false) {
-                // console.log("chainName: ", getChainName({ chainId }));
-                setSnackbarSeverity("warning");
-                setSnackbarMessage(
-                  `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
-                );
-                setOpenSnackbar(true);
-                return;
-              }
-
-              if (!rentMarketContract || !dataSigner) {
-                console.error(
-                  "rentMarketContract or signer is null or undefined."
-                );
-                return;
-              }
-
-              //* Rent this nft with rent fee.
-              try {
-                const tx = await rentMarketContract
-                  .connect(dataSigner)
-                  .rentNFT(
-                    process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-                    nftData.tokenId,
-                    process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS,
-                    {
-                      value: nftData.rentFee,
-                    }
-                  );
-                const txResult = await tx.wait();
-              } catch (error) {
-                console.error(error);
-                setSnackbarSeverity("error");
-                setSnackbarMessage(
-                  error.data.message ? error.data.message : error.message
-                );
-                setOpenSnackbar(true);
-              }
-            }}
-          >
-            RENT
-          </Button>
-        </CardActions>
-      </Card>
-    </Box>
-  );
-  return (
-    <Box
-      sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}
-      key={getUniqueKey()}
-    >
-      <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-        <CardMedia
-          component="img"
-          // image={metadataData ? metadataData.image : ""}
-          image={PLACEHOLDER_IMAGE_URL}
-          onError={handleCardMediaImageError}
-        />
-        <CardContent>
-          <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-            token id: {nftData.tokenId.toNumber()}
-          </Typography>
-          <Typography
-            sx={{ fontSize: 14 }}
-            color="text.secondary"
-            gutterBottom
-            component="div"
-          >
-            {/* name: {metadataData ? metadataData.name : ""} */}
-          </Typography>
-          <Typography
-            sx={{ fontSize: 14 }}
-            color="text.secondary"
-            gutterBottom
-            component="div"
-          >
-            {/* description: {metadataData ? metadataData.description : ""} */}
-          </Typography>
-          <Typography
-            sx={{ fontSize: 14 }}
-            color="text.secondary"
-            gutterBottom
-            component="div"
-          >
-            rent fee: {nftData.rentFee / Math.pow(10, 18)} matic
-          </Typography>
-        </CardContent>
-        <CardActions>
-          <Button
-            size="small"
-            onClick={async () => {
-              if (isWalletConnected() === false) {
-                // console.log("chainName: ", getChainName({ chainId }));
                 setSnackbarSeverity("warning");
                 setSnackbarMessage(
                   `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`

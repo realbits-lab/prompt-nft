@@ -29,7 +29,6 @@ import { isMobile } from "react-device-detect";
 import { getChainId, getChainName } from "../lib/util";
 import useUser from "../lib/useUser";
 import fetchJson, { FetchError, FetchType } from "../lib/fetchJson";
-//* Copy abi file from rent-market repository.
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
 import ListNft from "./ListNft";
