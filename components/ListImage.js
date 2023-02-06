@@ -15,7 +15,7 @@ import DialogActions from "@mui/material/DialogActions";
 import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
 
-function ListImage({ allImageDataArray, pageIndex, getAllIsValidating }) {
+function ListImage({ allImageDataArray, getAllIsValidating }) {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const NUMBER_PER_PAGE = 5;
 
@@ -23,6 +23,11 @@ function ListImage({ allImageDataArray, pageIndex, getAllIsValidating }) {
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;
+
+  const [pageIndex, setPageIndex] = React.useState(1);
+  const handlePageIndexChange = (event, value) => {
+    setPageIndex(value);
+  };
 
   function LoadingPage() {
     return (
@@ -90,40 +95,69 @@ function ListImage({ allImageDataArray, pageIndex, getAllIsValidating }) {
         );
       }
 
-      return allImageDataArray.map((imageData, idx) => {
-        // console.log("idx: ", idx);
-        // console.log("pageIndex.image: ", pageIndex.image);
-        // console.log("imageData: ", imageData);
-        // Check idx is in pagination.
-        // pageIndex.image starts from 1.
-        // idx starts from 0.
-        if (
-          idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
-          idx < pageIndex * NUMBER_PER_PAGE
-        ) {
-          return (
-            <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }} key={idx}>
-              <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-                <CardMedia
-                  component="img"
-                  image={imageData.imageUrl}
-                  onError={handleCardMediaImageError}
-                />
-                <CardContent>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                    component="div"
+      return (
+        <div>
+          {allImageDataArray.map((imageData, idx) => {
+            // console.log("idx: ", idx);
+            // console.log("pageIndex.image: ", pageIndex.image);
+            // console.log("imageData: ", imageData);
+            // Check idx is in pagination.
+            // pageIndex.image starts from 1.
+            // idx starts from 0.
+            if (
+              idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
+              idx < pageIndex * NUMBER_PER_PAGE
+            ) {
+              return (
+                <Box
+                  sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}
+                  key={idx}
+                >
+                  <Card
+                    sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}
                   >
-                    {imageData.prompt}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Box>
-          );
-        }
-      });
+                    <CardMedia
+                      component="img"
+                      image={imageData.imageUrl}
+                      onError={handleCardMediaImageError}
+                    />
+                    <CardContent>
+                      <Typography
+                        sx={{ fontSize: 14 }}
+                        color="text.secondary"
+                        gutterBottom
+                        component="div"
+                      >
+                        {imageData.prompt}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Box>
+              );
+            }
+          })}
+          <Box sx={{ m: 5 }} display="flex" justifyContent="center">
+            <Pagination
+              count={Math.ceil(allImageDataArray.length / NUMBER_PER_PAGE)}
+              page={pageIndex}
+              onChange={handlePageIndexChange}
+              variant="outlined"
+              sx={{
+                padding: "10",
+                ul: {
+                  "& .MuiPaginationItem-root": {
+                    color: "darkgrey",
+                    "&.Mui-selected": {
+                      background: "lightcyan",
+                      color: "darkgrey",
+                    },
+                  },
+                },
+              }}
+            />
+          </Box>
+        </div>
+      );
     },
     [allImageDataArray, pageIndex, getAllIsValidating]
   );

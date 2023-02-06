@@ -6,15 +6,21 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
+import Pagination from "@mui/material/Pagination";
 import CardRent from "./CardRent";
 
-function ListRent({ allMyRentDataArray, pageIndex }) {
+function ListRent({ allMyRentDataArray }) {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const NUMBER_PER_PAGE = 5;
   const CARD_MARGIN_TOP = "50px";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;
+
+  const [pageIndex, setPageIndex] = React.useState(1);
+  const handlePageIndexChange = (event, value) => {
+    setPageIndex(value);
+  };
 
   function NoContentPage({ message }) {
     return (
@@ -60,20 +66,44 @@ function ListRent({ allMyRentDataArray, pageIndex }) {
         );
       }
 
-      return allMyRentDataArray.map((nftData, idx) => {
-        // console.log("nftData: ", nftData);
-        // console.log("idx: ", idx);
-        // console.log("pageIndex: ", pageIndex);
-        // Check idx is in pagination.
-        // pageIndex.rent starts from 1.
-        // idx starts from 0.
-        if (
-          idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
-          idx < pageIndex * NUMBER_PER_PAGE
-        ) {
-          return <CardRent nftData={nftData} />;
-        }
-      });
+      return (
+        <div>
+          {allMyRentDataArray.map((nftData, idx) => {
+            // console.log("nftData: ", nftData);
+            // console.log("idx: ", idx);
+            // console.log("pageIndex: ", pageIndex);
+            // Check idx is in pagination.
+            // pageIndex.rent starts from 1.
+            // idx starts from 0.
+            if (
+              idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
+              idx < pageIndex * NUMBER_PER_PAGE
+            ) {
+              return <CardRent nftData={nftData} />;
+            }
+          })}
+          <Box sx={{ m: 5 }} display="flex" justifyContent="center">
+            <Pagination
+              count={Math.ceil(allMyRentDataArray.length / NUMBER_PER_PAGE)}
+              page={pageIndex}
+              onChange={handlePageIndexChange}
+              variant="outlined"
+              sx={{
+                padding: "10",
+                ul: {
+                  "& .MuiPaginationItem-root": {
+                    color: "darkgrey",
+                    "&.Mui-selected": {
+                      background: "lightcyan",
+                      color: "darkgrey",
+                    },
+                  },
+                },
+              }}
+            />
+          </Box>
+        </div>
+      );
     },
     [allMyRentDataArray, pageIndex]
   );

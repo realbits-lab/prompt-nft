@@ -675,7 +675,6 @@ function List({ mode }) {
             <ListImage
               allImageDataArray={allImageDataArray}
               getAllIsValidating={getAllIsValidating}
-              pageIndex={pageIndex[mode]}
             />
           </div>
         ) : mode === "nft" ? (
@@ -683,10 +682,7 @@ function List({ mode }) {
             {isWalletConnected() === false ? (
               <NoLoginPage />
             ) : (
-              <ListNft
-                allRegisterDataArray={allRegisterDataArray}
-                pageIndex={pageIndex[mode]}
-              />
+              <ListNft allRegisterDataArray={allRegisterDataArray} />
             )}
           </div>
         ) : mode === "own" ? (
@@ -694,10 +690,7 @@ function List({ mode }) {
             {isWalletConnected() === false ? (
               <NoLoginPage />
             ) : (
-              <ListOwn
-                allMyOwnDataArray={allMyOwnDataArray}
-                pageIndex={pageIndex[mode]}
-              />
+              <ListOwn allMyOwnDataArray={allMyOwnDataArray} />
             )}
           </div>
         ) : mode === "rent" ? (
@@ -705,10 +698,7 @@ function List({ mode }) {
             {isWalletConnected() === false ? (
               <NoLoginPage />
             ) : (
-              <ListRent
-                allMyRentDataArray={allMyRentDataArray}
-                pageIndex={pageIndex[mode]}
-              />
+              <ListRent allMyRentDataArray={allMyRentDataArray} />
             )}
           </div>
         ) : (
@@ -720,27 +710,6 @@ function List({ mode }) {
             />
           </div>
         )}
-
-        <Box sx={{ m: 5 }}>
-          <Pagination
-            count={allPageCount[mode]}
-            page={pageIndex[mode]}
-            onChange={handlePageIndexChange}
-            variant="outlined"
-            sx={{
-              padding: "10",
-              ul: {
-                "& .MuiPaginationItem-root": {
-                  color: "darkgrey",
-                  "&.Mui-selected": {
-                    background: "lightcyan",
-                    color: "darkgrey",
-                  },
-                },
-              },
-            }}
-          />
-        </Box>
 
         <Dialog
           open={openDialog}
