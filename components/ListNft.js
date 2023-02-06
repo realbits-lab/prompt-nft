@@ -9,7 +9,7 @@ import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 
-function ListNft({ allNftDataArray, pageIndex }) {
+function ListNft({ allRegisterDataArray, pageIndex }) {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const NUMBER_PER_PAGE = 5;
   const CARD_MARGIN_TOP = "50px";
@@ -19,16 +19,15 @@ function ListNft({ allNftDataArray, pageIndex }) {
 
   React.useEffect(
     function () {
-      console.log("call useEffect()");
-      console.log("allNftDataArray: ", allNftDataArray);
-      console.log("pageIndex: ", pageIndex);
+      // console.log("call useEffect()");
+      // console.log("allRegisterDataArray: ", allRegisterDataArray);
+      // console.log("pageIndex: ", pageIndex);
     },
-    [allNftDataArray, pageIndex]
+    [allRegisterDataArray, pageIndex]
   );
 
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
-    // console.log("imageUrl: ", imageUrl);
     e.target.onerror = null;
     e.target.src = PLACEHOLDER_IMAGE_URL;
   }
@@ -71,11 +70,11 @@ function ListNft({ allNftDataArray, pageIndex }) {
     function NftCardList(props) {
       console.log("call NftCardList()");
 
-      if (allNftDataArray.length === 0) {
+      if (!allRegisterDataArray || allRegisterDataArray.length === 0) {
         return <NoContentPage message={"No prompt NFT."} />;
       }
 
-      return allNftDataArray.map((nftData, idx) => {
+      return allRegisterDataArray.map((nftData, idx) => {
         // console.log("idx: ", idx);
         // console.log("pageIndex: ", pageIndex);
         //* Check idx is in pagination.
@@ -91,7 +90,7 @@ function ListNft({ allNftDataArray, pageIndex }) {
                 <CardMedia
                   component="img"
                   // width={100}
-                  image={nftData.metadata.image}
+                  // image={nftData.metadata.image}
                   onError={handleCardMediaImageError}
                 />
                 <CardContent>
@@ -108,7 +107,7 @@ function ListNft({ allNftDataArray, pageIndex }) {
                     gutterBottom
                     component="div"
                   >
-                    name: {nftData.metadata.name}
+                    {/* name: {nftData.metadata.name} */}
                   </Typography>
                   <Typography
                     sx={{ fontSize: 14 }}
@@ -116,7 +115,7 @@ function ListNft({ allNftDataArray, pageIndex }) {
                     gutterBottom
                     component="div"
                   >
-                    description: {nftData.metadata.description}
+                    {/* description: {nftData.metadata.description} */}
                   </Typography>
                   <Typography
                     sx={{ fontSize: 14 }}
@@ -182,7 +181,7 @@ function ListNft({ allNftDataArray, pageIndex }) {
         }
       });
     },
-    [allNftDataArray.length, pageIndex]
+    [allRegisterDataArray, pageIndex]
   );
 
   return <NftCardList />;

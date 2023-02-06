@@ -28,7 +28,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { isMobile } from "react-device-detect";
 import { getChainId, getChainName } from "../lib/util";
 import useUser from "../lib/useUser";
-import fetchJson, { FetchError } from "../lib/fetchJson";
+import fetchJson, { FetchError, FetchType } from "../lib/fetchJson";
 //* Copy abi file from rent-market repository.
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
@@ -42,7 +42,18 @@ function List({ mode }) {
   // console.log("call List()");
 
   //*---------------------------------------------------------------------------
-  //* Define constant or hook variables.
+  //* Define constant variables.
+  //*---------------------------------------------------------------------------
+  const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
+  const API_ALL_URL = process.env.NEXT_PUBLIC_API_ALL_URL;
+
+  const CARD_MARGIN_TOP = "50px";
+  const CARD_MAX_WIDTH = 420;
+  const CARD_MIN_WIDTH = 375;
+  const CARD_PADDING = 1;
+
+  //*---------------------------------------------------------------------------
+  //* Define hook variables.
   //*---------------------------------------------------------------------------
   const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
   // console.log("selectedChain: ", selectedChain);
@@ -67,6 +78,30 @@ function List({ mode }) {
     abi: rentmarketABI["abi"],
   });
   // console.log("rentMarketContract: ", rentMarketContract);
+  const {
+    data: allRegisterData,
+    error: getAllRegisterDataError,
+    isLoading: getAllRegisterDataIsLoading,
+  } = useSWR([
+    "getAllRegisterData",
+    FetchType.PROVIDER,
+    rentMarketContract,
+    dataSigner,
+  ]);
+  // console.log("data: ", data);
+  // console.log("getAllRegisterDataError: ", getAllRegisterDataError);
+  // console.log("isLoading: ", isLoading);
+
+  const {
+    data: getAllResult,
+    error: getAllError,
+    isValidating: getAllIsValidating,
+    mutate: getAllMutate,
+  } = useSWR([API_ALL_URL]);
+  // console.log("-- getAllResult: ", getAllResult);
+  // console.log("-- error: ", error);
+  // console.log("-- isValidating: ", isValidating);
+  // console.log("-- mutate: ", mutate);
 
   //*---------------------------------------------------------------------------
   //* Define user login.
@@ -114,31 +149,6 @@ function List({ mode }) {
   const theme = useTheme();
 
   //*---------------------------------------------------------------------------
-  //* Define constant variables.
-  //*---------------------------------------------------------------------------
-  const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
-  const API_ALL_URL = process.env.NEXT_PUBLIC_API_ALL_URL;
-
-  const CARD_MARGIN_TOP = "50px";
-  const CARD_MAX_WIDTH = 420;
-  const CARD_MIN_WIDTH = 375;
-  const CARD_PADDING = 1;
-
-  //*---------------------------------------------------------------------------
-  //* Define fetcher hook.
-  //*---------------------------------------------------------------------------
-  const {
-    data: getAllResult,
-    error,
-    isValidating,
-    mutate,
-  } = useSWR(API_ALL_URL);
-  // console.log("-- getAllResult: ", getAllResult);
-  // console.log("-- error: ", error);
-  // console.log("-- isValidating: ", isValidating);
-  // console.log("-- mutate: ", mutate);
-
-  //*---------------------------------------------------------------------------
   //* Handle snackbar.
   //*---------------------------------------------------------------------------
   const [snackbarMessage, setSnackbarMessage] = React.useState("");
@@ -152,7 +162,7 @@ function List({ mode }) {
   };
 
   //*---------------------------------------------------------------------------
-  //* Other variables.
+  //* Define state variables.
   //*---------------------------------------------------------------------------
   const [allImageDataCount, setAllImageDataCount] = React.useState(0);
   const [allImageDataArray, setAllImageDataArray] = React.useState([]);
@@ -216,7 +226,19 @@ function List({ mode }) {
     if (isWalletConnected() === true) {
       initializeNftData();
     }
-  }, [selectedChain, address, isConnected, dataSigner, promptNftContract]);
+
+    if (allRegisterData) {
+      setAllRegisterDataCount(allRegisterData.allRegisterDataCount);
+      setAllRegisterDataArray(allRegisterData.allRegisterDataArray);
+    }
+  }, [
+    selectedChain,
+    address,
+    isConnected,
+    dataSigner,
+    promptNftContract,
+    allRegisterData,
+  ]);
 
   React.useEffect(
     function () {
@@ -230,9 +252,6 @@ function List({ mode }) {
 
     try {
       //* Get all image prompt and image data.
-      // const getAllResult = await fetchJson(API_ALL_URL);
-      // const getAllResult = data;
-      // console.log("getAllResult: ", getAllResult);
       if (!getAllResult || getAllResult.length === 0) {
         setAllImageDataArray([]);
         setAllImageDataCount(0);
@@ -272,7 +291,7 @@ function List({ mode }) {
     // console.log("call initializeNftData()");
 
     try {
-      //* Get all nft data.
+      //* Get all nft data for metadata.
       const { allNftDataCountResult, allNftDataArrayResult } =
         await getAllNftData();
       // console.log("allNftDataCountResult: ", allNftDataCountResult);
@@ -281,14 +300,14 @@ function List({ mode }) {
       setAllNftDataArray(allNftDataArrayResult.reverse());
 
       //* Get all register data array.
-      const { allRegisterDataCountResult, allRegisterDataArrayResult } =
-        await getAllRegisterData({
-          allNftDataArrayResult: allNftDataArrayResult,
-        });
-      // console.log("allRegisterDataCountResult: ", allRegisterDataCountResult);
-      // console.log("allRegisterDataArrayResult: ", allRegisterDataArrayResult);
-      setAllRegisterDataCount(allRegisterDataCountResult);
-      setAllRegisterDataArray(allRegisterDataArrayResult.reverse());
+      // const { allRegisterDataCountResult, allRegisterDataArrayResult } =
+      //   await getAllRegisterData({
+      //     allNftDataArrayResult: allNftDataArrayResult,
+      //   });
+      // // console.log("allRegisterDataCountResult: ", allRegisterDataCountResult);
+      // // console.log("allRegisterDataArrayResult: ", allRegisterDataArrayResult);
+      // setAllRegisterDataCount(allRegisterDataCountResult);
+      // setAllRegisterDataArray(allRegisterDataArrayResult.reverse());
 
       //* Get all my own data array.
       const { myOwnDataCountResult, myOwnDataArrayResult } =
@@ -436,12 +455,12 @@ function List({ mode }) {
     }
 
     //* Get all nft data from rentmarket contract.
-    const allRegisterDataArray = await rentMarketContract
+    const allRegisterDataResultArray = await rentMarketContract
       .connect(dataSigner)
       .getAllRegisterData();
     // console.log("allRegisterDataArray: ", allRegisterDataArray);
 
-    const allRegisterDataWithMetadataArray = allRegisterDataArray
+    const allRegisterDataWithMetadataArray = allRegisterDataResultArray
       .map((registerElement) => {
         // console.log("registerElement.tokenId: ", registerElement.tokenId);
         const nftDataFoundIndex = allNftDataArrayResult.findIndex(
@@ -593,7 +612,7 @@ function List({ mode }) {
     try {
       //* Check user with public address and receive nonce as to user.
       //* If user does not exist, back-end would add user data.
-      const jsonResult = await fetchJson(`/api/nonce/${publicAddress}`);
+      const jsonResult = await fetchJson([`/api/nonce/${publicAddress}`]);
       // console.log("jsonResult: ", jsonResult);
     } catch (error) {
       setOpenSnackbar(false);
@@ -611,7 +630,7 @@ function List({ mode }) {
     const body = { publicAddress, signature: signMessageResult };
     try {
       mutateUser(
-        await fetchJson("/api/login", {
+        await fetchJson(["/api/login"], {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
@@ -635,7 +654,7 @@ function List({ mode }) {
 
   async function handleLogout({ mutateUser }) {
     try {
-      mutateUser(await fetchJson("/api/logout", { method: "POST" }), false);
+      mutateUser(await fetchJson(["/api/logout"], { method: "POST" }), false);
     } catch (error) {
       if (error instanceof FetchError) {
         console.error(error.data.message);
@@ -655,7 +674,7 @@ function List({ mode }) {
 
   const ImageCardList = React.useCallback(
     function ImageCardList(props) {
-      if (isValidating === true) {
+      if (getAllIsValidating === true) {
         return <LoadingPage />;
       }
 
@@ -704,7 +723,7 @@ function List({ mode }) {
         }
       });
     },
-    [allImageDataArray.length, pageIndex.image, isValidating]
+    [allImageDataArray.length, pageIndex.image, getAllIsValidating]
   );
 
   const OwnCardList = React.useCallback(
@@ -804,7 +823,7 @@ function List({ mode }) {
 
                         //* Get the plain prompt from prompter.
                         const body = { tokenId: nftData.tokenId.toNumber() };
-                        const promptResult = await fetchJson("/api/prompt", {
+                        const promptResult = await fetchJson(["/api/prompt"], {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify(body),
@@ -948,7 +967,7 @@ function List({ mode }) {
 
                       //* Get the prompt.
                       const body = { tokenId: nftData.tokenId.toNumber() };
-                      const promptResult = await fetchJson("/api/prompt", {
+                      const promptResult = await fetchJson(["/api/prompt"], {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(body),
@@ -1139,7 +1158,7 @@ function List({ mode }) {
               <NoLoginPage />
             ) : (
               <ListNft
-                allNftDataArray={allRegisterDataArray}
+                allRegisterDataArray={allRegisterDataArray}
                 pageIndex={pageIndex[mode]}
               />
             )}

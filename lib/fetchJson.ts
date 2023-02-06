@@ -28,15 +28,63 @@ export class FetchError extends Error {
   }
 }
 
+export enum FetchType {
+  URL,
+  PROVIDER,
+}
+
+async function getAllRegisterData({ contract, signer }) {
+  if (!contract || !signer) {
+    console.error("contract or signer is null or undefined.");
+    return {
+      allRegisterDataCount: 0,
+      allRegisterDataArray: [],
+    };
+  }
+
+  //* Get all nft data from rentmarket contract.
+  const allRegisterDataResultArray = await contract
+    .connect(signer)
+    .getAllRegisterData();
+  // console.log("allRegisterDataArray: ", allRegisterDataArray);
+
+  //* Return token data array.
+  return {
+    allRegisterDataCount: allRegisterDataResultArray.length,
+    allRegisterDataArray: allRegisterDataResultArray,
+  };
+}
+
 export default async function fetchJson<JSON = unknown>(
-  input: RequestInfo,
+  [url, type, contract, signer, ...remain]: [RequestInfo, FetchType],
   init?: RequestInit
 ): Promise<JSON> {
-  // console.log("call fetchJson()");
-  // console.log("input: ", input);
+  console.log("call fetchJson()");
+  console.log("url: ", url);
+  console.log("type: ", type);
+  console.log("contract: ", contract);
+  console.log("signer: ", signer);
+  console.log("remain: ", remain);
   // console.log("init: ", init);
 
-  const response = await fetch(input, init);
+  if (type === FetchType.PROVIDER) {
+    switch (url) {
+      case "getAllRegisterData":
+        const getAllRegisterDataResult = await getAllRegisterData({
+          contract: contract,
+          signer: signer,
+        });
+        console.log("getAllRegisterDataResult: ", getAllRegisterDataResult);
+        return getAllRegisterDataResult;
+
+      default:
+        throw new FetchError({
+          message: `Invalid API(${url}) for provider.`,
+        });
+    }
+  }
+
+  const response = await fetch(url, init);
 
   // if the server replies, there's always some data in json
   // if there's a network error, it will throw at the previous line
