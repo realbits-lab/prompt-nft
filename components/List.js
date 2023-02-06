@@ -1160,7 +1160,7 @@ function List({ mode }) {
         />
       );
     },
-    [allRegisterDataArray, pageIndex[mode]]
+    [allRegisterDataArray]
   );
 
   return (

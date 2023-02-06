@@ -27,26 +27,26 @@ function CardNft({ nftData }) {
   //*---------------------------------------------------------------------------
   //* Define hook variables.
   //*---------------------------------------------------------------------------
-  const {
-    data: dataSigner,
-    isError: isErrorSigner,
-    isLoading: isLoadingSigner,
-  } = useSigner();
-  const promptNftContract = useContract({
-    address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-    abi: promptNFTABI["abi"],
-  });
-  const {
-    data: metadataData,
-    error: metadataError,
-    isValidating: metadataIsValidating,
-  } = useSWR([
-    "getMetadata",
-    FetchType.PROVIDER,
-    promptNftContract,
-    dataSigner,
-    nftData.tokenId,
-  ]);
+  // const {
+  //   data: dataSigner,
+  //   isError: isErrorSigner,
+  //   isLoading: isLoadingSigner,
+  // } = useSigner();
+  // const promptNftContract = useContract({
+  //   address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
+  //   abi: promptNFTABI["abi"],
+  // });
+  // const {
+  //   data: metadataData,
+  //   error: metadataError,
+  //   isValidating: metadataIsValidating,
+  // } = useSWR([
+  //   "getMetadata",
+  //   FetchType.PROVIDER,
+  //   promptNftContract,
+  //   dataSigner,
+  //   nftData.tokenId,
+  // ]);
 
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
@@ -55,7 +55,7 @@ function CardNft({ nftData }) {
   }
 
   const CardMetadataCallback = React.useCallback(
-    function ({ metadata }) {
+    function CardMetadataCallback({ metadata }) {
       return (
         <Box
           sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}
@@ -64,7 +64,8 @@ function CardNft({ nftData }) {
           <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
             <CardMedia
               component="img"
-              image={metadata ? metadata.image : ""}
+              // image={metadata ? metadata.image : ""}
+              image={PLACEHOLDER_IMAGE_URL}
               onError={handleCardMediaImageError}
             />
             <CardContent>
@@ -154,7 +155,8 @@ function CardNft({ nftData }) {
     [nftData]
   );
 
-  return <CardMetadataCallback metadata={metadataData} />;
+  // return <CardMetadataCallback metadata={metadataData} />;
+  return <CardMetadataCallback metadata={undefined} />;
   return (
     <Box
       sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}
