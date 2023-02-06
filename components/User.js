@@ -1,4 +1,3 @@
-// import { useMetaMask } from "metamask-react";
 import { useWeb3ModalNetwork } from "@web3modal/react";
 import { useAccount, useSigner } from "wagmi";
 import Button from "@mui/material/Button";
@@ -29,7 +28,7 @@ const User = () => {
 
     // Check user with public address and receive nonce as to user.
     // If user does not exist, back-end would add user data.
-    const jsonResult = await fetchJson(`/api/nonce/${publicAddress}`);
+    const jsonResult = await fetchJson([`/api/nonce/${publicAddress}`]);
     // console.log("jsonResult: ", jsonResult);
 
     // Popup MetaMask confirmation modal to sign message with nonce data.
@@ -86,7 +85,7 @@ const User = () => {
     const body = { publicAddress, signature };
     try {
       mutateUser(
-        await fetchJson("/api/login", {
+        await fetchJson(["/api/login"], {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
@@ -103,7 +102,7 @@ const User = () => {
 
   const handleLogoutClick = async () => {
     try {
-      mutateUser(await fetchJson("/api/logout", { method: "POST" }), false);
+      mutateUser(await fetchJson(["/api/logout"], { method: "POST" }), false);
     } catch (error) {
       if (error instanceof FetchError) {
         console.error(error.data.message);
