@@ -39,7 +39,7 @@ const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
 });
 
 function List({ mode }) {
-  // console.log("call List()");
+  console.log("call List()");
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.
@@ -1130,6 +1130,39 @@ function List({ mode }) {
     [mode]
   );
 
+  const ListNftMemo = React.useMemo(function ListNftMemo(props) {
+    console.log("call ListNftMemo()");
+    console.log("props: ", props);
+    console.log("allRegisterDataArray: ", allRegisterDataArray);
+    console.log("pageIndex: ", pageIndex);
+    console.log("mode: ", mode);
+
+    return (
+      <ListNft
+        // allRegisterDataArray={allRegisterDataArray}
+        allRegisterDataArray={props}
+        pageIndex={pageIndex[mode]}
+      />
+    );
+  });
+
+  const ListNftCallback = React.useCallback(
+    function ListNftCallback({ allRegisterDataArray }) {
+      console.log("call ListNftCallback()");
+      console.log("allRegisterDataArray: ", allRegisterDataArray);
+      console.log("pageIndex: ", pageIndex);
+      console.log("mode: ", mode);
+
+      return (
+        <ListNft
+          allRegisterDataArray={allRegisterDataArray}
+          pageIndex={pageIndex[mode]}
+        />
+      );
+    },
+    [allRegisterDataArray, pageIndex[mode]]
+  );
+
   return (
     <div>
       <Box
@@ -1150,10 +1183,12 @@ function List({ mode }) {
             {isWalletConnected() === false ? (
               <NoLoginPage />
             ) : (
-              <ListNft
-                allRegisterDataArray={allRegisterDataArray}
-                pageIndex={pageIndex[mode]}
-              />
+              // <ListNft
+              //   allRegisterDataArray={allRegisterDataArray}
+              //   pageIndex={pageIndex[mode]}
+              // />
+              <ListNftCallback allRegisterDataArray={allRegisterDataArray} />
+              // {ListNftMemo}
             )}
           </div>
         ) : mode === "own" ? (

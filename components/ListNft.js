@@ -11,7 +11,7 @@ import CardNft from "./CardNft";
 import promptNFTABI from "../contracts/promptNFT.json";
 
 function ListNft({ allRegisterDataArray, pageIndex }) {
-  // console.log("call ListNft()");
+  console.log("call ListNft()");
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.
@@ -47,7 +47,7 @@ function ListNft({ allRegisterDataArray, pageIndex }) {
 
   React.useEffect(
     function () {
-      // console.log("call useEffect()");
+      console.log("call useEffect()");
       // console.log("allRegisterDataArray: ", allRegisterDataArray);
       // console.log("pageIndex: ", pageIndex);
     },
@@ -96,7 +96,7 @@ function ListNft({ allRegisterDataArray, pageIndex }) {
 
   const NftCardList = React.useCallback(
     function NftCardList(props) {
-      // console.log("call NftCardList()");
+      console.log("call NftCardList()");
 
       if (!allRegisterDataArray || allRegisterDataArray.length === 0) {
         return <NoContentPage message={"No prompt NFT."} />;
@@ -117,7 +117,7 @@ function ListNft({ allRegisterDataArray, pageIndex }) {
         }
       });
     },
-    [allRegisterDataArray.length, pageIndex]
+    [allRegisterDataArray, pageIndex]
   );
 
   return <NftCardList />;
