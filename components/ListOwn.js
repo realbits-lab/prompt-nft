@@ -1,5 +1,11 @@
 import React from "react";
-import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
+import {
+  Web3Button,
+  Web3NetworkSwitch,
+  useWeb3ModalNetwork,
+} from "@web3modal/react";
+import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
+import useSWR from "swr";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
@@ -7,6 +13,9 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
+import fetchJson, { FetchError, FetchType } from "../lib/fetchJson";
+import promptNFTABI from "../contracts/promptNFT.json";
+import rentmarketABI from "../contracts/rentMarket.json";
 import CardOwn from "./CardOwn";
 
 function ListOwn({ allMyOwnDataArray }) {
@@ -24,6 +33,43 @@ function ListOwn({ allMyOwnDataArray }) {
   const handlePageIndexChange = (event, value) => {
     setPageIndex(value);
   };
+
+  //*---------------------------------------------------------------------------
+  //* Define hook variables.
+  //*---------------------------------------------------------------------------
+  const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
+  // console.log("selectedChain: ", selectedChain);
+  const { address, isConnected } = useAccount();
+  // console.log("address: ", address);
+  // console.log("isConnected: ", isConnected);
+  const {
+    data: dataSigner,
+    isError: isErrorSigner,
+    isLoading: isLoadingSigner,
+  } = useSigner();
+  // console.log("dataSigner: ", dataSigner);
+  // console.log("isError: ", isError);
+  // console.log("isLoading: ", isLoading);
+  const promptNftContract = useContract({
+    address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
+    abi: promptNFTABI["abi"],
+  });
+  // console.log("promptNftContract: ", promptNftContract);
+  const rentMarketContract = useContract({
+    address: process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS,
+    abi: rentmarketABI["abi"],
+  });
+  // console.log("rentMarketContract: ", rentMarketContract);
+
+  //* Get all my own data array.
+  const { data, error, isLoading } = useSWR([
+    "getAllMyOwnData",
+    FetchType.PROVIDER,
+    promptNftContract,
+    dataSigner,
+    undefined,
+    address,
+  ]);
 
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
@@ -67,7 +113,8 @@ function ListOwn({ allMyOwnDataArray }) {
 
   const OwnCardList = React.useCallback(
     function OwnCardList() {
-      if (allMyOwnDataArray.length === 0) {
+      // if (allMyOwnDataArray.length === 0) {
+      if (!data) {
         return (
           <NoContentPage message={"You do not have any image prompt NFT."} />
         );
@@ -75,7 +122,7 @@ function ListOwn({ allMyOwnDataArray }) {
 
       return (
         <div>
-          {allMyOwnDataArray.map((nftData, idx) => {
+          {data.myOwnDataArrayResult.map((nftData, idx) => {
             // console.log("nftData: ", nftData);
             // console.log("idx: ", idx);
             // console.log("pageIndex: ", pageIndex);
@@ -91,7 +138,9 @@ function ListOwn({ allMyOwnDataArray }) {
           })}
           <Box sx={{ m: 5 }} display="flex" justifyContent="center">
             <Pagination
-              count={Math.ceil(allMyOwnDataArray.length / NUMBER_PER_PAGE)}
+              count={Math.ceil(
+                data.myOwnDataArrayResult.length / NUMBER_PER_PAGE
+              )}
               page={pageIndex}
               onChange={handlePageIndexChange}
               variant="outlined"
@@ -112,7 +161,7 @@ function ListOwn({ allMyOwnDataArray }) {
         </div>
       );
     },
-    [allMyOwnDataArray, pageIndex]
+    [data, pageIndex]
   );
 
   return <OwnCardList />;

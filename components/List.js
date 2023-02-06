@@ -78,59 +78,6 @@ function List({ mode }) {
   });
   // console.log("rentMarketContract: ", rentMarketContract);
 
-  //* Get all image data array.
-  const {
-    data: getAllResult,
-    error: getAllError,
-    isValidating: getAllIsValidating,
-    mutate: getAllMutate,
-  } = useSWR([API_ALL_URL]);
-  // console.log("getAllResult: ", getAllResult);
-  // console.log("getAllError: ", getAllError);
-  // console.log("getAllIsValidating: ", getAllIsValidating);
-  // console.log("getAllMutate: ", getAllMutate);
-
-  //* Get all register data array.
-  const {
-    data: allRegisterData,
-    error: getAllRegisterDataError,
-    isLoading: getAllRegisterDataIsLoading,
-  } = useSWR([
-    "getAllRegisterData",
-    FetchType.PROVIDER,
-    rentMarketContract,
-    dataSigner,
-  ]);
-  // console.log("allRegisterData: ", allRegisterData);
-  // console.log("getAllRegisterDataError: ", getAllRegisterDataError);
-  // console.log("getAllRegisterDataIsLoading: ", getAllRegisterDataIsLoading);
-
-  //* Get all my own data array.
-  const {
-    data: allMyOwnData,
-    error: getAllMyOwnDataError,
-    isLoading: getAllMyOwnDataIsLoading,
-  } = useSWR([
-    "getAllMyOwnData",
-    FetchType.PROVIDER,
-    promptNftContract,
-    dataSigner,
-    undefined,
-    address,
-  ]);
-
-  //* Get all my rent data array.
-  const {
-    data: allMyRentData,
-    error: getAllMyRentDataError,
-    isLoading: getAllMyRentDataIsLoading,
-  } = useSWR([
-    "getAllMyRentData",
-    FetchType.PROVIDER,
-    promptNftContract,
-    dataSigner,
-  ]);
-
   //*---------------------------------------------------------------------------
   //* Define user login.
   //*---------------------------------------------------------------------------
@@ -192,102 +139,12 @@ function List({ mode }) {
   //*---------------------------------------------------------------------------
   //* Define state variables.
   //*---------------------------------------------------------------------------
-  const [allImageDataCount, setAllImageDataCount] = React.useState(0);
-  const [allImageDataArray, setAllImageDataArray] = React.useState([]);
-
-  const [allMyRentDataCount, setAllMyRentDataCount] = React.useState(0);
-  const [allMyRentDataArray, setAllMyRentDataArray] = React.useState([]);
-
-  const [allMyOwnDataCount, setAllMyOwnDataCount] = React.useState(0);
-  const [allMyOwnDataArray, setAllMyOwnDataArray] = React.useState([]);
-
   const [decryptedPrompt, setDecryptedPrompt] = React.useState("");
 
   //*---------------------------------------------------------------------------
   //* For dialog.
   //*---------------------------------------------------------------------------
   const [openDialog, setOpenDialog] = React.useState(false);
-
-  //* TODO: Check the multiple calls.
-  React.useEffect(() => {
-    // console.log("call useEffect()");
-    // console.log("mode: ", mode);
-    // console.log("selectedChain: ", selectedChain);
-    // console.log("address: ", address);
-    // console.log("isConnected: ", isConnected);
-    // console.log("dataSigner: ", dataSigner);
-    // console.log("promptNftContract: ", promptNftContract);
-
-    if (isWalletConnected() === true) {
-      initializeNftData();
-    }
-  }, [
-    selectedChain,
-    address,
-    isConnected,
-    dataSigner,
-    promptNftContract,
-    allRegisterData,
-  ]);
-
-  React.useEffect(
-    function () {
-      initializeImageData();
-    },
-    [getAllResult]
-  );
-
-  async function initializeImageData() {
-    // console.log("call initializeImageData()");
-
-    try {
-      //* Get all image prompt and image data.
-      if (!getAllResult || getAllResult.length === 0) {
-        setAllImageDataArray([]);
-        setAllImageDataCount(0);
-        return;
-      }
-
-      setAllImageDataArray(getAllResult.data);
-      setAllImageDataCount(getAllResult.data.length);
-      // console.log(
-      //   "allUnencyptedPromptImages.data.length: ",
-      //   allUnencyptedPromptImages.data.length
-      // );
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async function initializeNftData() {
-    // console.log("call initializeNftData()");
-
-    try {
-      //* Get all my own data array.
-      const { myOwnDataCountResult, myOwnDataArrayResult } =
-        await getAllMyOwnData({
-          owner: address,
-          // allNftDataArrayResult: allNftDataArrayResult,
-        });
-      // console.log("myOwnDataCountResult: ", myOwnDataCountResult);
-      // console.log("myOwnDataArrayResult: ", myOwnDataArrayResult);
-      setAllMyOwnDataCount(myOwnDataCountResult);
-      setAllMyOwnDataArray(myOwnDataArrayResult.reverse());
-
-      //* Get all my rent data array.
-      const { myRentDataCountResult, myRentDataArrayResult } =
-        await getAllMyRentData({
-          myAccount: address,
-          // allNftDataArrayResult: allNftDataArrayResult,
-        });
-      // console.log("myRentDataCountResult: ", myRentDataCountResult);
-      // console.log("myRentDataArrayResult: ", myRentDataArrayResult);
-      setAllMyRentDataCount(myRentDataCountResult);
-      setAllMyRentDataArray(myRentDataArrayResult.reverse());
-    } catch (error) {
-      throw error;
-    }
-  }
 
   async function decryptData({ encryptData, decryptAddress }) {
     // console.log("call decyptData()");
@@ -562,10 +419,7 @@ function List({ mode }) {
       >
         {mode === "image" ? (
           <div>
-            <ListImage
-              allImageDataArray={allImageDataArray}
-              getAllIsValidating={getAllIsValidating}
-            />
+            <ListImage />
           </div>
         ) : mode === "nft" ? (
           <div>
@@ -573,26 +427,15 @@ function List({ mode }) {
           </div>
         ) : mode === "own" ? (
           <div>
-            {isWalletConnected() === false ? (
-              <NoLoginPage />
-            ) : (
-              <ListOwn allMyOwnDataArray={allMyOwnDataArray} />
-            )}
+            {isWalletConnected() === false ? <NoLoginPage /> : <ListOwn />}
           </div>
         ) : mode === "rent" ? (
           <div>
-            {isWalletConnected() === false ? (
-              <NoLoginPage />
-            ) : (
-              <ListRent allMyRentDataArray={allMyRentDataArray} />
-            )}
+            {isWalletConnected() === false ? <NoLoginPage /> : <ListRent />}
           </div>
         ) : (
           <div>
-            <ListImage
-              allImageDataArray={allImageDataArray}
-              getAllIsValidating={getAllIsValidating}
-            />
+            <ListImage />
           </div>
         )}
 

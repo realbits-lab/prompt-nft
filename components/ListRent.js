@@ -1,5 +1,11 @@
 import React from "react";
-import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
+import {
+  Web3Button,
+  Web3NetworkSwitch,
+  useWeb3ModalNetwork,
+} from "@web3modal/react";
+import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
+import useSWR from "swr";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
@@ -7,9 +13,12 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
+import fetchJson, { FetchError, FetchType } from "../lib/fetchJson";
+import promptNFTABI from "../contracts/promptNFT.json";
+import rentmarketABI from "../contracts/rentMarket.json";
 import CardRent from "./CardRent";
 
-function ListRent({ allMyRentDataArray }) {
+function ListRent() {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const NUMBER_PER_PAGE = 5;
   const CARD_MARGIN_TOP = "50px";
@@ -21,6 +30,44 @@ function ListRent({ allMyRentDataArray }) {
   const handlePageIndexChange = (event, value) => {
     setPageIndex(value);
   };
+
+  //*---------------------------------------------------------------------------
+  //* Define hook variables.
+  //*---------------------------------------------------------------------------
+  const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
+  // console.log("selectedChain: ", selectedChain);
+  const { address, isConnected } = useAccount();
+  // console.log("address: ", address);
+  // console.log("isConnected: ", isConnected);
+  const {
+    data: dataSigner,
+    isError: isErrorSigner,
+    isLoading: isLoadingSigner,
+  } = useSigner();
+  // console.log("dataSigner: ", dataSigner);
+  // console.log("isError: ", isError);
+  // console.log("isLoading: ", isLoading);
+  const promptNftContract = useContract({
+    address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
+    abi: promptNFTABI["abi"],
+  });
+  // console.log("promptNftContract: ", promptNftContract);
+  const rentMarketContract = useContract({
+    address: process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS,
+    abi: rentmarketABI["abi"],
+  });
+  // console.log("rentMarketContract: ", rentMarketContract);
+
+  //* Get all my rent data array.
+  const { data, error, isLoading } = useSWR([
+    "getAllMyRentData",
+    FetchType.PROVIDER,
+    rentMarketContract,
+    dataSigner,
+    "",
+    address,
+  ]);
+  console.log("data: ", data);
 
   function NoContentPage({ message }) {
     return (
@@ -58,7 +105,7 @@ function ListRent({ allMyRentDataArray }) {
 
   const RentCardList = React.useCallback(
     function RentCardList(props) {
-      if (allMyRentDataArray.length === 0) {
+      if (!data) {
         return (
           <NoContentPage
             message={"You have not yet rented any image prompt NFT."}
@@ -68,7 +115,7 @@ function ListRent({ allMyRentDataArray }) {
 
       return (
         <div>
-          {allMyRentDataArray.map((nftData, idx) => {
+          {data.myRentDataArrayResult.map((nftData, idx) => {
             // console.log("nftData: ", nftData);
             // console.log("idx: ", idx);
             // console.log("pageIndex: ", pageIndex);
@@ -84,7 +131,9 @@ function ListRent({ allMyRentDataArray }) {
           })}
           <Box sx={{ m: 5 }} display="flex" justifyContent="center">
             <Pagination
-              count={Math.ceil(allMyRentDataArray.length / NUMBER_PER_PAGE)}
+              count={Math.ceil(
+                data.myRentDataArrayResult.length / NUMBER_PER_PAGE
+              )}
               page={pageIndex}
               onChange={handlePageIndexChange}
               variant="outlined"
@@ -105,7 +154,7 @@ function ListRent({ allMyRentDataArray }) {
         </div>
       );
     },
-    [allMyRentDataArray, pageIndex]
+    [data, pageIndex]
   );
 
   return <RentCardList />;

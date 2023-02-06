@@ -103,7 +103,36 @@ async function getAllOwnData({ contract, signer, owner }) {
   };
 }
 
-async function getAllRentData({ contract, signer }) {}
+async function getAllRentData({ contract, signer, renter }) {
+  console.log("call getAllRentData()");
+  console.log("contract: ", contract);
+  console.log("signer: ", signer);
+  console.log("renter: ", renter);
+
+  if (!contract || !signer) {
+    console.error("rentMarketContract or signer is null or undefined.");
+    return {
+      myRentDataCountResult: 0,
+      myRentDataArrayResult: [],
+    };
+  }
+
+  const allRentDataResult = await contract.connect(signer).getAllRentData();
+  console.log("allRentDataResult:", allRentDataResult);
+
+  const allRentDataArrayWithMetadata = allRentDataResult.filter(
+    (rentElement) =>
+      rentElement.renteeAddress.localeCompare(renter, undefined, {
+        sensitivity: "accent",
+      }) === 0
+  );
+
+  // Return all my rent data array.
+  return {
+    myRentDataCountResult: allRentDataArrayWithMetadata.length,
+    myRentDataArrayResult: allRentDataArrayWithMetadata,
+  };
+}
 
 async function getAllRegisterData({ contract, signer }) {
   if (!contract || !signer) {
@@ -128,7 +157,7 @@ async function getAllRegisterData({ contract, signer }) {
 }
 
 export default async function fetchJson<JSON = unknown>(
-  [url, type, contract, signer, tokenId, owner, ...remain]: [
+  [url, type, contract, signer, tokenId, address, ...remain]: [
     RequestInfo,
     FetchType
   ],
@@ -151,6 +180,24 @@ export default async function fetchJson<JSON = unknown>(
         });
         // console.log("getAllRegisterDataResult: ", getAllRegisterDataResult);
         return getAllRegisterDataResult;
+
+      case "getAllMyOwnData":
+        const getAllMyOwnDataResult = await getAllOwnData({
+          contract: contract,
+          signer: signer,
+          owner: address,
+        });
+        console.log("getAllMyOwnDataResult: ", getAllMyOwnDataResult);
+        return getAllMyOwnDataResult;
+
+      case "getAllMyRentData":
+        const getAllMyRentData = await getAllRentData({
+          contract: contract,
+          signer: signer,
+          renter: address,
+        });
+        // console.log("getAllMyRentData: ", getAllMyRentData);
+        return getAllMyRentData;
 
       case "getMetadata":
         // console.log("case getMetadata");
