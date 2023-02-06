@@ -1,7 +1,5 @@
 import React from "react";
 import {
-  Web3Button,
-  Web3NetworkSwitch,
   useWeb3ModalNetwork,
 } from "@web3modal/react";
 import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
@@ -15,7 +13,6 @@ import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
-import fetchJson, { FetchError, FetchType } from "../lib/fetchJson";
 import CardImage from "./CardImage";
 
 function ListImage() {
@@ -132,8 +129,6 @@ function ListImage() {
           />
         );
       }
-
-      console.log("data:", data);
 
       return (
         <div>

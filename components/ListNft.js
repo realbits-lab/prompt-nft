@@ -15,7 +15,7 @@ import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
-import fetchJson, { FetchError, FetchType } from "../lib/fetchJson";
+import { FetchType } from "../lib/fetchJson";
 import CardNft from "./CardNft";
 
 function ListNft() {
@@ -107,7 +107,7 @@ function ListNft() {
 
   const NftCardList = React.useCallback(
     function NftCardList(props) {
-      console.log("call NftCardList()");
+      // console.log("call NftCardList()");
 
       if (!data) {
         return <NoContentPage message={"No prompt NFT."} />;

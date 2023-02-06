@@ -5,7 +5,6 @@ import {
   useWeb3ModalNetwork,
 } from "@web3modal/react";
 import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
-import useSWR from "swr";
 import { Buffer } from "buffer";
 import { Base64 } from "js-base64";
 import dynamic from "next/dynamic";
@@ -22,10 +21,9 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
-import { isMobile } from "react-device-detect";
 import { getChainId, getChainName } from "../lib/util";
 import useUser from "../lib/useUser";
-import fetchJson, { FetchError, FetchType } from "../lib/fetchJson";
+import fetchJson, { FetchError } from "../lib/fetchJson";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
 import ListImage from "./ListImage";
@@ -38,13 +36,12 @@ const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
 });
 
 function List({ mode }) {
-  console.log("call List()");
+  // console.log("call List()");
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.
   //*---------------------------------------------------------------------------
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
-  const API_ALL_URL = process.env.NEXT_PUBLIC_API_ALL_URL;
 
   const CARD_MARGIN_TOP = "50px";
   const CARD_MAX_WIDTH = 420;
@@ -80,9 +77,8 @@ function List({ mode }) {
 
   //*---------------------------------------------------------------------------
   //* Define user login.
-  //*---------------------------------------------------------------------------
-  const { user, mutateUser } = useUser();
   //* All properties on a domain are optional
+  //*---------------------------------------------------------------------------
   const domain = {
     chainId: getChainId({
       chainName: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
@@ -165,107 +161,6 @@ function List({ mode }) {
     });
 
     return Base64.decode(decrypt);
-  }
-
-  async function getAllMyOwnData({ owner, allNftDataArrayResult }) {
-    // console.log("call getAllMyOwnData()");
-    // console.log("dataSigner: ", dataSigner);
-
-    //* If no signer, return zero data.
-    if (!promptNftContract || !dataSigner) {
-      //* Return error.
-      return {
-        myOwnDataCountResult: 0,
-        myOwnDataArrayResult: [],
-      };
-    }
-
-    //* Get total supply of prompt nft.
-    const totalSupplyBigNumber = await promptNftContract
-      .connect(dataSigner)
-      .balanceOf(owner);
-    // console.log("totalSupply: ", totalSupply);
-    const totalSupply = totalSupplyBigNumber.toNumber();
-
-    //* Get all metadata per each token as to token uri.
-    let tokenDataArray = [];
-    for (let i = 0; i < totalSupply; i++) {
-      //* Get token id and uri.
-      const tokenId = await promptNftContract
-        .connect(dataSigner)
-        .tokenOfOwnerByIndex(owner, i);
-      // const tokenURI = await promptNftContract
-      //   .connect(dataSigner)
-      //   .tokenURI(tokenId);
-
-      //* Get token metadata from token uri.
-      //* TODO: Make async later.
-      // const fetchResult = await fetch(tokenURI);
-      // const tokenMetadata = await fetchResult.blob();
-      // const metadataJsonTextData = await tokenMetadata.text();
-      // const metadataJsonData = JSON.parse(metadataJsonTextData);
-
-      //* Add token metadata.
-      tokenDataArray.push({
-        tokenId: tokenId,
-        // metadata: metadataJsonData,
-      });
-    }
-    // console.log("tokenURIArray: ", tokenURIArray);
-
-    //* Return token data array.
-    return {
-      myOwnDataCountResult: totalSupply,
-      myOwnDataArrayResult: tokenDataArray,
-    };
-  }
-
-  async function getAllMyRentData({ myAccount, allNftDataArrayResult }) {
-    if (!rentMarketContract || !dataSigner) {
-      console.error("rentMarketContract or signer is null or undefined.");
-      return {
-        myRentDataCountResult: 0,
-        myRentDataArrayResult: [],
-      };
-    }
-
-    const allRentDataResult = await rentMarketContract
-      .connect(dataSigner)
-      .getAllRentData();
-
-    const allRentDataArrayWithMetadata = allRentDataResult.filter(
-      (rentElement) =>
-        rentElement.renteeAddress.localeCompare(myAccount, undefined, {
-          sensitivity: "accent",
-        }) === 0
-    );
-    // .map((rentElement) => {
-    //   const nftDataFoundIndex = allNftDataArrayResult.findIndex(
-    //     (nftElement) => {
-    //       return rentElement.tokenId.eq(nftElement.tokenId) === true;
-    //     }
-    //   );
-
-    //   if (nftDataFoundIndex !== -1) {
-    //     // Nft should be in register data.
-    //     return {
-    //       tokenId: rentElement.tokenId,
-    //       rentFee: rentElement.rentFee,
-    //       feeTokenAddress: rentElement.feeTokenAddress,
-    //       rentFeeByToken: rentElement.rentFeeByToken,
-    //       rentDuration: rentElement.rentDuration,
-    //       metadata: allNftDataArrayResult[nftDataFoundIndex].metadata,
-    //     };
-    //   }
-    // })
-    // .filter((element) => element !== undefined);
-    // console.log("allRentDataArrayWithMetadata: ", allRentDataArrayWithMetadata);
-
-    // Return all my rent data array.
-    return {
-      myRentDataCountResult: allRentDataArrayWithMetadata.length,
-      myRentDataArrayResult: allRentDataArrayWithMetadata,
-    };
   }
 
   async function handleLogin({ mutateUser, address, chainId }) {

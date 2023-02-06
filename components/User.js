@@ -1,4 +1,3 @@
-// import { useMetaMask } from "metamask-react";
 import { useWeb3ModalNetwork } from "@web3modal/react";
 import { useAccount, useSigner } from "wagmi";
 import Button from "@mui/material/Button";

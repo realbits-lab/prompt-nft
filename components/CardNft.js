@@ -14,7 +14,7 @@ import rentmarketABI from "../contracts/rentMarket.json";
 import { FetchType } from "../lib/fetchJson";
 
 function CardNft({ nftData }) {
-  console.log("call CardNft()");
+  // console.log("call CardNft()");
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.

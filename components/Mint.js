@@ -1,10 +1,6 @@
 import * as React from "react";
 import { ethers } from "ethers";
-import {
-  Web3Button,
-  Web3NetworkSwitch,
-  useWeb3ModalNetwork,
-} from "@web3modal/react";
+import { useWeb3ModalNetwork } from "@web3modal/react";
 import { useAccount, useSigner, useContract } from "wagmi";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { isMobile } from "react-device-detect";
@@ -15,7 +11,6 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
@@ -101,9 +96,9 @@ function Mint({ inputImageUrl, inputPrompt }) {
   const [buttonDisabled, setButtonDisabled] = React.useState(false);
 
   React.useEffect(() => {
-    console.log("call useEffect()");
-    console.log("inputImageUrl: ", inputImageUrl);
-    console.log("inputPrompt: ", inputPrompt);
+    // console.log("call useEffect()");
+    // console.log("inputImageUrl: ", inputImageUrl);
+    // console.log("inputPrompt: ", inputPrompt);
 
     const initialize = async () => {
       if (inputImageUrl !== undefined) {
@@ -232,7 +227,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
   }
 
   function handleCardMediaImageError(e) {
-    console.log("call handleCardMediaImageError()");
+    // console.log("call handleCardMediaImageError()");
     // console.log("imageUrl: ", imageUrl);
 
     e.target.onerror = null;

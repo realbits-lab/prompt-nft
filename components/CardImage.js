@@ -6,7 +6,7 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 
 function CardImage({ imageData }) {
-  console.log("call CardImage()");
+  // console.log("call CardImage()");
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.

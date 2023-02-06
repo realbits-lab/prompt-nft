@@ -4,7 +4,7 @@ import {
   Web3NetworkSwitch,
   useWeb3ModalNetwork,
 } from "@web3modal/react";
-import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
+import { useAccount, useSigner, useContract } from "wagmi";
 import useSWR from "swr";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -13,7 +13,7 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
-import fetchJson, { FetchError, FetchType } from "../lib/fetchJson";
+import { FetchType } from "../lib/fetchJson";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
 import CardRent from "./CardRent";
@@ -67,7 +67,7 @@ function ListRent() {
     "",
     address,
   ]);
-  console.log("data: ", data);
+  // console.log("data: ", data);
 
   function NoContentPage({ message }) {
     return (
