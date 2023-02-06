@@ -25,12 +25,6 @@ function ListNft({ allRegisterDataArray, pageIndex }) {
     [allRegisterDataArray, pageIndex]
   );
 
-  function handleCardMediaImageError(e) {
-    // console.log("call handleCardMediaImageError()");
-    e.target.onerror = null;
-    e.target.src = PLACEHOLDER_IMAGE_URL;
-  }
-
   function NoContentPage({ message }) {
     return (
       <Box

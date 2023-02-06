@@ -296,7 +296,7 @@ function List({ mode }) {
       const { myOwnDataCountResult, myOwnDataArrayResult } =
         await getAllMyOwnData({
           owner: address,
-          allNftDataArrayResult: allNftDataArrayResult,
+          // allNftDataArrayResult: allNftDataArrayResult,
         });
       // console.log("myOwnDataCountResult: ", myOwnDataCountResult);
       // console.log("myOwnDataArrayResult: ", myOwnDataArrayResult);
@@ -307,7 +307,7 @@ function List({ mode }) {
       const { myRentDataCountResult, myRentDataArrayResult } =
         await getAllMyRentData({
           myAccount: address,
-          allNftDataArrayResult: allNftDataArrayResult,
+          // allNftDataArrayResult: allNftDataArrayResult,
         });
       // console.log("myRentDataCountResult: ", myRentDataCountResult);
       // console.log("myRentDataArrayResult: ", myRentDataArrayResult);
@@ -446,21 +446,21 @@ function List({ mode }) {
       const tokenId = await promptNftContract
         .connect(dataSigner)
         .tokenOfOwnerByIndex(owner, i);
-      const tokenURI = await promptNftContract
-        .connect(dataSigner)
-        .tokenURI(tokenId);
+      // const tokenURI = await promptNftContract
+      //   .connect(dataSigner)
+      //   .tokenURI(tokenId);
 
       //* Get token metadata from token uri.
       //* TODO: Make async later.
-      const fetchResult = await fetch(tokenURI);
-      const tokenMetadata = await fetchResult.blob();
-      const metadataJsonTextData = await tokenMetadata.text();
-      const metadataJsonData = JSON.parse(metadataJsonTextData);
+      // const fetchResult = await fetch(tokenURI);
+      // const tokenMetadata = await fetchResult.blob();
+      // const metadataJsonTextData = await tokenMetadata.text();
+      // const metadataJsonData = JSON.parse(metadataJsonTextData);
 
       //* Add token metadata.
       tokenDataArray.push({
         tokenId: tokenId,
-        metadata: metadataJsonData,
+        // metadata: metadataJsonData,
       });
     }
     // console.log("tokenURIArray: ", tokenURIArray);
@@ -485,33 +485,32 @@ function List({ mode }) {
       .connect(dataSigner)
       .getAllRentData();
 
-    const allRentDataArrayWithMetadata = allRentDataResult
-      .filter(
-        (rentElement) =>
-          rentElement.renteeAddress.localeCompare(myAccount, undefined, {
-            sensitivity: "accent",
-          }) === 0
-      )
-      .map((rentElement) => {
-        const nftDataFoundIndex = allNftDataArrayResult.findIndex(
-          (nftElement) => {
-            return rentElement.tokenId.eq(nftElement.tokenId) === true;
-          }
-        );
+    const allRentDataArrayWithMetadata = allRentDataResult.filter(
+      (rentElement) =>
+        rentElement.renteeAddress.localeCompare(myAccount, undefined, {
+          sensitivity: "accent",
+        }) === 0
+    );
+    // .map((rentElement) => {
+    //   const nftDataFoundIndex = allNftDataArrayResult.findIndex(
+    //     (nftElement) => {
+    //       return rentElement.tokenId.eq(nftElement.tokenId) === true;
+    //     }
+    //   );
 
-        if (nftDataFoundIndex !== -1) {
-          // Nft should be in register data.
-          return {
-            tokenId: rentElement.tokenId,
-            rentFee: rentElement.rentFee,
-            feeTokenAddress: rentElement.feeTokenAddress,
-            rentFeeByToken: rentElement.rentFeeByToken,
-            rentDuration: rentElement.rentDuration,
-            metadata: allNftDataArrayResult[nftDataFoundIndex].metadata,
-          };
-        }
-      })
-      .filter((element) => element !== undefined);
+    //   if (nftDataFoundIndex !== -1) {
+    //     // Nft should be in register data.
+    //     return {
+    //       tokenId: rentElement.tokenId,
+    //       rentFee: rentElement.rentFee,
+    //       feeTokenAddress: rentElement.feeTokenAddress,
+    //       rentFeeByToken: rentElement.rentFeeByToken,
+    //       rentDuration: rentElement.rentDuration,
+    //       metadata: allNftDataArrayResult[nftDataFoundIndex].metadata,
+    //     };
+    //   }
+    // })
+    // .filter((element) => element !== undefined);
     // console.log("allRentDataArrayWithMetadata: ", allRentDataArrayWithMetadata);
 
     // Return all my rent data array.
@@ -647,127 +646,6 @@ function List({ mode }) {
       });
     },
     [allImageDataArray.length, pageIndex.image, getAllIsValidating]
-  );
-
-  const RentCardList = React.useCallback(
-    function RentCardList(props) {
-      if (allMyRentDataArray.length === 0) {
-        return (
-          <NoContentPage
-            message={"You have not yet rented any image prompt NFT."}
-          />
-        );
-      }
-
-      return allMyRentDataArray.map((nftData, idx) => {
-        // console.log("nftData: ", nftData);
-        // console.log("idx: ", idx);
-        // console.log("pageIndex.rent: ", pageIndex.rent);
-        // Check idx is in pagination.
-        // pageIndex.rent starts from 1.
-        // idx starts from 0.
-        if (
-          idx >= (pageIndex.rent - 1) * NUMBER_PER_PAGE &&
-          idx < pageIndex.rent * NUMBER_PER_PAGE
-        ) {
-          return (
-            <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }} key={idx}>
-              <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-                <CardMedia
-                  component="img"
-                  image={nftData.metadata.image}
-                  onError={handleCardMediaImageError}
-                />
-                <CardContent>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                  >
-                    token id: {nftData.tokenId.toNumber()}
-                  </Typography>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                    component="div"
-                  >
-                    name: {nftData.metadata.name}
-                  </Typography>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                    component="div"
-                  >
-                    description: {nftData.metadata.description}
-                  </Typography>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                    component="div"
-                  >
-                    rent fee: {nftData.rentFee / Math.pow(10, 18)} matic
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <Button
-                    size="small"
-                    onClick={async function () {
-                      //* Check the wallet connection.
-                      if (mode === "rent" && isWalletConnected() === false) {
-                        // console.log("chainName: ", getChainName({ chainId }));
-                        setSnackbarSeverity("warning");
-                        setSnackbarMessage(
-                          `Change metamask network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
-                        );
-                        setOpenSnackbar(true);
-                        return;
-                      }
-
-                      //* Check user login session.
-                      if (user.isLoggedIn === false) {
-                        try {
-                          await handleLogin({
-                            mutateUser: mutateUser,
-                            address: address,
-                            chainId: selectedChain.id,
-                          });
-                        } catch (error) {
-                          console.error(error);
-                          return;
-                        }
-                      }
-
-                      //* Get the prompt.
-                      const body = { tokenId: nftData.tokenId.toNumber() };
-                      const promptResult = await fetchJson(["/api/prompt"], {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(body),
-                      });
-                      // console.log("promptResult:", promptResult);
-                      const decodedPrompt = Base64.decode(
-                        promptResult.prompt
-                      ).toString();
-                      // console.log("decodedPrompt:", decodedPrompt);
-
-                      //* Show the prompt dialog
-                      setDecryptedPrompt(decodedPrompt);
-                      setOpenDialog(true);
-                    }}
-                  >
-                    PROMPT
-                  </Button>
-                </CardActions>
-              </Card>
-            </Box>
-          );
-        }
-      });
-    },
-    [allMyRentDataArray.length, pageIndex.rent]
   );
 
   function isWalletConnected() {
@@ -951,7 +829,14 @@ function List({ mode }) {
           </div>
         ) : mode === "rent" ? (
           <div>
-            {isWalletConnected() === false ? <NoLoginPage /> : <RentCardList />}
+            {isWalletConnected() === false ? (
+              <NoLoginPage />
+            ) : (
+              <ListRent
+                allMyRentDataArray={allMyRentDataArray}
+                pageIndex={pageIndex[mode]}
+              />
+            )}
           </div>
         ) : (
           <div>
