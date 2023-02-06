@@ -20,10 +20,6 @@ function ListOwn({ allMyOwnDataArray, pageIndex }) {
   const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;
 
-  if (allMyOwnDataArray.length === 0) {
-    return <NoContentPage message={"You do not have any image prompt NFT."} />;
-  }
-
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
     e.target.onerror = null;
@@ -64,20 +60,33 @@ function ListOwn({ allMyOwnDataArray, pageIndex }) {
     );
   }
 
-  return allMyOwnDataArray.map((nftData, idx) => {
-    // console.log("nftData: ", nftData);
-    // console.log("idx: ", idx);
-    // console.log("pageIndex: ", pageIndex);
-    // Check idx is in pagination.
-    // pageIndex.own starts from 1.
-    // idx starts from 0.
-    if (
-      idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
-      idx < pageIndex * NUMBER_PER_PAGE
-    ) {
-      return <CardOwn nftData={nftData} />;
-    }
-  });
+  const OwnCardList = React.useCallback(
+    function OwnCardList() {
+      if (allMyOwnDataArray.length === 0) {
+        return (
+          <NoContentPage message={"You do not have any image prompt NFT."} />
+        );
+      }
+
+      return allMyOwnDataArray.map((nftData, idx) => {
+        // console.log("nftData: ", nftData);
+        // console.log("idx: ", idx);
+        // console.log("pageIndex: ", pageIndex);
+        // Check idx is in pagination.
+        // pageIndex.own starts from 1.
+        // idx starts from 0.
+        if (
+          idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
+          idx < pageIndex * NUMBER_PER_PAGE
+        ) {
+          return <CardOwn nftData={nftData} />;
+        }
+      });
+    },
+    [allMyOwnDataArray, pageIndex]
+  );
+
+  return <OwnCardList />;
 }
 
 export default ListOwn;

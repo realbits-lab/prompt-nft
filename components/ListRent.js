@@ -50,28 +50,35 @@ function ListRent({ allMyRentDataArray, pageIndex }) {
     );
   }
 
-  if (allMyRentDataArray.length === 0) {
-    return (
-      <NoContentPage
-        message={"You have not yet rented any image prompt NFT."}
-      />
-    );
-  }
+  const RentCardList = React.useCallback(
+    function RentCardList(props) {
+      if (allMyRentDataArray.length === 0) {
+        return (
+          <NoContentPage
+            message={"You have not yet rented any image prompt NFT."}
+          />
+        );
+      }
 
-  return allMyRentDataArray.map((nftData, idx) => {
-    // console.log("nftData: ", nftData);
-    // console.log("idx: ", idx);
-    // console.log("pageIndex: ", pageIndex);
-    // Check idx is in pagination.
-    // pageIndex.rent starts from 1.
-    // idx starts from 0.
-    if (
-      idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
-      idx < pageIndex * NUMBER_PER_PAGE
-    ) {
-      return <CardRent nftData={nftData} />;
-    }
-  });
+      return allMyRentDataArray.map((nftData, idx) => {
+        // console.log("nftData: ", nftData);
+        // console.log("idx: ", idx);
+        // console.log("pageIndex: ", pageIndex);
+        // Check idx is in pagination.
+        // pageIndex.rent starts from 1.
+        // idx starts from 0.
+        if (
+          idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
+          idx < pageIndex * NUMBER_PER_PAGE
+        ) {
+          return <CardRent nftData={nftData} />;
+        }
+      });
+    },
+    [allMyRentDataArray, pageIndex]
+  );
+
+  return <RentCardList />;
 }
 
 export default ListRent;
