@@ -33,6 +33,35 @@ export enum FetchType {
   PROVIDER,
 }
 
+async function getMetadata({ tokenId, contract, signer }) {
+  console.log("call getMetadata()");
+  console.log("tokenId: ", tokenId);
+
+  if (!contract || !signer || !tokenId) {
+    console.error("contract or signer is null or undefined.");
+    throw new FetchError({
+      message: `Invalid contract(${contract}) or signer(${signer}) or tokenId(${tokenId}) for provider.`,
+    });
+  }
+
+  try {
+    const tokenURI = await contract
+      .connect(signer)
+      .tokenURI(tokenId.toNumber());
+    console.log("tokenURI: ", tokenURI);
+
+    //* Get token metadata from token uri.
+    const fetchResult = await fetch(tokenURI);
+    const tokenMetadata = await fetchResult.blob();
+    const metadataJsonTextData = await tokenMetadata.text();
+    const metadataJsonData = JSON.parse(metadataJsonTextData);
+
+    return metadataJsonData;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 async function getAllRegisterData({ contract, signer }) {
   if (!contract || !signer) {
     console.error("contract or signer is null or undefined.");
@@ -56,7 +85,7 @@ async function getAllRegisterData({ contract, signer }) {
 }
 
 export default async function fetchJson<JSON = unknown>(
-  [url, type, contract, signer, ...remain]: [RequestInfo, FetchType],
+  [url, type, contract, signer, tokenId, ...remain]: [RequestInfo, FetchType],
   init?: RequestInit
 ): Promise<JSON> {
   console.log("call fetchJson()");
@@ -76,6 +105,15 @@ export default async function fetchJson<JSON = unknown>(
         });
         console.log("getAllRegisterDataResult: ", getAllRegisterDataResult);
         return getAllRegisterDataResult;
+
+      case "getMetadata":
+        const metadata = await getMetadata({
+          contract: contract,
+          signer: signer,
+          tokenId: tokenId,
+        });
+        console.log("metadata: ", metadata);
+        return metadata;
 
       default:
         throw new FetchError({

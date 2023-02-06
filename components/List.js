@@ -78,6 +78,20 @@ function List({ mode }) {
     abi: rentmarketABI["abi"],
   });
   // console.log("rentMarketContract: ", rentMarketContract);
+
+  //* Get all image data array.
+  const {
+    data: getAllResult,
+    error: getAllError,
+    isValidating: getAllIsValidating,
+    mutate: getAllMutate,
+  } = useSWR([API_ALL_URL]);
+  // console.log("getAllResult: ", getAllResult);
+  // console.log("getAllError: ", getAllError);
+  // console.log("getAllIsValidating: ", getAllIsValidating);
+  // console.log("getAllMutate: ", getAllMutate);
+
+  //* Get all register data array.
   const {
     data: allRegisterData,
     error: getAllRegisterDataError,
@@ -88,20 +102,9 @@ function List({ mode }) {
     rentMarketContract,
     dataSigner,
   ]);
-  // console.log("data: ", data);
+  // console.log("allRegisterData: ", allRegisterData);
   // console.log("getAllRegisterDataError: ", getAllRegisterDataError);
-  // console.log("isLoading: ", isLoading);
-
-  const {
-    data: getAllResult,
-    error: getAllError,
-    isValidating: getAllIsValidating,
-    mutate: getAllMutate,
-  } = useSWR([API_ALL_URL]);
-  // console.log("-- getAllResult: ", getAllResult);
-  // console.log("-- error: ", error);
-  // console.log("-- isValidating: ", isValidating);
-  // console.log("-- mutate: ", mutate);
+  // console.log("getAllRegisterDataIsLoading: ", getAllRegisterDataIsLoading);
 
   //*---------------------------------------------------------------------------
   //* Define user login.
@@ -298,16 +301,6 @@ function List({ mode }) {
       // console.log("allNftDataArrayResult: ", allNftDataArrayResult);
       setAllNftDataCount(allNftDataCountResult);
       setAllNftDataArray(allNftDataArrayResult.reverse());
-
-      //* Get all register data array.
-      // const { allRegisterDataCountResult, allRegisterDataArrayResult } =
-      //   await getAllRegisterData({
-      //     allNftDataArrayResult: allNftDataArrayResult,
-      //   });
-      // // console.log("allRegisterDataCountResult: ", allRegisterDataCountResult);
-      // // console.log("allRegisterDataArrayResult: ", allRegisterDataArrayResult);
-      // setAllRegisterDataCount(allRegisterDataCountResult);
-      // setAllRegisterDataArray(allRegisterDataArrayResult.reverse());
 
       //* Get all my own data array.
       const { myOwnDataCountResult, myOwnDataArrayResult } =
