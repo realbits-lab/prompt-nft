@@ -14,6 +14,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
+import CardImage from "./CardImage";
 
 function ListImage({ allImageDataArray, getAllIsValidating }) {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
@@ -108,32 +109,7 @@ function ListImage({ allImageDataArray, getAllIsValidating }) {
               idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
               idx < pageIndex * NUMBER_PER_PAGE
             ) {
-              return (
-                <Box
-                  sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}
-                  key={idx}
-                >
-                  <Card
-                    sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}
-                  >
-                    <CardMedia
-                      component="img"
-                      image={imageData.imageUrl}
-                      onError={handleCardMediaImageError}
-                    />
-                    <CardContent>
-                      <Typography
-                        sx={{ fontSize: 14 }}
-                        color="text.secondary"
-                        gutterBottom
-                        component="div"
-                      >
-                        {imageData.prompt}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Box>
-              );
+              return <CardImage imageData={imageData} />;
             }
           })}
           <Box sx={{ m: 5 }} display="flex" justifyContent="center">
