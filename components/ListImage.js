@@ -1,7 +1,5 @@
 import React from "react";
-import {
-  useWeb3ModalNetwork,
-} from "@web3modal/react";
+import { useWeb3ModalNetwork } from "@web3modal/react";
 import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
 import useSWR from "swr";
 import Box from "@mui/material/Box";
@@ -132,21 +130,7 @@ function ListImage() {
 
       return (
         <div>
-          {data.data.map((imageData, idx) => {
-            // console.log("idx: ", idx);
-            // console.log("pageIndex.image: ", pageIndex.image);
-            // console.log("imageData: ", imageData);
-            // Check idx is in pagination.
-            // pageIndex.image starts from 1.
-            // idx starts from 0.
-            if (
-              idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
-              idx < pageIndex * NUMBER_PER_PAGE
-            ) {
-              return <CardImage imageData={imageData} />;
-            }
-          })}
-          <Box sx={{ m: 5 }} display="flex" justifyContent="center">
+          <Box sx={{ marginTop: 10 }} display="flex" justifyContent="center">
             <Pagination
               count={Math.ceil(data.data.length / NUMBER_PER_PAGE)}
               page={pageIndex}
@@ -166,6 +150,20 @@ function ListImage() {
               }}
             />
           </Box>
+          {data.data.map((imageData, idx) => {
+            // console.log("idx: ", idx);
+            // console.log("pageIndex.image: ", pageIndex.image);
+            // console.log("imageData: ", imageData);
+            // Check idx is in pagination.
+            // pageIndex.image starts from 1.
+            // idx starts from 0.
+            if (
+              idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
+              idx < pageIndex * NUMBER_PER_PAGE
+            ) {
+              return <CardImage imageData={imageData} />;
+            }
+          })}
         </div>
       );
     },

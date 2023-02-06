@@ -8,6 +8,7 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import Skeleton from "@mui/material/Skeleton";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
 import { FetchType } from "../lib/fetchJson";
@@ -64,11 +65,19 @@ function CardRent({ nftData }) {
   return (
     <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}>
       <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-        <CardMedia
-          component="img"
-          image={metadataData ? metadataData.image : ""}
-          onError={handleCardMediaImageError}
-        />
+        {metadataData ? (
+          <CardMedia
+            component="img"
+            image={metadataData ? metadataData.image : ""}
+            onError={handleCardMediaImageError}
+          />
+        ) : (
+          <Skeleton
+            variant="rounded"
+            width={CARD_MIN_WIDTH}
+            height={CARD_MIN_WIDTH}
+          />
+        )}
         <CardContent>
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
             token id: {nftData.tokenId.toNumber()}

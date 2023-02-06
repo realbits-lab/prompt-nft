@@ -13,6 +13,7 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
+import CircularProgress from "@mui/material/CircularProgress";
 import { FetchType } from "../lib/fetchJson";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
@@ -67,7 +68,23 @@ function ListRent() {
     "",
     address,
   ]);
-  // console.log("data: ", data);
+
+  function LoadingPage() {
+    return (
+      <Box
+        sx={{
+          "& .MuiTextField-root": { m: 1, width: "25ch" },
+        }}
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+      >
+        <CircularProgress sx={{ width: "50vw" }} />
+      </Box>
+    );
+  }
 
   function NoContentPage({ message }) {
     return (
@@ -105,6 +122,10 @@ function ListRent() {
 
   const RentCardList = React.useCallback(
     function RentCardList(props) {
+      if (isLoading === true) {
+        return <LoadingPage />;
+      }
+
       if (!data) {
         return (
           <NoContentPage
@@ -115,21 +136,7 @@ function ListRent() {
 
       return (
         <div>
-          {data.myRentDataArrayResult.map((nftData, idx) => {
-            // console.log("nftData: ", nftData);
-            // console.log("idx: ", idx);
-            // console.log("pageIndex: ", pageIndex);
-            // Check idx is in pagination.
-            // pageIndex.rent starts from 1.
-            // idx starts from 0.
-            if (
-              idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
-              idx < pageIndex * NUMBER_PER_PAGE
-            ) {
-              return <CardRent nftData={nftData} />;
-            }
-          })}
-          <Box sx={{ m: 5 }} display="flex" justifyContent="center">
+          <Box sx={{ marginTop: 10 }} display="flex" justifyContent="center">
             <Pagination
               count={Math.ceil(
                 data.myRentDataArrayResult.length / NUMBER_PER_PAGE
@@ -151,6 +158,20 @@ function ListRent() {
               }}
             />
           </Box>
+          {data.myRentDataArrayResult.map((nftData, idx) => {
+            // console.log("nftData: ", nftData);
+            // console.log("idx: ", idx);
+            // console.log("pageIndex: ", pageIndex);
+            // Check idx is in pagination.
+            // pageIndex.rent starts from 1.
+            // idx starts from 0.
+            if (
+              idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
+              idx < pageIndex * NUMBER_PER_PAGE
+            ) {
+              return <CardRent nftData={nftData} />;
+            }
+          })}
         </div>
       );
     },

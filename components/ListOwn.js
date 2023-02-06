@@ -13,6 +13,7 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
+import CircularProgress from "@mui/material/CircularProgress";
 import { FetchType } from "../lib/fetchJson";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
@@ -77,6 +78,23 @@ function ListOwn({ allMyOwnDataArray }) {
     e.target.src = PLACEHOLDER_IMAGE_URL;
   }
 
+  function LoadingPage() {
+    return (
+      <Box
+        sx={{
+          "& .MuiTextField-root": { m: 1, width: "25ch" },
+        }}
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+      >
+        <CircularProgress sx={{ width: "50vw" }} />
+      </Box>
+    );
+  }
+
   function NoContentPage({ message }) {
     return (
       <Box
@@ -113,7 +131,10 @@ function ListOwn({ allMyOwnDataArray }) {
 
   const OwnCardList = React.useCallback(
     function OwnCardList() {
-      // if (allMyOwnDataArray.length === 0) {
+      if (isLoading === true) {
+        return <LoadingPage />;
+      }
+
       if (!data) {
         return (
           <NoContentPage message={"You do not have any image prompt NFT."} />
@@ -122,21 +143,7 @@ function ListOwn({ allMyOwnDataArray }) {
 
       return (
         <div>
-          {data.myOwnDataArrayResult.map((nftData, idx) => {
-            // console.log("nftData: ", nftData);
-            // console.log("idx: ", idx);
-            // console.log("pageIndex: ", pageIndex);
-            // Check idx is in pagination.
-            // pageIndex.own starts from 1.
-            // idx starts from 0.
-            if (
-              idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
-              idx < pageIndex * NUMBER_PER_PAGE
-            ) {
-              return <CardOwn nftData={nftData} />;
-            }
-          })}
-          <Box sx={{ m: 5 }} display="flex" justifyContent="center">
+          <Box sx={{ marginTop: 10 }} display="flex" justifyContent="center">
             <Pagination
               count={Math.ceil(
                 data.myOwnDataArrayResult.length / NUMBER_PER_PAGE
@@ -158,6 +165,20 @@ function ListOwn({ allMyOwnDataArray }) {
               }}
             />
           </Box>
+          {data.myOwnDataArrayResult.map((nftData, idx) => {
+            // console.log("nftData: ", nftData);
+            // console.log("idx: ", idx);
+            // console.log("pageIndex: ", pageIndex);
+            // Check idx is in pagination.
+            // pageIndex.own starts from 1.
+            // idx starts from 0.
+            if (
+              idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
+              idx < pageIndex * NUMBER_PER_PAGE
+            ) {
+              return <CardOwn nftData={nftData} />;
+            }
+          })}
         </div>
       );
     },

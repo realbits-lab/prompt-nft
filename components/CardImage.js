@@ -4,6 +4,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
+import Skeleton from "@mui/material/Skeleton";
 
 function CardImage({ imageData }) {
   // console.log("call CardImage()");
@@ -26,11 +27,19 @@ function CardImage({ imageData }) {
   return (
     <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}>
       <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-        <CardMedia
-          component="img"
-          image={imageData.imageUrl}
-          onError={handleCardMediaImageError}
-        />
+        {imageData ? (
+          <CardMedia
+            component="img"
+            image={imageData ? imageData.imageUrl : ""}
+            onError={handleCardMediaImageError}
+          />
+        ) : (
+          <Skeleton
+            variant="rounded"
+            width={CARD_MIN_WIDTH}
+            height={CARD_MIN_WIDTH}
+          />
+        )}
         <CardContent>
           <Typography
             sx={{ fontSize: 14 }}

@@ -104,10 +104,10 @@ async function getAllOwnData({ contract, signer, owner }) {
 }
 
 async function getAllRentData({ contract, signer, renter }) {
-  console.log("call getAllRentData()");
-  console.log("contract: ", contract);
-  console.log("signer: ", signer);
-  console.log("renter: ", renter);
+  // console.log("call getAllRentData()");
+  // console.log("contract: ", contract);
+  // console.log("signer: ", signer);
+  // console.log("renter: ", renter);
 
   if (!contract || !signer) {
     console.error("rentMarketContract or signer is null or undefined.");
@@ -118,7 +118,7 @@ async function getAllRentData({ contract, signer, renter }) {
   }
 
   const allRentDataResult = await contract.connect(signer).getAllRentData();
-  console.log("allRentDataResult:", allRentDataResult);
+  // console.log("allRentDataResult:", allRentDataResult);
 
   const allRentDataArrayWithMetadata = allRentDataResult.filter(
     (rentElement) =>
@@ -187,7 +187,7 @@ export default async function fetchJson<JSON = unknown>(
           signer: signer,
           owner: address,
         });
-        console.log("getAllMyOwnDataResult: ", getAllMyOwnDataResult);
+        // console.log("getAllMyOwnDataResult: ", getAllMyOwnDataResult);
         return getAllMyOwnDataResult;
 
       case "getAllMyRentData":

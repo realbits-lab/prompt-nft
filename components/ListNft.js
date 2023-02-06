@@ -13,6 +13,7 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
+import CircularProgress from "@mui/material/CircularProgress";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
 import { FetchType } from "../lib/fetchJson";
@@ -71,6 +72,23 @@ function ListNft() {
   // console.log("getAllRegisterDataError: ", getAllRegisterDataError);
   // console.log("getAllRegisterDataIsLoading: ", getAllRegisterDataIsLoading);
 
+  function LoadingPage() {
+    return (
+      <Box
+        sx={{
+          "& .MuiTextField-root": { m: 1, width: "25ch" },
+        }}
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+      >
+        <CircularProgress sx={{ width: "50vw" }} />
+      </Box>
+    );
+  }
+
   function NoContentPage({ message }) {
     return (
       <Box
@@ -108,6 +126,9 @@ function ListNft() {
   const NftCardList = React.useCallback(
     function NftCardList(props) {
       // console.log("call NftCardList()");
+      if (isLoading === true) {
+        return <LoadingPage />;
+      }
 
       if (!data) {
         return <NoContentPage message={"No prompt NFT."} />;
@@ -115,20 +136,7 @@ function ListNft() {
 
       return (
         <div>
-          {data.allRegisterDataArray.map((nftData, idx) => {
-            // console.log("idx: ", idx);
-            // console.log("pageIndex: ", pageIndex);
-            //* Check idx is in pagination.
-            //* pageIndex starts from 1.
-            //* idx starts from 0.
-            if (
-              idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
-              idx < pageIndex * NUMBER_PER_PAGE
-            ) {
-              return <CardNft nftData={nftData} />;
-            }
-          })}
-          <Box sx={{ m: 5 }} display="flex" justifyContent="center">
+          <Box sx={{ marginTop: 10 }} display="flex" justifyContent="center">
             <Pagination
               count={Math.ceil(
                 data.allRegisterDataArray.length / NUMBER_PER_PAGE
@@ -150,6 +158,19 @@ function ListNft() {
               }}
             />
           </Box>
+          {data.allRegisterDataArray.map((nftData, idx) => {
+            // console.log("idx: ", idx);
+            // console.log("pageIndex: ", pageIndex);
+            //* Check idx is in pagination.
+            //* pageIndex starts from 1.
+            //* idx starts from 0.
+            if (
+              idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
+              idx < pageIndex * NUMBER_PER_PAGE
+            ) {
+              return <CardNft nftData={nftData} />;
+            }
+          })}
         </div>
       );
     },
