@@ -8,6 +8,7 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import CardNft from "./CardNft";
 
 function ListNft({ allRegisterDataArray, pageIndex }) {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
@@ -84,6 +85,7 @@ function ListNft({ allRegisterDataArray, pageIndex }) {
           idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
           idx < pageIndex * NUMBER_PER_PAGE
         ) {
+          return <CardNft nftData={nftData} />;
           return (
             <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }} key={idx}>
               <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
@@ -131,7 +133,7 @@ function ListNft({ allRegisterDataArray, pageIndex }) {
                   <Button
                     size="small"
                     onClick={async () => {
-                      if (mode === "nft" && isWalletConnected() === false) {
+                      if (isWalletConnected() === false) {
                         // console.log("chainName: ", getChainName({ chainId }));
                         setSnackbarSeverity("warning");
                         setSnackbarMessage(

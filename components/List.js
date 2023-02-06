@@ -1131,11 +1131,11 @@ function List({ mode }) {
   );
 
   const ListNftMemo = React.useMemo(function ListNftMemo(props) {
-    console.log("call ListNftMemo()");
-    console.log("props: ", props);
-    console.log("allRegisterDataArray: ", allRegisterDataArray);
-    console.log("pageIndex: ", pageIndex);
-    console.log("mode: ", mode);
+    // console.log("call ListNftMemo()");
+    // console.log("props: ", props);
+    // console.log("allRegisterDataArray: ", allRegisterDataArray);
+    // console.log("pageIndex: ", pageIndex);
+    // console.log("mode: ", mode);
 
     return (
       <ListNft
@@ -1148,10 +1148,10 @@ function List({ mode }) {
 
   const ListNftCallback = React.useCallback(
     function ListNftCallback({ allRegisterDataArray }) {
-      console.log("call ListNftCallback()");
-      console.log("allRegisterDataArray: ", allRegisterDataArray);
-      console.log("pageIndex: ", pageIndex);
-      console.log("mode: ", mode);
+      // console.log("call ListNftCallback()");
+      // console.log("allRegisterDataArray: ", allRegisterDataArray);
+      // console.log("pageIndex: ", pageIndex);
+      // console.log("mode: ", mode);
 
       return (
         <ListNft
