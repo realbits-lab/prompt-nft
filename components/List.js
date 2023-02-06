@@ -31,6 +31,7 @@ import useUser from "../lib/useUser";
 import fetchJson, { FetchError, FetchType } from "../lib/fetchJson";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
+import ListImage from "./ListImage";
 import ListNft from "./ListNft";
 import ListOwn from "./ListOwn";
 import ListRent from "./ListRent";
@@ -587,67 +588,6 @@ function List({ mode }) {
     }
   }
 
-  function handleCardMediaImageError(e) {
-    // console.log("call handleCardMediaImageError()");
-    // console.log("imageUrl: ", imageUrl);
-    e.target.onerror = null;
-    e.target.src = PLACEHOLDER_IMAGE_URL;
-  }
-
-  const ImageCardList = React.useCallback(
-    function ImageCardList(props) {
-      if (getAllIsValidating === true) {
-        return <LoadingPage />;
-      }
-
-      if (allImageDataArray.length === 0) {
-        return (
-          <NoContentPage
-            message={
-              "This service is just started. Soon, image list with prompt will be updated."
-            }
-          />
-        );
-      }
-
-      return allImageDataArray.map((imageData, idx) => {
-        // console.log("idx: ", idx);
-        // console.log("pageIndex.image: ", pageIndex.image);
-        // console.log("imageData: ", imageData);
-        // Check idx is in pagination.
-        // pageIndex.image starts from 1.
-        // idx starts from 0.
-        if (
-          idx >= (pageIndex.image - 1) * NUMBER_PER_PAGE &&
-          idx < pageIndex.image * NUMBER_PER_PAGE
-        ) {
-          return (
-            <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }} key={idx}>
-              <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-                <CardMedia
-                  component="img"
-                  image={imageData.imageUrl}
-                  onError={handleCardMediaImageError}
-                />
-                <CardContent>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.secondary"
-                    gutterBottom
-                    component="div"
-                  >
-                    {imageData.prompt}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Box>
-          );
-        }
-      });
-    },
-    [allImageDataArray.length, pageIndex.image, getAllIsValidating]
-  );
-
   function isWalletConnected() {
     // console.log("call isWalletConnected()");
     // console.log("isConnected: ", isConnected);
@@ -719,77 +659,6 @@ function List({ mode }) {
     );
   }
 
-  function LoadingPage() {
-    return (
-      <Box
-        sx={{
-          "& .MuiTextField-root": { m: 1, width: "25ch" },
-        }}
-        display="flex"
-        flexDirection="column"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
-      >
-        {mode !== "image" ? (
-          <Grid container spacing={2} justifyContent="space-around" padding={2}>
-            <Grid item>
-              <Web3Button />
-            </Grid>
-            <Grid item>
-              <Web3NetworkSwitch />
-            </Grid>
-          </Grid>
-        ) : null}
-        <CircularProgress sx={{ width: "50vw" }} />
-      </Box>
-    );
-  }
-
-  const NoContentPage = React.useCallback(
-    function NoContentPage({ message }) {
-      return (
-        <Box
-          sx={{
-            "& .MuiTextField-root": { m: 1, width: "25ch" },
-          }}
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="center"
-          minHeight="100vh"
-        >
-          {mode !== "image" ? (
-            <Grid
-              container
-              spacing={2}
-              justifyContent="space-around"
-              padding={2}
-            >
-              <Grid item>
-                <Web3Button />
-              </Grid>
-              <Grid item>
-                <Web3NetworkSwitch />
-              </Grid>
-            </Grid>
-          ) : null}
-          <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-            <CardMedia component="img" image={PLACEHOLDER_IMAGE_URL} />
-            <CardContent
-              sx={{
-                padding: "10",
-              }}
-            >
-              <Typography variant="h7">{message}</Typography>
-            </CardContent>
-          </Card>
-        </Box>
-      );
-    },
-    [mode]
-  );
-
   return (
     <div>
       <Box
@@ -803,7 +672,11 @@ function List({ mode }) {
       >
         {mode === "image" ? (
           <div>
-            <ImageCardList />
+            <ListImage
+              allImageDataArray={allImageDataArray}
+              getAllIsValidating={getAllIsValidating}
+              pageIndex={pageIndex[mode]}
+            />
           </div>
         ) : mode === "nft" ? (
           <div>
@@ -840,7 +713,11 @@ function List({ mode }) {
           </div>
         ) : (
           <div>
-            <ImageCardList />
+            <ListImage
+              allImageDataArray={allImageDataArray}
+              getAllIsValidating={getAllIsValidating}
+              pageIndex={pageIndex[mode]}
+            />
           </div>
         )}
 
