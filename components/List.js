@@ -13,7 +13,6 @@ import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
@@ -23,8 +22,6 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
-import Pagination from "@mui/material/Pagination";
-import CircularProgress from "@mui/material/CircularProgress";
 import { isMobile } from "react-device-detect";
 import { getChainId, getChainName } from "../lib/util";
 import useUser from "../lib/useUser";
@@ -108,6 +105,32 @@ function List({ mode }) {
   // console.log("getAllRegisterDataError: ", getAllRegisterDataError);
   // console.log("getAllRegisterDataIsLoading: ", getAllRegisterDataIsLoading);
 
+  //* Get all my own data array.
+  const {
+    data: allMyOwnData,
+    error: getAllMyOwnDataError,
+    isLoading: getAllMyOwnDataIsLoading,
+  } = useSWR([
+    "getAllMyOwnData",
+    FetchType.PROVIDER,
+    promptNftContract,
+    dataSigner,
+    undefined,
+    address,
+  ]);
+
+  //* Get all my rent data array.
+  const {
+    data: allMyRentData,
+    error: getAllMyRentDataError,
+    isLoading: getAllMyRentDataIsLoading,
+  } = useSWR([
+    "getAllMyRentData",
+    FetchType.PROVIDER,
+    promptNftContract,
+    dataSigner,
+  ]);
+
   //*---------------------------------------------------------------------------
   //* Define user login.
   //*---------------------------------------------------------------------------
@@ -172,9 +195,6 @@ function List({ mode }) {
   const [allImageDataCount, setAllImageDataCount] = React.useState(0);
   const [allImageDataArray, setAllImageDataArray] = React.useState([]);
 
-  const [allRegisterDataCount, setAllRegisterDataCount] = React.useState(0);
-  const [allRegisterDataArray, setAllRegisterDataArray] = React.useState([]);
-
   const [allMyRentDataCount, setAllMyRentDataCount] = React.useState(0);
   const [allMyRentDataArray, setAllMyRentDataArray] = React.useState([]);
 
@@ -182,33 +202,6 @@ function List({ mode }) {
   const [allMyOwnDataArray, setAllMyOwnDataArray] = React.useState([]);
 
   const [decryptedPrompt, setDecryptedPrompt] = React.useState("");
-
-  //*---------------------------------------------------------------------------
-  //* For pagination.
-  //* Keep each page index per menu (image, nft, own, and rent).
-  //*---------------------------------------------------------------------------
-  const NUMBER_PER_PAGE = 5;
-
-  const [pageIndex, setPageIndex] = React.useState({
-    image: 1,
-    nft: 1,
-    own: 1,
-    rent: 1,
-  });
-  const [allPageCount, setAllPageCount] = React.useState({
-    image: 1,
-    nft: 1,
-    own: 1,
-    rent: 1,
-  });
-  const handlePageIndexChange = (event, value) => {
-    setPageIndex((prevState) => {
-      return {
-        ...prevState,
-        [mode]: value,
-      };
-    });
-  };
 
   //*---------------------------------------------------------------------------
   //* For dialog.
@@ -227,11 +220,6 @@ function List({ mode }) {
 
     if (isWalletConnected() === true) {
       initializeNftData();
-    }
-
-    if (allRegisterData) {
-      setAllRegisterDataCount(allRegisterData.allRegisterDataCount);
-      setAllRegisterDataArray(allRegisterData.allRegisterDataArray);
     }
   }, [
     selectedChain,
@@ -257,13 +245,6 @@ function List({ mode }) {
       if (!getAllResult || getAllResult.length === 0) {
         setAllImageDataArray([]);
         setAllImageDataCount(0);
-        // setAllPageCount(0);
-        setAllPageCount((prevState) => {
-          return {
-            ...prevState,
-            [mode]: 0,
-          };
-        });
         return;
       }
 
@@ -273,17 +254,6 @@ function List({ mode }) {
       //   "allUnencyptedPromptImages.data.length: ",
       //   allUnencyptedPromptImages.data.length
       // );
-
-      //* Get total page count not from useState but variable directly.
-      const totalCount = Math.ceil(getAllResult.data.length / NUMBER_PER_PAGE);
-      // console.log("totalCount: ", totalCount);
-      // console.log("mode: ", mode);
-      setAllPageCount((prevState) => {
-        return {
-          ...prevState,
-          ["image"]: totalCount,
-        };
-      });
     } catch (error) {
       throw error;
     }
@@ -314,35 +284,6 @@ function List({ mode }) {
       // console.log("myRentDataArrayResult: ", myRentDataArrayResult);
       setAllMyRentDataCount(myRentDataCountResult);
       setAllMyRentDataArray(myRentDataArrayResult.reverse());
-
-      //* Get total page count not from useState but variable directly.
-      let allCount = 0;
-      switch (mode) {
-        case "image":
-          allCount = allImageDataCount;
-          break;
-
-        case "nft":
-          allCount = allNftDataCountResult;
-          break;
-
-        case "own":
-          allCount = myOwnDataCountResult;
-          break;
-
-        case "rent":
-          allCount = myRentDataCountResult;
-          break;
-      }
-      const totalCount = Math.ceil(allCount / NUMBER_PER_PAGE);
-      // console.log("totalCount: ", totalCount);
-      // console.log("mode: ", mode);
-      setAllPageCount((prevState) => {
-        return {
-          ...prevState,
-          [mode]: totalCount,
-        };
-      });
     } catch (error) {
       throw error;
     }
@@ -367,57 +308,6 @@ function List({ mode }) {
     });
 
     return Base64.decode(decrypt);
-  }
-
-  async function getAllRegisterData({ allNftDataArrayResult }) {
-    if (!rentMarketContract || !dataSigner) {
-      console.error("rentMarketContract or signer is null or undefined.");
-      return {
-        allRegisterDataCountResult: 0,
-        allRegisterDataArrayResult: [],
-      };
-    }
-
-    //* Get all nft data from rentmarket contract.
-    const allRegisterDataResultArray = await rentMarketContract
-      .connect(dataSigner)
-      .getAllRegisterData();
-    // console.log("allRegisterDataArray: ", allRegisterDataArray);
-
-    const allRegisterDataWithMetadataArray = allRegisterDataResultArray
-      .map((registerElement) => {
-        // console.log("registerElement.tokenId: ", registerElement.tokenId);
-        const nftDataFoundIndex = allNftDataArrayResult.findIndex(
-          (nftElement) => {
-            // console.log("nftElement.tokenId: ", nftElement.tokenId);
-            return registerElement.tokenId.eq(nftElement.tokenId);
-          }
-        );
-        // console.log("nftDataFoundIndex: ", nftDataFoundIndex);
-
-        if (nftDataFoundIndex !== -1) {
-          // Nft should be in register data.
-          return {
-            tokenId: registerElement.tokenId,
-            rentFee: registerElement.rentFee,
-            feeTokenAddress: registerElement.feeTokenAddress,
-            rentFeeByToken: registerElement.rentFeeByToken,
-            rentDuration: registerElement.rentDuration,
-            metadata: allNftDataArrayResult[nftDataFoundIndex].metadata,
-          };
-        }
-      })
-      .filter((element) => element !== undefined);
-    // console.log(
-    //   "allRegisterDataWithMetadataArray: ",
-    //   allRegisterDataWithMetadataArray
-    // );
-
-    //* Return token data array.
-    return {
-      allRegisterDataCountResult: allRegisterDataWithMetadataArray.length,
-      allRegisterDataArrayResult: allRegisterDataWithMetadataArray,
-    };
   }
 
   async function getAllMyOwnData({ owner, allNftDataArrayResult }) {
@@ -679,11 +569,7 @@ function List({ mode }) {
           </div>
         ) : mode === "nft" ? (
           <div>
-            {isWalletConnected() === false ? (
-              <NoLoginPage />
-            ) : (
-              <ListNft allRegisterDataArray={allRegisterDataArray} />
-            )}
+            {isWalletConnected() === false ? <NoLoginPage /> : <ListNft />}
           </div>
         ) : mode === "own" ? (
           <div>
@@ -706,7 +592,6 @@ function List({ mode }) {
             <ListImage
               allImageDataArray={allImageDataArray}
               getAllIsValidating={getAllIsValidating}
-              pageIndex={pageIndex[mode]}
             />
           </div>
         )}

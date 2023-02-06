@@ -62,6 +62,49 @@ async function getMetadata({ tokenId, contract, signer }) {
   }
 }
 
+async function getAllOwnData({ contract, signer, owner }) {
+  // console.log("call getAllMyOwnData()");
+  // console.log("signer: ", signer);
+
+  //* If no signer, return zero data.
+  if (!contract || !signer) {
+    //* Return error.
+    return {
+      myOwnDataCountResult: 0,
+      myOwnDataArrayResult: [],
+    };
+  }
+
+  //* Get total supply of prompt nft.
+  const totalSupplyBigNumber = await contract.connect(signer).balanceOf(owner);
+  // console.log("totalSupply: ", totalSupply);
+  const totalSupply = totalSupplyBigNumber.toNumber();
+
+  //* Get all metadata per each token as to token uri.
+  let tokenDataArray = [];
+  for (let i = 0; i < totalSupply; i++) {
+    //* Get token id and uri.
+    const tokenId = await contract
+      .connect(signer)
+      .tokenOfOwnerByIndex(owner, i);
+
+    //* Add token metadata.
+    tokenDataArray.push({
+      tokenId: tokenId,
+      // metadata: metadataJsonData,
+    });
+  }
+  // console.log("tokenURIArray: ", tokenURIArray);
+
+  //* Return token data array.
+  return {
+    myOwnDataCountResult: totalSupply,
+    myOwnDataArrayResult: tokenDataArray,
+  };
+}
+
+async function getAllRentData({ contract, signer }) {}
+
 async function getAllRegisterData({ contract, signer }) {
   if (!contract || !signer) {
     console.error("contract or signer is null or undefined.");
@@ -85,7 +128,10 @@ async function getAllRegisterData({ contract, signer }) {
 }
 
 export default async function fetchJson<JSON = unknown>(
-  [url, type, contract, signer, tokenId, ...remain]: [RequestInfo, FetchType],
+  [url, type, contract, signer, tokenId, owner, ...remain]: [
+    RequestInfo,
+    FetchType
+  ],
   init?: RequestInit
 ): Promise<JSON> {
   // console.log("call fetchJson()");
