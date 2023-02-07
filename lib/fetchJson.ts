@@ -33,15 +33,23 @@ export enum FetchType {
   PROVIDER,
 }
 
-async function getMetadata({ tokenId, contract, signer }) {
+async function getMetadata({
+  tokenId,
+  contract,
+  signer,
+}: {
+  tokenId: any;
+  contract: any;
+  signer: any;
+}) {
   // console.log("call getMetadata()");
   // console.log("tokenId: ", tokenId);
 
   if (!contract || !signer || !tokenId) {
     console.error("contract or signer is null or undefined.");
-    throw new FetchError({
-      message: `Invalid contract(${contract}) or signer(${signer}) or tokenId(${tokenId}) for provider.`,
-    });
+    throw new Error(
+      `Invalid contract(${contract}) or signer(${signer}) or tokenId(${tokenId}) for provider.`
+    );
   }
 
   try {
@@ -62,7 +70,15 @@ async function getMetadata({ tokenId, contract, signer }) {
   }
 }
 
-async function getAllOwnData({ contract, signer, owner }) {
+async function getAllOwnData({
+  contract,
+  signer,
+  owner,
+}: {
+  contract: any;
+  signer: any;
+  owner: any;
+}) {
   // console.log("call getAllMyOwnData()");
   // console.log("signer: ", signer);
 
@@ -103,7 +119,15 @@ async function getAllOwnData({ contract, signer, owner }) {
   };
 }
 
-async function getAllRentData({ contract, signer, renter }) {
+async function getAllRentData({
+  contract,
+  signer,
+  renter,
+}: {
+  contract: any;
+  signer: any;
+  renter: any;
+}) {
   // console.log("call getAllRentData()");
   // console.log("contract: ", contract);
   // console.log("signer: ", signer);
@@ -121,7 +145,7 @@ async function getAllRentData({ contract, signer, renter }) {
   // console.log("allRentDataResult:", allRentDataResult);
 
   const allRentDataArrayWithMetadata = allRentDataResult.filter(
-    (rentElement) =>
+    (rentElement: any) =>
       rentElement.renteeAddress.localeCompare(renter, undefined, {
         sensitivity: "accent",
       }) === 0
@@ -134,7 +158,13 @@ async function getAllRentData({ contract, signer, renter }) {
   };
 }
 
-async function getAllRegisterData({ contract, signer }) {
+async function getAllRegisterData({
+  contract,
+  signer,
+}: {
+  contract: any;
+  signer: any;
+}) {
   if (!contract || !signer) {
     console.error("contract or signer is null or undefined.");
     return {
@@ -159,10 +189,15 @@ async function getAllRegisterData({ contract, signer }) {
 export default async function fetchJson<JSON = unknown>(
   [url, type, contract, signer, tokenId, address, ...remain]: [
     RequestInfo,
-    FetchType
+    FetchType,
+    any,
+    any,
+    any,
+    any,
+    any
   ],
   init?: RequestInit
-): Promise<JSON> {
+): Promise<any> {
   // console.log("call fetchJson()");
   // console.log("url: ", url);
   // console.log("type: ", type);
@@ -216,9 +251,7 @@ export default async function fetchJson<JSON = unknown>(
         return metadata;
 
       default:
-        throw new FetchError({
-          message: `Invalid API(${url}) for provider.`,
-        });
+        throw new Error(`Invalid API(${url}) for provider.`);
     }
   }
 
