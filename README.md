@@ -24,3 +24,7 @@
 ### PostgreSql connection pool on heroku
 
 - https://devcenter.heroku.com/articles/postgres-connection-pooling
+
+### Custom domain in heroku
+
+- https://devcenter.heroku.com/articles/custom-domains
