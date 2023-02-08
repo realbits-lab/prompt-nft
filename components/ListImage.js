@@ -12,6 +12,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
 import CardImage from "./CardImage";
+import fetchJson from "../lib/fetchJson";
 
 function ListImage() {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
