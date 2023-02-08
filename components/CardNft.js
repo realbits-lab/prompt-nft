@@ -1,5 +1,7 @@
 import React from "react";
-import { useSigner, useContract } from "wagmi";
+import { useWeb3ModalNetwork } from "@web3modal/react";
+import { useSigner, useContract, useAccount } from "wagmi";
+import { isMobile } from "react-device-detect";
 import useSWR from "swr";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -12,6 +14,7 @@ import Skeleton from "@mui/material/Skeleton";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
 import { FetchType } from "../lib/fetchJson";
+import { isWalletConnected } from "../lib/util";
 
 function CardNft({ nftData }) {
   // console.log("call CardNft()");
@@ -28,6 +31,11 @@ function CardNft({ nftData }) {
   //*---------------------------------------------------------------------------
   //* Define hook variables.
   //*---------------------------------------------------------------------------
+  const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
+  // console.log("selectedChain: ", selectedChain);
+  const { address, isConnected } = useAccount();
+  // console.log("address: ", address);
+  // console.log("isConnected: ", isConnected);
   const {
     data: dataSigner,
     isError: isErrorSigner,
@@ -111,7 +119,7 @@ function CardNft({ nftData }) {
           <Button
             size="small"
             onClick={async () => {
-              if (isWalletConnected() === false) {
+              if (isWalletConnected({ isConnected, selectedChain }) === false) {
                 setSnackbarSeverity("warning");
                 setSnackbarMessage(
                   `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`

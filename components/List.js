@@ -5,8 +5,6 @@ import {
   useWeb3ModalNetwork,
 } from "@web3modal/react";
 import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
-import { Buffer } from "buffer";
-import { Base64 } from "js-base64";
 import dynamic from "next/dynamic";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -21,8 +19,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
-import { getChainId, getChainName } from "../lib/util";
-import useUser from "../lib/useUser";
+import { getChainId, isWalletConnected } from "../lib/util";
 import fetchJson, { FetchError } from "../lib/fetchJson";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
@@ -136,32 +133,7 @@ function List({ mode }) {
   //* Define state variables.
   //*---------------------------------------------------------------------------
   const [decryptedPrompt, setDecryptedPrompt] = React.useState("");
-
-  //*---------------------------------------------------------------------------
-  //* For dialog.
-  //*---------------------------------------------------------------------------
   const [openDialog, setOpenDialog] = React.useState(false);
-
-  async function decryptData({ encryptData, decryptAddress }) {
-    // console.log("call decyptData()");
-    // console.log("decryptAddress: ", decryptAddress);
-
-    //* Check input data error.
-    if (!encryptData || !decryptAddress) {
-      return;
-    }
-
-    const ct = `0x${Buffer.from(JSON.stringify(encryptData), "utf8").toString(
-      "hex"
-    )}`;
-
-    const decrypt = await window.ethereum.request({
-      method: "eth_decrypt",
-      params: [ct, decryptAddress],
-    });
-
-    return Base64.decode(decrypt);
-  }
 
   async function handleLogin({ mutateUser, address, chainId }) {
     // console.log("call handleLogin()");
@@ -230,35 +202,35 @@ function List({ mode }) {
     }
   }
 
-  function isWalletConnected() {
-    // console.log("call isWalletConnected()");
-    // console.log("isConnected: ", isConnected);
-    // console.log("selectedChain: ", selectedChain);
-    // if (selectedChain) {
-    //   console.log(
-    //     "getChainName({ chainId: selectedChain.id }): ",
-    //     getChainName({ chainId: selectedChain.id })
-    //   );
-    // }
-    // console.log(
-    //   "getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK }): ",
-    //   getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK })
-    // );
-    if (
-      isConnected === false ||
-      selectedChain === undefined ||
-      getChainName({ chainId: selectedChain.id }) !==
-        getChainName({
-          chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
-        })
-    ) {
-      // console.log("return false");
-      return false;
-    } else {
-      // console.log("return true");
-      return true;
-    }
-  }
+  // function isWalletConnected() {
+  //   // console.log("call isWalletConnected()");
+  //   // console.log("isConnected: ", isConnected);
+  //   // console.log("selectedChain: ", selectedChain);
+  //   // if (selectedChain) {
+  //   //   console.log(
+  //   //     "getChainName({ chainId: selectedChain.id }): ",
+  //   //     getChainName({ chainId: selectedChain.id })
+  //   //   );
+  //   // }
+  //   // console.log(
+  //   //   "getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK }): ",
+  //   //   getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK })
+  //   // );
+  //   if (
+  //     isConnected === false ||
+  //     selectedChain === undefined ||
+  //     getChainName({ chainId: selectedChain.id }) !==
+  //       getChainName({
+  //         chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
+  //       })
+  //   ) {
+  //     // console.log("return false");
+  //     return false;
+  //   } else {
+  //     // console.log("return true");
+  //     return true;
+  //   }
+  // }
 
   function NoLoginPage() {
     // console.log("theme: ", theme);
@@ -318,15 +290,27 @@ function List({ mode }) {
           </div>
         ) : mode === "nft" ? (
           <div>
-            {isWalletConnected() === false ? <NoLoginPage /> : <ListNft />}
+            {isWalletConnected({ isConnected, selectedChain }) === false ? (
+              <NoLoginPage />
+            ) : (
+              <ListNft />
+            )}
           </div>
         ) : mode === "own" ? (
           <div>
-            {isWalletConnected() === false ? <NoLoginPage /> : <ListOwn />}
+            {isWalletConnected({ isConnected, selectedChain }) === false ? (
+              <NoLoginPage />
+            ) : (
+              <ListOwn />
+            )}
           </div>
         ) : mode === "rent" ? (
           <div>
-            {isWalletConnected() === false ? <NoLoginPage /> : <ListRent />}
+            {isWalletConnected({ isConnected, selectedChain }) === false ? (
+              <NoLoginPage />
+            ) : (
+              <ListRent />
+            )}
           </div>
         ) : (
           <div>
