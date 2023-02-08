@@ -1,6 +1,4 @@
 import React from "react";
-import { useWeb3ModalNetwork } from "@web3modal/react";
-import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
 import useSWR from "swr";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -9,10 +7,7 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
-import promptNFTABI from "../contracts/promptNFT.json";
-import rentmarketABI from "../contracts/rentMarket.json";
 import CardImage from "./CardImage";
-import fetchJson from "../lib/fetchJson";
 
 function ListImage({
   selectedChain,

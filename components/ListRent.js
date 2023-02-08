@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  Web3Button,
-  Web3NetworkSwitch,
-  useWeb3ModalNetwork,
-} from "@web3modal/react";
-import { useAccount, useSigner, useContract } from "wagmi";
+import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 import useSWR from "swr";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -15,8 +10,6 @@ import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
 import { FetchType } from "../lib/fetchJson";
-import promptNFTABI from "../contracts/promptNFT.json";
-import rentmarketABI from "../contracts/rentMarket.json";
 import CardRent from "./CardRent";
 
 function ListRent({

@@ -1,6 +1,4 @@
 import React from "react";
-import { useWeb3ModalNetwork } from "@web3modal/react";
-import { useSigner, useContract, useAccount } from "wagmi";
 import { isMobile } from "react-device-detect";
 import useSWR from "swr";
 import Box from "@mui/material/Box";
@@ -16,8 +14,6 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
-import promptNFTABI from "../contracts/promptNFT.json";
-import rentmarketABI from "../contracts/rentMarket.json";
 import { FetchType } from "../lib/fetchJson";
 import { isWalletConnected, decryptData, handleLogin } from "../lib/util";
 

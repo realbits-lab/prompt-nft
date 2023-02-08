@@ -1,6 +1,5 @@
 import React from "react";
 import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
-import { useContract } from "wagmi";
 import useSWR from "swr";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -10,7 +9,6 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
-import promptNFTABI from "../contracts/promptNFT.json";
 import { FetchType } from "../lib/fetchJson";
 import CardNft from "./CardNft";
 
