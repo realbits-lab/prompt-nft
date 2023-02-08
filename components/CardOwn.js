@@ -19,7 +19,7 @@ import DialogActions from "@mui/material/DialogActions";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
 import { FetchType } from "../lib/fetchJson";
-import { isWalletConnected, decryptData } from "../lib/util";
+import { isWalletConnected, decryptData, handleLogin } from "../lib/util";
 
 function CardNft({ nftData }) {
   // console.log("call CardNft()");
@@ -143,6 +143,10 @@ function CardNft({ nftData }) {
               if (isMobile === true) {
                 //* Set user login session.
                 if (user.isLoggedIn === false) {
+                  setSnackbarSeverity("info");
+                  setSnackbarMessage("Checking user authentication...");
+                  setOpenSnackbar(true);
+
                   try {
                     await handleLogin({
                       mutateUser: mutateUser,
@@ -156,6 +160,10 @@ function CardNft({ nftData }) {
                     setOpenSnackbar(true);
                     return;
                   }
+
+                  setOpenSnackbar(false);
+                  setSnackbarMessage("Checking is finished.");
+                  setOpenSnackbar(true);
                 }
 
                 //* Get the plain prompt from prompter.
