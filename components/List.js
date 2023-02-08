@@ -202,36 +202,6 @@ function List({ mode }) {
     }
   }
 
-  // function isWalletConnected() {
-  //   // console.log("call isWalletConnected()");
-  //   // console.log("isConnected: ", isConnected);
-  //   // console.log("selectedChain: ", selectedChain);
-  //   // if (selectedChain) {
-  //   //   console.log(
-  //   //     "getChainName({ chainId: selectedChain.id }): ",
-  //   //     getChainName({ chainId: selectedChain.id })
-  //   //   );
-  //   // }
-  //   // console.log(
-  //   //   "getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK }): ",
-  //   //   getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK })
-  //   // );
-  //   if (
-  //     isConnected === false ||
-  //     selectedChain === undefined ||
-  //     getChainName({ chainId: selectedChain.id }) !==
-  //       getChainName({
-  //         chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
-  //       })
-  //   ) {
-  //     // console.log("return false");
-  //     return false;
-  //   } else {
-  //     // console.log("return true");
-  //     return true;
-  //   }
-  // }
-
   function NoLoginPage() {
     // console.log("theme: ", theme);
     return (
