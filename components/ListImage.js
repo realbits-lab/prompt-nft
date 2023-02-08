@@ -56,9 +56,12 @@ function ListImage() {
   // console.log("rentMarketContract: ", rentMarketContract);
 
   //* Get all image data array.
-  const { data, error, isValidating, mutate } = useSWR([API_ALL_URL]);
-  // console.log("data: ", data);
-  // console.log("isValidating: ", isValidating);
+  const { data, error, isLoading, isValidating, mutate } = useSWR([
+    API_ALL_URL,
+  ]);
+  console.log("data: ", data);
+  console.log("isLoading: ", isLoading);
+  console.log("isValidating: ", isValidating);
 
   function LoadingPage() {
     return (
@@ -112,7 +115,7 @@ function ListImage() {
 
   const ImageCardList = React.useCallback(
     function ImageCardList() {
-      if (!data && isValidating === true) {
+      if (isLoading === true) {
         return <LoadingPage />;
       }
 
@@ -165,7 +168,7 @@ function ListImage() {
         </div>
       );
     },
-    [data, pageIndex, isValidating]
+    [data, pageIndex, isLoading]
   );
 
   return <ImageCardList />;

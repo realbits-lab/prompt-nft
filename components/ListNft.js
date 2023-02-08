@@ -62,15 +62,15 @@ function ListNft() {
   // console.log("rentMarketContract: ", rentMarketContract);
 
   //* Get all register data array.
-  const { data, error, isLoading } = useSWR([
+  const { data, error, isLoading, isValidating } = useSWR([
     "getAllRegisterData",
     FetchType.PROVIDER,
     rentMarketContract,
     dataSigner,
   ]);
-  // console.log("allRegisterData: ", allRegisterData);
-  // console.log("getAllRegisterDataError: ", getAllRegisterDataError);
-  // console.log("getAllRegisterDataIsLoading: ", getAllRegisterDataIsLoading);
+  console.log("data: ", data);
+  console.log("isLoading: ", isLoading);
+  console.log("isValidating: ", isValidating);
 
   function LoadingPage() {
     return (

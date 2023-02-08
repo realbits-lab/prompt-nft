@@ -63,7 +63,7 @@ function ListOwn() {
   // console.log("rentMarketContract: ", rentMarketContract);
 
   //* Get all my own data array.
-  const { data, error, isLoading } = useSWR([
+  const { data, error, isLoading, isValidating } = useSWR([
     "getAllMyOwnData",
     FetchType.PROVIDER,
     promptNftContract,
@@ -71,6 +71,9 @@ function ListOwn() {
     undefined,
     address,
   ]);
+  console.log("data: ", data);
+  console.log("isLoading: ", isLoading);
+  console.log("isValidating: ", isValidating);
 
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");

@@ -60,7 +60,7 @@ function ListRent() {
   // console.log("rentMarketContract: ", rentMarketContract);
 
   //* Get all my rent data array.
-  const { data, error, isLoading } = useSWR([
+  const { data, error, isLoading, isValidating } = useSWR([
     "getAllMyRentData",
     FetchType.PROVIDER,
     rentMarketContract,
@@ -68,6 +68,9 @@ function ListRent() {
     "",
     address,
   ]);
+  console.log("data: ", data);
+  console.log("isLoading: ", isLoading);
+  console.log("isValidating: ", isValidating);
 
   function LoadingPage() {
     return (

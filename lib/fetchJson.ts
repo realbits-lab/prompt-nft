@@ -171,6 +171,7 @@ async function getAllRegisterData({
     console.error(
       "contract or signer is null or undefined in getAllRegisterData."
     );
+    return;
     return {
       allRegisterDataCount: 0,
       allRegisterDataArray: [],
