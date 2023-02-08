@@ -214,11 +214,7 @@ function List({ mode }) {
               <ListRent />
             )}
           </div>
-        ) : (
-          <div>
-            <ListImage />
-          </div>
-        )}
+        ) : null}
 
         <Dialog
           open={openDialog}
