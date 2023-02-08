@@ -161,7 +161,7 @@ function ListImage() {
               idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
               idx < pageIndex * NUMBER_PER_PAGE
             ) {
-              return <CardImage imageData={imageData} />;
+              return <CardImage imageData={imageData} key={idx} />;
             }
           })}
         </div>
