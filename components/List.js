@@ -32,8 +32,8 @@ const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
 });
 
 function List({ mode }) {
-  console.log("call List()");
-  console.log("mode: ", mode);
+  // console.log("call List()");
+  // console.log("mode: ", mode);
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.
@@ -188,14 +188,28 @@ function List({ mode }) {
       >
         {mode === "image" ? (
           <div>
-            <ListImage />
+            <ListImage
+              selectedChain={selectedChain}
+              address={address}
+              isConnected={isConnected}
+              dataSigner={dataSigner}
+              promptNftContract={promptNftContract}
+              rentMarketContract={rentMarketContract}
+            />
           </div>
         ) : mode === "nft" ? (
           <div>
             {isWalletConnected({ isConnected, selectedChain }) === false ? (
               <NoLoginPage />
             ) : (
-              <ListNft />
+              <ListNft
+                selectedChain={selectedChain}
+                address={address}
+                isConnected={isConnected}
+                dataSigner={dataSigner}
+                promptNftContract={promptNftContract}
+                rentMarketContract={rentMarketContract}
+              />
             )}
           </div>
         ) : mode === "own" ? (
@@ -203,7 +217,14 @@ function List({ mode }) {
             {isWalletConnected({ isConnected, selectedChain }) === false ? (
               <NoLoginPage />
             ) : (
-              <ListOwn />
+              <ListOwn
+                selectedChain={selectedChain}
+                address={address}
+                isConnected={isConnected}
+                dataSigner={dataSigner}
+                promptNftContract={promptNftContract}
+                rentMarketContract={rentMarketContract}
+              />
             )}
           </div>
         ) : mode === "rent" ? (
@@ -211,7 +232,14 @@ function List({ mode }) {
             {isWalletConnected({ isConnected, selectedChain }) === false ? (
               <NoLoginPage />
             ) : (
-              <ListRent />
+              <ListRent
+                selectedChain={selectedChain}
+                address={address}
+                isConnected={isConnected}
+                dataSigner={dataSigner}
+                promptNftContract={promptNftContract}
+                rentMarketContract={rentMarketContract}
+              />
             )}
           </div>
         ) : null}

@@ -7,7 +7,7 @@ import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
 
 function CardImage({ imageData }) {
-  console.log("call CardImage()");
+  // console.log("call CardImage()");
   // console.log("imageData: ", imageData);
 
   //*---------------------------------------------------------------------------

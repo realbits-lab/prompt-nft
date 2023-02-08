@@ -75,7 +75,7 @@ function ListPage(props) {
         }}
         sx={{ my: 2, color: "white" }}
         onClick={(e) => {
-          console.log("call onClick()");
+          // console.log("call onClick()");
           setMode(buttonMode);
         }}
       >

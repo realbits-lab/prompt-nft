@@ -14,7 +14,14 @@ import rentmarketABI from "../contracts/rentMarket.json";
 import CardImage from "./CardImage";
 import fetchJson from "../lib/fetchJson";
 
-function ListImage() {
+function ListImage({
+  selectedChain,
+  address,
+  isConnected,
+  dataSigner,
+  promptNftContract,
+  rentMarketContract,
+}) {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const API_ALL_URL = process.env.NEXT_PUBLIC_API_ALL_URL;
   const NUMBER_PER_PAGE = 5;
@@ -29,40 +36,13 @@ function ListImage() {
     setPageIndex(value);
   };
 
-  //*---------------------------------------------------------------------------
-  //* Define hook variables.
-  //*---------------------------------------------------------------------------
-  const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
-  // console.log("selectedChain: ", selectedChain);
-  const { address, isConnected } = useAccount();
-  // console.log("address: ", address);
-  // console.log("isConnected: ", isConnected);
-  const {
-    data: dataSigner,
-    isError: isErrorSigner,
-    isLoading: isLoadingSigner,
-  } = useSigner();
-  // console.log("dataSigner: ", dataSigner);
-  // console.log("isError: ", isError);
-  // console.log("isLoading: ", isLoading);
-  const promptNftContract = useContract({
-    address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-    abi: promptNFTABI["abi"],
-  });
-  // console.log("promptNftContract: ", promptNftContract);
-  const rentMarketContract = useContract({
-    address: process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS,
-    abi: rentmarketABI["abi"],
-  });
-  // console.log("rentMarketContract: ", rentMarketContract);
-
   //* Get all image data array.
   const { data, error, isLoading, isValidating, mutate } = useSWR([
     API_ALL_URL,
   ]);
-  console.log("data: ", data);
-  console.log("isLoading: ", isLoading);
-  console.log("isValidating: ", isValidating);
+  // console.log("data: ", data);
+  // console.log("isLoading: ", isLoading);
+  // console.log("isValidating: ", isValidating);
 
   function LoadingPage() {
     return (

@@ -1,7 +1,4 @@
 import React from "react";
-import { useWeb3ModalNetwork } from "@web3modal/react";
-import { useSigner, useContract, useAccount } from "wagmi";
-import { isMobile } from "react-device-detect";
 import useSWR from "swr";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -11,12 +8,18 @@ import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
-import promptNFTABI from "../contracts/promptNFT.json";
-import rentmarketABI from "../contracts/rentMarket.json";
 import { FetchType } from "../lib/fetchJson";
 import { isWalletConnected } from "../lib/util";
 
-function CardNft({ nftData }) {
+function CardNft({
+  nftData,
+  dataSigner,
+  selectedChain,
+  address,
+  isConnected,
+  rentMarketContract,
+  promptNftContract,
+}) {
   // console.log("call CardNft()");
 
   //*---------------------------------------------------------------------------
@@ -27,30 +30,6 @@ function CardNft({ nftData }) {
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;
-
-  //*---------------------------------------------------------------------------
-  //* Define hook variables.
-  //*---------------------------------------------------------------------------
-  const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
-  // console.log("selectedChain: ", selectedChain);
-  const { address, isConnected } = useAccount();
-  // console.log("address: ", address);
-  // console.log("isConnected: ", isConnected);
-  const {
-    data: dataSigner,
-    isError: isErrorSigner,
-    isLoading: isLoadingSigner,
-  } = useSigner();
-
-  const promptNftContract = useContract({
-    address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-    abi: promptNFTABI["abi"],
-  });
-
-  const rentMarketContract = useContract({
-    address: process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS,
-    abi: rentmarketABI["abi"],
-  });
 
   const {
     data: metadataData,

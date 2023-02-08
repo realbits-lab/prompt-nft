@@ -21,7 +21,15 @@ import rentmarketABI from "../contracts/rentMarket.json";
 import { FetchType } from "../lib/fetchJson";
 import { isWalletConnected, decryptData, handleLogin } from "../lib/util";
 
-function CardRent({ nftData }) {
+function CardRent({
+  nftData,
+  dataSigner,
+  selectedChain,
+  address,
+  isConnected,
+  rentMarketContract,
+  promptNftContract,
+}) {
   // console.log("call CardRent()");
 
   //*---------------------------------------------------------------------------
@@ -32,42 +40,6 @@ function CardRent({ nftData }) {
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;
-
-  //*---------------------------------------------------------------------------
-  //* Define hook variables.
-  //*---------------------------------------------------------------------------
-  const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
-  // console.log("selectedChain: ", selectedChain);
-  const { address, isConnected } = useAccount();
-  // console.log("address: ", address);
-  // console.log("isConnected: ", isConnected);
-  const {
-    data: dataSigner,
-    isError: isErrorSigner,
-    isLoading: isLoadingSigner,
-  } = useSigner();
-
-  const promptNftContract = useContract({
-    address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-    abi: promptNFTABI["abi"],
-  });
-
-  const rentMarketContract = useContract({
-    address: process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS,
-    abi: rentmarketABI["abi"],
-  });
-
-  const {
-    data: metadataData,
-    error: metadataError,
-    isValidating: metadataIsValidating,
-  } = useSWR([
-    "getMetadata",
-    FetchType.PROVIDER,
-    promptNftContract,
-    dataSigner,
-    nftData.tokenId,
-  ]);
 
   //*---------------------------------------------------------------------------
   //* Define state variables.
