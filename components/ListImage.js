@@ -57,10 +57,8 @@ function ListImage() {
 
   //* Get all image data array.
   const { data, error, isValidating, mutate } = useSWR([API_ALL_URL]);
-  // console.log("getAllResult: ", getAllResult);
-  // console.log("getAllError: ", getAllError);
-  // console.log("getAllIsValidating: ", getAllIsValidating);
-  // console.log("getAllMutate: ", getAllMutate);
+  // console.log("data: ", data);
+  // console.log("isValidating: ", isValidating);
 
   function LoadingPage() {
     return (
@@ -114,7 +112,7 @@ function ListImage() {
 
   const ImageCardList = React.useCallback(
     function ImageCardList() {
-      if (isValidating === true) {
+      if (!data && isValidating === true) {
         return <LoadingPage />;
       }
 
