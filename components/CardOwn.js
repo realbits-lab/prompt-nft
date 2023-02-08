@@ -1,5 +1,5 @@
 import React from "react";
-import { useSigner, useContract } from "wagmi";
+import { isMobile } from "react-device-detect";
 import useSWR from "swr";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -9,11 +9,23 @@ import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
-import promptNFTABI from "../contracts/promptNFT.json";
-import rentmarketABI from "../contracts/rentMarket.json";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
 import { FetchType } from "../lib/fetchJson";
+import { isWalletConnected, decryptData, handleLogin } from "../lib/util";
 
-function CardNft({ nftData }) {
+function CardNft({
+  nftData,
+  dataSigner,
+  selectedChain,
+  address,
+  isConnected,
+  rentMarketContract,
+  promptNftContract,
+}) {
   // console.log("call CardNft()");
 
   //*---------------------------------------------------------------------------
@@ -24,25 +36,6 @@ function CardNft({ nftData }) {
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;
-
-  //*---------------------------------------------------------------------------
-  //* Define hook variables.
-  //*---------------------------------------------------------------------------
-  const {
-    data: dataSigner,
-    isError: isErrorSigner,
-    isLoading: isLoadingSigner,
-  } = useSigner();
-
-  const promptNftContract = useContract({
-    address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-    abi: promptNFTABI["abi"],
-  });
-
-  const rentMarketContract = useContract({
-    address: process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS,
-    abi: rentmarketABI["abi"],
-  });
 
   const {
     data: metadataData,
@@ -55,6 +48,12 @@ function CardNft({ nftData }) {
     dataSigner,
     nftData.tokenId,
   ]);
+
+  //*---------------------------------------------------------------------------
+  //* Define state variables.
+  //*---------------------------------------------------------------------------
+  const [decryptedPrompt, setDecryptedPrompt] = React.useState("");
+  const [openDialog, setOpenDialog] = React.useState(false);
 
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
@@ -111,7 +110,7 @@ function CardNft({ nftData }) {
           <Button
             size="small"
             onClick={async function () {
-              if (mode === "own" && isWalletConnected() === false) {
+              if (isWalletConnected({ isConnected, selectedChain }) === false) {
                 // console.log("chainName: ", getChainName({ chainId }));
                 setSnackbarSeverity("warning");
                 setSnackbarMessage(
@@ -124,6 +123,10 @@ function CardNft({ nftData }) {
               if (isMobile === true) {
                 //* Set user login session.
                 if (user.isLoggedIn === false) {
+                  setSnackbarSeverity("info");
+                  setSnackbarMessage("Checking user authentication...");
+                  setOpenSnackbar(true);
+
                   try {
                     await handleLogin({
                       mutateUser: mutateUser,
@@ -137,6 +140,10 @@ function CardNft({ nftData }) {
                     setOpenSnackbar(true);
                     return;
                   }
+
+                  setOpenSnackbar(false);
+                  setSnackbarMessage("Checking is finished.");
+                  setOpenSnackbar(true);
                 }
 
                 //* Get the plain prompt from prompter.
@@ -184,6 +191,25 @@ function CardNft({ nftData }) {
           </Button>
         </CardActions>
       </Card>
+
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Prompt</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {decryptedPrompt}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} autoFocus>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

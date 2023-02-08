@@ -5,8 +5,6 @@ import {
   useWeb3ModalNetwork,
 } from "@web3modal/react";
 import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
-import { Buffer } from "buffer";
-import { Base64 } from "js-base64";
 import dynamic from "next/dynamic";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -21,9 +19,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
-import { getChainId, getChainName } from "../lib/util";
-import useUser from "../lib/useUser";
-import fetchJson, { FetchError } from "../lib/fetchJson";
+import { getChainId, isWalletConnected } from "../lib/util";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
 import ListImage from "./ListImage";
@@ -37,6 +33,7 @@ const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
 
 function List({ mode }) {
   // console.log("call List()");
+  // console.log("mode: ", mode);
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.
@@ -76,8 +73,7 @@ function List({ mode }) {
   // console.log("rentMarketContract: ", rentMarketContract);
 
   //*---------------------------------------------------------------------------
-  //* Define user login.
-  //* All properties on a domain are optional
+  //* Define signature data.
   //*---------------------------------------------------------------------------
   const domain = {
     chainId: getChainId({
@@ -136,129 +132,7 @@ function List({ mode }) {
   //* Define state variables.
   //*---------------------------------------------------------------------------
   const [decryptedPrompt, setDecryptedPrompt] = React.useState("");
-
-  //*---------------------------------------------------------------------------
-  //* For dialog.
-  //*---------------------------------------------------------------------------
   const [openDialog, setOpenDialog] = React.useState(false);
-
-  async function decryptData({ encryptData, decryptAddress }) {
-    // console.log("call decyptData()");
-    // console.log("decryptAddress: ", decryptAddress);
-
-    //* Check input data error.
-    if (!encryptData || !decryptAddress) {
-      return;
-    }
-
-    const ct = `0x${Buffer.from(JSON.stringify(encryptData), "utf8").toString(
-      "hex"
-    )}`;
-
-    const decrypt = await window.ethereum.request({
-      method: "eth_decrypt",
-      params: [ct, decryptAddress],
-    });
-
-    return Base64.decode(decrypt);
-  }
-
-  async function handleLogin({ mutateUser, address, chainId }) {
-    // console.log("call handleLogin()");
-    // console.log("chainId: ", chainId);
-
-    setSnackbarSeverity("info");
-    setSnackbarMessage("Checking user authentication...");
-    setOpenSnackbar(true);
-
-    const publicAddress = address.toLowerCase();
-    // console.log("publicAddress: ", publicAddress);
-
-    try {
-      //* Check user with public address and receive nonce as to user.
-      //* If user does not exist, back-end would add user data.
-      const jsonResult = await fetchJson([`/api/nonce/${publicAddress}`]);
-      // console.log("jsonResult: ", jsonResult);
-    } catch (error) {
-      setOpenSnackbar(false);
-      setSnackbarMessage("Checking is finished.");
-      setOpenSnackbar(true);
-      throw error;
-    }
-
-    //* Popup MetaMask confirmation modal to sign message with nonce data.
-    const signMessageResult = await signTypedDataAsync();
-    // console.log("signMessageResult: ", signMessageResult);
-
-    //* Send signature to back-end on the /auth route.
-    //* Call /api/login and set mutate user data with response data.
-    const body = { publicAddress, signature: signMessageResult };
-    try {
-      mutateUser(
-        await fetchJson(["/api/login"], {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        })
-      );
-      setOpenSnackbar(false);
-      setSnackbarMessage("Checking is finished.");
-      setOpenSnackbar(true);
-    } catch (error) {
-      if (error instanceof FetchError) {
-        console.error(error.data.message);
-      } else {
-        console.error("An unexpected error happened:", error);
-      }
-      setOpenSnackbar(false);
-      setSnackbarMessage("Checking is finished.");
-      setOpenSnackbar(true);
-      throw error;
-    }
-  }
-
-  async function handleLogout({ mutateUser }) {
-    try {
-      mutateUser(await fetchJson(["/api/logout"], { method: "POST" }), false);
-    } catch (error) {
-      if (error instanceof FetchError) {
-        console.error(error.data.message);
-      } else {
-        console.error("An unexpected error happened:", error);
-      }
-      throw error;
-    }
-  }
-
-  function isWalletConnected() {
-    // console.log("call isWalletConnected()");
-    // console.log("isConnected: ", isConnected);
-    // console.log("selectedChain: ", selectedChain);
-    // if (selectedChain) {
-    //   console.log(
-    //     "getChainName({ chainId: selectedChain.id }): ",
-    //     getChainName({ chainId: selectedChain.id })
-    //   );
-    // }
-    // console.log(
-    //   "getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK }): ",
-    //   getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK })
-    // );
-    if (
-      isConnected === false ||
-      selectedChain === undefined ||
-      getChainName({ chainId: selectedChain.id }) !==
-        getChainName({
-          chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
-        })
-    ) {
-      // console.log("return false");
-      return false;
-    } else {
-      // console.log("return true");
-      return true;
-    }
-  }
 
   function NoLoginPage() {
     // console.log("theme: ", theme);
@@ -314,25 +188,61 @@ function List({ mode }) {
       >
         {mode === "image" ? (
           <div>
-            <ListImage />
+            <ListImage
+              selectedChain={selectedChain}
+              address={address}
+              isConnected={isConnected}
+              dataSigner={dataSigner}
+              promptNftContract={promptNftContract}
+              rentMarketContract={rentMarketContract}
+            />
           </div>
         ) : mode === "nft" ? (
           <div>
-            {isWalletConnected() === false ? <NoLoginPage /> : <ListNft />}
+            {isWalletConnected({ isConnected, selectedChain }) === false ? (
+              <NoLoginPage />
+            ) : (
+              <ListNft
+                selectedChain={selectedChain}
+                address={address}
+                isConnected={isConnected}
+                dataSigner={dataSigner}
+                promptNftContract={promptNftContract}
+                rentMarketContract={rentMarketContract}
+              />
+            )}
           </div>
         ) : mode === "own" ? (
           <div>
-            {isWalletConnected() === false ? <NoLoginPage /> : <ListOwn />}
+            {isWalletConnected({ isConnected, selectedChain }) === false ? (
+              <NoLoginPage />
+            ) : (
+              <ListOwn
+                selectedChain={selectedChain}
+                address={address}
+                isConnected={isConnected}
+                dataSigner={dataSigner}
+                promptNftContract={promptNftContract}
+                rentMarketContract={rentMarketContract}
+              />
+            )}
           </div>
         ) : mode === "rent" ? (
           <div>
-            {isWalletConnected() === false ? <NoLoginPage /> : <ListRent />}
+            {isWalletConnected({ isConnected, selectedChain }) === false ? (
+              <NoLoginPage />
+            ) : (
+              <ListRent
+                selectedChain={selectedChain}
+                address={address}
+                isConnected={isConnected}
+                dataSigner={dataSigner}
+                promptNftContract={promptNftContract}
+                rentMarketContract={rentMarketContract}
+              />
+            )}
           </div>
-        ) : (
-          <div>
-            <ListImage />
-          </div>
-        )}
+        ) : null}
 
         <Dialog
           open={openDialog}

@@ -1,5 +1,5 @@
 import React from "react";
-import { useSigner, useContract } from "wagmi";
+import { isMobile } from "react-device-detect";
 import useSWR from "swr";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -9,11 +9,23 @@ import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
-import promptNFTABI from "../contracts/promptNFT.json";
-import rentmarketABI from "../contracts/rentMarket.json";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
 import { FetchType } from "../lib/fetchJson";
+import { isWalletConnected, decryptData, handleLogin } from "../lib/util";
 
-function CardRent({ nftData }) {
+function CardRent({
+  nftData,
+  dataSigner,
+  selectedChain,
+  address,
+  isConnected,
+  rentMarketContract,
+  promptNftContract,
+}) {
   // console.log("call CardRent()");
 
   //*---------------------------------------------------------------------------
@@ -26,24 +38,20 @@ function CardRent({ nftData }) {
   const CARD_PADDING = 1;
 
   //*---------------------------------------------------------------------------
+  //* Define state variables.
+  //*---------------------------------------------------------------------------
+  const [decryptedPrompt, setDecryptedPrompt] = React.useState("");
+  const [openDialog, setOpenDialog] = React.useState(false);
+
+  function handleCardMediaImageError(e) {
+    // console.log("call handleCardMediaImageError()");
+    e.target.onerror = null;
+    e.target.src = PLACEHOLDER_IMAGE_URL;
+  }
+
+  //*---------------------------------------------------------------------------
   //* Define hook variables.
   //*---------------------------------------------------------------------------
-  const {
-    data: dataSigner,
-    isError: isErrorSigner,
-    isLoading: isLoadingSigner,
-  } = useSigner();
-
-  const promptNftContract = useContract({
-    address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-    abi: promptNFTABI["abi"],
-  });
-
-  const rentMarketContract = useContract({
-    address: process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS,
-    abi: rentmarketABI["abi"],
-  });
-
   const {
     data: metadataData,
     error: metadataError,
@@ -55,12 +63,6 @@ function CardRent({ nftData }) {
     dataSigner,
     nftData.tokenId,
   ]);
-
-  function handleCardMediaImageError(e) {
-    // console.log("call handleCardMediaImageError()");
-    e.target.onerror = null;
-    e.target.src = PLACEHOLDER_IMAGE_URL;
-  }
 
   return (
     <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}>
@@ -111,7 +113,7 @@ function CardRent({ nftData }) {
           <Button
             size="small"
             onClick={async function () {
-              if (mode === "own" && isWalletConnected() === false) {
+              if (isWalletConnected({ isConnected, selectedChain }) === false) {
                 // console.log("chainName: ", getChainName({ chainId }));
                 setSnackbarSeverity("warning");
                 setSnackbarMessage(
@@ -124,6 +126,10 @@ function CardRent({ nftData }) {
               if (isMobile === true) {
                 //* Set user login session.
                 if (user.isLoggedIn === false) {
+                  setSnackbarSeverity("info");
+                  setSnackbarMessage("Checking user authentication...");
+                  setOpenSnackbar(true);
+
                   try {
                     await handleLogin({
                       mutateUser: mutateUser,
@@ -137,6 +143,10 @@ function CardRent({ nftData }) {
                     setOpenSnackbar(true);
                     return;
                   }
+
+                  setOpenSnackbar(false);
+                  setSnackbarMessage("Checking is finished.");
+                  setOpenSnackbar(true);
                 }
 
                 //* Get the plain prompt from prompter.
@@ -184,6 +194,25 @@ function CardRent({ nftData }) {
           </Button>
         </CardActions>
       </Card>
+
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Prompt</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {decryptedPrompt}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} autoFocus>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

@@ -75,6 +75,8 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
     <SWRConfig
       value={{
         fetcher: fetchJson,
+        revalidateOnFocus: false,
+        keepPreviousData: true,
         onError: (err) => {
           console.error(err);
         },

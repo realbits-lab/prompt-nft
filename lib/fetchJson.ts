@@ -46,7 +46,7 @@ async function getMetadata({
   // console.log("tokenId: ", tokenId);
 
   if (!contract || !signer || !tokenId) {
-    console.error("contract or signer is null or undefined.");
+    console.error("contract or signer is null or undefined in getMetadata.");
     throw new Error(
       `Invalid contract(${contract}) or signer(${signer}) or tokenId(${tokenId}) for provider.`
     );
@@ -134,7 +134,9 @@ async function getAllRentData({
   // console.log("renter: ", renter);
 
   if (!contract || !signer) {
-    console.error("rentMarketContract or signer is null or undefined.");
+    console.error(
+      "rentMarketContract or signer is null or undefined in getAllRentData."
+    );
     return {
       myRentDataCountResult: 0,
       myRentDataArrayResult: [],
@@ -166,7 +168,10 @@ async function getAllRegisterData({
   signer: any;
 }) {
   if (!contract || !signer) {
-    console.error("contract or signer is null or undefined.");
+    console.error(
+      "contract or signer is null or undefined in getAllRegisterData."
+    );
+    return;
     return {
       allRegisterDataCount: 0,
       allRegisterDataArray: [],
@@ -213,7 +218,6 @@ export default async function fetchJson<JSON = unknown>(
           contract: contract,
           signer: signer,
         });
-        // console.log("getAllRegisterDataResult: ", getAllRegisterDataResult);
         return getAllRegisterDataResult;
 
       case "getAllMyOwnData":

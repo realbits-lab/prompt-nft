@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  Web3Button,
-  Web3NetworkSwitch,
-  useWeb3ModalNetwork,
-} from "@web3modal/react";
-import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
+import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 import useSWR from "swr";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -14,12 +9,17 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
-import promptNFTABI from "../contracts/promptNFT.json";
-import rentmarketABI from "../contracts/rentMarket.json";
 import { FetchType } from "../lib/fetchJson";
 import CardNft from "./CardNft";
 
-function ListNft() {
+function ListNft({
+  dataSigner,
+  rentMarketContract,
+  promptNftContract,
+  selectedChain,
+  address,
+  isConnected,
+}) {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const API_ALL_URL = process.env.NEXT_PUBLIC_API_ALL_URL;
   const NUMBER_PER_PAGE = 5;
@@ -34,43 +34,16 @@ function ListNft() {
     setPageIndex(value);
   };
 
-  //*---------------------------------------------------------------------------
-  //* Define hook variables.
-  //*---------------------------------------------------------------------------
-  const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
-  // console.log("selectedChain: ", selectedChain);
-  const { address, isConnected } = useAccount();
-  // console.log("address: ", address);
-  // console.log("isConnected: ", isConnected);
-  const {
-    data: dataSigner,
-    isError: isErrorSigner,
-    isLoading: isLoadingSigner,
-  } = useSigner();
-  // console.log("dataSigner: ", dataSigner);
-  // console.log("isError: ", isError);
-  // console.log("isLoading: ", isLoading);
-  const promptNftContract = useContract({
-    address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-    abi: promptNFTABI["abi"],
-  });
-  // console.log("promptNftContract: ", promptNftContract);
-  const rentMarketContract = useContract({
-    address: process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS,
-    abi: rentmarketABI["abi"],
-  });
-  // console.log("rentMarketContract: ", rentMarketContract);
-
   //* Get all register data array.
-  const { data, error, isLoading } = useSWR([
+  const { data, error, isLoading, isValidating } = useSWR([
     "getAllRegisterData",
     FetchType.PROVIDER,
     rentMarketContract,
     dataSigner,
   ]);
-  // console.log("allRegisterData: ", allRegisterData);
-  // console.log("getAllRegisterDataError: ", getAllRegisterDataError);
-  // console.log("getAllRegisterDataIsLoading: ", getAllRegisterDataIsLoading);
+  // console.log("data: ", data);
+  // console.log("isLoading: ", isLoading);
+  // console.log("isValidating: ", isValidating);
 
   function LoadingPage() {
     return (
@@ -168,7 +141,18 @@ function ListNft() {
               idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
               idx < pageIndex * NUMBER_PER_PAGE
             ) {
-              return <CardNft nftData={nftData} />;
+              return (
+                <CardNft
+                  nftData={nftData}
+                  key={idx}
+                  dataSigner={dataSigner}
+                  address={address}
+                  isConnected={isConnected}
+                  rentMarketContract={rentMarketContract}
+                  selectedChain={selectedChain}
+                  promptNftContract={promptNftContract}
+                />
+              );
             }
           })}
         </div>

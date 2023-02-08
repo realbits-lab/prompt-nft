@@ -8,6 +8,7 @@ import Skeleton from "@mui/material/Skeleton";
 
 function CardImage({ imageData }) {
   // console.log("call CardImage()");
+  // console.log("imageData: ", imageData);
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.

@@ -12,10 +12,19 @@ export default async function handler(req, res) {
   }
 
   // POST /api/post
-  // Required fields in body: prompt, imageUrl
-  const { prompt, imageUrl } = req.body;
+  // Required fields in body: prompt, imageUrl, discordBotToken
+  const { prompt, imageUrl, discordBotToken } = req.body;
   console.log("prompt: ", prompt);
   console.log("imageUrl: ", imageUrl);
+  console.log("discordBotToken: ", discordBotToken);
+
+  if (
+    !discordBotToken ||
+    discordBotToken !== process.env.NEXT_PUBLIC_DISCORD_BOT_TOKEN
+  ) {
+    res.status(500).json({ error: "Invalid discord bot token." });
+    return;
+  }
 
   const result = await prisma.post.create({
     data: {
