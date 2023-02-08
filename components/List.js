@@ -32,7 +32,8 @@ const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
 });
 
 function List({ mode }) {
-  // console.log("call List()");
+  console.log("call List()");
+  console.log("mode: ", mode);
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.

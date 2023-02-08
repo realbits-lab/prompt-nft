@@ -38,7 +38,7 @@ function ListPage(props) {
   // console.log("router.query: ", router.query);
   // console.log("queryMode: ", queryMode);
 
-  const [mode, setMode] = React.useState(queryMode || "image");
+  const [mode, setMode] = React.useState("image");
   const BUTTON_BORDER_RADIUS = 25;
   const SELECTED_BUTTON_BACKGROUND_COLOR = "#21b6ae";
   const SELECTED_BUTTON_PADDING = "2px 2px";
@@ -75,7 +75,6 @@ function ListPage(props) {
         }}
         sx={{ my: 2, color: "white" }}
         onClick={(e) => {
-          e.preventDefault();
           setMode(buttonMode);
         }}
       >
