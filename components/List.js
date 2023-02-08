@@ -73,8 +73,7 @@ function List({ mode }) {
   // console.log("rentMarketContract: ", rentMarketContract);
 
   //*---------------------------------------------------------------------------
-  //* Define user login.
-  //* All properties on a domain are optional
+  //* Define signature data.
   //*---------------------------------------------------------------------------
   const domain = {
     chainId: getChainId({
