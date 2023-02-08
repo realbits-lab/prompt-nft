@@ -19,7 +19,7 @@ import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
 import CardOwn from "./CardOwn";
 
-function ListOwn({ allMyOwnDataArray }) {
+function ListOwn() {
   // console.log("call OwnCardList()");
   // console.log("allMyOwnDataCount: ", allMyOwnDataCount);
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
@@ -176,7 +176,7 @@ function ListOwn({ allMyOwnDataArray }) {
               idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
               idx < pageIndex * NUMBER_PER_PAGE
             ) {
-              return <CardOwn nftData={nftData} />;
+              return <CardOwn nftData={nftData} key={idx} />;
             }
           })}
         </div>

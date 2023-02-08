@@ -169,7 +169,7 @@ function ListRent() {
               idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
               idx < pageIndex * NUMBER_PER_PAGE
             ) {
-              return <CardRent nftData={nftData} />;
+              return <CardRent nftData={nftData} key={idx} />;
             }
           })}
         </div>
