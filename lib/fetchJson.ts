@@ -91,13 +91,15 @@ async function getAllOwnData({
     };
   }
 
+  //* TODO: Not from nft contract, but from rent market contract.
   //* Get total supply of prompt nft.
+  // console.log("contract: ", contract);
   const totalSupplyBigNumber = await contract.connect(signer).balanceOf(owner);
   // console.log("totalSupply: ", totalSupply);
   const totalSupply = totalSupplyBigNumber.toNumber();
 
   //* Get all metadata per each token as to token uri.
-  let tokenDataArray = [];
+  let tokenDataArray: Array<any> = [];
   for (let i = 0; i < totalSupply; i++) {
     //* Get token id and uri.
     const tokenId = await contract
@@ -178,16 +180,39 @@ async function getAllRegisterData({
     };
   }
 
+  //* Get all collection data from rentmarket contract.
+  //* collectionAddress
+  const allCollectionResultArray = await contract
+    .connect(signer)
+    .getAllCollection();
+  // console.log("allCollectionResultArray: ", allCollectionResultArray);
+
   //* Get all nft data from rentmarket contract.
+  //* nftAddress
   const allRegisterDataResultArray = await contract
     .connect(signer)
     .getAllRegisterData();
-  // console.log("allRegisterDataArray: ", allRegisterDataArray);
+  // console.log("allRegisterDataResultArray: ", allRegisterDataResultArray);
+
+  const addressFilteredDataArray = allRegisterDataResultArray.filter(function (
+    registerData: any
+  ) {
+    return allCollectionResultArray.some(function (collection: any) {
+      return (
+        registerData.nftAddress.localeCompare(
+          collection.collectionAddress,
+          undefined,
+          { sensitivity: "accent" }
+        ) === 0
+      );
+    });
+  });
+  // console.log("addressFilteredDataArray: ", addressFilteredDataArray);
 
   //* Return token data array.
   return {
-    allRegisterDataCount: allRegisterDataResultArray.length,
-    allRegisterDataArray: allRegisterDataResultArray,
+    allRegisterDataCount: addressFilteredDataArray.length,
+    allRegisterDataArray: addressFilteredDataArray,
   };
 }
 

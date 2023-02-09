@@ -21,13 +21,10 @@ function ListNft({
   isConnected,
 }) {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
-  const API_ALL_URL = process.env.NEXT_PUBLIC_API_ALL_URL;
   const NUMBER_PER_PAGE = 5;
 
-  const CARD_MARGIN_TOP = "50px";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
-  const CARD_PADDING = 1;
 
   const [pageIndex, setPageIndex] = React.useState(1);
   const handlePageIndexChange = (event, value) => {

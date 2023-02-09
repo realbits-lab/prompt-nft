@@ -1,6 +1,7 @@
 import React from "react";
 import { isMobile } from "react-device-detect";
 import useSWR from "swr";
+import { Base64 } from "js-base64";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -14,8 +15,9 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
-import { FetchType } from "../lib/fetchJson";
+import fetchJson, { FetchType } from "../lib/fetchJson";
 import { isWalletConnected, decryptData, handleLogin } from "../lib/util";
+import useUser from "../lib/useUser";
 
 function CardNft({
   nftData,
@@ -25,6 +27,7 @@ function CardNft({
   isConnected,
   rentMarketContract,
   promptNftContract,
+  signTypedDataAsync,
 }) {
   // console.log("call CardNft()");
 
@@ -48,6 +51,20 @@ function CardNft({
     dataSigner,
     nftData.tokenId,
   ]);
+
+  const { user, mutateUser } = useUser();
+  // const {
+  //   data: dataSignTypedData,
+  //   isError: isErrorSignTypedData,
+  //   isLoading: isLoadingSignTypedData,
+  //   isSuccess: isSuccessSignTypedData,
+  //   signTypedData,
+  //   signTypedDataAsync,
+  // } = useSignTypedData({
+  //   domain: domain,
+  //   types: types,
+  //   value: value,
+  // });
 
   //*---------------------------------------------------------------------------
   //* Define state variables.
@@ -132,6 +149,7 @@ function CardNft({
                       mutateUser: mutateUser,
                       address: address,
                       chainId: selectedChain.id,
+                      signTypedDataAsync: signTypedDataAsync,
                     });
                   } catch (error) {
                     console.error(error);

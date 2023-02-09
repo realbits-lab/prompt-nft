@@ -1,6 +1,7 @@
 import React from "react";
 import { useRouter } from "next/router";
 import PropTypes from "prop-types";
+import { useRecoilStateLoadable, useRecoilValueLoadable } from "recoil";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
@@ -9,6 +10,12 @@ import Container from "@mui/material/Container";
 import Slide from "@mui/material/Slide";
 import Button from "@mui/material/Button";
 import List from "../../components/List";
+import {
+  RBSnackbar,
+  AlertSeverity,
+  writeToastMessageState,
+  readToastMessageState,
+} from "../../lib/util";
 
 function HideOnScroll(props) {
   const { children, window } = props;
@@ -42,6 +49,34 @@ function ListPage(props) {
   const BUTTON_BORDER_RADIUS = 25;
   const SELECTED_BUTTON_BACKGROUND_COLOR = "#21b6ae";
   const SELECTED_BUTTON_PADDING = "2px 2px";
+
+  //* --------------------------------------------------------------------------
+  //* Snackbar variables.
+  //* --------------------------------------------------------------------------
+  const [writeToastMessageLoadable, setWriteToastMessage] =
+    useRecoilStateLoadable(writeToastMessageState);
+  const writeToastMessage =
+    writeToastMessageLoadable?.state === "hasValue"
+      ? writeToastMessageLoadable.contents
+      : {
+          snackbarSeverity: AlertSeverity.info,
+          snackbarMessage: "",
+          snackbarTime: new Date(),
+          snackbarOpen: true,
+        };
+
+  const readToastMessageLoadable = useRecoilValueLoadable(
+    readToastMessageState
+  );
+  const readToastMessage =
+    readToastMessageLoadable?.state === "hasValue"
+      ? readToastMessageLoadable.contents
+      : {
+          snackbarSeverity: AlertSeverity.info,
+          snackbarMessage: "",
+          snackbarTime: new Date(),
+          snackbarOpen: true,
+        };
 
   React.useEffect(
     function () {
@@ -106,6 +141,13 @@ function ListPage(props) {
           <List mode={mode} />
         </Box>
       </Container>
+
+      <RBSnackbar
+        open={readToastMessage.snackbarOpen}
+        message={readToastMessage.snackbarMessage}
+        severity={readToastMessage.snackbarSeverity}
+        currentTime={readToastMessage.snackbarTime}
+      />
     </React.Fragment>
   );
 }

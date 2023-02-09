@@ -44,6 +44,7 @@
     "react-device-detect": "^2.2.2",
     "react-dom": "18.2.0",
     "react-router-dom": "^6.4.5",
+    "recoil": "^0.7.6",
     "swr": "^2.0.0",
     "wagmi": "^0.11.2"
   },

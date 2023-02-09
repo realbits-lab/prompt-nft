@@ -1,5 +1,6 @@
 import React from "react";
 import useSWR from "swr";
+import { useRecoilStateLoadable } from "recoil";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -9,7 +10,11 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
 import { FetchType } from "../lib/fetchJson";
-import { isWalletConnected } from "../lib/util";
+import {
+  isWalletConnected,
+  AlertSeverity,
+  writeToastMessageState,
+} from "../lib/util";
 
 function CardNft({
   nftData,
@@ -42,6 +47,21 @@ function CardNft({
     dataSigner,
     nftData.tokenId,
   ]);
+
+  //* --------------------------------------------------------------------------
+  //* Snackbar variables.
+  //* --------------------------------------------------------------------------
+  const [writeToastMessageLoadable, setWriteToastMessage] =
+    useRecoilStateLoadable(writeToastMessageState);
+  const writeToastMessage =
+    writeToastMessageLoadable?.state === "hasValue"
+      ? writeToastMessageLoadable.contents
+      : {
+          snackbarSeverity: AlertSeverity.info,
+          snackbarMessage: "",
+          snackbarTime: new Date(),
+          snackbarOpen: true,
+        };
 
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
@@ -99,11 +119,12 @@ function CardNft({
             size="small"
             onClick={async () => {
               if (isWalletConnected({ isConnected, selectedChain }) === false) {
-                setSnackbarSeverity("warning");
-                setSnackbarMessage(
-                  `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
-                );
-                setOpenSnackbar(true);
+                setWriteToastMessage({
+                  snackbarSeverity: AlertSeverity.warning,
+                  snackbarMessage: `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`,
+                  snackbarTime: new Date(),
+                  snackbarOpen: true,
+                });
                 return;
               }
 
@@ -115,6 +136,18 @@ function CardNft({
               }
 
               //* Rent this nft with rent fee.
+              console.log("nftData.rentFee: ", nftData.rentFee);
+              console.log("nftData.tokenId: ", nftData.tokenId);
+              console.log("rentMarketContract: ", rentMarketContract);
+              console.log("dataSigner: ", dataSigner);
+              console.log(
+                "process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS: ",
+                process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS
+              );
+              console.log(
+                "process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS: ",
+                process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS
+              );
               try {
                 const tx = await rentMarketContract
                   .connect(dataSigner)
@@ -128,12 +161,15 @@ function CardNft({
                   );
                 const txResult = await tx.wait();
               } catch (error) {
-                console.error(error);
-                setSnackbarSeverity("error");
-                setSnackbarMessage(
-                  error.data.message ? error.data.message : error.message
-                );
-                setOpenSnackbar(true);
+                console.error("error: ", error);
+                setWriteToastMessage({
+                  snackbarSeverity: AlertSeverity.error,
+                  snackbarMessage: error.data
+                    ? error.data.message
+                    : error.message,
+                  snackbarTime: new Date(),
+                  snackbarOpen: true,
+                });
               }
             }}
           >
