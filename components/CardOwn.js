@@ -16,8 +16,9 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
-import { FetchType } from "../lib/fetchJson";
+import fetchJson, { FetchType } from "../lib/fetchJson";
 import { isWalletConnected, decryptData, handleLogin } from "../lib/util";
+import useUser from "../lib/useUser";
 
 function CardNft({
   nftData,
@@ -27,7 +28,7 @@ function CardNft({
   isConnected,
   rentMarketContract,
   promptNftContract,
-  signTypedDataAsync
+  signTypedDataAsync,
 }) {
   // console.log("call CardNft()");
 
@@ -52,18 +53,19 @@ function CardNft({
     nftData.tokenId,
   ]);
 
-  const {
-    data: dataSignTypedData,
-    isError: isErrorSignTypedData,
-    isLoading: isLoadingSignTypedData,
-    isSuccess: isSuccessSignTypedData,
-    signTypedData,
-    signTypedDataAsync,
-  } = useSignTypedData({
-    domain: domain,
-    types: types,
-    value: value,
-  });
+  const { user, mutateUser } = useUser();
+  // const {
+  //   data: dataSignTypedData,
+  //   isError: isErrorSignTypedData,
+  //   isLoading: isLoadingSignTypedData,
+  //   isSuccess: isSuccessSignTypedData,
+  //   signTypedData,
+  //   signTypedDataAsync,
+  // } = useSignTypedData({
+  //   domain: domain,
+  //   types: types,
+  //   value: value,
+  // });
 
   //*---------------------------------------------------------------------------
   //* Define state variables.
@@ -148,7 +150,7 @@ function CardNft({
                       mutateUser: mutateUser,
                       address: address,
                       chainId: selectedChain.id,
-                      signTypedDataAsync:signTypedDataAsync,
+                      signTypedDataAsync: signTypedDataAsync,
                     });
                   } catch (error) {
                     console.error(error);
