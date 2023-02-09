@@ -183,14 +183,14 @@ async function getAllRegisterData({
   const allCollectionResultArray = await contract
     .connect(signer)
     .getAllCollection();
-  console.log("allCollectionResultArray: ", allCollectionResultArray);
+  // console.log("allCollectionResultArray: ", allCollectionResultArray);
 
   //* Get all nft data from rentmarket contract.
   //* nftAddress
   const allRegisterDataResultArray = await contract
     .connect(signer)
     .getAllRegisterData();
-  console.log("allRegisterDataResultArray: ", allRegisterDataResultArray);
+  // console.log("allRegisterDataResultArray: ", allRegisterDataResultArray);
 
   const addressFilteredDataArray = allRegisterDataResultArray.filter(function (
     registerData: any
@@ -205,7 +205,7 @@ async function getAllRegisterData({
       );
     });
   });
-  console.log("addressFilteredDataArray: ", addressFilteredDataArray);
+  // console.log("addressFilteredDataArray: ", addressFilteredDataArray);
 
   //* Return token data array.
   return {
