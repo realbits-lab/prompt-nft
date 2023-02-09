@@ -119,11 +119,12 @@ function CardNft({
             size="small"
             onClick={async () => {
               if (isWalletConnected({ isConnected, selectedChain }) === false) {
-                setSnackbarSeverity("warning");
-                setSnackbarMessage(
-                  `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
-                );
-                setOpenSnackbar(true);
+                setWriteToastMessage({
+                  snackbarSeverity: AlertSeverity.warning,
+                  snackbarMessage: `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`,
+                  snackbarTime: new Date(),
+                  snackbarOpen: true,
+                });
                 return;
               }
 
@@ -136,6 +137,17 @@ function CardNft({
 
               //* Rent this nft with rent fee.
               console.log("nftData.rentFee: ", nftData.rentFee);
+              console.log("nftData.tokenId: ", nftData.tokenId);
+              console.log("rentMarketContract: ", rentMarketContract);
+              console.log("dataSigner: ", dataSigner);
+              console.log(
+                "process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS: ",
+                process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS
+              );
+              console.log(
+                "process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS: ",
+                process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS
+              );
               try {
                 const tx = await rentMarketContract
                   .connect(dataSigner)
@@ -158,12 +170,6 @@ function CardNft({
                   snackbarTime: new Date(),
                   snackbarOpen: true,
                 });
-
-                // setSnackbarSeverity("error");
-                // setSnackbarMessage(
-                //   error.data.message ? error.data.message : error.message
-                // );
-                // setOpenSnackbar(true);
               }
             }}
           >

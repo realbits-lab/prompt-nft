@@ -1,7 +1,6 @@
 import React from "react";
 import { isMobile } from "react-device-detect";
 import useSWR from "swr";
-import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
 import { Base64 } from "js-base64";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
