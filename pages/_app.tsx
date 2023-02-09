@@ -8,6 +8,7 @@ import { Web3Modal } from "@web3modal/react";
 import { configureChains, createClient, WagmiConfig } from "wagmi";
 import { polygon, polygonMumbai, localhost } from "wagmi/chains";
 import { SWRConfig } from "swr";
+import { RecoilRoot } from "recoil";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material";
 import { CacheProvider, EmotionCache } from "@emotion/react";
@@ -86,7 +87,9 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <WagmiConfig client={wagmiClient}>
-            <Component {...pageProps} />
+            <RecoilRoot>
+              <Component {...pageProps} />
+            </RecoilRoot>
           </WagmiConfig>
 
           <Web3Modal

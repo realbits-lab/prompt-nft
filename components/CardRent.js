@@ -1,6 +1,9 @@
 import React from "react";
 import { isMobile } from "react-device-detect";
 import useSWR from "swr";
+import { useRecoilStateLoadable } from "recoil";
+import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
+import { Base64 } from "js-base64";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -14,8 +17,15 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
-import { FetchType } from "../lib/fetchJson";
-import { isWalletConnected, decryptData, handleLogin } from "../lib/util";
+import fetchJson, { FetchType } from "../lib/fetchJson";
+import {
+  isWalletConnected,
+  decryptData,
+  handleLogin,
+  AlertSeverity,
+  writeToastMessageState,
+} from "../lib/util";
+import useUser from "../lib/useUser";
 
 function CardRent({
   nftData,
@@ -25,6 +35,7 @@ function CardRent({
   isConnected,
   rentMarketContract,
   promptNftContract,
+  signTypedDataAsync,
 }) {
   // console.log("call CardRent()");
 
@@ -63,6 +74,35 @@ function CardRent({
     dataSigner,
     nftData.tokenId,
   ]);
+  const { user, mutateUser } = useUser();
+
+  // const {
+  //   data: dataSignTypedData,
+  //   isError: isErrorSignTypedData,
+  //   isLoading: isLoadingSignTypedData,
+  //   isSuccess: isSuccessSignTypedData,
+  //   signTypedData,
+  //   signTypedDataAsync,
+  // } = useSignTypedData({
+  //   domain: domain,
+  //   types: types,
+  //   value: value,
+  // });
+
+  //* --------------------------------------------------------------------------
+  //* Snackbar variables.
+  //* --------------------------------------------------------------------------
+  const [writeToastMessageLoadable, setWriteToastMessage] =
+    useRecoilStateLoadable(writeToastMessageState);
+  const writeToastMessage =
+    writeToastMessageLoadable?.state === "hasValue"
+      ? writeToastMessageLoadable.contents
+      : {
+          snackbarSeverity: AlertSeverity.info,
+          snackbarMessage: "",
+          snackbarTime: new Date(),
+          snackbarOpen: true,
+        };
 
   return (
     <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}>
@@ -115,38 +155,55 @@ function CardRent({
             onClick={async function () {
               if (isWalletConnected({ isConnected, selectedChain }) === false) {
                 // console.log("chainName: ", getChainName({ chainId }));
-                setSnackbarSeverity("warning");
-                setSnackbarMessage(
-                  `Change metamask network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
-                );
-                setOpenSnackbar(true);
+                // setSnackbarSeverity("warning");
+                // setSnackbarMessage(
+                //   `Change metamask network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
+                // );
+                // setOpenSnackbar(true);
+
+                setWriteToastMessage({
+                  snackbarSeverity: AlertSeverity.warning,
+                  snackbarMessage: `Change metamask network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`,
+                  snackbarTime: new Date(),
+                  snackbarOpen: true,
+                });
                 return;
               }
 
               if (isMobile === true) {
                 //* Set user login session.
                 if (user.isLoggedIn === false) {
-                  setSnackbarSeverity("info");
-                  setSnackbarMessage("Checking user authentication...");
-                  setOpenSnackbar(true);
+                  setWriteToastMessage({
+                    snackbarSeverity: AlertSeverity.info,
+                    snackbarMessage: "Checking user authentication...",
+                    snackbarTime: new Date(),
+                    snackbarOpen: true,
+                  });
 
                   try {
                     await handleLogin({
                       mutateUser: mutateUser,
                       address: address,
                       chainId: selectedChain.id,
+                      signTypedDataAsync: signTypedDataAsync,
                     });
                   } catch (error) {
                     console.error(error);
-                    setSnackbarSeverity("error");
-                    setSnackbarMessage(`Login error: ${error}`);
-                    setOpenSnackbar(true);
+                    setWriteToastMessage({
+                      snackbarSeverity: AlertSeverity.error,
+                      snackbarMessage: `Login error: ${error}`,
+                      snackbarTime: new Date(),
+                      snackbarOpen: true,
+                    });
                     return;
                   }
 
-                  setOpenSnackbar(false);
-                  setSnackbarMessage("Checking is finished.");
-                  setOpenSnackbar(true);
+                  setWriteToastMessage({
+                    snackbarSeverity: AlertSeverity.info,
+                    snackbarMessage: "Checking is finished.",
+                    snackbarTime: new Date(),
+                    snackbarOpen: true,
+                  });
                 }
 
                 //* Get the plain prompt from prompter.

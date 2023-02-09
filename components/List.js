@@ -224,6 +224,7 @@ function List({ mode }) {
                 dataSigner={dataSigner}
                 promptNftContract={promptNftContract}
                 rentMarketContract={rentMarketContract}
+                signTypedDataAsync={signTypedDataAsync}
               />
             )}
           </div>
@@ -239,6 +240,7 @@ function List({ mode }) {
                 dataSigner={dataSigner}
                 promptNftContract={promptNftContract}
                 rentMarketContract={rentMarketContract}
+                signTypedDataAsync={signTypedDataAsync}
               />
             )}
           </div>

@@ -1,6 +1,8 @@
 import React from "react";
 import { isMobile } from "react-device-detect";
 import useSWR from "swr";
+import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
+import { Base64 } from "js-base64";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -25,6 +27,7 @@ function CardNft({
   isConnected,
   rentMarketContract,
   promptNftContract,
+  signTypedDataAsync
 }) {
   // console.log("call CardNft()");
 
@@ -48,6 +51,19 @@ function CardNft({
     dataSigner,
     nftData.tokenId,
   ]);
+
+  const {
+    data: dataSignTypedData,
+    isError: isErrorSignTypedData,
+    isLoading: isLoadingSignTypedData,
+    isSuccess: isSuccessSignTypedData,
+    signTypedData,
+    signTypedDataAsync,
+  } = useSignTypedData({
+    domain: domain,
+    types: types,
+    value: value,
+  });
 
   //*---------------------------------------------------------------------------
   //* Define state variables.
@@ -132,6 +148,7 @@ function CardNft({
                       mutateUser: mutateUser,
                       address: address,
                       chainId: selectedChain.id,
+                      signTypedDataAsync:signTypedDataAsync,
                     });
                   } catch (error) {
                     console.error(error);

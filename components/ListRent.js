@@ -19,6 +19,7 @@ function ListRent({
   dataSigner,
   promptNftContract,
   rentMarketContract,
+  signTypedDataAsync,
 }) {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const NUMBER_PER_PAGE = 5;
@@ -155,6 +156,7 @@ function ListRent({
                   rentMarketContract={rentMarketContract}
                   selectedChain={selectedChain}
                   promptNftContract={promptNftContract}
+                  signTypedDataAsync={signTypedDataAsync}
                 />
               );
             }

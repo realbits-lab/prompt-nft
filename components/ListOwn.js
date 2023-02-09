@@ -19,6 +19,7 @@ function ListOwn({
   dataSigner,
   promptNftContract,
   rentMarketContract,
+  signTypedDataAsync,
 }) {
   // console.log("call OwnCardList()");
   // console.log("allMyOwnDataCount: ", allMyOwnDataCount);
@@ -162,6 +163,7 @@ function ListOwn({
                   rentMarketContract={rentMarketContract}
                   selectedChain={selectedChain}
                   promptNftContract={promptNftContract}
+                  signTypedDataAsync={signTypedDataAsync}
                 />
               );
             }

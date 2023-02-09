@@ -1,5 +1,6 @@
 import React from "react";
 import useSWR from "swr";
+import { useRecoilStateLoadable } from "recoil";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -9,7 +10,11 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
 import { FetchType } from "../lib/fetchJson";
-import { isWalletConnected } from "../lib/util";
+import {
+  isWalletConnected,
+  AlertSeverity,
+  writeToastMessageState,
+} from "../lib/util";
 
 function CardNft({
   nftData,
@@ -42,6 +47,21 @@ function CardNft({
     dataSigner,
     nftData.tokenId,
   ]);
+
+  //* --------------------------------------------------------------------------
+  //* Snackbar variables.
+  //* --------------------------------------------------------------------------
+  const [writeToastMessageLoadable, setWriteToastMessage] =
+    useRecoilStateLoadable(writeToastMessageState);
+  const writeToastMessage =
+    writeToastMessageLoadable?.state === "hasValue"
+      ? writeToastMessageLoadable.contents
+      : {
+          snackbarSeverity: AlertSeverity.info,
+          snackbarMessage: "",
+          snackbarTime: new Date(),
+          snackbarOpen: true,
+        };
 
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
@@ -115,6 +135,7 @@ function CardNft({
               }
 
               //* Rent this nft with rent fee.
+              console.log("nftData.rentFee: ", nftData.rentFee);
               try {
                 const tx = await rentMarketContract
                   .connect(dataSigner)
@@ -128,12 +149,21 @@ function CardNft({
                   );
                 const txResult = await tx.wait();
               } catch (error) {
-                console.error(error);
-                setSnackbarSeverity("error");
-                setSnackbarMessage(
-                  error.data.message ? error.data.message : error.message
-                );
-                setOpenSnackbar(true);
+                console.error("error: ", error);
+                setWriteToastMessage({
+                  snackbarSeverity: AlertSeverity.error,
+                  snackbarMessage: error.data
+                    ? error.data.message
+                    : error.message,
+                  snackbarTime: new Date(),
+                  snackbarOpen: true,
+                });
+
+                // setSnackbarSeverity("error");
+                // setSnackbarMessage(
+                //   error.data.message ? error.data.message : error.message
+                // );
+                // setOpenSnackbar(true);
               }
             }}
           >
