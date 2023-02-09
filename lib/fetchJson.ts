@@ -91,13 +91,15 @@ async function getAllOwnData({
     };
   }
 
+  //* TODO: Not from nft contract, but from rent market contract.
   //* Get total supply of prompt nft.
+  // console.log("contract: ", contract);
   const totalSupplyBigNumber = await contract.connect(signer).balanceOf(owner);
   // console.log("totalSupply: ", totalSupply);
   const totalSupply = totalSupplyBigNumber.toNumber();
 
   //* Get all metadata per each token as to token uri.
-  let tokenDataArray = [];
+  let tokenDataArray: Array<any> = [];
   for (let i = 0; i < totalSupply; i++) {
     //* Get token id and uri.
     const tokenId = await contract

@@ -5,20 +5,13 @@ import {
   useWeb3ModalNetwork,
 } from "@web3modal/react";
 import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
-import dynamic from "next/dynamic";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
 import { getChainId, isWalletConnected } from "../lib/util";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
@@ -26,10 +19,6 @@ import ListImage from "./ListImage";
 import ListNft from "./ListNft";
 import ListOwn from "./ListOwn";
 import ListRent from "./ListRent";
-
-const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
-  ssr: false,
-});
 
 function List({ mode }) {
   // console.log("call List()");
@@ -40,10 +29,8 @@ function List({ mode }) {
   //*---------------------------------------------------------------------------
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
 
-  const CARD_MARGIN_TOP = "50px";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
-  const CARD_PADDING = 1;
 
   //*---------------------------------------------------------------------------
   //* Define hook variables.
@@ -95,14 +82,7 @@ function List({ mode }) {
     contents: process.env.NEXT_PUBLIC_LOGIN_SIGN_MESSAGE,
   };
 
-  const {
-    data: dataSignTypedData,
-    isError: isErrorSignTypedData,
-    isLoading: isLoadingSignTypedData,
-    isSuccess: isSuccessSignTypedData,
-    signTypedData,
-    signTypedDataAsync,
-  } = useSignTypedData({
+  const { signTypedDataAsync } = useSignTypedData({
     domain: domain,
     types: types,
     value: value,
@@ -114,25 +94,6 @@ function List({ mode }) {
   // console.log("signTypedData: ", signTypedData);
 
   const theme = useTheme();
-
-  //*---------------------------------------------------------------------------
-  //* Handle snackbar.
-  //*---------------------------------------------------------------------------
-  const [snackbarMessage, setSnackbarMessage] = React.useState("");
-  const [openSnackbar, setOpenSnackbar] = React.useState(false);
-  const [snackbarSeverity, setSnackbarSeverity] = React.useState("info");
-  const handleCloseSnackbar = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setOpenSnackbar(false);
-  };
-
-  //*---------------------------------------------------------------------------
-  //* Define state variables.
-  //*---------------------------------------------------------------------------
-  const [decryptedPrompt, setDecryptedPrompt] = React.useState("");
-  const [openDialog, setOpenDialog] = React.useState(false);
 
   function NoLoginPage() {
     // console.log("theme: ", theme);
@@ -245,34 +206,7 @@ function List({ mode }) {
             )}
           </div>
         ) : null}
-
-        <Dialog
-          open={openDialog}
-          onClose={() => setOpenDialog(false)}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">Prompt</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              {decryptedPrompt}
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpenDialog(false)} autoFocus>
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
       </Box>
-
-      <MessageSnackbar
-        open={openSnackbar}
-        autoHideDuration={10000}
-        onClose={handleCloseSnackbar}
-        severity={snackbarSeverity}
-        message={snackbarMessage}
-      />
     </div>
   );
 }
