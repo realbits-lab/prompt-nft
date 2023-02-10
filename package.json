@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node server.js",
     "lint": "next lint"
   },
   "cacheDirectories": [
@@ -36,11 +36,12 @@
     "babel-plugin-styled-components": "^2.0.7",
     "ethereumjs-util": "^7.1.5",
     "ethers": "^5.7.2",
+    "express": "^4.18.2",
+    "heroku-ssl-redirect": "^0.1.1",
     "iron-session": "^6.3.1",
     "js-base64": "^3.7.3",
     "metamask-react": "^2.4.1",
     "next": "13.0.6",
-    "next-ssl-redirect-middleware": "^0.1.4",
     "react": "18.2.0",
     "react-device-detect": "^2.2.2",
     "react-dom": "18.2.0",
