@@ -35,25 +35,27 @@ export enum FetchType {
 
 async function getMetadata({
   tokenId,
-  contract,
+  promptNftContract,
   signer,
 }: {
   tokenId: any;
-  contract: any;
+  promptNftContract: any;
   signer: any;
 }) {
   // console.log("call getMetadata()");
   // console.log("tokenId: ", tokenId);
 
-  if (!contract || !signer || !tokenId) {
-    console.error("contract or signer is null or undefined in getMetadata.");
+  if (!promptNftContract || !signer || !tokenId) {
+    console.error(
+      "promptNftContract or signer is null or undefined in getMetadata."
+    );
     throw new Error(
-      `Invalid contract(${contract}) or signer(${signer}) or tokenId(${tokenId}) for provider.`
+      `Invalid contract(${promptNftContract}) or signer(${signer}) or tokenId(${tokenId}) for provider.`
     );
   }
 
   try {
-    const tokenURI = await contract
+    const tokenURI = await promptNftContract
       .connect(signer)
       .tokenURI(tokenId.toNumber());
     // console.log("tokenURI: ", tokenURI);
@@ -71,19 +73,19 @@ async function getMetadata({
 }
 
 async function getAllOwnData({
-  contract,
+  promptNftContract,
   signer,
-  owner,
+  ownerAddress,
 }: {
-  contract: any;
+  promptNftContract: any;
   signer: any;
-  owner: any;
+  ownerAddress: any;
 }) {
   // console.log("call getAllMyOwnData()");
   // console.log("signer: ", signer);
 
   //* If no signer, return zero data.
-  if (!contract || !signer) {
+  if (!promptNftContract || !signer) {
     //* Return error.
     return {
       myOwnDataCountResult: 0,
@@ -94,7 +96,9 @@ async function getAllOwnData({
   //* TODO: Not from nft contract, but from rent market contract.
   //* Get total supply of prompt nft.
   // console.log("contract: ", contract);
-  const totalSupplyBigNumber = await contract.connect(signer).balanceOf(owner);
+  const totalSupplyBigNumber = await promptNftContract
+    .connect(signer)
+    .balanceOf(ownerAddress);
   // console.log("totalSupply: ", totalSupply);
   const totalSupply = totalSupplyBigNumber.toNumber();
 
@@ -102,9 +106,9 @@ async function getAllOwnData({
   let tokenDataArray: Array<any> = [];
   for (let i = 0; i < totalSupply; i++) {
     //* Get token id and uri.
-    const tokenId = await contract
+    const tokenId = await promptNftContract
       .connect(signer)
-      .tokenOfOwnerByIndex(owner, i);
+      .tokenOfOwnerByIndex(ownerAddress, i);
 
     //* Add token metadata.
     tokenDataArray.push({
@@ -122,20 +126,20 @@ async function getAllOwnData({
 }
 
 async function getAllRentData({
-  contract,
+  rentMarketContract,
   signer,
-  renter,
+  renterAddress,
 }: {
-  contract: any;
+  rentMarketContract: any;
   signer: any;
-  renter: any;
+  renterAddress: any;
 }) {
   // console.log("call getAllRentData()");
-  // console.log("contract: ", contract);
+  // console.log("rentMarketContract: ", rentMarketContract);
   // console.log("signer: ", signer);
-  // console.log("renter: ", renter);
+  // console.log("renterAddress: ", renterAddress);
 
-  if (!contract || !signer) {
+  if (!rentMarketContract || !signer) {
     console.error(
       "rentMarketContract or signer is null or undefined in getAllRentData."
     );
@@ -145,12 +149,14 @@ async function getAllRentData({
     };
   }
 
-  const allRentDataResult = await contract.connect(signer).getAllRentData();
+  const allRentDataResult = await rentMarketContract
+    .connect(signer)
+    .getAllRentData();
   // console.log("allRentDataResult:", allRentDataResult);
 
   const allRentDataArrayWithMetadata = allRentDataResult.filter(
     (rentElement: any) =>
-      rentElement.renteeAddress.localeCompare(renter, undefined, {
+      rentElement.renteeAddress.localeCompare(renterAddress, undefined, {
         sensitivity: "accent",
       }) === 0
   );
@@ -163,15 +169,15 @@ async function getAllRentData({
 }
 
 async function getAllRegisterData({
-  contract,
+  rentMarketContract,
   signer,
 }: {
-  contract: any;
+  rentMarketContract: any;
   signer: any;
 }) {
-  if (!contract || !signer) {
+  if (!rentMarketContract || !signer) {
     console.error(
-      "contract or signer is null or undefined in getAllRegisterData."
+      "rentMarketContract or signer is null or undefined in getAllRegisterData."
     );
     return;
     return {
@@ -182,14 +188,14 @@ async function getAllRegisterData({
 
   //* Get all collection data from rentmarket contract.
   //* collectionAddress
-  const allCollectionResultArray = await contract
+  const allCollectionResultArray = await rentMarketContract
     .connect(signer)
     .getAllCollection();
   // console.log("allCollectionResultArray: ", allCollectionResultArray);
 
   //* Get all nft data from rentmarket contract.
   //* nftAddress
-  const allRegisterDataResultArray = await contract
+  const allRegisterDataResultArray = await rentMarketContract
     .connect(signer)
     .getAllRegisterData();
   // console.log("allRegisterDataResultArray: ", allRegisterDataResultArray);
@@ -217,15 +223,25 @@ async function getAllRegisterData({
 }
 
 export default async function fetchJson<JSON = unknown>(
-  [url, type, contract, signer, tokenId, address, ...remain]: [
-    RequestInfo,
-    FetchType,
-    any,
-    any,
-    any,
-    any,
-    any
-  ],
+  {
+    url,
+    command,
+    promptNftContract,
+    rentMarketContract,
+    signer,
+    tokenId,
+    ownerAddress,
+    renterAddress,
+  }: {
+    url: RequestInfo;
+    command: string;
+    promptNftContract: any;
+    rentMarketContract: any;
+    signer: any;
+    tokenId: any;
+    ownerAddress: any;
+    renterAddress: any;
+  },
   init?: RequestInit
 ): Promise<any> {
   // console.log("call fetchJson()");
@@ -236,29 +252,29 @@ export default async function fetchJson<JSON = unknown>(
   // console.log("remain: ", remain);
   // console.log("init: ", init);
 
-  if (type === FetchType.PROVIDER) {
-    switch (url) {
+  if (url === undefined) {
+    switch (command) {
       case "getAllRegisterData":
         const getAllRegisterDataResult = await getAllRegisterData({
-          contract: contract,
+          rentMarketContract: rentMarketContract,
           signer: signer,
         });
         return getAllRegisterDataResult;
 
       case "getAllMyOwnData":
         const getAllMyOwnDataResult = await getAllOwnData({
-          contract: contract,
+          promptNftContract: promptNftContract,
           signer: signer,
-          owner: address,
+          ownerAddress: ownerAddress,
         });
         // console.log("getAllMyOwnDataResult: ", getAllMyOwnDataResult);
         return getAllMyOwnDataResult;
 
       case "getAllMyRentData":
         const getAllMyRentData = await getAllRentData({
-          contract: contract,
+          rentMarketContract: rentMarketContract,
           signer: signer,
-          renter: address,
+          renterAddress: renterAddress,
         });
         // console.log("getAllMyRentData: ", getAllMyRentData);
         return getAllMyRentData;
@@ -272,7 +288,7 @@ export default async function fetchJson<JSON = unknown>(
         // console.log("tokenId: ", tokenId);
         // console.log("remain: ", remain);
         const metadata = await getMetadata({
-          contract: contract,
+          promptNftContract: promptNftContract,
           signer: signer,
           tokenId: tokenId,
         });

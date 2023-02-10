@@ -40,13 +40,12 @@ function CardNft({
     data: metadataData,
     error: metadataError,
     isValidating: metadataIsValidating,
-  } = useSWR([
-    "getMetadata",
-    FetchType.PROVIDER,
-    promptNftContract,
-    dataSigner,
-    nftData.tokenId,
-  ]);
+  } = useSWR({
+    command: "getMetadata",
+    promptNftContract: promptNftContract,
+    signer: dataSigner,
+    tokenId: nftData.tokenId,
+  });
 
   //* --------------------------------------------------------------------------
   //* Snackbar variables.

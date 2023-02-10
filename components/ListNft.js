@@ -32,12 +32,11 @@ function ListNft({
   };
 
   //* Get all register data array.
-  const { data, error, isLoading, isValidating } = useSWR([
-    "getAllRegisterData",
-    FetchType.PROVIDER,
-    rentMarketContract,
-    dataSigner,
-  ]);
+  const { data, error, isLoading, isValidating } = useSWR({
+    command: "getAllRegisterData",
+    rentMarketContract: rentMarketContract,
+    signer: dataSigner,
+  });
   // console.log("data: ", data);
   // console.log("isLoading: ", isLoading);
   // console.log("isValidating: ", isValidating);

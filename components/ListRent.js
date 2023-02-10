@@ -33,14 +33,12 @@ function ListRent({
   };
 
   //* Get all my rent data array.
-  const { data, error, isLoading, isValidating } = useSWR([
-    "getAllMyRentData",
-    FetchType.PROVIDER,
-    rentMarketContract,
-    dataSigner,
-    "",
-    address,
-  ]);
+  const { data, error, isLoading, isValidating } = useSWR({
+    command: "getAllMyRentData",
+    rentMarketContract: rentMarketContract,
+    signer: dataSigner,
+    renterAddress: address,
+  });
   // console.log("data: ", data);
   // console.log("isLoading: ", isLoading);
   // console.log("isValidating: ", isValidating);
