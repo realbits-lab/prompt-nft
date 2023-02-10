@@ -8,7 +8,7 @@ import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
 import CardImage from "./CardImage";
 
-function ListImage({ allImageDataArray,isLoading }) {
+function ListImage({ data, isLoading }) {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const NUMBER_PER_PAGE = 5;
 
@@ -69,7 +69,7 @@ function ListImage({ allImageDataArray,isLoading }) {
         return <LoadingPage />;
       }
 
-      if (!allImageDataArray) {
+      if (!data) {
         return (
           <NoContentPage
             message={
@@ -83,7 +83,7 @@ function ListImage({ allImageDataArray,isLoading }) {
         <div>
           <Box sx={{ marginTop: 10 }} display="flex" justifyContent="center">
             <Pagination
-              count={Math.ceil(allImageDataArray.data.length / NUMBER_PER_PAGE)}
+              count={Math.ceil(data.data.length / NUMBER_PER_PAGE)}
               page={pageIndex}
               onChange={handlePageIndexChange}
               variant="outlined"
@@ -101,7 +101,7 @@ function ListImage({ allImageDataArray,isLoading }) {
               }}
             />
           </Box>
-          {allImageDataArray.data.map((imageData, idx) => {
+          {data.data.map((imageData, idx) => {
             // console.log("idx: ", idx);
             // console.log("pageIndex.image: ", pageIndex.image);
             // console.log("imageData: ", imageData);
@@ -118,7 +118,7 @@ function ListImage({ allImageDataArray,isLoading }) {
         </div>
       );
     },
-    [allImageDataArray, pageIndex,isLoading]
+    [data, pageIndex, isLoading]
   );
 
   return <ImageCardList />;

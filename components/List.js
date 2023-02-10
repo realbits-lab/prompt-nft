@@ -216,10 +216,7 @@ function List({ mode }) {
       >
         {mode === "image" ? (
           <div>
-            <ListImage
-              allImageDataArray={dataImage}
-              isLoading={isLoadingImage}
-            />
+            <ListImage data={dataImage} isLoading={isLoadingImage} />
           </div>
         ) : mode === "nft" ? (
           <div>
