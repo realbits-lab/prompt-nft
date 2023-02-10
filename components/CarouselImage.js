@@ -9,7 +9,7 @@ import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
 import CardImage from "./CardImage";
 
-function ListImage({
+function CarouselImage({
   selectedChain,
   address,
   isConnected,
@@ -21,10 +21,8 @@ function ListImage({
   const API_ALL_URL = process.env.NEXT_PUBLIC_API_ALL_URL;
   const NUMBER_PER_PAGE = 5;
 
-  const CARD_MARGIN_TOP = "50px";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
-  const CARD_PADDING = 1;
 
   const [pageIndex, setPageIndex] = React.useState(1);
   const handlePageIndexChange = (event, value) => {
@@ -35,7 +33,7 @@ function ListImage({
   const { data, error, isLoading, isValidating, mutate } = useSWR([
     API_ALL_URL,
   ]);
-  console.log("data: ", data);
+  // console.log("data: ", data);
   // console.log("isLoading: ", isLoading);
   // console.log("isValidating: ", isValidating);
 
@@ -150,4 +148,4 @@ function ListImage({
   return <ImageCardList />;
 }
 
-export default ListImage;
+export default CarouselImage;

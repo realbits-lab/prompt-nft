@@ -1,7 +1,7 @@
 import { withIronSessionApiRoute } from "iron-session/next";
+import { sessionOptions } from "../../lib/session";
 import { NextApiRequest, NextApiResponse } from "next";
 import { PrismaClient } from "@prisma/client";
-import { sessionOptions } from "../../lib/session";
 import { getChainId } from "../../lib/util";
 import type { User } from "./user";
 const ethUtil = require("ethereumjs-util");

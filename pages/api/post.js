@@ -22,6 +22,12 @@ export default async function handler(req, res) {
     !discordBotToken ||
     discordBotToken !== process.env.NEXT_PUBLIC_DISCORD_BOT_TOKEN
   ) {
+    console.error("discordBotToken is different.");
+    console.error("discordBotToken: ", discordBotToken);
+    console.error(
+      "process.env.NEXT_PUBLIC_DISCORD_BOT_TOKEN: ",
+      process.env.NEXT_PUBLIC_DISCORD_BOT_TOKEN
+    );
     res.status(500).json({ error: "Invalid discord bot token." });
     return;
   }
@@ -37,6 +43,7 @@ export default async function handler(req, res) {
   if (result) {
     res.status(200).json({ data: "ok" });
   } else {
+    console.error("data creation failed. result: ", result);
     res.status(500).json({ message: "data creation failed." });
   }
 }
