@@ -22,13 +22,13 @@ export default async function handler(req, res) {
     !discordBotToken ||
     discordBotToken !== process.env.NEXT_PUBLIC_DISCORD_BOT_TOKEN
   ) {
-    console.error("discordBotToken is different.");
-    console.error("discordBotToken: ", discordBotToken);
-    console.error("process.env: ", process.env);
-    console.error(
-      "process.env.NEXT_PUBLIC_DISCORD_BOT_TOKEN: ",
-      process.env.NEXT_PUBLIC_DISCORD_BOT_TOKEN
-    );
+    // console.error("discordBotToken is different.");
+    // console.error("discordBotToken: ", discordBotToken);
+    // console.error("process.env: ", process.env);
+    // console.error(
+    //   "process.env.NEXT_PUBLIC_DISCORD_BOT_TOKEN: ",
+    //   process.env.NEXT_PUBLIC_DISCORD_BOT_TOKEN
+    // );
     res.status(500).json({ error: "Invalid discord bot token." });
     return;
   }
