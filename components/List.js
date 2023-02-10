@@ -155,8 +155,33 @@ function List({ mode }) {
 
   React.useEffect(
     function () {
+      // console.log("dataNft: ", dataNft);
+      // console.log("dataOwn: ", dataOwn);
+      // console.log("dataRent: ", dataRent);
       setAllNftDataArray(dataNft);
-      setAllOwnDataArray(dataOwn);
+      if (dataNft && dataOwn) {
+        const ownDataArray = dataNft.filter(function (nft) {
+          // console.log("nft: ", nft);
+          // console.log("nft.tokenId: ", nft.tokenId);
+          return dataOwn.some(function (element) {
+            // console.log("element.tokenId: ", element.tokenId);
+            return (
+              nft.tokenId.eq(element.tokenId) &&
+              nft.nftAddress.localeCompare(
+                promptNftContract.address,
+                undefined,
+                {
+                  sensitivity: "accent",
+                }
+              ) === 0
+            );
+          });
+        });
+        // console.log("ownDataArray: ", ownDataArray);
+        setAllOwnDataArray(ownDataArray);
+      } else {
+        setAllOwnDataArray(dataOwn);
+      }
       setAllRentDataArray(dataRent);
     },
     [dataNft, dataOwn, dataRent]
@@ -248,7 +273,7 @@ function List({ mode }) {
                 promptNftContract={promptNftContract}
                 rentMarketContract={rentMarketContract}
                 signTypedDataAsync={signTypedDataAsync}
-                data={dataOwn}
+                data={allOwnDataArray}
                 isLoading={isLoadingOwn}
               />
             )}

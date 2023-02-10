@@ -87,7 +87,6 @@ async function getAllOwnData({
     return [];
   }
 
-  //* TODO: Not from nft contract, but from rent market contract.
   //* Get total supply of prompt nft.
   // console.log("contract: ", contract);
   const totalSupplyBigNumber = await promptNftContract
@@ -107,10 +106,9 @@ async function getAllOwnData({
     //* Add token metadata.
     tokenDataArray.push({
       tokenId: tokenId,
-      // metadata: metadataJsonData,
     });
   }
-  // console.log("tokenURIArray: ", tokenURIArray);
+  // console.log("tokenDataArray: ", tokenDataArray);
 
   //* Return token data array.
   return tokenDataArray;
