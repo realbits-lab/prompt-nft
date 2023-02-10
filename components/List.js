@@ -5,6 +5,7 @@ import {
   useWeb3ModalNetwork,
 } from "@web3modal/react";
 import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
+import useSWR from "swr";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -28,6 +29,7 @@ function List({ mode }) {
   //* Define constant variables.
   //*---------------------------------------------------------------------------
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
+  const API_ALL_URL = process.env.NEXT_PUBLIC_API_ALL_URL;
 
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
@@ -58,6 +60,62 @@ function List({ mode }) {
     abi: rentmarketABI["abi"],
   });
   // console.log("rentMarketContract: ", rentMarketContract);
+
+  //* Get all image data array.
+  const {
+    data: dataImage,
+    error: errorImage,
+    isLoading: isLoadingImage,
+    isValidating: isValidatingImage,
+    mutate: mutateImage,
+  } = useSWR({
+    url: API_ALL_URL,
+  });
+
+  //* Get all register data array.
+  const {
+    data: dataNft,
+    error: errorNft,
+    isLoading: isLoadingNft,
+    isValidating: isValidatingNft,
+  } = useSWR({
+    command: "getAllRegisterData",
+    rentMarketContract: rentMarketContract,
+    signer: dataSigner,
+  });
+
+  //* Get all my own data array.
+  const {
+    data: dataOwn,
+    error: errorOwn,
+    isLoading: isLoadingOwn,
+    isValidating: isValidatingOwn,
+  } = useSWR({
+    command: "getAllMyOwnData",
+    promptNftContract: promptNftContract,
+    signer: dataSigner,
+    ownerAddress: address,
+  });
+
+  //* Get all my rent data array.
+  const {
+    data: dataRent,
+    error: errorRent,
+    isLoading: isLoadingRent,
+    isValidating: isValidatingRent,
+  } = useSWR({
+    command: "getAllMyRentData",
+    rentMarketContract: rentMarketContract,
+    signer: dataSigner,
+    renterAddress: address,
+  });
+
+  //*---------------------------------------------------------------------------
+  //* Define state data.
+  //*---------------------------------------------------------------------------
+  const [allNftDataArray, setAllNftDataArray] = React.useState();
+  const [allOwnDataArray, setAllOwnDataArray] = React.useState();
+  const [allRentDataArray, setAllRentDataArray] = React.useState();
 
   //*---------------------------------------------------------------------------
   //* Define signature data.
@@ -94,6 +152,15 @@ function List({ mode }) {
   // console.log("signTypedData: ", signTypedData);
 
   const theme = useTheme();
+
+  React.useEffect(
+    function () {
+      setAllNftDataArray(dataNft);
+      setAllOwnDataArray(dataOwn);
+      setAllRentDataArray(dataRent);
+    },
+    [dataNft, dataOwn, dataRent]
+  );
 
   function NoLoginPage() {
     // console.log("theme: ", theme);
@@ -150,12 +217,8 @@ function List({ mode }) {
         {mode === "image" ? (
           <div>
             <ListImage
-              selectedChain={selectedChain}
-              address={address}
-              isConnected={isConnected}
-              dataSigner={dataSigner}
-              promptNftContract={promptNftContract}
-              rentMarketContract={rentMarketContract}
+              allImageDataArray={dataImage}
+              isLoading={isLoadingImage}
             />
           </div>
         ) : mode === "nft" ? (
@@ -170,6 +233,8 @@ function List({ mode }) {
                 dataSigner={dataSigner}
                 promptNftContract={promptNftContract}
                 rentMarketContract={rentMarketContract}
+                data={dataNft}
+                isLoading={isLoadingNft}
               />
             )}
           </div>
@@ -186,6 +251,8 @@ function List({ mode }) {
                 promptNftContract={promptNftContract}
                 rentMarketContract={rentMarketContract}
                 signTypedDataAsync={signTypedDataAsync}
+                data={dataOwn}
+                isLoading={isLoadingOwn}
               />
             )}
           </div>
@@ -202,6 +269,8 @@ function List({ mode }) {
                 promptNftContract={promptNftContract}
                 rentMarketContract={rentMarketContract}
                 signTypedDataAsync={signTypedDataAsync}
+                data={dataRent}
+                isLoading={isLoadingRent}
               />
             )}
           </div>

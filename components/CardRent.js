@@ -16,7 +16,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
-import fetchJson, { FetchType } from "../lib/fetchJson";
+import fetchJson from "../lib/fetchJson";
 import {
   isWalletConnected,
   decryptData,

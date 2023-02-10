@@ -1,5 +1,4 @@
 import React from "react";
-import useSWR from "swr";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -9,16 +8,8 @@ import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
 import CardImage from "./CardImage";
 
-function ListImage({
-  selectedChain,
-  address,
-  isConnected,
-  dataSigner,
-  promptNftContract,
-  rentMarketContract,
-}) {
+function ListImage({ allImageDataArray,isLoading }) {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
-  const API_ALL_URL = process.env.NEXT_PUBLIC_API_ALL_URL;
   const NUMBER_PER_PAGE = 5;
 
   const CARD_MAX_WIDTH = 420;
@@ -28,14 +19,6 @@ function ListImage({
   const handlePageIndexChange = (event, value) => {
     setPageIndex(value);
   };
-
-  //* Get all image data array.
-  const { data, error, isLoading, isValidating, mutate } = useSWR({
-    url: API_ALL_URL,
-  });
-  // console.log("data: ", data);
-  // console.log("isLoading: ", isLoading);
-  // console.log("isValidating: ", isValidating);
 
   function LoadingPage() {
     return (
@@ -80,20 +63,13 @@ function ListImage({
     );
   }
 
-  function handleCardMediaImageError(e) {
-    // console.log("call handleCardMediaImageError()");
-    // console.log("imageUrl: ", imageUrl);
-    e.target.onerror = null;
-    e.target.src = PLACEHOLDER_IMAGE_URL;
-  }
-
   const ImageCardList = React.useCallback(
     function ImageCardList() {
       if (isLoading === true) {
         return <LoadingPage />;
       }
 
-      if (!data) {
+      if (!allImageDataArray) {
         return (
           <NoContentPage
             message={
@@ -107,7 +83,7 @@ function ListImage({
         <div>
           <Box sx={{ marginTop: 10 }} display="flex" justifyContent="center">
             <Pagination
-              count={Math.ceil(data.data.length / NUMBER_PER_PAGE)}
+              count={Math.ceil(allImageDataArray.data.length / NUMBER_PER_PAGE)}
               page={pageIndex}
               onChange={handlePageIndexChange}
               variant="outlined"
@@ -125,7 +101,7 @@ function ListImage({
               }}
             />
           </Box>
-          {data.data.map((imageData, idx) => {
+          {allImageDataArray.data.map((imageData, idx) => {
             // console.log("idx: ", idx);
             // console.log("pageIndex.image: ", pageIndex.image);
             // console.log("imageData: ", imageData);
@@ -142,7 +118,7 @@ function ListImage({
         </div>
       );
     },
-    [data, pageIndex, isLoading]
+    [allImageDataArray, pageIndex,isLoading]
   );
 
   return <ImageCardList />;

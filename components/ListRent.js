@@ -1,6 +1,5 @@
 import React from "react";
 import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
-import useSWR from "swr";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
@@ -9,7 +8,6 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
-import { FetchType } from "../lib/fetchJson";
 import CardRent from "./CardRent";
 
 function ListRent({
@@ -20,6 +18,8 @@ function ListRent({
   promptNftContract,
   rentMarketContract,
   signTypedDataAsync,
+  data,
+  isLoading,
 }) {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const NUMBER_PER_PAGE = 5;
@@ -31,17 +31,6 @@ function ListRent({
   const handlePageIndexChange = (event, value) => {
     setPageIndex(value);
   };
-
-  //* Get all my rent data array.
-  const { data, error, isLoading, isValidating } = useSWR({
-    command: "getAllMyRentData",
-    rentMarketContract: rentMarketContract,
-    signer: dataSigner,
-    renterAddress: address,
-  });
-  // console.log("data: ", data);
-  // console.log("isLoading: ", isLoading);
-  // console.log("isValidating: ", isValidating);
 
   function LoadingPage() {
     return (
@@ -112,9 +101,7 @@ function ListRent({
         <div>
           <Box sx={{ marginTop: 10 }} display="flex" justifyContent="center">
             <Pagination
-              count={Math.ceil(
-                data.myRentDataArrayResult.length / NUMBER_PER_PAGE
-              )}
+              count={Math.ceil(data.length / NUMBER_PER_PAGE)}
               page={pageIndex}
               onChange={handlePageIndexChange}
               variant="outlined"
@@ -132,7 +119,7 @@ function ListRent({
               }}
             />
           </Box>
-          {data.myRentDataArrayResult.map((nftData, idx) => {
+          {data.map((nftData, idx) => {
             // console.log("nftData: ", nftData);
             // console.log("idx: ", idx);
             // console.log("pageIndex: ", pageIndex);

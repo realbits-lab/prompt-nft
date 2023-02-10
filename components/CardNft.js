@@ -9,7 +9,6 @@ import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
-import { FetchType } from "../lib/fetchJson";
 import {
   isWalletConnected,
   AlertSeverity,

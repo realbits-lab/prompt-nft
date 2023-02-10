@@ -1,6 +1,5 @@
 import React from "react";
 import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
-import useSWR from "swr";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
@@ -9,7 +8,6 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
-import { FetchType } from "../lib/fetchJson";
 import CardOwn from "./CardOwn";
 
 function ListOwn({
@@ -20,6 +18,8 @@ function ListOwn({
   promptNftContract,
   rentMarketContract,
   signTypedDataAsync,
+  data,
+  isLoading,
 }) {
   // console.log("call OwnCardList()");
   // console.log("allMyOwnDataCount: ", allMyOwnDataCount);
@@ -33,23 +33,6 @@ function ListOwn({
   const handlePageIndexChange = (event, value) => {
     setPageIndex(value);
   };
-
-  //* Get all my own data array.
-  const { data, error, isLoading, isValidating } = useSWR({
-    command: "getAllMyOwnData",
-    promptNftContract: promptNftContract,
-    signer: dataSigner,
-    ownerAddress: address,
-  });
-  // console.log("data: ", data);
-  // console.log("isLoading: ", isLoading);
-  // console.log("isValidating: ", isValidating);
-
-  function handleCardMediaImageError(e) {
-    // console.log("call handleCardMediaImageError()");
-    e.target.onerror = null;
-    e.target.src = PLACEHOLDER_IMAGE_URL;
-  }
 
   function LoadingPage() {
     return (
@@ -119,7 +102,7 @@ function ListOwn({
           <Box sx={{ marginTop: 10 }} display="flex" justifyContent="center">
             <Pagination
               count={Math.ceil(
-                data.myOwnDataArrayResult.length / NUMBER_PER_PAGE
+                data.length / NUMBER_PER_PAGE
               )}
               page={pageIndex}
               onChange={handlePageIndexChange}
@@ -138,7 +121,7 @@ function ListOwn({
               }}
             />
           </Box>
-          {data.myOwnDataArrayResult.map((nftData, idx) => {
+          {data.map((nftData, idx) => {
             // console.log("nftData: ", nftData);
             // console.log("idx: ", idx);
             // console.log("pageIndex: ", pageIndex);
