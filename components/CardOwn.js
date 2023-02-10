@@ -2,6 +2,7 @@ import React from "react";
 import { isMobile } from "react-device-detect";
 import useSWR from "swr";
 import { Base64 } from "js-base64";
+import { useRecoilStateLoadable } from "recoil";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -16,7 +17,14 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import fetchJson from "../lib/fetchJson";
-import { isWalletConnected, decryptData, handleLogin } from "../lib/util";
+import {
+  isWalletConnected,
+  decryptData,
+  handleLogin,
+  RBSnackbar,
+  AlertSeverity,
+  writeToastMessageState,
+} from "../lib/util";
 import useUser from "../lib/useUser";
 
 function CardNft({
@@ -77,6 +85,21 @@ function CardNft({
     e.target.src = PLACEHOLDER_IMAGE_URL;
   }
 
+  //* --------------------------------------------------------------------------
+  //* Snackbar variables.
+  //* --------------------------------------------------------------------------
+  const [writeToastMessageLoadable, setWriteToastMessage] =
+    useRecoilStateLoadable(writeToastMessageState);
+  const writeToastMessage =
+    writeToastMessageLoadable?.state === "hasValue"
+      ? writeToastMessageLoadable.contents
+      : {
+          snackbarSeverity: AlertSeverity.info,
+          snackbarMessage: "",
+          snackbarTime: new Date(),
+          snackbarOpen: true,
+        };
+
   return (
     <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}>
       <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
@@ -128,20 +151,24 @@ function CardNft({
             onClick={async function () {
               if (isWalletConnected({ isConnected, selectedChain }) === false) {
                 // console.log("chainName: ", getChainName({ chainId }));
-                setSnackbarSeverity("warning");
-                setSnackbarMessage(
-                  `Change metamask network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
-                );
-                setOpenSnackbar(true);
+                setWriteToastMessage({
+                  snackbarSeverity: AlertSeverity.warning,
+                  snackbarMessage: `Change metamask network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`,
+                  snackbarTime: new Date(),
+                  snackbarOpen: true,
+                });
                 return;
               }
 
               if (isMobile === true) {
                 //* Set user login session.
                 if (user.isLoggedIn === false) {
-                  setSnackbarSeverity("info");
-                  setSnackbarMessage("Checking user authentication...");
-                  setOpenSnackbar(true);
+                  setWriteToastMessage({
+                    snackbarSeverity: AlertSeverity.info,
+                    snackbarMessage: "Checking user authentication...",
+                    snackbarTime: new Date(),
+                    snackbarOpen: true,
+                  });
 
                   try {
                     await handleLogin({
@@ -152,15 +179,21 @@ function CardNft({
                     });
                   } catch (error) {
                     console.error(error);
-                    setSnackbarSeverity("error");
-                    setSnackbarMessage(`Login error: ${error}`);
-                    setOpenSnackbar(true);
+                    setWriteToastMessage({
+                      snackbarSeverity: AlertSeverity.error,
+                      snackbarMessage: `Login error: ${error}`,
+                      snackbarTime: new Date(),
+                      snackbarOpen: true,
+                    });
                     return;
                   }
 
-                  setOpenSnackbar(false);
-                  setSnackbarMessage("Checking is finished.");
-                  setOpenSnackbar(true);
+                  setWriteToastMessage({
+                    snackbarSeverity: AlertSeverity.error,
+                    snackbarMessage: "Checking is finished.",
+                    snackbarTime: new Date(),
+                    snackbarOpen: true,
+                  });
                 }
 
                 //* Get the plain prompt from prompter.

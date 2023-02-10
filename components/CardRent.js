@@ -153,11 +153,6 @@ function CardRent({
             onClick={async function () {
               if (isWalletConnected({ isConnected, selectedChain }) === false) {
                 // console.log("chainName: ", getChainName({ chainId }));
-                // setSnackbarSeverity("warning");
-                // setSnackbarMessage(
-                //   `Change metamask network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
-                // );
-                // setOpenSnackbar(true);
 
                 setWriteToastMessage({
                   snackbarSeverity: AlertSeverity.warning,
