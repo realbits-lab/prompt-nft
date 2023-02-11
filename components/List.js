@@ -59,7 +59,7 @@ function List({ mode }) {
     readRentingDataLoadable?.state === "hasValue"
       ? readRentingDataLoadable.contents
       : [];
-  console.log("readRentingData: ", readRentingData);
+  // console.log("readRentingData: ", readRentingData);
 
   //*---------------------------------------------------------------------------
   //* Define hook variables.
@@ -89,6 +89,18 @@ function List({ mode }) {
   // console.log("rentMarketContract: ", rentMarketContract);
 
   //* Listen contract event.
+  useContractEvent({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI["abi"],
+    eventName: "RentNFT",
+    listener(node, label, owner) {
+      console.log("node: ", node);
+      console.log("label: ", label);
+      console.log("owner: ", owner);
+      swrRefetchRentData();
+    },
+  });
+
   useContractEvent({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI["abi"],
@@ -260,7 +272,6 @@ function List({ mode }) {
       swrDataRegisterData,
       swrDataRentData,
       dataOwn,
-      readRentingDataLoadable,
     ]
   );
 
@@ -357,27 +368,27 @@ function List({ mode }) {
           }
 
           //* Check renting data.
-          if (readRentingData) {
-            const someResult = readRentingData.some(function (rentingData) {
-              console.log("rentingData: ", rentingData);
-              return (
-                rentingData.tokenId.eq(nft.tokenId) &&
-                rentingData.nftAddress.localeCompare(
-                  PROMPT_NFT_CONTRACT_ADDRESS,
-                  undefined,
-                  {
-                    sensitivity: "accent",
-                  }
-                ) === 0
-              );
-            });
+          // if (readRentingData) {
+          //   const someResult = readRentingData.some(function (rentingData) {
+          //     console.log("rentingData: ", rentingData);
+          //     return (
+          //       rentingData.tokenId.eq(nft.tokenId) &&
+          //       rentingData.nftAddress.localeCompare(
+          //         PROMPT_NFT_CONTRACT_ADDRESS,
+          //         undefined,
+          //         {
+          //           sensitivity: "accent",
+          //         }
+          //       ) === 0
+          //     );
+          //   });
 
-            if (someResult === true) {
-              isRenting = true;
-            } else {
-              isRenting = false;
-            }
-          }
+          //   if (someResult === true) {
+          //     isRenting = true;
+          //   } else {
+          //     isRenting = false;
+          //   }
+          // }
 
           // console.log("nft.tokenId: ", nft.tokenId.toNumber());
           // console.log("isOwn: ", isOwn);

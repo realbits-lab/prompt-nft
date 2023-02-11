@@ -84,43 +84,34 @@ function CardNft({
   // console.log("contractWrite: ", contractWrite);
   // console.log("contractWrite.write: ", contractWrite.write);
   // console.log("contractWrite.status: ", contractWrite.status);
+  // console.log("contractWrite.data?.hash: ", contractWrite.data?.hash);
   const waitForTransaction = useWaitForTransaction({
     hash: contractWrite.data?.hash,
     onSuccess(data) {
-      console.log("call onSuccess()");
-      console.log("data: ", data);
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
     },
     onError(error) {
-      console.log("call onSuccess()");
-      console.log("error: ", error);
+      // console.log("call onSuccess()");
+      // console.log("error: ", error);
+      setIsRenting(false);
     },
     onSettled(data, error) {
-      console.log("call onSettled()");
-      console.log("data: ", data);
-      console.log("error: ", error);
-      console.log("readRentingData: ", readRentingData);
-
-      //* Remove renting data state array.
-      if (readRentingData) {
-        const rentingData = readRentingData.filter(function (element) {
-          console.log("element: ", element);
-          return (
-            element.tokenId.neq(nftData.tokenId) &&
-            element.nftAddress.localeCompare(
-              PROMPT_NFT_CONTRACT_ADDRESS,
-              undefined,
-              {
-                sensitivity: "accent",
-              }
-            ) === 0
-          );
-        });
-        console.log("rentingData: ", rentingData);
-        setWriteRentingData(rentingData);
-      }
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.info,
+        snackbarMessage: "Renting is finished.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
+      // console.log("readRentingData: ", readRentingData);
     },
   });
+  // console.log("waitForTransaction: ", waitForTransaction);
   // console.log("waitForTransaction.data: ", waitForTransaction.data);
+  // console.log("waitForTransaction.status: ", waitForTransaction.status);
 
   //* Get pending transactions.
   useWatchPendingTransactions({
@@ -176,6 +167,8 @@ function CardNft({
     e.target.onerror = null;
     e.target.src = PLACEHOLDER_IMAGE_URL;
   }
+
+  const [isRenting, setIsRenting] = React.useState(false);
 
   return (
     <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}>
@@ -243,7 +236,7 @@ function CardNft({
             >
               PROMPT
             </Button>
-          ) : nftData.isRenting === true ? (
+          ) : isRenting === true ? (
             <Button disabled>RENTING</Button>
           ) : (
             <Button
@@ -292,17 +285,18 @@ function CardNft({
                 try {
                   // console.log("contractWrite: ", contractWrite);
                   const tx = contractWrite.write();
-                  console.log("readRentingData: ", readRentingData);
+                  // console.log("tx: ", tx);
+                  setIsRenting(true);
 
+                  // console.log("readRentingData: ", readRentingData);
                   let rentingDataArray = readRentingData;
                   rentingDataArray.push({
                     nftAddress: PROMPT_NFT_CONTRACT_ADDRESS,
                     tokenId: nftData.tokenId,
                   });
-
-                  console.log("rentingDataArray: ", rentingDataArray);
+                  // console.log("rentingDataArray: ", rentingDataArray);
                   setWriteRentingData(rentingDataArray);
-                  console.log("readRentingData: ", readRentingData);
+                  // console.log("readRentingData: ", readRentingData);
 
                   // console.log("tx: ", tx);
                   // const tx = await rentMarketContract
