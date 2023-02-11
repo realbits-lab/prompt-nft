@@ -1,7 +1,6 @@
 import React from "react";
 import { isMobile } from "react-device-detect";
 import useSWR from "swr";
-import { Base64 } from "js-base64";
 import { useRecoilStateLoadable } from "recoil";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -11,19 +10,12 @@ import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
 import fetchJson from "../lib/fetchJson";
 import {
-  isWalletConnected,
-  decryptData,
-  handleLogin,
-  RBSnackbar,
   AlertSeverity,
   writeToastMessageState,
+  writeDialogMessageState,
+  handleCheckPrompt,
 } from "../lib/util";
 import useUser from "../lib/useUser";
 
@@ -73,12 +65,6 @@ function CardNft({
   //   value: value,
   // });
 
-  //*---------------------------------------------------------------------------
-  //* Define state variables.
-  //*---------------------------------------------------------------------------
-  const [decryptedPrompt, setDecryptedPrompt] = React.useState("");
-  const [openDialog, setOpenDialog] = React.useState(false);
-
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
     e.target.onerror = null;
@@ -98,6 +84,19 @@ function CardNft({
           snackbarMessage: "",
           snackbarTime: new Date(),
           snackbarOpen: true,
+        };
+
+  //* --------------------------------------------------------------------------
+  //* Prompt dialog variables.
+  //* --------------------------------------------------------------------------
+  const [writeDialogMessageLoadable, setWriteDialogMessage] =
+    useRecoilStateLoadable(writeDialogMessageState);
+  const writeDialogMessage =
+    writeDialogMessageLoadable?.state === "hasValue"
+      ? writeDialogMessageLoadable.contents
+      : {
+          decyprtedPrompt: undefined,
+          openDialog: false,
         };
 
   return (
@@ -149,136 +148,24 @@ function CardNft({
           <Button
             size="small"
             onClick={async function () {
-              if (isWalletConnected({ isConnected, selectedChain }) === false) {
-                // console.log("chainName: ", getChainName({ chainId }));
-                setWriteToastMessage({
-                  snackbarSeverity: AlertSeverity.warning,
-                  snackbarMessage: `Change metamask network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`,
-                  snackbarTime: new Date(),
-                  snackbarOpen: true,
-                });
-                return;
-              }
-
-              if (isMobile === true) {
-                //* Set user login session.
-                if (user.isLoggedIn === false) {
-                  setWriteToastMessage({
-                    snackbarSeverity: AlertSeverity.info,
-                    snackbarMessage: "Checking user authentication...",
-                    snackbarTime: new Date(),
-                    snackbarOpen: true,
-                  });
-                  // const signMessageResult = await signTypedDataAsync();
-                  // console.log("signMessageResult: ", signMessageResult);
-
-                  try {
-                    await handleLogin({
-                      mutateUser: mutateUser,
-                      address: address,
-                      chainId: selectedChain.id,
-                      signTypedDataAsync: signTypedDataAsync,
-                    });
-                  } catch (error) {
-                    console.error(error);
-                    setWriteToastMessage({
-                      snackbarSeverity: AlertSeverity.error,
-                      snackbarMessage: `Login error: ${error}`,
-                      snackbarTime: new Date(),
-                      snackbarOpen: true,
-                    });
-                    return;
-                  }
-
-                  setWriteToastMessage({
-                    snackbarSeverity: AlertSeverity.info,
-                    snackbarMessage: "Checking is finished.",
-                    snackbarTime: new Date(),
-                    snackbarOpen: true,
-                  });
-                }
-
-                //* Get the plain prompt from prompter.
-                setWriteToastMessage({
-                  snackbarSeverity: AlertSeverity.info,
-                  snackbarMessage: "Trying to find the prompt...",
-                  snackbarTime: new Date(),
-                  snackbarOpen: true,
-                });
-
-                const body = { tokenId: nftData.tokenId.toNumber() };
-                const promptResult = await fetchJson(
-                  { url: "/api/prompt" },
-                  {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(body),
-                  }
-                );
-                // console.log("promptResult:", promptResult);
-
-                const decodedPrompt = Base64.decode(
-                  promptResult.prompt
-                ).toString();
-                // console.log("decodedPrompt:", decodedPrompt);
-
-                setDecryptedPrompt(decodedPrompt);
-                setOpenDialog(true);
-
-                setWriteToastMessage({
-                  snackbarSeverity: AlertSeverity.info,
-                  snackbarMessage: undefined,
-                  snackbarTime: new Date(),
-                  snackbarOpen: false,
-                });
-              } else {
-                const encryptPromptData = await promptNftContract
-                  .connect(dataSigner)
-                  .getTokenOwnerPrompt(nftData.tokenId);
-                // console.log("encryptPromptData: ", encryptPromptData);
-
-                const encryptData = {
-                  ciphertext: encryptPromptData["ciphertext"],
-                  ephemPublicKey: encryptPromptData["ephemPublicKey"],
-                  nonce: encryptPromptData["nonce"],
-                  version: encryptPromptData["version"],
-                };
-                // console.log("encryptData: ", encryptData);
-
-                const prompt = await decryptData({
-                  encryptData: encryptData,
-                  decryptAddress: address,
-                });
-                // console.log("prompt: ", prompt);
-
-                setDecryptedPrompt(prompt);
-                setOpenDialog(true);
-              }
+              await handleCheckPrompt({
+                setWriteToastMessage: setWriteToastMessage,
+                setWriteDialogMessage: setWriteDialogMessage,
+                isMobile: isMobile,
+                user: user,
+                nftData: nftData,
+                promptNftContract: promptNftContract,
+                dataSigner: dataSigner,
+                isConnected: isConnected,
+                selectedChain: selectedChain,
+                address: address,
+              });
             }}
           >
             PROMPT
           </Button>
         </CardActions>
       </Card>
-
-      <Dialog
-        open={openDialog}
-        onClose={() => setOpenDialog(false)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">Prompt</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            {decryptedPrompt}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} autoFocus>
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }

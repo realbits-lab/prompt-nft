@@ -13,6 +13,8 @@ import {
   isWalletConnected,
   AlertSeverity,
   writeToastMessageState,
+  writeDialogMessageState,
+  handleCheckPrompt,
 } from "../lib/util";
 
 function CardNft({
@@ -130,83 +132,107 @@ function CardNft({
           </Typography>
         </CardContent>
         <CardActions>
-          <Button
-            size="small"
-            onClick={async () => {
-              if (isWalletConnected({ isConnected, selectedChain }) === false) {
-                setWriteToastMessage({
-                  snackbarSeverity: AlertSeverity.warning,
-                  snackbarMessage: `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`,
-                  snackbarTime: new Date(),
-                  snackbarOpen: true,
+          {nftData.isOwn === true || nftData.isRent === true ? (
+            <Button
+              size="small"
+              onClick={async function () {
+                await handleCheckPrompt({
+                  setWriteToastMessage: setWriteToastMessage,
+                  setWriteDialogMessage: setWriteDialogMessage,
+                  isMobile: isMobile,
+                  user: user,
+                  nftData: nftData,
+                  promptNftContract: promptNftContract,
+                  dataSigner: dataSigner,
+                  isConnected: isConnected,
+                  selectedChain: selectedChain,
+                  address: address,
                 });
-                return;
-              }
+              }}
+            >
+              PROMPT
+            </Button>
+          ) : (
+            <Button
+              size="small"
+              onClick={async () => {
+                if (
+                  isWalletConnected({ isConnected, selectedChain }) === false
+                ) {
+                  setWriteToastMessage({
+                    snackbarSeverity: AlertSeverity.warning,
+                    snackbarMessage: `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`,
+                    snackbarTime: new Date(),
+                    snackbarOpen: true,
+                  });
+                  return;
+                }
 
-              if (!rentMarketContract || !dataSigner) {
-                console.error(
-                  "rentMarketContract or signer is null or undefined."
-                );
-                return;
-              }
-
-              //* Rent this nft with rent fee.
-              // console.log("nftData.rentFee: ", nftData.rentFee);
-              // console.log("nftData.tokenId: ", nftData.tokenId);
-              // console.log("rentMarketContract: ", rentMarketContract);
-              // console.log("dataSigner: ", dataSigner);
-              // console.log(
-              //   "process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS: ",
-              //   process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS
-              // );
-              // console.log(
-              //   "process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS: ",
-              //   process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS
-              // );
-
-              setWriteToastMessage({
-                snackbarSeverity: AlertSeverity.info,
-                snackbarMessage: "Trying to rent this nft...",
-                snackbarTime: new Date(),
-                snackbarOpen: true,
-              });
-
-              try {
-                const tx = await rentMarketContract
-                  .connect(dataSigner)
-                  .rentNFT(
-                    process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-                    nftData.tokenId,
-                    process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS,
-                    {
-                      value: nftData.rentFee,
-                    }
+                if (!rentMarketContract || !dataSigner) {
+                  console.error(
+                    "rentMarketContract or signer is null or undefined."
                   );
-                const txResult = await tx.wait();
-              } catch (error) {
-                console.error("error: ", error);
+                  return;
+                }
+
+                //* Rent this nft with rent fee.
+                // console.log("nftData.rentFee: ", nftData.rentFee);
+                // console.log("nftData.tokenId: ", nftData.tokenId);
+                // console.log("rentMarketContract: ", rentMarketContract);
+                // console.log("dataSigner: ", dataSigner);
+                // console.log(
+                //   "process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS: ",
+                //   process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS
+                // );
+                // console.log(
+                //   "process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS: ",
+                //   process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS
+                // );
+
                 setWriteToastMessage({
-                  snackbarSeverity: AlertSeverity.error,
-                  snackbarMessage: error.data
-                    ? error.data.message
-                    : error.message,
+                  snackbarSeverity: AlertSeverity.info,
+                  snackbarMessage: "Trying to rent this nft...",
                   snackbarTime: new Date(),
                   snackbarOpen: true,
                 });
-                return;
-              }
 
-              setWriteToastMessage({
-                snackbarSeverity: AlertSeverity.info,
-                snackbarMessage:
-                  "Rent transaction is just started and wait a moment...",
-                snackbarTime: new Date(),
-                snackbarOpen: true,
-              });
-            }}
-          >
-            RENT
-          </Button>
+                try {
+                  const tx = await rentMarketContract
+                    .connect(dataSigner)
+                    .rentNFT(
+                      process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
+                      nftData.tokenId,
+                      process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS,
+                      {
+                        value: nftData.rentFee,
+                      }
+                    );
+                  const txResult = await tx.wait();
+                } catch (error) {
+                  console.error("error: ", error);
+                  setWriteToastMessage({
+                    snackbarSeverity: AlertSeverity.error,
+                    snackbarMessage: error.data
+                      ? error.data.message
+                      : error.message,
+                    snackbarTime: new Date(),
+                    snackbarOpen: true,
+                  });
+                  return;
+                }
+
+                setWriteToastMessage({
+                  snackbarSeverity: AlertSeverity.info,
+                  snackbarMessage:
+                    "Rent transaction is just started and wait a moment...",
+                  snackbarTime: new Date(),
+                  snackbarOpen: true,
+                });
+              }}
+            >
+              RENT
+            </Button>
+          )}
         </CardActions>
       </Card>
     </Box>

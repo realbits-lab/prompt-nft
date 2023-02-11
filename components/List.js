@@ -20,7 +20,6 @@ import ListImage from "./ListImage";
 import ListNft from "./ListNft";
 import ListOwn from "./ListOwn";
 import ListRent from "./ListRent";
-import { DateRange } from "@mui/icons-material";
 
 function List({ mode }) {
   // console.log("call List()");
@@ -220,7 +219,7 @@ function List({ mode }) {
             //* Check rent status.
             if (dataRent) {
               const someResult = dataRent.some(function (rentData) {
-                console.log("rentData: ", rentData);
+                // console.log("rentData: ", rentData);
                 return (
                   rentData.tokenId.eq(nft.tokenId) &&
                   rentData.renteeAddress.localeCompare(address, undefined, {
@@ -235,9 +234,9 @@ function List({ mode }) {
                 isRent = false;
               }
             }
-            console.log("nft.tokenId: ", nft.tokenId.toNumber());
-            console.log("isOwn: ", isOwn);
-            console.log("isRent: ", isRent);
+            // console.log("nft.tokenId: ", nft.tokenId.toNumber());
+            // console.log("isOwn: ", isOwn);
+            // console.log("isRent: ", isRent);
 
             return {
               ...nft,
