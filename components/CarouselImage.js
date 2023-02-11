@@ -1,7 +1,7 @@
 import React from "react";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
+import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -9,9 +9,11 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import MobileStepper from "@mui/material/MobileStepper";
 import CircularProgress from "@mui/material/CircularProgress";
+import Paper from "@mui/material/Paper";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import SwipeableViews from "react-swipeable-views";
+import { bindKeyboard } from "react-swipeable-views-utils";
 
 function CarouselImage({ data, isLoading }) {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
@@ -19,8 +21,9 @@ function CarouselImage({ data, isLoading }) {
   const CARD_MARGIN_TOP = "60px";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
-  const CARD_PADDING = 1;
+  const CARD_PADDING = 10;
 
+  const BindKeyboardSwipeableViews = bindKeyboard(SwipeableViews);
   const theme = useTheme();
   const [activeStep, setActiveStep] = React.useState(0);
   const maxSteps = data?.data?.length || 0;
@@ -81,7 +84,6 @@ function CarouselImage({ data, isLoading }) {
   }
 
   function handleCardMediaImageError(e) {
-    // console.log("call handleCardMediaImageError()");
     e.target.onerror = null;
     e.target.src = PLACEHOLDER_IMAGE_URL;
   }
@@ -103,116 +105,92 @@ function CarouselImage({ data, isLoading }) {
       }
 
       return (
-        <Box
-          sx={{
-            m: CARD_PADDING,
-            marginTop: CARD_MARGIN_TOP,
-            // height: window.innerHeight - 100,
-            // height: 300,
-          }}
-        >
-          {/* <Paper
-            square
-            elevation={0}
+        <>
+          <Box
             sx={{
-              display: "flex",
-              alignItems: "center",
-              height: 50,
-              pl: 2,
-              bgcolor: "background.default",
+              m: CARD_PADDING,
+              marginTop: CARD_MARGIN_TOP,
             }}
           >
-            <Typography>{data.data[activeStep].prompt}</Typography>
-          </Paper> */}
-          <SwipeableViews
-            axis={theme.direction === "rtl" ? "x-reverse" : "x"}
-            index={activeStep}
-            onChangeIndex={handleStepChange}
-            enableMouseEvents
-            sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}
-          >
-            {data.data.map((imageData, index) => (
-              <div key={index}>
-                {Math.abs(activeStep - index) <= 2 ? (
-                  // <Box
-                  //   component="img"
-                  //   sx={{
-                  //     height: 255,
-                  //     display: "block",
-                  //     maxWidth: 400,
-                  //     overflow: "hidden",
-                  //     width: "100%",
-                  //   }}
-                  //   src={imageData.imageUrl}
-                  // />
-                  <Card sx={{}}>
-                    {imageData ? (
-                      <CardMedia
-                        component="img"
-                        image={imageData ? imageData.imageUrl : ""}
-                        onError={handleCardMediaImageError}
-                        sx={{
-                          height: window.innerHeight - 200,
-                          objectFit: "cover",
-                        }}
-                      />
-                    ) : (
-                      <Skeleton
-                        variant="rounded"
-                        width={CARD_MIN_WIDTH}
-                        height={CARD_MIN_WIDTH}
-                      />
-                    )}
-                    <CardContent>
-                      <Typography
-                        sx={{ fontSize: 14 }}
-                        color="text.secondary"
-                        gutterBottom
-                        component="div"
-                      >
-                        {imageData.prompt}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                ) : null}
-              </div>
-            ))}
-          </SwipeableViews>
-          <MobileStepper
-            steps={maxSteps}
-            // position="static"
-            variant="progress"
-            activeStep={activeStep}
-            nextButton={
-              <Button
-                size="small"
-                onClick={handleNext}
-                disabled={activeStep === maxSteps - 1}
-              >
-                Next
-                {theme.direction === "rtl" ? (
-                  <KeyboardArrowLeft />
-                ) : (
-                  <KeyboardArrowRight />
-                )}
-              </Button>
-            }
-            backButton={
-              <Button
-                size="small"
-                onClick={handleBack}
-                disabled={activeStep === 0}
-              >
-                {theme.direction === "rtl" ? (
-                  <KeyboardArrowRight />
-                ) : (
-                  <KeyboardArrowLeft />
-                )}
-                Back
-              </Button>
-            }
-          />
-        </Box>
+            <BindKeyboardSwipeableViews
+              axis={theme.direction === "rtl" ? "x-reverse" : "x"}
+              index={activeStep}
+              onChangeIndex={handleStepChange}
+              enableMouseEvents
+            >
+              {data.data.map(function (imageData, index) {
+                return (
+                  <div key={index}>
+                    {Math.abs(activeStep - index) <= 2 ? (
+                      <Card>
+                        {imageData ? (
+                          <CardMedia
+                            component="img"
+                            image={imageData ? imageData.imageUrl : ""}
+                            onError={handleCardMediaImageError}
+                            sx={{
+                              objectFit: "cover",
+                            }}
+                          />
+                        ) : (
+                          <Skeleton
+                            variant="rounded"
+                            width={CARD_MIN_WIDTH}
+                            height={CARD_MIN_WIDTH}
+                          />
+                        )}
+                        <CardContent>
+                          <Grid container>
+                            <Grid item xs={2}></Grid>
+                            <Grid item xs={10}>
+                              <Typography color="text.secondary" variant="h7">
+                                {imageData.prompt}
+                              </Typography>
+                            </Grid>
+                          </Grid>
+                        </CardContent>
+                      </Card>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </BindKeyboardSwipeableViews>
+
+            <MobileStepper
+              steps={maxSteps}
+              variant="progress"
+              activeStep={activeStep}
+              nextButton={
+                <Button
+                  size="small"
+                  onClick={handleNext}
+                  disabled={activeStep === maxSteps - 1}
+                >
+                  Next
+                  {theme.direction === "rtl" ? (
+                    <KeyboardArrowLeft />
+                  ) : (
+                    <KeyboardArrowRight />
+                  )}
+                </Button>
+              }
+              backButton={
+                <Button
+                  size="small"
+                  onClick={handleBack}
+                  disabled={activeStep === 0}
+                >
+                  {theme.direction === "rtl" ? (
+                    <KeyboardArrowRight />
+                  ) : (
+                    <KeyboardArrowLeft />
+                  )}
+                  Back
+                </Button>
+              }
+            />
+          </Box>
+        </>
       );
     },
     [activeStep, maxSteps, data, isLoading]
