@@ -159,25 +159,25 @@ function List({ mode }) {
     cacheOnBlock: true,
     watch: true,
     onSuccess(data) {
-      console.log("call onSuccess()");
-      console.log("data: ", data);
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
       const allMyRentDataArray = data.filter(
         (rentData) =>
           rentData.renteeAddress.localeCompare(address, undefined, {
             sensitivity: "accent",
           }) === 0
       );
-      console.log("allMyRentDataArray: ", allMyRentDataArray);
+      // console.log("allMyRentDataArray: ", allMyRentDataArray);
       setAllRentDataArray(allMyRentDataArray);
     },
     onError(error) {
-      console.log("call onError()");
-      console.log("error: ", error);
+      // console.log("call onError()");
+      // console.log("error: ", error);
     },
     onSettled(data, error) {
-      console.log("call onSettled()");
-      console.log("data: ", data);
-      console.log("error: ", error);
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
     },
   });
 
