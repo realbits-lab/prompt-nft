@@ -200,6 +200,14 @@ function CardRent({
                 }
 
                 //* Get the plain prompt from prompter.
+                setWriteToastMessage({
+                  snackbarSeverity: AlertSeverity.info,
+                  snackbarMessage: "Trying to find the prompt...",
+                  snackbarTime: new Date(),
+                  snackbarOpen: true,
+                });
+
+                //* Get the plain prompt from prompter.
                 const body = { tokenId: nftData.tokenId.toNumber() };
                 const promptResult = await fetchJson(
                   { url: "/api/prompt" },
@@ -218,6 +226,13 @@ function CardRent({
 
                 setDecryptedPrompt(decodedPrompt);
                 setOpenDialog(true);
+
+                setWriteToastMessage({
+                  snackbarSeverity: AlertSeverity.info,
+                  snackbarMessage: undefined,
+                  snackbarTime: new Date(),
+                  snackbarOpen: false,
+                });
               } else {
                 const encryptPromptData = await promptNftContract
                   .connect(dataSigner)
