@@ -4,7 +4,13 @@ import {
   Web3NetworkSwitch,
   useWeb3ModalNetwork,
 } from "@web3modal/react";
-import { useAccount, useSigner, useContract, useSignTypedData } from "wagmi";
+import {
+  useAccount,
+  useSigner,
+  useContract,
+  useContractRead,
+  useSignTypedData,
+} from "wagmi";
 import useSWR from "swr";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -30,6 +36,11 @@ function List({ mode }) {
   //*---------------------------------------------------------------------------
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const API_ALL_URL = process.env.NEXT_PUBLIC_API_ALL_URL;
+  const RENT_MARKET_CONTRACT_ADDRES =
+    process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
+  // console.log("RENT_MARKET_CONTRACT_ADDRES: ", RENT_MARKET_CONTRACT_ADDRES);
+  const PROMPT_NFT_CONTRACT_ADDRESS =
+    process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS;
 
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
@@ -51,12 +62,12 @@ function List({ mode }) {
   // console.log("isError: ", isError);
   // console.log("isLoading: ", isLoading);
   const promptNftContract = useContract({
-    address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
+    address: PROMPT_NFT_CONTRACT_ADDRESS,
     abi: promptNFTABI["abi"],
   });
   // console.log("promptNftContract: ", promptNftContract);
   const rentMarketContract = useContract({
-    address: process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS,
+    address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI["abi"],
   });
   // console.log("rentMarketContract: ", rentMarketContract);
@@ -73,15 +84,41 @@ function List({ mode }) {
   });
 
   //* Get all register data array.
+  // const {
+  //   data: swrDataRegisterData,
+  //   error: errorNft,
+  //   isLoading: isLoadingNft,
+  //   isValidating: isValidatingNft,
+  // } = useSWR({
+  //   command: "getAllRegisterData",
+  //   rentMarketContract: rentMarketContract,
+  //   signer: dataSigner,
+  // });
   const {
-    data: dataNft,
-    error: errorNft,
-    isLoading: isLoadingNft,
-    isValidating: isValidatingNft,
-  } = useSWR({
-    command: "getAllRegisterData",
-    rentMarketContract: rentMarketContract,
-    signer: dataSigner,
+    data: swrDataRegisterData,
+    isError: swrErrorRegisterData,
+    isLoading: swrIsLoadingRegisterData,
+    isValidating: swrIsValidatingRegisterData,
+    status: swrStatusRegisterData,
+  } = useContractRead({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI.abi,
+    functionName: "getAllRegisterData",
+    cacheOnBlock: true,
+    watch: true,
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+    },
+    onError(error) {
+      // console.log("call onError()");
+      // console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
+    },
   });
 
   //* Get all my own data array.
@@ -98,16 +135,50 @@ function List({ mode }) {
   });
 
   //* Get all my rent data array.
+  // const {
+  //   data: dataRent,
+  //   error: errorRent,
+  //   isLoading: isLoadingRent,
+  //   isValidating: isValidatingRent,
+  // } = useSWR({
+  //   command: "getAllMyRentData",
+  //   rentMarketContract: rentMarketContract,
+  //   signer: dataSigner,
+  //   renterAddress: address,
+  // });
   const {
-    data: dataRent,
-    error: errorRent,
-    isLoading: isLoadingRent,
-    isValidating: isValidatingRent,
-  } = useSWR({
-    command: "getAllMyRentData",
-    rentMarketContract: rentMarketContract,
-    signer: dataSigner,
-    renterAddress: address,
+    data: swrDataRentData,
+    isError: swrErrorRentData,
+    isLoading: swrIsLoadingRentData,
+    isValidating: swrIsValidatingRentData,
+    status: swrStatusRentData,
+  } = useContractRead({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI.abi,
+    functionName: "getAllRentData",
+    cacheOnBlock: true,
+    watch: true,
+    onSuccess(data) {
+      console.log("call onSuccess()");
+      console.log("data: ", data);
+      const allMyRentDataArray = data.filter(
+        (rentData) =>
+          rentData.renteeAddress.localeCompare(address, undefined, {
+            sensitivity: "accent",
+          }) === 0
+      );
+      console.log("allMyRentDataArray: ", allMyRentDataArray);
+      setAllRentDataArray(allMyRentDataArray);
+    },
+    onError(error) {
+      console.log("call onError()");
+      console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      console.log("call onSettled()");
+      console.log("data: ", data);
+      console.log("error: ", error);
+    },
   });
 
   //*---------------------------------------------------------------------------
@@ -155,15 +226,19 @@ function List({ mode }) {
 
   React.useEffect(
     function () {
-      console.log("call useEffect()");
-      console.log("dataNft: ", dataNft);
-      console.log("dataOwn: ", dataOwn);
+      // console.log("call useEffect()");
+      // console.log("swrDataRegisterData: ", swrDataRegisterData);
+      // console.log("swrErrorRegisterData: ", swrErrorRegisterData);
+      // console.log("swrIsLoadingRegisterData: ", swrIsLoadingRegisterData);
+      // console.log("swrIsValidatingRegisterData: ", swrIsValidatingRegisterData);
+      // console.log("swrStatusRegisterData: ", swrStatusRegisterData);
+      // console.log("dataOwn: ", dataOwn);
       // console.log("dataRent: ", dataRent);
 
       let ownDataArray;
       //* Set all own data array.
-      if (dataNft && dataOwn) {
-        ownDataArray = dataNft.filter(function (nft) {
+      if (swrDataRegisterData && dataOwn) {
+        ownDataArray = swrDataRegisterData.filter(function (nft) {
           // console.log("nft: ", nft);
           // console.log("nft.tokenId: ", nft.tokenId);
           return dataOwn.some(function (element) {
@@ -185,11 +260,22 @@ function List({ mode }) {
       }
 
       //* Set all rent data.
-      setAllRentDataArray(dataRent);
+      let allMyRentDataArray;
+      if (swrDataRentData) {
+        // console.log("address: ", address);
+        allMyRentDataArray = swrDataRentData.filter(
+          (rentData) =>
+            rentData.renteeAddress.localeCompare(address, undefined, {
+              sensitivity: "accent",
+            }) === 0
+        );
+        // console.log("allMyRentDataArray: ", allMyRentDataArray);
+        setAllRentDataArray(allMyRentDataArray);
+      }
 
       //* Set all registered nft data.
-      if (dataNft) {
-        const dataNftWithStatusArray = dataNft
+      if (swrDataRegisterData) {
+        const dataNftWithStatusArray = swrDataRegisterData
           .map(function (nft) {
             let isOwn = false;
             let isRent = false;
@@ -217,8 +303,8 @@ function List({ mode }) {
             }
 
             //* Check rent status.
-            if (dataRent) {
-              const someResult = dataRent.some(function (rentData) {
+            if (allMyRentDataArray) {
+              const someResult = allMyRentDataArray.some(function (rentData) {
                 // console.log("rentData: ", rentData);
                 return (
                   rentData.tokenId.eq(nft.tokenId) &&
@@ -246,7 +332,7 @@ function List({ mode }) {
             };
           })
           .filter((e) => e);
-        setAllNftDataArray(dataNftWithStatusArray);
+        setAllNftDataArray(dataNftWithStatusArray.reverse());
       }
     },
     [
@@ -255,9 +341,9 @@ function List({ mode }) {
       dataSigner,
       promptNftContract,
       rentMarketContract,
-      dataNft,
+      swrDataRegisterData,
+      swrDataRentData,
       dataOwn,
-      dataRent,
     ]
   );
 
@@ -329,9 +415,8 @@ function List({ mode }) {
                 dataSigner={dataSigner}
                 promptNftContract={promptNftContract}
                 rentMarketContract={rentMarketContract}
-                // data={dataNft}
                 data={allNftDataArray}
-                isLoading={isLoadingNft}
+                isLoading={swrIsLoadingRegisterData}
               />
             )}
           </div>
@@ -366,8 +451,8 @@ function List({ mode }) {
                 promptNftContract={promptNftContract}
                 rentMarketContract={rentMarketContract}
                 signTypedDataAsync={signTypedDataAsync}
-                data={dataRent}
-                isLoading={isLoadingRent}
+                data={allRentDataArray}
+                isLoading={swrIsLoadingRentData}
               />
             )}
           </div>
