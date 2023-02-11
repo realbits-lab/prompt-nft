@@ -155,10 +155,10 @@ function List({ mode }) {
 
   React.useEffect(
     function () {
-      // console.log("dataNft: ", dataNft);
-      // console.log("dataOwn: ", dataOwn);
+      console.log("call useEffect()");
+      console.log("dataNft: ", dataNft);
+      console.log("dataOwn: ", dataOwn);
       // console.log("dataRent: ", dataRent);
-      // setAllNftDataArray(dataNft);
 
       let ownDataArray;
       //* Set all own data array.
@@ -249,7 +249,16 @@ function List({ mode }) {
         setAllNftDataArray(dataNftWithStatusArray);
       }
     },
-    [dataNft, dataOwn, dataRent]
+    [
+      selectedChain,
+      address,
+      dataSigner,
+      promptNftContract,
+      rentMarketContract,
+      dataNft,
+      dataOwn,
+      dataRent,
+    ]
   );
 
   function NoLoginPage() {

@@ -1,4 +1,5 @@
 import React from "react";
+import { isMobile } from "react-device-detect";
 import useSWR from "swr";
 import { useRecoilStateLoadable } from "recoil";
 import Box from "@mui/material/Box";
@@ -16,6 +17,7 @@ import {
   writeDialogMessageState,
   handleCheckPrompt,
 } from "../lib/util";
+import useUser from "../lib/useUser";
 
 function CardNft({
   nftData,
@@ -48,6 +50,7 @@ function CardNft({
     signer: dataSigner,
     tokenId: nftData ? nftData.tokenId : 0,
   });
+  const { user, mutateUser } = useUser();
 
   //* --------------------------------------------------------------------------
   //* Snackbar variables.
