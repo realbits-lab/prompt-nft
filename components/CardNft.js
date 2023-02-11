@@ -176,6 +176,7 @@ function CardNft({
                   snackbarTime: new Date(),
                   snackbarOpen: true,
                 });
+                return;
               }
 
               setWriteToastMessage({

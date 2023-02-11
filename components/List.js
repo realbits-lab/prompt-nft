@@ -179,8 +179,6 @@ function List({ mode }) {
         });
         // console.log("ownDataArray: ", ownDataArray);
         setAllOwnDataArray(ownDataArray);
-      } else {
-        setAllOwnDataArray(dataOwn);
       }
       setAllRentDataArray(dataRent);
     },
