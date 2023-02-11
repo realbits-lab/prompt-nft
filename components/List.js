@@ -94,9 +94,9 @@ function List({ mode }) {
     abi: rentmarketABI["abi"],
     eventName: "RentNFT",
     listener(node, label, owner) {
-      console.log("node: ", node);
-      console.log("label: ", label);
-      console.log("owner: ", owner);
+      // console.log("node: ", node);
+      // console.log("label: ", label);
+      // console.log("owner: ", owner);
       swrRefetchRentData();
     },
   });
@@ -106,9 +106,9 @@ function List({ mode }) {
     abi: rentmarketABI["abi"],
     eventName: "UnrentNFT",
     listener(node, label, owner) {
-      console.log("node: ", node);
-      console.log("label: ", label);
-      console.log("owner: ", owner);
+      // console.log("node: ", node);
+      // console.log("label: ", label);
+      // console.log("owner: ", owner);
       swrRefetchRentData();
     },
   });
@@ -260,7 +260,7 @@ function List({ mode }) {
 
   React.useEffect(
     function () {
-      console.log("call useEffect()");
+      // console.log("call useEffect()");
       initialize();
     },
     [
@@ -315,7 +315,7 @@ function List({ mode }) {
             sensitivity: "accent",
           }) === 0
       );
-      console.log("allMyRentDataArray: ", allMyRentDataArray);
+      // console.log("allMyRentDataArray: ", allMyRentDataArray);
       setAllMyRentDataArray(allMyRentDataArray);
     }
 
@@ -405,7 +405,7 @@ function List({ mode }) {
         .filter((e) => e);
 
       setAllNftDataArray(dataNftWithStatusArray.reverse());
-      console.log("dataNftWithStatusArray: ", dataNftWithStatusArray);
+      // console.log("dataNftWithStatusArray: ", dataNftWithStatusArray);
     }
   }
 
