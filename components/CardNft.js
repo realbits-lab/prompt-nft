@@ -64,6 +64,19 @@ function CardNft({
           snackbarOpen: true,
         };
 
+  //* --------------------------------------------------------------------------
+  //* Prompt dialog variables.
+  //* --------------------------------------------------------------------------
+  const [writeDialogMessageLoadable, setWriteDialogMessage] =
+    useRecoilStateLoadable(writeDialogMessageState);
+  const writeDialogMessage =
+    writeDialogMessageLoadable?.state === "hasValue"
+      ? writeDialogMessageLoadable.contents
+      : {
+          decyprtedPrompt: undefined,
+          openDialog: false,
+        };
+
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
     e.target.onerror = null;
@@ -113,22 +126,6 @@ function CardNft({
             component="div"
           >
             rent fee: {nftData.rentFee / Math.pow(10, 18)} matic
-          </Typography>
-          <Typography
-            sx={{ fontSize: 14 }}
-            color="text.secondary"
-            gutterBottom
-            component="div"
-          >
-            isOwn : {nftData.isOwn.toString()}
-          </Typography>
-          <Typography
-            sx={{ fontSize: 14 }}
-            color="text.secondary"
-            gutterBottom
-            component="div"
-          >
-            isRent : {nftData.isRent.toString()}
           </Typography>
         </CardContent>
         <CardActions>

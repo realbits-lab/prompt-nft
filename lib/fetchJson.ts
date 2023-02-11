@@ -195,7 +195,7 @@ async function getAllRegisterData({
   // console.log("addressFilteredDataArray: ", addressFilteredDataArray);
 
   //* Return token data array.
-  return addressFilteredDataArray;
+  return addressFilteredDataArray.reverse();
 }
 
 export default async function fetchJson<JSON = unknown>(

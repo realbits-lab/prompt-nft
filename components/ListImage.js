@@ -9,6 +9,9 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CardImage from "./CardImage";
 
 function ListImage({ data, isLoading }) {
+  console.log("call ListImage()");
+  console.log("data: ", data);
+
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const NUMBER_PER_PAGE = 5;
 

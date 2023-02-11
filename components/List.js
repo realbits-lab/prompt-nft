@@ -158,7 +158,7 @@ function List({ mode }) {
       // console.log("dataNft: ", dataNft);
       // console.log("dataOwn: ", dataOwn);
       // console.log("dataRent: ", dataRent);
-      setAllNftDataArray(dataNft);
+      // setAllNftDataArray(dataNft);
 
       let ownDataArray;
       //* Set all own data array.
