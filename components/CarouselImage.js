@@ -181,6 +181,7 @@ function CarouselImage({ data, isLoading }) {
           <MobileStepper
             steps={maxSteps}
             // position="static"
+            variant="progress"
             activeStep={activeStep}
             nextButton={
               <Button
