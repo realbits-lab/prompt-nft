@@ -29,6 +29,7 @@ import {
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
 import ListImage from "./ListImage";
+import CarouselImage from "./CarouselImage";
 import ListNft from "./ListNft";
 import ListOwn from "./ListOwn";
 import ListRent from "./ListRent";
@@ -463,7 +464,8 @@ function List({ mode }) {
       >
         {mode === "image" ? (
           <div>
-            <ListImage data={dataImage} isLoading={isLoadingImage} />
+            {/* <ListImage data={dataImage} isLoading={isLoadingImage} /> */}
+            <CarouselImage data={dataImage} isLoading={isLoadingImage} />
           </div>
         ) : mode === "nft" ? (
           <div>

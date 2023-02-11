@@ -1,41 +1,41 @@
 import React from "react";
-import useSWR from "swr";
+import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
-import Pagination from "@mui/material/Pagination";
+import MobileStepper from "@mui/material/MobileStepper";
 import CircularProgress from "@mui/material/CircularProgress";
-import CardImage from "./CardImage";
+import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
+import SwipeableViews from "react-swipeable-views";
 
-function CarouselImage({
-  selectedChain,
-  address,
-  isConnected,
-  dataSigner,
-  promptNftContract,
-  rentMarketContract,
-}) {
+function CarouselImage({ data, isLoading }) {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
-  const API_ALL_URL = process.env.NEXT_PUBLIC_API_ALL_URL;
-  const NUMBER_PER_PAGE = 5;
 
+  const CARD_MARGIN_TOP = "60px";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
+  const CARD_PADDING = 1;
 
-  const [pageIndex, setPageIndex] = React.useState(1);
-  const handlePageIndexChange = (event, value) => {
-    setPageIndex(value);
+  const theme = useTheme();
+  const [activeStep, setActiveStep] = React.useState(0);
+  const maxSteps = data?.data?.length || 0;
+
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
-  //* Get all image data array.
-  const { data, error, isLoading, isValidating, mutate } = useSWR([
-    API_ALL_URL,
-  ]);
-  // console.log("data: ", data);
-  // console.log("isLoading: ", isLoading);
-  // console.log("isValidating: ", isValidating);
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleStepChange = (step) => {
+    setActiveStep(step);
+  };
 
   function LoadingPage() {
     return (
@@ -82,7 +82,6 @@ function CarouselImage({
 
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
-    // console.log("imageUrl: ", imageUrl);
     e.target.onerror = null;
     e.target.src = PLACEHOLDER_IMAGE_URL;
   }
@@ -104,45 +103,118 @@ function CarouselImage({
       }
 
       return (
-        <div>
-          <Box sx={{ marginTop: 10 }} display="flex" justifyContent="center">
-            <Pagination
-              count={Math.ceil(data.data.length / NUMBER_PER_PAGE)}
-              page={pageIndex}
-              onChange={handlePageIndexChange}
-              variant="outlined"
-              sx={{
-                padding: "10",
-                ul: {
-                  "& .MuiPaginationItem-root": {
-                    color: "darkgrey",
-                    "&.Mui-selected": {
-                      background: "lightcyan",
-                      color: "darkgrey",
-                    },
-                  },
-                },
-              }}
-            />
-          </Box>
-          {data.data.map((imageData, idx) => {
-            // console.log("idx: ", idx);
-            // console.log("pageIndex.image: ", pageIndex.image);
-            // console.log("imageData: ", imageData);
-            // Check idx is in pagination.
-            // pageIndex.image starts from 1.
-            // idx starts from 0.
-            if (
-              idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
-              idx < pageIndex * NUMBER_PER_PAGE
-            ) {
-              return <CardImage imageData={imageData} key={idx} />;
+        <Box
+          sx={{
+            m: CARD_PADDING,
+            marginTop: CARD_MARGIN_TOP,
+            // height: window.innerHeight - 100,
+            // height: 300,
+          }}
+        >
+          {/* <Paper
+            square
+            elevation={0}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              height: 50,
+              pl: 2,
+              bgcolor: "background.default",
+            }}
+          >
+            <Typography>{data.data[activeStep].prompt}</Typography>
+          </Paper> */}
+          <SwipeableViews
+            axis={theme.direction === "rtl" ? "x-reverse" : "x"}
+            index={activeStep}
+            onChangeIndex={handleStepChange}
+            enableMouseEvents
+            sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}
+          >
+            {data.data.map((imageData, index) => (
+              <div key={index}>
+                {Math.abs(activeStep - index) <= 2 ? (
+                  // <Box
+                  //   component="img"
+                  //   sx={{
+                  //     height: 255,
+                  //     display: "block",
+                  //     maxWidth: 400,
+                  //     overflow: "hidden",
+                  //     width: "100%",
+                  //   }}
+                  //   src={imageData.imageUrl}
+                  // />
+                  <Card>
+                    {imageData ? (
+                      <CardMedia
+                        component="img"
+                        image={imageData ? imageData.imageUrl : ""}
+                        onError={handleCardMediaImageError}
+                        sx={{
+                          height: window.innerHeight - 200,
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      <Skeleton
+                        variant="rounded"
+                        width={CARD_MIN_WIDTH}
+                        height={CARD_MIN_WIDTH}
+                      />
+                    )}
+                    <CardContent>
+                      <Typography
+                        sx={{ fontSize: 14 }}
+                        color="text.secondary"
+                        gutterBottom
+                        component="div"
+                      >
+                        {imageData.prompt}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                ) : null}
+              </div>
+            ))}
+          </SwipeableViews>
+          <MobileStepper
+            steps={maxSteps}
+            // position="static"
+            activeStep={activeStep}
+            nextButton={
+              <Button
+                size="small"
+                onClick={handleNext}
+                disabled={activeStep === maxSteps - 1}
+              >
+                Next
+                {theme.direction === "rtl" ? (
+                  <KeyboardArrowLeft />
+                ) : (
+                  <KeyboardArrowRight />
+                )}
+              </Button>
             }
-          })}
-        </div>
+            backButton={
+              <Button
+                size="small"
+                onClick={handleBack}
+                disabled={activeStep === 0}
+              >
+                {theme.direction === "rtl" ? (
+                  <KeyboardArrowRight />
+                ) : (
+                  <KeyboardArrowLeft />
+                )}
+                Back
+              </Button>
+            }
+          />
+        </Box>
       );
     },
-    [data, pageIndex, isLoading]
+    [activeStep, maxSteps, data, isLoading]
   );
 
   return <ImageCardList />;
