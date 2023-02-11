@@ -145,7 +145,7 @@ function CarouselImage({ data, isLoading }) {
                   //   }}
                   //   src={imageData.imageUrl}
                   // />
-                  <Card>
+                  <Card sx={{}}>
                     {imageData ? (
                       <CardMedia
                         component="img"
