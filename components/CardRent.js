@@ -162,6 +162,7 @@ function CardRent({
                 isConnected: isConnected,
                 selectedChain: selectedChain,
                 address: address,
+                mutateUser: mutateUser,
               });
             }}
           >

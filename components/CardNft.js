@@ -231,6 +231,7 @@ function CardNft({
                   isConnected: isConnected,
                   selectedChain: selectedChain,
                   address: address,
+                  mutateUser: mutateUser,
                 });
               }}
             >
