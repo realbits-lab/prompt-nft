@@ -91,7 +91,7 @@ function ListOwn({
         return <LoadingPage />;
       }
 
-      if (!data) {
+      if (!data || data.length === 0) {
         return (
           <NoContentPage message={"You do not have any image prompt NFT."} />
         );
@@ -101,9 +101,7 @@ function ListOwn({
         <div>
           <Box sx={{ marginTop: 10 }} display="flex" justifyContent="center">
             <Pagination
-              count={Math.ceil(
-                data.length / NUMBER_PER_PAGE
-              )}
+              count={Math.ceil(data.length / NUMBER_PER_PAGE)}
               page={pageIndex}
               onChange={handlePageIndexChange}
               variant="outlined"

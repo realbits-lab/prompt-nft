@@ -89,7 +89,7 @@ function ListRent({
         return <LoadingPage />;
       }
 
-      if (!data) {
+      if (!data || data.length === 0) {
         return (
           <NoContentPage
             message={"You have not yet rented any image prompt NFT."}

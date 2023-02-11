@@ -1,7 +1,13 @@
 import React from "react";
 import { isMobile } from "react-device-detect";
 import useSWR from "swr";
-import { useRecoilStateLoadable } from "recoil";
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useWaitForTransaction,
+  useWatchPendingTransactions,
+} from "wagmi";
+import { useRecoilStateLoadable, useRecoilValueLoadable } from "recoil";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -15,8 +21,11 @@ import {
   AlertSeverity,
   writeToastMessageState,
   writeDialogMessageState,
+  writeRentingDataState,
+  readRentingDataState,
   handleCheckPrompt,
 } from "../lib/util";
+import rentmarketABI from "../contracts/rentMarket.json";
 import useUser from "../lib/useUser";
 
 function CardNft({
@@ -35,6 +44,13 @@ function CardNft({
   //* Define constant variables.
   //*---------------------------------------------------------------------------
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
+  const RENT_MARKET_CONTRACT_ADDRES =
+    process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
+  const PROMPT_NFT_CONTRACT_ADDRESS =
+    process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS;
+  const SERVICE_ACCOUNT_ADDRESS =
+    process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
+
   const CARD_MARGIN_TOP = "50px";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
@@ -51,6 +67,67 @@ function CardNft({
     tokenId: nftData ? nftData.tokenId : 0,
   });
   const { user, mutateUser } = useUser();
+
+  //* Wait for transactions.
+  const { config } = usePrepareContractWrite({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI.abi,
+    functionName: "rentNFT",
+    args: [
+      PROMPT_NFT_CONTRACT_ADDRESS,
+      nftData.tokenId,
+      SERVICE_ACCOUNT_ADDRESS,
+    ],
+    overrides: { value: nftData.rentFee },
+  });
+  const contractWrite = useContractWrite(config);
+  // console.log("contractWrite: ", contractWrite);
+  // console.log("contractWrite.write: ", contractWrite.write);
+  // console.log("contractWrite.status: ", contractWrite.status);
+  const waitForTransaction = useWaitForTransaction({
+    hash: contractWrite.data?.hash,
+    onSuccess(data) {
+      console.log("call onSuccess()");
+      console.log("data: ", data);
+    },
+    onError(error) {
+      console.log("call onSuccess()");
+      console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      console.log("call onSettled()");
+      console.log("data: ", data);
+      console.log("error: ", error);
+      console.log("readRentingData: ", readRentingData);
+
+      //* Remove renting data state array.
+      if (readRentingData) {
+        const rentingData = readRentingData.filter(function (element) {
+          console.log("element: ", element);
+          return (
+            element.tokenId.neq(nftData.tokenId) &&
+            element.nftAddress.localeCompare(
+              PROMPT_NFT_CONTRACT_ADDRESS,
+              undefined,
+              {
+                sensitivity: "accent",
+              }
+            ) === 0
+          );
+        });
+        console.log("rentingData: ", rentingData);
+        setWriteRentingData(rentingData);
+      }
+    },
+  });
+  // console.log("waitForTransaction.data: ", waitForTransaction.data);
+
+  //* Get pending transactions.
+  useWatchPendingTransactions({
+    listener: function (tx) {
+      console.log("tx: ", tx);
+    },
+  });
 
   //* --------------------------------------------------------------------------
   //* Snackbar variables.
@@ -80,6 +157,20 @@ function CardNft({
           openDialog: false,
         };
 
+  //* --------------------------------------------------------------------------
+  //* Renting data variables.
+  //* --------------------------------------------------------------------------
+  const [writeRentingDataLoadable, setWriteRentingData] =
+    useRecoilStateLoadable(writeRentingDataState);
+  const writeRentingData =
+    writeRentingDataLoadable?.state === "hasValue"
+      ? writeRentingDataLoadable.contents
+      : [];
+  const readRentingDataLoadable = useRecoilValueLoadable(readRentingDataState);
+  const readRentingData =
+    readRentingDataLoadable?.state === "hasValue"
+      ? readRentingDataLoadable.contents
+      : [];
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
     e.target.onerror = null;
@@ -152,6 +243,8 @@ function CardNft({
             >
               PROMPT
             </Button>
+          ) : nftData.isRenting === true ? (
+            <Button disabled>RENTING</Button>
           ) : (
             <Button
               size="small"
@@ -197,17 +290,32 @@ function CardNft({
                 });
 
                 try {
-                  const tx = await rentMarketContract
-                    .connect(dataSigner)
-                    .rentNFT(
-                      process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-                      nftData.tokenId,
-                      process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS,
-                      {
-                        value: nftData.rentFee,
-                      }
-                    );
-                  const txResult = await tx.wait();
+                  // console.log("contractWrite: ", contractWrite);
+                  const tx = contractWrite.write();
+                  console.log("readRentingData: ", readRentingData);
+
+                  let rentingDataArray = readRentingData;
+                  rentingDataArray.push({
+                    nftAddress: PROMPT_NFT_CONTRACT_ADDRESS,
+                    tokenId: nftData.tokenId,
+                  });
+
+                  console.log("rentingDataArray: ", rentingDataArray);
+                  setWriteRentingData(rentingDataArray);
+                  console.log("readRentingData: ", readRentingData);
+
+                  // console.log("tx: ", tx);
+                  // const tx = await rentMarketContract
+                  //   .connect(dataSigner)
+                  //   .rentNFT(
+                  //     process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
+                  //     nftData.tokenId,
+                  //     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS,
+                  //     {
+                  //       value: nftData.rentFee,
+                  //     }
+                  //   );
+                  // const txResult = await tx.wait();
                 } catch (error) {
                   console.error("error: ", error);
                   setWriteToastMessage({

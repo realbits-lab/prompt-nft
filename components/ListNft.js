@@ -92,7 +92,7 @@ function ListNft({
         return <LoadingPage />;
       }
 
-      if (!data) {
+      if (!data || data.length === 0) {
         return <NoContentPage message={"No prompt NFT."} />;
       }
 
