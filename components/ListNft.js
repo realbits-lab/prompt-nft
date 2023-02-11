@@ -20,6 +20,9 @@ function ListNft({
   data,
   isLoading,
 }) {
+  // console.log("call ListNft");
+  // console.log("data: ", data);
+
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const NUMBER_PER_PAGE = 5;
 
@@ -89,7 +92,7 @@ function ListNft({
         return <LoadingPage />;
       }
 
-      if (!data) {
+      if (!data || data.length === 0) {
         return <NoContentPage message={"No prompt NFT."} />;
       }
 
@@ -97,9 +100,7 @@ function ListNft({
         <div>
           <Box sx={{ marginTop: 10 }} display="flex" justifyContent="center">
             <Pagination
-              count={Math.ceil(
-                data.length / NUMBER_PER_PAGE
-              )}
+              count={Math.ceil(data.length / NUMBER_PER_PAGE)}
               page={pageIndex}
               onChange={handlePageIndexChange}
               variant="outlined"

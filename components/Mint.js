@@ -368,7 +368,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
                 //* Check image url is already minted with crypt flag.
                 try {
                   const checkCryptResponse = await fetchJson(
-                    ["/api/check-crypt"],
+                    { url: "/api/check-crypt" },
                     {
                       method: "POST",
                       headers: {

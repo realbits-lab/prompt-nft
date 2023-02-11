@@ -25,6 +25,7 @@ function CardNft({
   promptNftContract,
 }) {
   // console.log("call CardNft()");
+  // console.log("nftData: ", nftData);
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.
@@ -43,7 +44,7 @@ function CardNft({
     command: "getMetadata",
     promptNftContract: promptNftContract,
     signer: dataSigner,
-    tokenId: nftData.tokenId,
+    tokenId: nftData ? nftData.tokenId : 0,
   });
 
   //* --------------------------------------------------------------------------
@@ -110,6 +111,22 @@ function CardNft({
             component="div"
           >
             rent fee: {nftData.rentFee / Math.pow(10, 18)} matic
+          </Typography>
+          <Typography
+            sx={{ fontSize: 14 }}
+            color="text.secondary"
+            gutterBottom
+            component="div"
+          >
+            isOwn : {nftData.isOwn.toString()}
+          </Typography>
+          <Typography
+            sx={{ fontSize: 14 }}
+            color="text.secondary"
+            gutterBottom
+            component="div"
+          >
+            isRent : {nftData.isRent.toString()}
           </Typography>
         </CardContent>
         <CardActions>

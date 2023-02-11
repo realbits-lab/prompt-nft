@@ -20,6 +20,7 @@ import ListImage from "./ListImage";
 import ListNft from "./ListNft";
 import ListOwn from "./ListOwn";
 import ListRent from "./ListRent";
+import { DateRange } from "@mui/icons-material";
 
 function List({ mode }) {
   // console.log("call List()");
@@ -159,8 +160,11 @@ function List({ mode }) {
       // console.log("dataOwn: ", dataOwn);
       // console.log("dataRent: ", dataRent);
       setAllNftDataArray(dataNft);
+
+      let ownDataArray;
+      //* Set all own data array.
       if (dataNft && dataOwn) {
-        const ownDataArray = dataNft.filter(function (nft) {
+        ownDataArray = dataNft.filter(function (nft) {
           // console.log("nft: ", nft);
           // console.log("nft.tokenId: ", nft.tokenId);
           return dataOwn.some(function (element) {
@@ -180,7 +184,71 @@ function List({ mode }) {
         // console.log("ownDataArray: ", ownDataArray);
         setAllOwnDataArray(ownDataArray);
       }
+
+      //* Set all rent data.
       setAllRentDataArray(dataRent);
+
+      //* Set all registered nft data.
+      if (dataNft) {
+        const dataNftWithStatusArray = dataNft
+          .map(function (nft) {
+            let isOwn = false;
+            let isRent = false;
+            let isRenting = false;
+
+            //* Check own status.
+            if (ownDataArray) {
+              const someResult = ownDataArray.some(function (ownData) {
+                return (
+                  ownData.tokenId.eq(nft.tokenId) &&
+                  ownData.nftAddress.localeCompare(
+                    promptNftContract.address,
+                    undefined,
+                    {
+                      sensitivity: "accent",
+                    }
+                  ) === 0
+                );
+              });
+              if (someResult === true) {
+                isOwn = true;
+              } else {
+                isOwn = false;
+              }
+            }
+
+            //* Check rent status.
+            if (dataRent) {
+              const someResult = dataRent.some(function (rentData) {
+                console.log("rentData: ", rentData);
+                return (
+                  rentData.tokenId.eq(nft.tokenId) &&
+                  rentData.renteeAddress.localeCompare(address, undefined, {
+                    sensitivity: "accent",
+                  }) === 0
+                );
+              });
+
+              if (someResult === true) {
+                isRent = true;
+              } else {
+                isRent = false;
+              }
+            }
+            console.log("nft.tokenId: ", nft.tokenId.toNumber());
+            console.log("isOwn: ", isOwn);
+            console.log("isRent: ", isRent);
+
+            return {
+              ...nft,
+              isOwn: isOwn,
+              isRent: isRent,
+              isRenting: isRenting,
+            };
+          })
+          .filter((e) => e);
+        setAllNftDataArray(dataNftWithStatusArray);
+      }
     },
     [dataNft, dataOwn, dataRent]
   );
@@ -253,7 +321,8 @@ function List({ mode }) {
                 dataSigner={dataSigner}
                 promptNftContract={promptNftContract}
                 rentMarketContract={rentMarketContract}
-                data={dataNft}
+                // data={dataNft}
+                data={allNftDataArray}
                 isLoading={isLoadingNft}
               />
             )}
