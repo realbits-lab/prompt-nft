@@ -134,18 +134,18 @@ function CardNft({
               }
 
               //* Rent this nft with rent fee.
-              console.log("nftData.rentFee: ", nftData.rentFee);
-              console.log("nftData.tokenId: ", nftData.tokenId);
-              console.log("rentMarketContract: ", rentMarketContract);
-              console.log("dataSigner: ", dataSigner);
-              console.log(
-                "process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS: ",
-                process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS
-              );
-              console.log(
-                "process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS: ",
-                process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS
-              );
+              // console.log("nftData.rentFee: ", nftData.rentFee);
+              // console.log("nftData.tokenId: ", nftData.tokenId);
+              // console.log("rentMarketContract: ", rentMarketContract);
+              // console.log("dataSigner: ", dataSigner);
+              // console.log(
+              //   "process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS: ",
+              //   process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS
+              // );
+              // console.log(
+              //   "process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS: ",
+              //   process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS
+              // );
               try {
                 const tx = await rentMarketContract
                   .connect(dataSigner)

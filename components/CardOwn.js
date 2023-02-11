@@ -169,6 +169,8 @@ function CardNft({
                     snackbarTime: new Date(),
                     snackbarOpen: true,
                   });
+                  // const signMessageResult = await signTypedDataAsync();
+                  // console.log("signMessageResult: ", signMessageResult);
 
                   try {
                     await handleLogin({
@@ -189,7 +191,7 @@ function CardNft({
                   }
 
                   setWriteToastMessage({
-                    snackbarSeverity: AlertSeverity.error,
+                    snackbarSeverity: AlertSeverity.info,
                     snackbarMessage: "Checking is finished.",
                     snackbarTime: new Date(),
                     snackbarOpen: true,
@@ -197,12 +199,22 @@ function CardNft({
                 }
 
                 //* Get the plain prompt from prompter.
-                const body = { tokenId: nftData.tokenId.toNumber() };
-                const promptResult = await fetchJson(["/api/prompt"], {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(body),
+                setWriteToastMessage({
+                  snackbarSeverity: AlertSeverity.info,
+                  snackbarMessage: "Trying to find the prompt...",
+                  snackbarTime: new Date(),
+                  snackbarOpen: true,
                 });
+
+                const body = { tokenId: nftData.tokenId.toNumber() };
+                const promptResult = await fetchJson(
+                  { url: "/api/prompt" },
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body),
+                  }
+                );
                 // console.log("promptResult:", promptResult);
 
                 const decodedPrompt = Base64.decode(
@@ -212,6 +224,13 @@ function CardNft({
 
                 setDecryptedPrompt(decodedPrompt);
                 setOpenDialog(true);
+
+                setWriteToastMessage({
+                  snackbarSeverity: AlertSeverity.info,
+                  snackbarMessage: undefined,
+                  snackbarTime: new Date(),
+                  snackbarOpen: false,
+                });
               } else {
                 const encryptPromptData = await promptNftContract
                   .connect(dataSigner)

@@ -201,11 +201,14 @@ function CardRent({
 
                 //* Get the plain prompt from prompter.
                 const body = { tokenId: nftData.tokenId.toNumber() };
-                const promptResult = await fetchJson(["/api/prompt"], {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(body),
-                });
+                const promptResult = await fetchJson(
+                  { url: "/api/prompt" },
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body),
+                  }
+                );
                 // console.log("promptResult:", promptResult);
 
                 const decodedPrompt = Base64.decode(

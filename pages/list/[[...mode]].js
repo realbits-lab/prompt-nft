@@ -60,9 +60,9 @@ function ListPage(props) {
       ? writeToastMessageLoadable.contents
       : {
           snackbarSeverity: AlertSeverity.info,
-          snackbarMessage: "",
+          snackbarMessage: undefined,
           snackbarTime: new Date(),
-          snackbarOpen: true,
+          snackbarOpen: false,
         };
 
   const readToastMessageLoadable = useRecoilValueLoadable(
@@ -73,9 +73,9 @@ function ListPage(props) {
       ? readToastMessageLoadable.contents
       : {
           snackbarSeverity: AlertSeverity.info,
-          snackbarMessage: "",
+          snackbarMessage: undefined,
           snackbarTime: new Date(),
-          snackbarOpen: true,
+          snackbarOpen: false,
         };
 
   React.useEffect(

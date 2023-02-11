@@ -149,7 +149,7 @@ function List({ mode }) {
   // console.log("isErrorSignTypedData: ", isErrorSignTypedData);
   // console.log("isLoadingSignTypedData: ", isLoadingSignTypedData);
   // console.log("isSuccessSignTypedData: ", isSuccessSignTypedData);
-  // console.log("signTypedData: ", signTypedData);
+  // console.log("signTypedDataAsync: ", signTypedDataAsync);
 
   const theme = useTheme();
 

@@ -15,12 +15,12 @@ async function handler(req, res) {
 
   //* Check query.
   const params = req.query.updated;
-  console.log("params: ", params);
+  // console.log("params: ", params);
 
   //* Check session for newly-updated images checking of all api.
   let fetchTimestamp;
   if (req.session.updated) {
-    console.log("req.session.updated: ", req.session.updated);
+    // console.log("req.session.updated: ", req.session.updated);
 
     if (params === "true") {
       //* Update fetch timestamp in a session.
@@ -32,14 +32,14 @@ async function handler(req, res) {
       fetchTimestamp = req.session.updated.fetchTimestamp;
     }
   } else {
-    console.log("no req.session.updated");
+    // console.log("no req.session.updated");
     fetchTimestamp = new Date();
     const updated = { fetchTimestamp: fetchTimestamp };
     req.session.updated = updated;
     await req.session.save();
-    console.log("saved req.session.updated: ", req.session.updated);
+    // console.log("saved req.session.updated: ", req.session.updated);
   }
-  console.log("fetchTimestamp: ", fetchTimestamp);
+  // console.log("fetchTimestamp: ", fetchTimestamp);
 
   //* GET /api/all
   //* Check imageUrl and prompt was saved in sqlite already.
@@ -54,10 +54,10 @@ async function handler(req, res) {
       },
     });
     // console.log("findManyResult: ", findManyResult);
-    console.log(
-      "typeof findManyResult.createdAt: ",
-      typeof findManyResult.createdAt
-    );
+    // console.log(
+    //   "typeof findManyResult.createdAt: ",
+    //   typeof findManyResult.createdAt
+    // );
 
     if (findManyResult === null) {
       await prisma.$disconnect();
@@ -73,7 +73,7 @@ async function handler(req, res) {
         createdAt: "desc",
       },
     });
-    console.log("fineManyUpdateResult: ", fineManyUpdateResult);
+    // console.log("fineManyUpdateResult: ", fineManyUpdateResult);
 
     //* Send 200 OK response.
     await prisma.$disconnect();

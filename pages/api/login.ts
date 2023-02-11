@@ -26,7 +26,9 @@ async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
     return res.status(500).json({ message: (error as Error).message });
   }
   // console.log("findUniqueResult: ", findUniqueResult);
+
   if (!findUniqueResult) {
+    // console.log("Can't find unique public address: ", publicAddress);
     //* : Handle error.
     return res
       .status(500)
@@ -63,7 +65,6 @@ async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
   });
 
   // console.log("start to call sigUtil.recoverTypedSignature()");
-
   let recovered;
   try {
     recovered = sigUtil.recoverTypedSignature({
@@ -82,12 +83,14 @@ async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
     ethUtil.toChecksumAddress(recovered) ===
     ethUtil.toChecksumAddress(publicAddress)
   ) {
+    console.error("Recovered address is the same as input address.")
     const user = { isLoggedIn: true, publicAddress: publicAddress } as User;
     req.session.user = user;
     await req.session.save();
 
     return res.json(user);
   } else {
+    console.error("Recovered address is not the same as input address.")
     return res.status(401).json({ error: "Signature verification failed." });
   }
 }
