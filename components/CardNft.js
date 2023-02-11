@@ -146,6 +146,14 @@ function CardNft({
               //   "process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS: ",
               //   process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS
               // );
+
+              setWriteToastMessage({
+                snackbarSeverity: AlertSeverity.info,
+                snackbarMessage: "Trying to rent this nft...",
+                snackbarTime: new Date(),
+                snackbarOpen: true,
+              });
+
               try {
                 const tx = await rentMarketContract
                   .connect(dataSigner)
@@ -169,6 +177,14 @@ function CardNft({
                   snackbarOpen: true,
                 });
               }
+
+              setWriteToastMessage({
+                snackbarSeverity: AlertSeverity.info,
+                snackbarMessage:
+                  "Rent transaction is just started and wait a moment...",
+                snackbarTime: new Date(),
+                snackbarOpen: true,
+              });
             }}
           >
             RENT
