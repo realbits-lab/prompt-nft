@@ -1,0 +1,59 @@
+{
+  "name": "prompt-nft",
+  "version": "0.0.1",
+  "engines": {
+    "node": "16.x",
+    "npm": "8.x"
+  },
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "node server.js",
+    "lint": "next lint"
+  },
+  "cacheDirectories": [
+    ".next/cache"
+  ],
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.231.0",
+    "@emotion/react": "^11.10.5",
+    "@emotion/server": "^11.10.0",
+    "@emotion/styled": "^11.10.5",
+    "@metamask/detect-provider": "^2.0.0",
+    "@metamask/eth-sig-util": "^5.0.2",
+    "@motionone/utils": "^10.15.1",
+    "@mui/icons-material": "^5.11.0",
+    "@mui/material": "^5.11.0",
+    "@next/font": "^13.1.6",
+    "@prisma/client": "^4.7.1",
+    "@walletconnect/sign-client": "^2.3.3",
+    "@walletconnect/web3-provider": "^1.8.0",
+    "@web3modal/ethereum": "^2.0.0",
+    "@web3modal/react": "^2.0.0",
+    "@web3modal/standalone": "^2.1.1",
+    "axios": "^1.3.0",
+    "babel-plugin-styled-components": "^2.0.7",
+    "ethereumjs-util": "^7.1.5",
+    "ethers": "^5.7.2",
+    "express": "^4.18.2",
+    "heroku-ssl-redirect": "^0.1.1",
+    "iron-session": "^6.3.1",
+    "js-base64": "^3.7.3",
+    "metamask-react": "^2.4.1",
+    "next": "13.0.6",
+    "react": "18.2.0",
+    "react-device-detect": "^2.2.2",
+    "react-dom": "18.2.0",
+    "react-router-dom": "^6.4.5",
+    "react-swipeable-views": "^0.14.0",
+    "recoil": "^0.7.6",
+    "swr": "^2.0.0",
+    "wagmi": "^0.11.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.33.0",
+    "prisma": "^4.7.1",
+    "typescript": "4.9.4"
+  }
+}
