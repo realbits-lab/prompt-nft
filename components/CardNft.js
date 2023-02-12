@@ -94,7 +94,6 @@ function CardNft({
     onError(error) {
       // console.log("call onSuccess()");
       // console.log("error: ", error);
-      setIsRenting(false);
     },
     onSettled(data, error) {
       setWriteToastMessage({
@@ -103,6 +102,7 @@ function CardNft({
         snackbarTime: new Date(),
         snackbarOpen: true,
       });
+      setIsRenting(false);
       // console.log("call onSettled()");
       // console.log("data: ", data);
       // console.log("error: ", error);
@@ -206,31 +206,10 @@ function CardNft({
           }}
         >
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-            token id: {nftData.tokenId.toNumber()}
-          </Typography>
-          <Typography
-            sx={{ fontSize: 14 }}
-            color="text.secondary"
-            gutterBottom
-            component="div"
-          >
-            name: {metadataData ? metadataData.name : ""}
-          </Typography>
-          <Typography
-            sx={{ fontSize: 14 }}
-            color="text.secondary"
-            gutterBottom
-            component="div"
-          >
-            description: {metadataData ? metadataData.description : ""}
-          </Typography>
-          <Typography
-            sx={{ fontSize: 14 }}
-            color="text.secondary"
-            gutterBottom
-            component="div"
-          >
-            rent fee: {nftData.rentFee / Math.pow(10, 18)} matic
+            # {nftData.tokenId.toNumber()} /{" "}
+            {metadataData ? metadataData.name : ""} /{" "}
+            {metadataData ? metadataData.description : ""} /{" "}
+            {nftData.rentFee / Math.pow(10, 18)} matic
           </Typography>
         </CardContent>
         <CardActions>
@@ -256,103 +235,114 @@ function CardNft({
               PROMPT
             </Button>
           ) : isRenting === true ? (
-            <Button disabled>RENTING</Button>
-          ) : (
-            <Button
-              size="small"
-              onClick={async () => {
-                if (
-                  isWalletConnected({ isConnected, selectedChain }) === false
-                ) {
-                  setWriteToastMessage({
-                    snackbarSeverity: AlertSeverity.warning,
-                    snackbarMessage: `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`,
-                    snackbarTime: new Date(),
-                    snackbarOpen: true,
-                  });
-                  return;
-                }
-
-                if (!rentMarketContract || !dataSigner) {
-                  console.error(
-                    "rentMarketContract or signer is null or undefined."
-                  );
-                  return;
-                }
-
-                //* Rent this nft with rent fee.
-                // console.log("nftData.rentFee: ", nftData.rentFee);
-                // console.log("nftData.tokenId: ", nftData.tokenId);
-                // console.log("rentMarketContract: ", rentMarketContract);
-                // console.log("dataSigner: ", dataSigner);
-                // console.log(
-                //   "process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS: ",
-                //   process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS
-                // );
-                // console.log(
-                //   "process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS: ",
-                //   process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS
-                // );
-
-                setWriteToastMessage({
-                  snackbarSeverity: AlertSeverity.info,
-                  snackbarMessage: "Trying to rent this nft...",
-                  snackbarTime: new Date(),
-                  snackbarOpen: true,
-                });
-
-                try {
-                  // console.log("contractWrite: ", contractWrite);
-                  const tx = contractWrite.write();
-                  // console.log("tx: ", tx);
-                  setIsRenting(true);
-
-                  // console.log("readRentingData: ", readRentingData);
-                  let rentingDataArray = readRentingData;
-                  rentingDataArray.push({
-                    nftAddress: PROMPT_NFT_CONTRACT_ADDRESS,
-                    tokenId: nftData.tokenId,
-                  });
-                  // console.log("rentingDataArray: ", rentingDataArray);
-                  setWriteRentingData(rentingDataArray);
-                  // console.log("readRentingData: ", readRentingData);
-
-                  // console.log("tx: ", tx);
-                  // const tx = await rentMarketContract
-                  //   .connect(dataSigner)
-                  //   .rentNFT(
-                  //     process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-                  //     nftData.tokenId,
-                  //     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS,
-                  //     {
-                  //       value: nftData.rentFee,
-                  //     }
-                  //   );
-                  // const txResult = await tx.wait();
-                } catch (error) {
-                  console.error("error: ", error);
-                  setWriteToastMessage({
-                    snackbarSeverity: AlertSeverity.error,
-                    snackbarMessage: error.data
-                      ? error.data.message
-                      : error.message,
-                    snackbarTime: new Date(),
-                    snackbarOpen: true,
-                  });
-                  return;
-                }
-
-                setWriteToastMessage({
-                  snackbarSeverity: AlertSeverity.info,
-                  snackbarMessage:
-                    "Rent transaction is just started and wait a moment...",
-                  snackbarTime: new Date(),
-                  snackbarOpen: true,
-                });
-              }}
+            <Typography
+              color="text.secondary"
+              variant="h7"
+              gutterBottom
+              component="div"
             >
-              RENT
-            </Button>
+              RENTING
+            </Typography>
+          ) : (
+            <>
+              <Button
+                size="medium"
+                variant="contained"
+                onClick={async () => {
+                  if (
+                    isWalletConnected({ isConnected, selectedChain }) === false
+                  ) {
+                    setWriteToastMessage({
+                      snackbarSeverity: AlertSeverity.warning,
+                      snackbarMessage: `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`,
+                      snackbarTime: new Date(),
+                      snackbarOpen: true,
+                    });
+                    return;
+                  }
+
+                  if (!rentMarketContract || !dataSigner) {
+                    console.error(
+                      "rentMarketContract or signer is null or undefined."
+                    );
+                    return;
+                  }
+
+                  //* Rent this nft with rent fee.
+                  // console.log("nftData.rentFee: ", nftData.rentFee);
+                  // console.log("nftData.tokenId: ", nftData.tokenId);
+                  // console.log("rentMarketContract: ", rentMarketContract);
+                  // console.log("dataSigner: ", dataSigner);
+                  // console.log(
+                  //   "process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS: ",
+                  //   process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS
+                  // );
+                  // console.log(
+                  //   "process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS: ",
+                  //   process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS
+                  // );
+
+                  setWriteToastMessage({
+                    snackbarSeverity: AlertSeverity.info,
+                    snackbarMessage: "Trying to rent this nft...",
+                    snackbarTime: new Date(),
+                    snackbarOpen: true,
+                  });
+
+                  try {
+                    // console.log("contractWrite: ", contractWrite);
+                    const tx = contractWrite.write();
+                    // console.log("tx: ", tx);
+                    setIsRenting(true);
+
+                    // console.log("readRentingData: ", readRentingData);
+                    let rentingDataArray = readRentingData;
+                    rentingDataArray.push({
+                      nftAddress: PROMPT_NFT_CONTRACT_ADDRESS,
+                      tokenId: nftData.tokenId,
+                    });
+                    // console.log("rentingDataArray: ", rentingDataArray);
+                    setWriteRentingData(rentingDataArray);
+                    // console.log("readRentingData: ", readRentingData);
+
+                    // console.log("tx: ", tx);
+                    // const tx = await rentMarketContract
+                    //   .connect(dataSigner)
+                    //   .rentNFT(
+                    //     process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
+                    //     nftData.tokenId,
+                    //     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS,
+                    //     {
+                    //       value: nftData.rentFee,
+                    //     }
+                    //   );
+                    // const txResult = await tx.wait();
+                  } catch (error) {
+                    console.error("error: ", error);
+                    setWriteToastMessage({
+                      snackbarSeverity: AlertSeverity.error,
+                      snackbarMessage: error.data
+                        ? error.data.message
+                        : error.message,
+                      snackbarTime: new Date(),
+                      snackbarOpen: true,
+                    });
+                    setIsRenting(false);
+                    return;
+                  }
+
+                  setWriteToastMessage({
+                    snackbarSeverity: AlertSeverity.info,
+                    snackbarMessage:
+                      "Rent transaction is just started and wait a moment...",
+                    snackbarTime: new Date(),
+                    snackbarOpen: true,
+                  });
+                }}
+              >
+                RENT
+              </Button>
+            </>
           )}
         </CardActions>
       </Card>
