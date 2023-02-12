@@ -31,6 +31,7 @@ import rentmarketABI from "../contracts/rentMarket.json";
 import ListImage from "./ListImage";
 import CarouselImage from "./CarouselImage";
 import ListNft from "./ListNft";
+import CarouselNft from "./CarouselNft";
 import ListOwn from "./ListOwn";
 import ListRent from "./ListRent";
 
@@ -472,7 +473,7 @@ function List({ mode }) {
             {isWalletConnected({ isConnected, selectedChain }) === false ? (
               <NoLoginPage />
             ) : (
-              <ListNft
+              <CarouselNft
                 selectedChain={selectedChain}
                 address={address}
                 isConnected={isConnected}
@@ -482,6 +483,16 @@ function List({ mode }) {
                 data={allNftDataArray}
                 isLoading={swrIsLoadingRegisterData}
               />
+              // <ListNft
+              //   selectedChain={selectedChain}
+              //   address={address}
+              //   isConnected={isConnected}
+              //   dataSigner={dataSigner}
+              //   promptNftContract={promptNftContract}
+              //   rentMarketContract={rentMarketContract}
+              //   data={allNftDataArray}
+              //   isLoading={swrIsLoadingRegisterData}
+              // />
             )}
           </div>
         ) : mode === "own" ? (

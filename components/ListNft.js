@@ -20,7 +20,7 @@ function ListNft({
   data,
   isLoading,
 }) {
-  // console.log("call ListNft");
+  // console.log("call ListNft()");
   // console.log("data: ", data);
 
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;

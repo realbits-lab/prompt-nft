@@ -171,13 +171,27 @@ function CardNft({
   const [isRenting, setIsRenting] = React.useState(false);
 
   return (
-    <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}>
-      <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
+    <Box
+      sx={{
+        m: CARD_PADDING,
+        marginTop: CARD_MARGIN_TOP,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Card>
         {metadataData ? (
           <CardMedia
             component="img"
             image={metadataData ? metadataData.image : ""}
             onError={handleCardMediaImageError}
+            sx={{
+              objectFit: "cover",
+              width: "90vw",
+              height: "50vh",
+            }}
           />
         ) : (
           <Skeleton
@@ -186,7 +200,11 @@ function CardNft({
             height={CARD_MIN_WIDTH}
           />
         )}
-        <CardContent>
+        <CardContent
+          sx={{
+            width: "90vw",
+          }}
+        >
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
             token id: {nftData.tokenId.toNumber()}
           </Typography>
