@@ -51,7 +51,7 @@ function CardNft({
   const SERVICE_ACCOUNT_ADDRESS =
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
 
-  const CARD_MARGIN_TOP = "50px";
+  const CARD_MARGIN_TOP = "60px";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;

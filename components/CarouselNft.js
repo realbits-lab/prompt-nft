@@ -105,11 +105,6 @@ function CarouselNft({
     );
   }
 
-  function handleCardMediaImageError(e) {
-    e.target.onerror = null;
-    e.target.src = PLACEHOLDER_IMAGE_URL;
-  }
-
   const NftCardList = React.useCallback(
     function NftCardList() {
       if (isLoading === true) {
@@ -137,29 +132,18 @@ function CarouselNft({
             {data.map(function (nftData, index) {
               return (
                 <div key={index}>
-                  <Box
-                    sx={{
-                      m: CARD_PADDING,
-                      marginTop: CARD_MARGIN_TOP,
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {Math.abs(activeStep - index) <= 2 ? (
-                      <CardNft
-                        nftData={nftData}
-                        key={index}
-                        dataSigner={dataSigner}
-                        address={address}
-                        isConnected={isConnected}
-                        rentMarketContract={rentMarketContract}
-                        selectedChain={selectedChain}
-                        promptNftContract={promptNftContract}
-                      />
-                    ) : null}
-                  </Box>
+                  {Math.abs(activeStep - index) <= 2 ? (
+                    <CardNft
+                      nftData={nftData}
+                      key={index}
+                      dataSigner={dataSigner}
+                      address={address}
+                      isConnected={isConnected}
+                      rentMarketContract={rentMarketContract}
+                      selectedChain={selectedChain}
+                      promptNftContract={promptNftContract}
+                    />
+                  ) : null}
                 </div>
               );
             })}
