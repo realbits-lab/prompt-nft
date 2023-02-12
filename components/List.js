@@ -53,16 +53,6 @@ function List({ mode }) {
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
 
-  //* --------------------------------------------------------------------------
-  //* Renting data variables.
-  //* --------------------------------------------------------------------------
-  const readRentingDataLoadable = useRecoilValueLoadable(readRentingDataState);
-  const readRentingData =
-    readRentingDataLoadable?.state === "hasValue"
-      ? readRentingDataLoadable.contents
-      : [];
-  // console.log("readRentingData: ", readRentingData);
-
   //*---------------------------------------------------------------------------
   //* Define hook variables.
   //*---------------------------------------------------------------------------
@@ -368,29 +358,6 @@ function List({ mode }) {
               isRent = false;
             }
           }
-
-          //* Check renting data.
-          // if (readRentingData) {
-          //   const someResult = readRentingData.some(function (rentingData) {
-          //     console.log("rentingData: ", rentingData);
-          //     return (
-          //       rentingData.tokenId.eq(nft.tokenId) &&
-          //       rentingData.nftAddress.localeCompare(
-          //         PROMPT_NFT_CONTRACT_ADDRESS,
-          //         undefined,
-          //         {
-          //           sensitivity: "accent",
-          //         }
-          //       ) === 0
-          //     );
-          //   });
-
-          //   if (someResult === true) {
-          //     isRenting = true;
-          //   } else {
-          //     isRenting = false;
-          //   }
-          // }
 
           // console.log("nft.tokenId: ", nft.tokenId.toNumber());
           // console.log("isOwn: ", isOwn);

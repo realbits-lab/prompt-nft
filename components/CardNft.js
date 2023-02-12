@@ -21,8 +21,6 @@ import {
   AlertSeverity,
   writeToastMessageState,
   writeDialogMessageState,
-  writeRentingDataState,
-  readRentingDataState,
   handleCheckPrompt,
 } from "../lib/util";
 import rentmarketABI from "../contracts/rentMarket.json";
@@ -148,20 +146,6 @@ function CardNft({
           openDialog: false,
         };
 
-  //* --------------------------------------------------------------------------
-  //* Renting data variables.
-  //* --------------------------------------------------------------------------
-  const [writeRentingDataLoadable, setWriteRentingData] =
-    useRecoilStateLoadable(writeRentingDataState);
-  const writeRentingData =
-    writeRentingDataLoadable?.state === "hasValue"
-      ? writeRentingDataLoadable.contents
-      : [];
-  const readRentingDataLoadable = useRecoilValueLoadable(readRentingDataState);
-  const readRentingData =
-    readRentingDataLoadable?.state === "hasValue"
-      ? readRentingDataLoadable.contents
-      : [];
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
     e.target.onerror = null;
@@ -294,16 +278,6 @@ function CardNft({
                     const tx = contractWrite.write();
                     // console.log("tx: ", tx);
                     setIsRenting(true);
-
-                    // console.log("readRentingData: ", readRentingData);
-                    let rentingDataArray = readRentingData;
-                    rentingDataArray.push({
-                      nftAddress: PROMPT_NFT_CONTRACT_ADDRESS,
-                      tokenId: nftData.tokenId,
-                    });
-                    // console.log("rentingDataArray: ", rentingDataArray);
-                    setWriteRentingData(rentingDataArray);
-                    // console.log("readRentingData: ", readRentingData);
 
                     // console.log("tx: ", tx);
                     // const tx = await rentMarketContract
