@@ -191,8 +191,8 @@ function CardNft({
         >
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
             # {nftData.tokenId.toNumber()} /{" "}
-            {metadataData ? metadataData.name : ""} /{" "}
-            {metadataData ? metadataData.description : ""} /{" "}
+            {metadataData ? metadataData.name : "loading..."} /{" "}
+            {metadataData ? metadataData.description : "loading..."} /{" "}
             {nftData.rentFee / Math.pow(10, 18)} matic
           </Typography>
         </CardContent>
@@ -200,6 +200,7 @@ function CardNft({
           {nftData.isOwn === true || nftData.isRent === true ? (
             <Button
               size="small"
+              variant="contained"
               onClick={async function () {
                 await handleCheckPrompt({
                   setWriteToastMessage: setWriteToastMessage,
@@ -230,7 +231,7 @@ function CardNft({
           ) : (
             <>
               <Button
-                size="medium"
+                size="small"
                 variant="contained"
                 onClick={async () => {
                   if (
