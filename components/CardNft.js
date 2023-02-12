@@ -7,7 +7,7 @@ import {
   useWaitForTransaction,
   useWatchPendingTransactions,
 } from "wagmi";
-import { useRecoilStateLoadable, useRecoilValueLoadable } from "recoil";
+import { useRecoilStateLoadable } from "recoil";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -274,10 +274,10 @@ function CardNft({
                   });
 
                   try {
-                    // console.log("contractWrite: ", contractWrite);
-                    const tx = contractWrite.write();
-                    // console.log("tx: ", tx);
                     setIsRenting(true);
+                    // console.log("contractWrite: ", contractWrite);
+                    const tx = await contractWrite.writeAsync();
+                    // console.log("tx: ", tx);
 
                     // console.log("tx: ", tx);
                     // const tx = await rentMarketContract
