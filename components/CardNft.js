@@ -200,6 +200,7 @@ function CardNft({
           {nftData.isOwn === true || nftData.isRent === true ? (
             <Button
               size="small"
+              variant="contained"
               onClick={async function () {
                 await handleCheckPrompt({
                   setWriteToastMessage: setWriteToastMessage,
@@ -230,7 +231,7 @@ function CardNft({
           ) : (
             <>
               <Button
-                size="medium"
+                size="small"
                 variant="contained"
                 onClick={async () => {
                   if (
