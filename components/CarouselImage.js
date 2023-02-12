@@ -133,6 +133,7 @@ function CarouselImage({ data, isLoading }) {
                             sx={{
                               objectFit: "cover",
                               width: "90vw",
+                              height: "50vh",
                             }}
                           />
                         ) : (
@@ -147,7 +148,11 @@ function CarouselImage({ data, isLoading }) {
                             width: "90vw",
                           }}
                         >
-                          <Typography color="text.secondary" variant="h5">
+                          <Typography
+                            sx={{ fontSize: 14 }}
+                            color="text.secondary"
+                            gutterBottom
+                          >
                             {imageData.prompt}
                           </Typography>
                         </CardContent>
