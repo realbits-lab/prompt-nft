@@ -12,9 +12,12 @@ import Button from "@mui/material/Button";
 import List from "../../components/List";
 import {
   RBSnackbar,
+  PromptDialog,
   AlertSeverity,
   writeToastMessageState,
   readToastMessageState,
+  writeDialogMessageState,
+  readDialogMessageState,
 } from "../../lib/util";
 
 function HideOnScroll(props) {
@@ -60,9 +63,9 @@ function ListPage(props) {
       ? writeToastMessageLoadable.contents
       : {
           snackbarSeverity: AlertSeverity.info,
-          snackbarMessage: "",
+          snackbarMessage: undefined,
           snackbarTime: new Date(),
-          snackbarOpen: true,
+          snackbarOpen: false,
         };
 
   const readToastMessageLoadable = useRecoilValueLoadable(
@@ -73,9 +76,33 @@ function ListPage(props) {
       ? readToastMessageLoadable.contents
       : {
           snackbarSeverity: AlertSeverity.info,
-          snackbarMessage: "",
+          snackbarMessage: undefined,
           snackbarTime: new Date(),
-          snackbarOpen: true,
+          snackbarOpen: false,
+        };
+
+  //* --------------------------------------------------------------------------
+  //* Prompt dialog variables.
+  //* --------------------------------------------------------------------------
+  const [writeDialogMessageLoadable, setWriteDialogMessage] =
+    useRecoilStateLoadable(writeDialogMessageState);
+  const writeDialogMessage =
+    writeDialogMessageLoadable?.state === "hasValue"
+      ? writeDialogMessageLoadable.contents
+      : {
+          decyprtedPrompt: undefined,
+          openDialog: false,
+        };
+
+  const readDialogMessageLoadable = useRecoilValueLoadable(
+    readDialogMessageState
+  );
+  const readDialogMessage =
+    readDialogMessageLoadable?.state === "hasValue"
+      ? readDialogMessageLoadable.contents
+      : {
+          decyprtedPrompt: undefined,
+          openDialog: false,
         };
 
   React.useEffect(
@@ -147,6 +174,11 @@ function ListPage(props) {
         message={readToastMessage.snackbarMessage}
         severity={readToastMessage.snackbarSeverity}
         currentTime={readToastMessage.snackbarTime}
+      />
+
+      <PromptDialog
+        inputOpenDialog={readDialogMessage.openDialog}
+        inputDecryptedPrompt={readDialogMessage.decyprtedPrompt}
       />
     </React.Fragment>
   );

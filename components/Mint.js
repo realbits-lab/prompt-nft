@@ -368,7 +368,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
                 //* Check image url is already minted with crypt flag.
                 try {
                   const checkCryptResponse = await fetchJson(
-                    ["/api/check-crypt"],
+                    { url: "/api/check-crypt" },
                     {
                       method: "POST",
                       headers: {
@@ -417,17 +417,20 @@ function Mint({ inputImageUrl, inputPrompt }) {
                   // console.log("tokenURI: ", tokenURI);
 
                   //* Get contract owner encrypted prompt.
-                  const fetchResponse = await fetchJson(["/api/crypt"], {
-                    method: "POST",
-                    headers: {
-                      Accept: "application/json",
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                      prompt: promptText,
-                      imageUrl: imageUrl,
-                    }),
-                  });
+                  const fetchResponse = await fetchJson(
+                    { url: "/api/crypt" },
+                    {
+                      method: "POST",
+                      headers: {
+                        Accept: "application/json",
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        prompt: promptText,
+                        imageUrl: imageUrl,
+                      }),
+                    }
+                  );
                   // console.log("fetchResponse: ", fetchResponse);
 
                   //* Mint prompt NFT.

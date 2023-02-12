@@ -1,7 +1,7 @@
 import React from "react";
 import { isMobile } from "react-device-detect";
 import useSWR from "swr";
-import { Base64 } from "js-base64";
+import { useRecoilStateLoadable } from "recoil";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -10,13 +10,12 @@ import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
-import fetchJson, { FetchType } from "../lib/fetchJson";
-import { isWalletConnected, decryptData, handleLogin } from "../lib/util";
+import {
+  AlertSeverity,
+  writeToastMessageState,
+  writeDialogMessageState,
+  handleCheckPrompt,
+} from "../lib/util";
 import useUser from "../lib/useUser";
 
 function CardNft({
@@ -44,13 +43,12 @@ function CardNft({
     data: metadataData,
     error: metadataError,
     isValidating: metadataIsValidating,
-  } = useSWR([
-    "getMetadata",
-    FetchType.PROVIDER,
-    promptNftContract,
-    dataSigner,
-    nftData.tokenId,
-  ]);
+  } = useSWR({
+    command: "getMetadata",
+    promptNftContract: promptNftContract,
+    signer: dataSigner,
+    tokenId: nftData.tokenId,
+  });
 
   const { user, mutateUser } = useUser();
   // const {
@@ -66,17 +64,39 @@ function CardNft({
   //   value: value,
   // });
 
-  //*---------------------------------------------------------------------------
-  //* Define state variables.
-  //*---------------------------------------------------------------------------
-  const [decryptedPrompt, setDecryptedPrompt] = React.useState("");
-  const [openDialog, setOpenDialog] = React.useState(false);
-
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
     e.target.onerror = null;
     e.target.src = PLACEHOLDER_IMAGE_URL;
   }
+
+  //* --------------------------------------------------------------------------
+  //* Snackbar variables.
+  //* --------------------------------------------------------------------------
+  const [writeToastMessageLoadable, setWriteToastMessage] =
+    useRecoilStateLoadable(writeToastMessageState);
+  const writeToastMessage =
+    writeToastMessageLoadable?.state === "hasValue"
+      ? writeToastMessageLoadable.contents
+      : {
+          snackbarSeverity: AlertSeverity.info,
+          snackbarMessage: "",
+          snackbarTime: new Date(),
+          snackbarOpen: true,
+        };
+
+  //* --------------------------------------------------------------------------
+  //* Prompt dialog variables.
+  //* --------------------------------------------------------------------------
+  const [writeDialogMessageLoadable, setWriteDialogMessage] =
+    useRecoilStateLoadable(writeDialogMessageState);
+  const writeDialogMessage =
+    writeDialogMessageLoadable?.state === "hasValue"
+      ? writeDialogMessageLoadable.contents
+      : {
+          decyprtedPrompt: undefined,
+          openDialog: false,
+        };
 
   return (
     <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}>
@@ -127,107 +147,25 @@ function CardNft({
           <Button
             size="small"
             onClick={async function () {
-              if (isWalletConnected({ isConnected, selectedChain }) === false) {
-                // console.log("chainName: ", getChainName({ chainId }));
-                setSnackbarSeverity("warning");
-                setSnackbarMessage(
-                  `Change metamask network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`
-                );
-                setOpenSnackbar(true);
-                return;
-              }
-
-              if (isMobile === true) {
-                //* Set user login session.
-                if (user.isLoggedIn === false) {
-                  setSnackbarSeverity("info");
-                  setSnackbarMessage("Checking user authentication...");
-                  setOpenSnackbar(true);
-
-                  try {
-                    await handleLogin({
-                      mutateUser: mutateUser,
-                      address: address,
-                      chainId: selectedChain.id,
-                      signTypedDataAsync: signTypedDataAsync,
-                    });
-                  } catch (error) {
-                    console.error(error);
-                    setSnackbarSeverity("error");
-                    setSnackbarMessage(`Login error: ${error}`);
-                    setOpenSnackbar(true);
-                    return;
-                  }
-
-                  setOpenSnackbar(false);
-                  setSnackbarMessage("Checking is finished.");
-                  setOpenSnackbar(true);
-                }
-
-                //* Get the plain prompt from prompter.
-                const body = { tokenId: nftData.tokenId.toNumber() };
-                const promptResult = await fetchJson(["/api/prompt"], {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(body),
-                });
-                // console.log("promptResult:", promptResult);
-
-                const decodedPrompt = Base64.decode(
-                  promptResult.prompt
-                ).toString();
-                // console.log("decodedPrompt:", decodedPrompt);
-
-                setDecryptedPrompt(decodedPrompt);
-                setOpenDialog(true);
-              } else {
-                const encryptPromptData = await promptNftContract
-                  .connect(dataSigner)
-                  .getTokenOwnerPrompt(nftData.tokenId);
-                // console.log("encryptPromptData: ", encryptPromptData);
-
-                const encryptData = {
-                  ciphertext: encryptPromptData["ciphertext"],
-                  ephemPublicKey: encryptPromptData["ephemPublicKey"],
-                  nonce: encryptPromptData["nonce"],
-                  version: encryptPromptData["version"],
-                };
-                // console.log("encryptData: ", encryptData);
-
-                const prompt = await decryptData({
-                  encryptData: encryptData,
-                  decryptAddress: address,
-                });
-                // console.log("prompt: ", prompt);
-
-                setDecryptedPrompt(prompt);
-                setOpenDialog(true);
-              }
+              await handleCheckPrompt({
+                setWriteToastMessage: setWriteToastMessage,
+                setWriteDialogMessage: setWriteDialogMessage,
+                isMobile: isMobile,
+                user: user,
+                nftData: nftData,
+                promptNftContract: promptNftContract,
+                dataSigner: dataSigner,
+                isConnected: isConnected,
+                selectedChain: selectedChain,
+                address: address,
+                mutateUser: mutateUser,
+              });
             }}
           >
             PROMPT
           </Button>
         </CardActions>
       </Card>
-
-      <Dialog
-        open={openDialog}
-        onClose={() => setOpenDialog(false)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">Prompt</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            {decryptedPrompt}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} autoFocus>
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }

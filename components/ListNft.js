@@ -1,6 +1,5 @@
 import React from "react";
 import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
-import useSWR from "swr";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
@@ -9,7 +8,6 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
-import { FetchType } from "../lib/fetchJson";
 import CardNft from "./CardNft";
 
 function ListNft({
@@ -19,7 +17,12 @@ function ListNft({
   selectedChain,
   address,
   isConnected,
+  data,
+  isLoading,
 }) {
+  // console.log("call ListNft()");
+  // console.log("data: ", data);
+
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const NUMBER_PER_PAGE = 5;
 
@@ -30,17 +33,6 @@ function ListNft({
   const handlePageIndexChange = (event, value) => {
     setPageIndex(value);
   };
-
-  //* Get all register data array.
-  const { data, error, isLoading, isValidating } = useSWR([
-    "getAllRegisterData",
-    FetchType.PROVIDER,
-    rentMarketContract,
-    dataSigner,
-  ]);
-  // console.log("data: ", data);
-  // console.log("isLoading: ", isLoading);
-  // console.log("isValidating: ", isValidating);
 
   function LoadingPage() {
     return (
@@ -100,7 +92,7 @@ function ListNft({
         return <LoadingPage />;
       }
 
-      if (!data) {
+      if (!data || data.length === 0) {
         return <NoContentPage message={"No prompt NFT."} />;
       }
 
@@ -108,9 +100,7 @@ function ListNft({
         <div>
           <Box sx={{ marginTop: 10 }} display="flex" justifyContent="center">
             <Pagination
-              count={Math.ceil(
-                data.allRegisterDataArray.length / NUMBER_PER_PAGE
-              )}
+              count={Math.ceil(data.length / NUMBER_PER_PAGE)}
               page={pageIndex}
               onChange={handlePageIndexChange}
               variant="outlined"
@@ -128,7 +118,7 @@ function ListNft({
               }}
             />
           </Box>
-          {data.allRegisterDataArray.map((nftData, idx) => {
+          {data.map((nftData, idx) => {
             // console.log("idx: ", idx);
             // console.log("pageIndex: ", pageIndex);
             //* Check idx is in pagination.
