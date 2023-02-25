@@ -261,7 +261,7 @@ function List({ mode }) {
   // console.log("isErrorSignTypedData: ", isErrorSignTypedData);
   // console.log("isLoadingSignTypedData: ", isLoadingSignTypedData);
   // console.log("isSuccessSignTypedData: ", isSuccessSignTypedData);
-  // console.log("signTypedDataAsync: ", signTypedDataAsync);
+  console.log("signTypedDataAsync: ", signTypedDataAsync);
 
   const theme = useTheme();
 
@@ -475,6 +475,7 @@ function List({ mode }) {
                 rentMarketContract={rentMarketContract}
                 data={allNftDataArray}
                 isLoading={swrIsLoadingRegisterData}
+                signTypedDataAsync={signTypedDataAsync}
               />
               // <ListNft
               //   selectedChain={selectedChain}

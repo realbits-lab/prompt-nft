@@ -34,6 +34,7 @@ function CardNft({
   isConnected,
   rentMarketContract,
   promptNftContract,
+  signTypedDataAsync,
 }) {
   // console.log("call CardNft()");
   // console.log("nftData: ", nftData);
@@ -214,6 +215,7 @@ function CardNft({
                   selectedChain: selectedChain,
                   address: address,
                   mutateUser: mutateUser,
+                  signTypedDataAsync: signTypedDataAsync,
                 });
               }}
             >

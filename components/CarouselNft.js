@@ -26,6 +26,7 @@ function CarouselNft({
   isConnected,
   data,
   isLoading,
+  signTypedDataAsync,
 }) {
   // console.log("call CarouselNft()");
   // console.log("data: ", data);
@@ -142,6 +143,7 @@ function CarouselNft({
                       rentMarketContract={rentMarketContract}
                       selectedChain={selectedChain}
                       promptNftContract={promptNftContract}
+                      signTypedDataAsync={signTypedDataAsync}
                     />
                   ) : null}
                 </div>
