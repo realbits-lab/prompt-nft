@@ -181,7 +181,6 @@ function ListPage(props) {
         currentTime={readToastMessage.snackbarTime}
       />
 
-			
       <Dialog
         open={readDialogMessage.openDialog}
         onClose={() =>
