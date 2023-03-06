@@ -261,7 +261,7 @@ function List({ mode }) {
   // console.log("isErrorSignTypedData: ", isErrorSignTypedData);
   // console.log("isLoadingSignTypedData: ", isLoadingSignTypedData);
   // console.log("isSuccessSignTypedData: ", isSuccessSignTypedData);
-  console.log("signTypedDataAsync: ", signTypedDataAsync);
+  // console.log("signTypedDataAsync: ", signTypedDataAsync);
 
   const theme = useTheme();
 
@@ -290,7 +290,7 @@ function List({ mode }) {
     // console.log("swrIsLoadingRegisterData: ", swrIsLoadingRegisterData);
     // console.log("swrIsValidatingRegisterData: ", swrIsValidatingRegisterData);
     // console.log("swrStatusRegisterData: ", swrStatusRegisterData);
-    console.log("swrDataCollection: ", swrDataCollection);
+    // console.log("swrDataCollection: ", swrDataCollection);
     // console.log("dataOwn: ", dataOwn);
     // console.log("dataRent: ", dataRent);
 
@@ -301,7 +301,7 @@ function List({ mode }) {
           return collection.collectionAddress === registerData.nftAddress;
         });
       });
-      console.log("registerData: ", registerData);
+      // console.log("registerData: ", registerData);
     }
 
     let ownDataArray;
@@ -340,7 +340,7 @@ function List({ mode }) {
 
     //* Set all registered nft data.
     if (registerData) {
-      console.log("registerData: ", registerData);
+      // console.log("registerData: ", registerData);
       const dataNftWithStatusArray = registerData.map(function (nft) {
         let isOwn = false;
         let isRent = false;
@@ -400,7 +400,7 @@ function List({ mode }) {
       });
 
       setAllNftDataArray(dataNftWithStatusArray.reverse());
-      console.log("dataNftWithStatusArray: ", dataNftWithStatusArray);
+      // console.log("dataNftWithStatusArray: ", dataNftWithStatusArray);
     }
   }
 
