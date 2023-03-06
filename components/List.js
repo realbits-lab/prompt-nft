@@ -459,7 +459,10 @@ function List({ mode }) {
         {mode === "image" ? (
           <div>
             {/* <ListImage data={dataImage} isLoading={isLoadingImage} /> */}
-            <CarouselImage data={dataImage} isLoading={isLoadingImage} />
+            <CarouselImage
+              data={dataImage}
+              isLoading={isLoadingImage}
+            />
           </div>
         ) : mode === "nft" ? (
           <div>

@@ -28,7 +28,7 @@ function CarouselNft({
   signTypedDataAsync,
 }) {
   // console.log("call CarouselNft()");
-  // console.log("data: ", data);
+  console.log("data: ", data);
   // console.log("isConnected: ", isConnected);
   // console.log("isLoading: ", isLoading);
   // console.log("signTypedDataAsync: ", signTypedDataAsync);
@@ -144,7 +144,6 @@ function CarouselNft({
                   {Math.abs(activeStep - index) <= 2 ? (
                     <CardNft
                       nftData={nftData}
-                      key={index}
                       dataSigner={dataSigner}
                       address={address}
                       isConnected={isConnected}
