@@ -28,7 +28,7 @@ function CarouselNft({
   signTypedDataAsync,
 }) {
   // console.log("call CarouselNft()");
-  console.log("data: ", data);
+  // console.log("data: ", data);
   // console.log("isConnected: ", isConnected);
   // console.log("isLoading: ", isLoading);
   // console.log("signTypedDataAsync: ", signTypedDataAsync);
@@ -130,6 +130,7 @@ function CarouselNft({
         return <LoadingPage />;
       }
 
+      // console.log("activeStep: ", activeStep);
       return (
         <>
           <BindKeyboardSwipeableViews

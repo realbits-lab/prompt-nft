@@ -15,19 +15,16 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import CardImage from "./CardImage";
 
 function CarouselImage({ data, isLoading }) {
-  console.log("data: ", data);
+  // console.log("data: ", data);
+  // console.log("isLoading: ", isLoading);
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
 
-  const CARD_MARGIN_TOP = "60px";
-  const CARD_MARGIN_BOTTOM = 200;
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
-  const CARD_PADDING = 10;
 
   const BindKeyboardSwipeableViews = bindKeyboard(SwipeableViews);
   const theme = useTheme();
   const [activeStep, setActiveStep] = React.useState(0);
-  const [cardImageHeight, setCardImageHeight] = React.useState(0);
   const maxSteps = data?.data?.length || 0;
 
   const handleNext = () => {
@@ -41,19 +38,6 @@ function CarouselImage({ data, isLoading }) {
   const handleStepChange = (step) => {
     setActiveStep(step);
   };
-
-  React.useEffect(function () {
-    console.log("call useEffect()");
-    setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
-
-    //* TODO: This is not working. Fix it.
-    //* Register window resize event.
-    window.addEventListener("resize", function () {
-      // console.log("call resize()");
-      // console.log("window.innerHeight: ", window.innerHeight);
-      setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
-    });
-  });
 
   function LoadingPage() {
     return (
@@ -119,6 +103,7 @@ function CarouselImage({ data, isLoading }) {
         );
       }
 
+      // console.log("activeStep: ", activeStep);
       return (
         <>
           <BindKeyboardSwipeableViews
@@ -127,7 +112,7 @@ function CarouselImage({ data, isLoading }) {
             onChangeIndex={handleStepChange}
             enableMouseEvents
           >
-            {data?.data?.map(function (imageData, index) {
+            {data.data.map(function (imageData, index) {
               return (
                 <div key={index}>
                   {Math.abs(activeStep - index) <= 2 ? (
