@@ -53,9 +53,9 @@ function ListPage(props) {
   const SELECTED_BUTTON_BACKGROUND_COLOR = "#21b6ae";
   const SELECTED_BUTTON_PADDING = "2px 2px";
 
-  //* --------------------------------------------------------------------------
+  //*---------------------------------------------------------------------------
   //* Snackbar variables.
-  //* --------------------------------------------------------------------------
+  //*---------------------------------------------------------------------------
   const [writeToastMessageLoadable, setWriteToastMessage] =
     useRecoilStateLoadable(writeToastMessageState);
   const writeToastMessage =
@@ -81,9 +81,9 @@ function ListPage(props) {
           snackbarOpen: false,
         };
 
-  //* --------------------------------------------------------------------------
+  //*---------------------------------------------------------------------------
   //* Prompt dialog variables.
-  //* --------------------------------------------------------------------------
+  //*---------------------------------------------------------------------------
   const [writeDialogMessageLoadable, setWriteDialogMessage] =
     useRecoilStateLoadable(writeDialogMessageState);
   const writeDialogMessage =
