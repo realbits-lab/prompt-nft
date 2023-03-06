@@ -12,8 +12,10 @@ import MobileStepper from "@mui/material/MobileStepper";
 import CircularProgress from "@mui/material/CircularProgress";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
+import CardImage from "./CardImage";
 
 function CarouselImage({ data, isLoading }) {
+  console.log("data: ", data);
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
 
   const CARD_MARGIN_TOP = "60px";
@@ -41,6 +43,7 @@ function CarouselImage({ data, isLoading }) {
   };
 
   React.useEffect(function () {
+    console.log("call useEffect()");
     setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
 
     //* TODO: This is not working. Fix it.
@@ -50,7 +53,7 @@ function CarouselImage({ data, isLoading }) {
       // console.log("window.innerHeight: ", window.innerHeight);
       setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
     });
-  }, []);
+  });
 
   function LoadingPage() {
     return (
@@ -106,7 +109,7 @@ function CarouselImage({ data, isLoading }) {
         return <LoadingPage />;
       }
 
-      if (!data) {
+      if (!data?.data) {
         return (
           <NoContentPage
             message={
@@ -124,55 +127,12 @@ function CarouselImage({ data, isLoading }) {
             onChangeIndex={handleStepChange}
             enableMouseEvents
           >
-            {data.data.map(function (imageData, index) {
+            {data?.data?.map(function (imageData, index) {
               return (
                 <div key={index}>
-                  <Box
-                    sx={{
-                      m: CARD_PADDING,
-                      marginTop: CARD_MARGIN_TOP,
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {Math.abs(activeStep - index) <= 2 ? (
-                      <Card>
-                        {imageData ? (
-                          <CardMedia
-                            component="img"
-                            image={imageData ? imageData.imageUrl : ""}
-                            onError={handleCardMediaImageError}
-                            sx={{
-                              objectFit: "contain",
-                              width: "90vw",
-                              height: cardImageHeight,
-                            }}
-                          />
-                        ) : (
-                          <Skeleton
-                            variant="rounded"
-                            width={CARD_MIN_WIDTH}
-                            height={CARD_MIN_WIDTH}
-                          />
-                        )}
-                        <CardContent
-                          sx={{
-                            width: "90vw",
-                          }}
-                        >
-                          <Typography
-                            sx={{ fontSize: 14 }}
-                            color="text.secondary"
-                            gutterBottom
-                          >
-                            {imageData.prompt}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    ) : null}
-                  </Box>
+                  {Math.abs(activeStep - index) <= 2 ? (
+                    <CardImage imageData={imageData} />
+                  ) : null}
                 </div>
               );
             })}
@@ -214,7 +174,7 @@ function CarouselImage({ data, isLoading }) {
         </>
       );
     },
-    [activeStep, maxSteps, data, isLoading]
+    [activeStep, maxSteps, data?.data, isLoading]
   );
 
   return <ImageCardList />;

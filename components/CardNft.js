@@ -179,7 +179,7 @@ function CardNft({
             image={metadataData ? metadataData.image : ""}
             onError={handleCardMediaImageError}
             sx={{
-              objectFit: "cover",
+              objectFit: "contain",
               width: "90vw",
               height: "50vh",
             }}
