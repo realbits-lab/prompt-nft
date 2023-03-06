@@ -9,10 +9,14 @@ import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Slide from "@mui/material/Slide";
 import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
 import List from "../../components/List";
 import {
   RBSnackbar,
-  PromptDialog,
   AlertSeverity,
   writeToastMessageState,
   readToastMessageState,
@@ -108,6 +112,7 @@ function ListPage(props) {
   React.useEffect(
     function () {
       // console.log("call useEffect()");
+      // console.log("readDialogMessage: ", readDialogMessage);
       // console.log("queryMode: ", queryMode);
 
       if (
@@ -176,10 +181,38 @@ function ListPage(props) {
         currentTime={readToastMessage.snackbarTime}
       />
 
-      <PromptDialog
-        inputOpenDialog={readDialogMessage.openDialog}
-        inputDecryptedPrompt={readDialogMessage.decyprtedPrompt}
-      />
+			
+      <Dialog
+        open={readDialogMessage.openDialog}
+        onClose={() =>
+          setWriteDialogMessage({
+            decyprtedPrompt: readDialogMessage.decyprtedPrompt,
+            openDialog: false,
+          })
+        }
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Prompt</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {readDialogMessage.decyprtedPrompt || ""}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() =>
+              setWriteDialogMessage({
+                decyprtedPrompt: readDialogMessage.decyprtedPrompt,
+                openDialog: false,
+              })
+            }
+            autoFocus
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </React.Fragment>
   );
 }
