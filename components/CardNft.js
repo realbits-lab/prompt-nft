@@ -68,7 +68,7 @@ function CardNft({
   const { user, mutateUser } = useUser();
 
   //* Wait for transactions.
-  const { config } = usePrepareContractWrite({
+  const { config, error } = usePrepareContractWrite({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
     functionName: "rentNFT",
@@ -80,6 +80,12 @@ function CardNft({
     overrides: { value: nftData.rentFee },
   });
   const contractWrite = useContractWrite(config);
+  // console.log("RENT_MARKET_CONTRACT_ADDRES: ", RENT_MARKET_CONTRACT_ADDRES);
+  // console.log("PROMPT_NFT_CONTRACT_ADDRESS: ", PROMPT_NFT_CONTRACT_ADDRESS);
+  // console.log("SERVICE_ACCOUNT_ADDRESS: ", SERVICE_ACCOUNT_ADDRESS);
+  // console.log("nftData: ", nftData);
+  // console.log("config: ", config);
+  // console.log("error: ", error);
   // console.log("contractWrite: ", contractWrite);
   // console.log("contractWrite.write: ", contractWrite.write);
   // console.log("contractWrite.status: ", contractWrite.status);
@@ -236,6 +242,19 @@ function CardNft({
                 size="small"
                 variant="contained"
                 onClick={async () => {
+                  //* Handle usePrepareContractWrite error.
+                  if (error) {
+                    setWriteToastMessage({
+                      snackbarSeverity: AlertSeverity.warning,
+                      snackbarMessage: `Error: ${
+                        error.data ? error.data.message : error.message
+                      }`,
+                      snackbarTime: new Date(),
+                      snackbarOpen: true,
+                    });
+                    return;
+                  }
+
                   if (
                     isWalletConnected({ isConnected, selectedChain }) === false
                   ) {
@@ -278,7 +297,7 @@ function CardNft({
 
                   try {
                     setIsRenting(true);
-                    // console.log("contractWrite: ", contractWrite);
+                    console.log("contractWrite: ", contractWrite);
                     const tx = await contractWrite.writeAsync();
                     // console.log("tx: ", tx);
 
