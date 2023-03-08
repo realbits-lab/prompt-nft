@@ -49,7 +49,9 @@ function ListPage(props) {
   // console.log("call ListPage()");
   const router = useRouter();
   const queryMode = router.query.mode;
+  const queryUpdated = router.query.updated;
   // console.log("router.query: ", router.query);
+  // console.log("queryUpdated: ", queryUpdated);
   // console.log("queryMode: ", queryMode);
 
   const [mode, setMode] = React.useState("image");
@@ -170,7 +172,7 @@ function ListPage(props) {
 
       <Container>
         <Box sx={{ my: 2 }}>
-          <List mode={mode} />
+          <List mode={mode} updated={queryUpdated}/>
         </Box>
       </Container>
 

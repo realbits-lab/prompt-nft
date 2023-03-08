@@ -16,6 +16,7 @@ import useSWR from "swr";
 import { useRecoilValueLoadable } from "recoil";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -35,7 +36,7 @@ import CarouselNft from "./CarouselNft";
 import ListOwn from "./ListOwn";
 import ListRent from "./ListRent";
 
-function List({ mode }) {
+function List({ mode, updated }) {
   // console.log("call List()");
   // console.log("mode: ", mode);
 
@@ -43,7 +44,7 @@ function List({ mode }) {
   //* Define constant variables.
   //*---------------------------------------------------------------------------
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
-  const API_ALL_URL = process.env.NEXT_PUBLIC_API_ALL_URL;
+  const API_ALL_URL = `${process.env.NEXT_PUBLIC_API_ALL_URL}?updated=${updated}`;
   const RENT_MARKET_CONTRACT_ADDRES =
     process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
   // console.log("RENT_MARKET_CONTRACT_ADDRES: ", RENT_MARKET_CONTRACT_ADDRES);
@@ -459,10 +460,16 @@ function List({ mode }) {
         {mode === "image" ? (
           <div>
             {/* <ListImage data={dataImage} isLoading={isLoadingImage} /> */}
-            <CarouselImage
-              data={dataImage}
-              isLoading={isLoadingImage}
-            />
+            <Grid container>
+              <Grid item>
+                {dataImage?.newlyUpdatedData?.length > 0 ? (
+                  <Button>New images</Button>
+                ) : null}
+              </Grid>
+              <Grid item>
+                <CarouselImage data={dataImage} isLoading={isLoadingImage} />
+              </Grid>
+            </Grid>
           </div>
         ) : mode === "nft" ? (
           <div>
