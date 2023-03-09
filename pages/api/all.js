@@ -1,6 +1,7 @@
 import { withIronSessionApiRoute } from "iron-session/next";
 import { sessionOptions } from "../../lib/session";
 import { PrismaClient } from "@prisma/client";
+import moment from "moment";
 
 async function handler(req, res) {
   //* Check method error.
@@ -29,7 +30,7 @@ async function handler(req, res) {
       req.session.updated = updated;
       await req.session.save();
     } else {
-      fetchTimestamp = req.session.updated.fetchTimestamp;
+      fetchTimestamp = new Date(req.session.updated.fetchTimestamp);
     }
   } else {
     // console.log("no req.session.updated");
@@ -39,7 +40,14 @@ async function handler(req, res) {
     await req.session.save();
     // console.log("saved req.session.updated: ", req.session.updated);
   }
+  // console.log("typeof fetchTimestamp: ", typeof fetchTimestamp);
   // console.log("fetchTimestamp: ", fetchTimestamp);
+
+  //* Get one minus day from fetch timestamp.
+  let endTimestamp = new Date(fetchTimestamp);
+  endTimestamp.setDate(fetchTimestamp.getDate() - 2);
+  // console.log("typeof endTimestamp: ", typeof endTimestamp);
+  // console.log("endTimestamp: ", endTimestamp);
 
   //* GET /api/all
   //* Check imageUrl and prompt was saved in sqlite already.
@@ -47,7 +55,7 @@ async function handler(req, res) {
     const findManyResult = await prisma.post.findMany({
       where: {
         isEncrypted: false,
-        createdAt: { lte: fetchTimestamp },
+        createdAt: { lte: fetchTimestamp, gte: endTimestamp },
       },
       orderBy: {
         createdAt: "desc",
@@ -67,7 +75,7 @@ async function handler(req, res) {
     const fineManyUpdateResult = await prisma.post.findMany({
       where: {
         isEncrypted: false,
-        createdAt: { gte: fetchTimestamp },
+        createdAt: { gt: fetchTimestamp },
       },
       orderBy: {
         createdAt: "desc",

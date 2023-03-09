@@ -9,10 +9,14 @@ import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Slide from "@mui/material/Slide";
 import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
 import List from "../../components/List";
 import {
   RBSnackbar,
-  PromptDialog,
   AlertSeverity,
   writeToastMessageState,
   readToastMessageState,
@@ -45,7 +49,9 @@ function ListPage(props) {
   // console.log("call ListPage()");
   const router = useRouter();
   const queryMode = router.query.mode;
+  const queryUpdated = router.query.updated;
   // console.log("router.query: ", router.query);
+  // console.log("queryUpdated: ", queryUpdated);
   // console.log("queryMode: ", queryMode);
 
   const [mode, setMode] = React.useState("image");
@@ -53,9 +59,9 @@ function ListPage(props) {
   const SELECTED_BUTTON_BACKGROUND_COLOR = "#21b6ae";
   const SELECTED_BUTTON_PADDING = "2px 2px";
 
-  //* --------------------------------------------------------------------------
+  //*---------------------------------------------------------------------------
   //* Snackbar variables.
-  //* --------------------------------------------------------------------------
+  //*---------------------------------------------------------------------------
   const [writeToastMessageLoadable, setWriteToastMessage] =
     useRecoilStateLoadable(writeToastMessageState);
   const writeToastMessage =
@@ -81,9 +87,9 @@ function ListPage(props) {
           snackbarOpen: false,
         };
 
-  //* --------------------------------------------------------------------------
+  //*---------------------------------------------------------------------------
   //* Prompt dialog variables.
-  //* --------------------------------------------------------------------------
+  //*---------------------------------------------------------------------------
   const [writeDialogMessageLoadable, setWriteDialogMessage] =
     useRecoilStateLoadable(writeDialogMessageState);
   const writeDialogMessage =
@@ -108,6 +114,7 @@ function ListPage(props) {
   React.useEffect(
     function () {
       // console.log("call useEffect()");
+      // console.log("readDialogMessage: ", readDialogMessage);
       // console.log("queryMode: ", queryMode);
 
       if (
@@ -165,7 +172,7 @@ function ListPage(props) {
 
       <Container>
         <Box sx={{ my: 2 }}>
-          <List mode={mode} />
+          <List mode={mode} updated={queryUpdated}/>
         </Box>
       </Container>
 
@@ -176,10 +183,37 @@ function ListPage(props) {
         currentTime={readToastMessage.snackbarTime}
       />
 
-      <PromptDialog
-        inputOpenDialog={readDialogMessage.openDialog}
-        inputDecryptedPrompt={readDialogMessage.decyprtedPrompt}
-      />
+      <Dialog
+        open={readDialogMessage.openDialog}
+        onClose={() =>
+          setWriteDialogMessage({
+            decyprtedPrompt: readDialogMessage.decyprtedPrompt,
+            openDialog: false,
+          })
+        }
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Prompt</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {readDialogMessage.decyprtedPrompt || ""}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() =>
+              setWriteDialogMessage({
+                decyprtedPrompt: readDialogMessage.decyprtedPrompt,
+                openDialog: false,
+              })
+            }
+            autoFocus
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </React.Fragment>
   );
 }

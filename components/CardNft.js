@@ -51,9 +51,11 @@ function CardNft({
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
 
   const CARD_MARGIN_TOP = "60px";
+  const CARD_MARGIN_BOTTOM = 250;
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;
+  const [cardImageHeight, setCardImageHeight] = React.useState(0);
 
   const {
     data: metadataData,
@@ -68,7 +70,7 @@ function CardNft({
   const { user, mutateUser } = useUser();
 
   //* Wait for transactions.
-  const { config } = usePrepareContractWrite({
+  const { config, error } = usePrepareContractWrite({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
     functionName: "rentNFT",
@@ -80,6 +82,12 @@ function CardNft({
     overrides: { value: nftData.rentFee },
   });
   const contractWrite = useContractWrite(config);
+  // console.log("RENT_MARKET_CONTRACT_ADDRES: ", RENT_MARKET_CONTRACT_ADDRES);
+  // console.log("PROMPT_NFT_CONTRACT_ADDRESS: ", PROMPT_NFT_CONTRACT_ADDRESS);
+  // console.log("SERVICE_ACCOUNT_ADDRESS: ", SERVICE_ACCOUNT_ADDRESS);
+  // console.log("nftData: ", nftData);
+  // console.log("config: ", config);
+  // console.log("error: ", error);
   // console.log("contractWrite: ", contractWrite);
   // console.log("contractWrite.write: ", contractWrite.write);
   // console.log("contractWrite.status: ", contractWrite.status);
@@ -147,6 +155,18 @@ function CardNft({
           openDialog: false,
         };
 
+  React.useEffect(function () {
+    // console.log("call useEffect()");
+    setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
+
+    //* Register window resize event.
+    window.addEventListener("resize", function () {
+      // console.log("call resize()");
+      // console.log("window.innerHeight: ", window.innerHeight);
+      setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
+    });
+  });
+
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
     e.target.onerror = null;
@@ -173,9 +193,9 @@ function CardNft({
             image={metadataData ? metadataData.image : ""}
             onError={handleCardMediaImageError}
             sx={{
-              objectFit: "cover",
+              objectFit: "contain",
               width: "90vw",
-              height: "50vh",
+              height: cardImageHeight,
             }}
           />
         ) : (
@@ -236,6 +256,19 @@ function CardNft({
                 size="small"
                 variant="contained"
                 onClick={async () => {
+                  //* Handle usePrepareContractWrite error.
+                  if (error) {
+                    setWriteToastMessage({
+                      snackbarSeverity: AlertSeverity.warning,
+                      snackbarMessage: `Error: ${
+                        error.data ? error.data.message : error.message
+                      }`,
+                      snackbarTime: new Date(),
+                      snackbarOpen: true,
+                    });
+                    return;
+                  }
+
                   if (
                     isWalletConnected({ isConnected, selectedChain }) === false
                   ) {
@@ -278,7 +311,7 @@ function CardNft({
 
                   try {
                     setIsRenting(true);
-                    // console.log("contractWrite: ", contractWrite);
+                    console.log("contractWrite: ", contractWrite);
                     const tx = await contractWrite.writeAsync();
                     // console.log("tx: ", tx);
 

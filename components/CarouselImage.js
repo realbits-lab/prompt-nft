@@ -3,6 +3,7 @@ import SwipeableViews from "react-swipeable-views";
 import { bindKeyboard } from "react-swipeable-views-utils";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -12,14 +13,16 @@ import MobileStepper from "@mui/material/MobileStepper";
 import CircularProgress from "@mui/material/CircularProgress";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
+import CardImage from "./CardImage";
 
 function CarouselImage({ data, isLoading }) {
+  // console.log("data: ", data);
+  // console.log("isLoading: ", isLoading);
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
 
   const CARD_MARGIN_TOP = "60px";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
-  const CARD_PADDING = 10;
 
   const BindKeyboardSwipeableViews = bindKeyboard(SwipeableViews);
   const theme = useTheme();
@@ -92,7 +95,7 @@ function CarouselImage({ data, isLoading }) {
         return <LoadingPage />;
       }
 
-      if (!data) {
+      if (!data?.data) {
         return (
           <NoContentPage
             message={
@@ -102,8 +105,17 @@ function CarouselImage({ data, isLoading }) {
         );
       }
 
+      // console.log("activeStep: ", activeStep);
       return (
         <>
+          {data?.newlyUpdatedData?.length > 0 ? (
+            <Button
+              sx={{ marginTop: CARD_MARGIN_TOP }}
+              href="/list/image?updated=true"
+            >
+              New images
+            </Button>
+          ) : null}
           <BindKeyboardSwipeableViews
             axis={theme.direction === "rtl" ? "x-reverse" : "x"}
             index={activeStep}
@@ -113,52 +125,9 @@ function CarouselImage({ data, isLoading }) {
             {data.data.map(function (imageData, index) {
               return (
                 <div key={index}>
-                  <Box
-                    sx={{
-                      m: CARD_PADDING,
-                      marginTop: CARD_MARGIN_TOP,
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {Math.abs(activeStep - index) <= 2 ? (
-                      <Card>
-                        {imageData ? (
-                          <CardMedia
-                            component="img"
-                            image={imageData ? imageData.imageUrl : ""}
-                            onError={handleCardMediaImageError}
-                            sx={{
-                              objectFit: "cover",
-                              width: "90vw",
-                              height: "50vh",
-                            }}
-                          />
-                        ) : (
-                          <Skeleton
-                            variant="rounded"
-                            width={CARD_MIN_WIDTH}
-                            height={CARD_MIN_WIDTH}
-                          />
-                        )}
-                        <CardContent
-                          sx={{
-                            width: "90vw",
-                          }}
-                        >
-                          <Typography
-                            sx={{ fontSize: 14 }}
-                            color="text.secondary"
-                            gutterBottom
-                          >
-                            {imageData.prompt}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    ) : null}
-                  </Box>
+                  {Math.abs(activeStep - index) <= 2 ? (
+                    <CardImage imageData={imageData} />
+                  ) : null}
                 </div>
               );
             })}

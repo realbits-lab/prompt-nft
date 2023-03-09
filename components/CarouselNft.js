@@ -12,7 +12,6 @@ import Typography from "@mui/material/Typography";
 import MobileStepper from "@mui/material/MobileStepper";
 import CircularProgress from "@mui/material/CircularProgress";
 import Grid from "@mui/material/Grid";
-import Pagination from "@mui/material/Pagination";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import CardNft from "./CardNft";
@@ -30,13 +29,14 @@ function CarouselNft({
 }) {
   // console.log("call CarouselNft()");
   // console.log("data: ", data);
+  // console.log("isConnected: ", isConnected);
+  // console.log("isLoading: ", isLoading);
+  // console.log("signTypedDataAsync: ", signTypedDataAsync);
 
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
 
-  const CARD_MARGIN_TOP = "60px";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
-  const CARD_PADDING = 10;
 
   const BindKeyboardSwipeableViews = bindKeyboard(SwipeableViews);
   const theme = useTheme();
@@ -108,8 +108,12 @@ function CarouselNft({
 
   const NftCardList = React.useCallback(
     function NftCardList() {
-      if (isLoading === true) {
-        return <LoadingPage />;
+      if (!isConnected) {
+        return (
+          <NoContentPage
+            message={`You are not connected to blockchain. Connect to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK} network.`}
+          />
+        );
       }
 
       if (!data) {
@@ -122,6 +126,11 @@ function CarouselNft({
         );
       }
 
+      if (isLoading === true) {
+        return <LoadingPage />;
+      }
+
+      // console.log("activeStep: ", activeStep);
       return (
         <>
           <BindKeyboardSwipeableViews
@@ -136,7 +145,6 @@ function CarouselNft({
                   {Math.abs(activeStep - index) <= 2 ? (
                     <CardNft
                       nftData={nftData}
-                      key={index}
                       dataSigner={dataSigner}
                       address={address}
                       isConnected={isConnected}

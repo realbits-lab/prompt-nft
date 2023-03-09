@@ -14,10 +14,24 @@ function CardImage({ imageData }) {
   //* Define constant variables.
   //*---------------------------------------------------------------------------
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
-  const CARD_MARGIN_TOP = "50px";
+  const CARD_MARGIN_TOP = "60px";
+  const CARD_MARGIN_BOTTOM = 200;
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;
+  const [cardImageHeight, setCardImageHeight] = React.useState(0);
+
+  React.useEffect(function () {
+    // console.log("call useEffect()");
+    setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
+
+    //* Register window resize event.
+    window.addEventListener("resize", function () {
+      // console.log("call resize()");
+      // console.log("window.innerHeight: ", window.innerHeight);
+      setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
+    });
+  });
 
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
@@ -26,13 +40,28 @@ function CardImage({ imageData }) {
   }
 
   return (
-    <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}>
-      <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
+    <Box
+      sx={{
+        m: CARD_PADDING,
+        marginTop: CARD_MARGIN_TOP,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Card>
         {imageData ? (
           <CardMedia
             component="img"
             image={imageData ? imageData.imageUrl : ""}
             onError={handleCardMediaImageError}
+            sx={{
+              objectFit: "contain",
+              width: "90vw",
+              // height: "50vh",
+              height: cardImageHeight,
+            }}
           />
         ) : (
           <Skeleton
@@ -41,13 +70,12 @@ function CardImage({ imageData }) {
             height={CARD_MIN_WIDTH}
           />
         )}
-        <CardContent>
-          <Typography
-            sx={{ fontSize: 14 }}
-            color="text.secondary"
-            gutterBottom
-            component="div"
-          >
+        <CardContent
+          sx={{
+            width: "90vw",
+          }}
+        >
+          <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
             {imageData.prompt}
           </Typography>
         </CardContent>
