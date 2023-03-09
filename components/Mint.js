@@ -159,7 +159,7 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
     }
   }
 
-  async function encryptData({ prompt }) {
+  async function encryptData({ prompt, negativePrompt }) {
     // console.log("call encryptData()");
     // console.log("prompt: ", prompt);
 
@@ -177,14 +177,19 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
     );
     // console.log("base64EncryptionPublicKey: ", base64EncryptionPublicKey);
 
-    const enc = encrypt({
+    const encryptPrompt = encrypt({
       publicKey: base64EncryptionPublicKey.toString("base64"),
       data: Base64.encode(prompt).toString(),
       version: "x25519-xsalsa20-poly1305",
     });
     // console.log("enc: ", enc);
+    const encryptNegativePrompt = encrypt({
+      publicKey: base64EncryptionPublicKey.toString("base64"),
+      data: Base64.encode(negativePrompt).toString(),
+      version: "x25519-xsalsa20-poly1305",
+    });
 
-    return enc;
+    return { encryptPrompt, encryptNegativePrompt };
   }
 
   async function mintPromptNft({
@@ -194,26 +199,40 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
     contractOwnerEncryptPromptData,
     contractOwnerEncryptNegativePromptData,
   }) {
-    // console.log("call mintPromptNft()");
+    console.log("call mintPromptNft()");
+    console.log("prompt: ", prompt);
+    console.log("negativePrompt: ", negativePrompt);
 
     //* Check undefined error.
     if (
-      !prompt ||
-      !negativePrompt ||
       !tokenURI ||
       !contractOwnerEncryptPromptData ||
       !contractOwnerEncryptNegativePromptData
     ) {
+      console.log("tokenURI: ", tokenURI);
+      console.log(
+        "contractOwnerEncryptPromptData: ",
+        contractOwnerEncryptPromptData
+      );
+      console.log(
+        "contractOwnerEncryptNegativePromptData: ",
+        contractOwnerEncryptNegativePromptData
+      );
       return;
     }
 
-    const tokenOwnerEncryptPromptData = await encryptData({
+    const {
+      encryptPrompt: tokenOwnerEncryptPromptData,
+      encryptNegativePrompt: tokenOwnerEncryptNegativePromptData,
+    } = await encryptData({
       prompt: prompt,
+      negativePrompt: negativePrompt,
     });
-    const tokenOwnerEncryptNegativePromptData = await encryptData({
-      prompt: negativePrompt,
-    });
-    // console.log("tokenOwnerEncryptData: ", tokenOwnerEncryptData);
+    console.log("tokenOwnerEncryptPromptData: ", tokenOwnerEncryptPromptData);
+    console.log(
+      "tokenOwnerEncryptNegativePromptData: ",
+      tokenOwnerEncryptNegativePromptData
+    );
 
     //* Mint nft with encrypted data.
     // console.log("signerRef.current: ", signerRef.current);
@@ -237,12 +256,23 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
     } else {
       contractSigner = signer;
     }
-    // console.log("promptNftContract: ", promptNftContract);
-    // console.log("contractSigner: ", contractSigner);
-    // console.log("address: ", address);
-    // console.log("tokenURI: ", tokenURI);
-    // console.log("tokenOwnerEncryptData: ", tokenOwnerEncryptData);
-    // console.log("contractOwnerEncryptData: ", contractOwnerEncryptData);
+    console.log("promptNftContract: ", promptNftContract);
+    console.log("contractSigner: ", contractSigner);
+    console.log("address: ", address);
+    console.log("tokenURI: ", tokenURI);
+    console.log("tokenOwnerEncryptPromptData: ", tokenOwnerEncryptPromptData);
+    console.log(
+      "tokenOwnerEncryptNegativePromptData: ",
+      tokenOwnerEncryptNegativePromptData
+    );
+    console.log(
+      "contractOwnerEncryptPromptData: ",
+      contractOwnerEncryptPromptData
+    );
+    console.log(
+      "contractOwnerEncryptNegativePromptData: ",
+      contractOwnerEncryptNegativePromptData
+    );
 
     //* TODO: Add tokenOwnerEncryptNegativePromptData and contractOwnerEncryptNegativePromptData.
     const tx = await promptNftContract
@@ -251,10 +281,12 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
         address,
         tokenURI,
         tokenOwnerEncryptPromptData,
-        contractOwnerEncryptPromptData
+        tokenOwnerEncryptNegativePromptData,
+        contractOwnerEncryptPromptData,
+        contractOwnerEncryptNegativePromptData
       );
     const response = await tx.wait();
-    // console.log("response: ", response);
+    console.log("response: ", response);
 
     //* Return token id.
     return response;
