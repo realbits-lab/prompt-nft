@@ -14,8 +14,9 @@ export default async function handler(req, res) {
 
   // POST /api/post
   // Required fields in body: prompt, imageUrl, discordBotToken
-  const { prompt, imageUrl, discordBotToken } = req.body;
+  const { prompt, negativePrompt, imageUrl, discordBotToken } = req.body;
   console.log("prompt: ", prompt);
+  console.log("negativePrompt: ", negativePrompt);
   console.log("imageUrl: ", imageUrl);
   console.log("discordBotToken: ", discordBotToken);
 
@@ -36,6 +37,7 @@ export default async function handler(req, res) {
   const result = await prisma.post.create({
     data: {
       prompt: prompt,
+      negativePrompt: negativePrompt,
       imageUrl: imageUrl,
     },
   });

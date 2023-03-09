@@ -43,7 +43,7 @@ const MintPage = () => {
   React.useEffect(() => {
     // console.log("call useEffect()");
 
-    const initialize = async () => {
+    const initialize = async function () {
       // console.log("call initialize()");
 
       const params = router.query.mint;
@@ -81,17 +81,27 @@ const MintPage = () => {
 
       //* Check imageUrl and prompt was saved in sqlite already.
       //* Mint NFT only in case of pre-saved image.
-      const promptEncodedString = encodeURIComponent(inputPrompt);
       const imageUrlEncodedString = encodeURIComponent(inputImageUrl);
       const fetchImageDatabaseResponse = await fetch(
-        `${GET_API_URL}/${promptEncodedString}/${imageUrlEncodedString}`
+        `${GET_API_URL}/${imageUrlEncodedString}`
       );
-      // console.log("fetchImageDatabaseResponse: ", fetchImageDatabaseResponse);
+      console.log("fetchImageDatabaseResponse: ", fetchImageDatabaseResponse);
 
       if (fetchImageDatabaseResponse.status !== 200) {
         setErrorStatus(
           "Invalid image url and prompts. Image and prompt should be created in discord bot."
         );
+        return;
+      }
+
+      const fetchImageDatabaseResponseJson =
+        await fetchImageDatabaseResponse.json();
+      console.log(
+        "fetchImageDatabaseResponseJson: ",
+        fetchImageDatabaseResponseJson
+      );
+      if (fetchImageDatabaseResponseJson.data.isEncrypted === true) {
+        setErrorStatus("Image was already minted.");
         return;
       }
 
@@ -138,9 +148,12 @@ const MintPage = () => {
               padding: "10",
             }}
           >
+            <Typography variant="h5" color={"orange"}>
+              {errorStatus}
+            </Typography>
             <Typography variant="caption">
               Thanks for trying to mint your image with prompt. But error
-              happened to post image url and prompt. {inputErrorStatus}
+              happened to post image url and prompt.
             </Typography>
           </CardContent>
           <CardActions>
