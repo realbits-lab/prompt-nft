@@ -59,8 +59,7 @@ const MintPage = () => {
       if (
         params !== undefined &&
         (Array.isArray(params) === false ||
-          params.length !== 2 ||
-          params.length !== 3)
+          (params.length !== 2 && params.length !== 3))
       ) {
         setErrorStatus(
           "Invalid paramters. You should make a url like /mint/{prompt}/{image_url}"
@@ -170,7 +169,7 @@ const MintPage = () => {
           }}
         >
           <Button variant="text">
-            Click the Connect Wallet or Wrong Network button
+            Click the connect wallet button or change network.
           </Button>
           {buildContentPage()}
         </Box>

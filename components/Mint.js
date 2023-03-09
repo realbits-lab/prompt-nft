@@ -31,6 +31,7 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
   //*----------------------------------------------------------------------------
   //* Define constance variables.
   //*----------------------------------------------------------------------------
+  const CARD_MARGIN_BOTTOM = 500;
   const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
   // console.log("selectedChain: ", selectedChain);
   const { address, isConnected } = useAccount();
@@ -95,6 +96,7 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
     <Typography>MINT</Typography>
   );
   const [buttonDisabled, setButtonDisabled] = React.useState(false);
+  const [cardImageHeight, setCardImageHeight] = React.useState(0);
 
   React.useEffect(() => {
     // console.log("call useEffect()");
@@ -128,6 +130,15 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
     };
 
     initialize();
+
+    setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
+
+    //* Register window resize event.
+    window.addEventListener("resize", function () {
+      // console.log("call resize()");
+      // console.log("window.innerHeight: ", window.innerHeight);
+      setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
+    });
   }, [inputImageUrl, inputPrompt]);
 
   async function uploadMetadata({ name, description, inputImageUrl }) {
@@ -275,7 +286,8 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
               image={imageUrl}
               onError={handleCardMediaImageError}
               sx={{
-                objectFit: "cover",
+                objectFit: "contain",
+                height: cardImageHeight,
               }}
             />
           ) : (
