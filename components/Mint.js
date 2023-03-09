@@ -27,7 +27,7 @@ const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
 });
 import promptNFTABI from "../contracts/promptNFT.json";
 
-function Mint({ inputImageUrl, inputPrompt }) {
+function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
   //*----------------------------------------------------------------------------
   //* Define constance variables.
   //*----------------------------------------------------------------------------
@@ -90,6 +90,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
   //*---------------------------------------------------------------------------
   const [imageUrl, setImageUrl] = React.useState();
   const [promptText, setPromptText] = React.useState("");
+  const [negativePromptText, setNegativePromptText] = React.useState("");
   const [buttonMessage, setButtonMessage] = React.useState(
     <Typography>MINT</Typography>
   );
@@ -109,6 +110,12 @@ function Mint({ inputImageUrl, inputPrompt }) {
         setPromptText(inputPrompt);
       } else {
         setPromptText("");
+      }
+
+      if (inputNegativePrompt !== undefined) {
+        setNegativePromptText(inputNegativePrompt);
+      } else {
+        setNegativePromptText("");
       }
 
       try {
@@ -169,16 +176,31 @@ function Mint({ inputImageUrl, inputPrompt }) {
     return enc;
   }
 
-  async function mintPromptNft({ prompt, tokenURI, contractOwnerEncryptData }) {
+  async function mintPromptNft({
+    prompt,
+    negativePrompt,
+    tokenURI,
+    contractOwnerEncryptPromptData,
+    contractOwnerEncryptNegativePromptData,
+  }) {
     // console.log("call mintPromptNft()");
 
     //* Check undefined error.
-    if (!prompt || !tokenURI || !contractOwnerEncryptData) {
+    if (
+      !prompt ||
+      !negativePrompt ||
+      !tokenURI ||
+      !contractOwnerEncryptPromptData ||
+      !contractOwnerEncryptNegativePromptData
+    ) {
       return;
     }
 
-    const tokenOwnerEncryptData = await encryptData({
+    const tokenOwnerEncryptPromptData = await encryptData({
       prompt: prompt,
+    });
+    const tokenOwnerEncryptNegativePromptData = await encryptData({
+      prompt: negativePrompt,
     });
     // console.log("tokenOwnerEncryptData: ", tokenOwnerEncryptData);
 
@@ -211,13 +233,14 @@ function Mint({ inputImageUrl, inputPrompt }) {
     // console.log("tokenOwnerEncryptData: ", tokenOwnerEncryptData);
     // console.log("contractOwnerEncryptData: ", contractOwnerEncryptData);
 
+    //* TODO: Add tokenOwnerEncryptNegativePromptData and contractOwnerEncryptNegativePromptData.
     const tx = await promptNftContract
       .connect(contractSigner)
       .safeMint(
         address,
         tokenURI,
-        tokenOwnerEncryptData,
-        contractOwnerEncryptData
+        tokenOwnerEncryptPromptData,
+        contractOwnerEncryptPromptData
       );
     const response = await tx.wait();
     // console.log("response: ", response);
@@ -307,6 +330,18 @@ function Mint({ inputImageUrl, inputPrompt }) {
               label="Prompt"
               name="prompt"
               value={promptText}
+              inputProps={{ readOnly: true, style: { fontSize: 12 } }}
+              style={{
+                width: "100%",
+                paddingRight: "15px",
+              }}
+            />
+            <TextField
+              required
+              id="outlined-required"
+              label="Negative Prompt"
+              name="negative-prompt"
+              value={negativePromptText}
               inputProps={{ readOnly: true, style: { fontSize: 12 } }}
               style={{
                 width: "100%",
@@ -427,6 +462,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
                       },
                       body: JSON.stringify({
                         prompt: promptText,
+                        negativePrompt: negativePromptText,
                         imageUrl: imageUrl,
                       }),
                     }
@@ -442,9 +478,12 @@ function Mint({ inputImageUrl, inputPrompt }) {
 
                   mintPromptNft({
                     prompt: promptText,
+                    negativePrompt: negativePromptText,
                     tokenURI: tokenURI,
-                    contractOwnerEncryptData:
-                      fetchResponse.contractOwnerEncryptData,
+                    contractOwnerEncryptPromptData:
+                      fetchResponse.contractOwnerEncryptPromptData,
+                    contractOwnerEncryptNegativePromptData:
+                      fetchResponse.contractOwnerEncryptNegativePromptData,
                   }).then(function (tx) {
                     // console.log("tx: ", tx);
                     // console.log("tx.transactionHash: ", tx.transactionHash);

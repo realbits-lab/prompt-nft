@@ -35,6 +35,7 @@ const MintPage = () => {
   //*---------------------------------------------------------------------------
   const router = useRouter();
   const [prompt, setPrompt] = React.useState();
+  const [negativePrompt, setNegativePrompt] = React.useState();
   const [imageUrl, setImageUrl] = React.useState();
   const [errorStatus, setErrorStatus] = React.useState();
 
@@ -57,7 +58,9 @@ const MintPage = () => {
       //* Check params error.
       if (
         params !== undefined &&
-        (Array.isArray(params) === false || params.length !== 2)
+        (Array.isArray(params) === false ||
+          params.length !== 2 ||
+          params.length !== 3)
       ) {
         setErrorStatus(
           "Invalid paramters. You should make a url like /mint/{prompt}/{image_url}"
@@ -68,6 +71,12 @@ const MintPage = () => {
       //* Get prompt and imageUrl.
       const inputPrompt = params[0];
       const inputImageUrl = params[1];
+      let inputNegativePrompt;
+      if (params.length === 3) {
+        inputNegativePrompt = params[2];
+      } else {
+        inputNegativePrompt = "";
+      }
       // console.log("inputPrompt: ", inputPrompt);
       // console.log("inputImageUrl: ", inputImageUrl);
 
@@ -88,6 +97,7 @@ const MintPage = () => {
       }
 
       setPrompt(inputPrompt);
+      setNegativePrompt(inputNegativePrompt);
       setImageUrl(inputImageUrl);
       //* TODO: Track page mounted status.
       setErrorStatus(undefined);
@@ -175,7 +185,13 @@ const MintPage = () => {
     // console.log("errorStatus: ", errorStatus);
 
     if (errorStatus === undefined) {
-      return <Mint inputImageUrl={imageUrl} inputPrompt={prompt} />;
+      return (
+        <Mint
+          inputImageUrl={imageUrl}
+          inputPrompt={prompt}
+          inputNegativePrompt={negativePrompt}
+        />
+      );
     } else {
       return <ErrorPage errorStatus={errorStatus} />;
     }

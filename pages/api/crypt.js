@@ -16,6 +16,7 @@ export default async function handler(req, res) {
   // POST /api/crypt
   // Required fields in body: prompt, imageUrl
   const prompt = req.body.prompt;
+  const negativePrompt = req.body.negativePrompt;
   const imageUrl = req.body.imageUrl;
   // console.log("prompt: ", prompt);
   // console.log("imageUrl: ", imageUrl);
@@ -29,9 +30,14 @@ export default async function handler(req, res) {
   );
   // console.log("encryptionPublicKey: ", encryptionPublicKey);
 
-  const contractOwnerEncryptData = encrypt({
+  const contractOwnerEncryptPromptData = encrypt({
     publicKey: encryptionPublicKey,
     data: Base64.encode(prompt).toString(),
+    version: "x25519-xsalsa20-poly1305",
+  });
+  const contractOwnerEncryptNegativePromptData = encrypt({
+    publicKey: encryptionPublicKey,
+    data: Base64.encode(negativePrompt).toString(),
     version: "x25519-xsalsa20-poly1305",
   });
   // console.log("contractOwnerEncryptData: ", contractOwnerEncryptData);
@@ -47,5 +53,9 @@ export default async function handler(req, res) {
   // console.log("updatePostResult: ", updatePostResult);
 
   //* Send 200 OK response.
-  res.status(200).json({ contractOwnerEncryptData: contractOwnerEncryptData });
+  res.status(200).json({
+    contractOwnerEncryptPromptData: contractOwnerEncryptPromptData,
+    contractOwnerEncryptNegativePromptData:
+      contractOwnerEncryptNegativePromptData,
+  });
 }
