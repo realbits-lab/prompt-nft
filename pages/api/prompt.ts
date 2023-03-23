@@ -7,11 +7,11 @@ import { getProvider } from "lib/util";
 const { decrypt } = require("@metamask/eth-sig-util");
 
 export type PromptResult = {
-  isLoggedIn: boolean;
-  prompt: string;
+  isLoggedIn: boolean | undefined;
+  prompt: string | undefined;
+  error: any;
 };
 
-//* TODO: Check caller address is owner or renter from contract.
 async function promptRoute(
   req: NextApiRequest,
   res: NextApiResponse<PromptResult>
@@ -40,13 +40,17 @@ async function promptRoute(
       provider
     );
     // console.log("signer: ", signer);
-    const contractOwnerEncryptDataResult = await promptNftContract
-      .connect(signer)
-      .getContractOwnerPrompt(tokenId);
-    // console.log(
-    //   "contractOwnerEncryptDataResult:",
-    //   contractOwnerEncryptDataResult
-    // );
+    //* TODO: Handle the negative prompt.
+    const [contractOwnerEncryptDataResult, negativePrompt] =
+      await promptNftContract.connect(signer).getContractOwnerPrompt(tokenId);
+    console.log(
+      "contractOwnerEncryptDataResult:",
+      contractOwnerEncryptDataResult
+    );
+    console.log(
+      "contractOwnerEncryptDataResult[version]:",
+      contractOwnerEncryptDataResult["version"]
+    );
     const contractOwnerEncryptData = {
       ciphertext: contractOwnerEncryptDataResult["ciphertext"],
       ephemPublicKey: contractOwnerEncryptDataResult["ephemPublicKey"],
@@ -55,18 +59,33 @@ async function promptRoute(
     };
 
     //* Decrypt the contract owner encrypted prompt.
-    const contractOwnerDecryptResult = decrypt({
-      encryptedData: contractOwnerEncryptData,
-      privateKey: process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY,
-    });
-    // console.log("contractOwnerDecryptResult:", contractOwnerDecryptResult);
+    //* TODO: Handle error.
+    try {
+      const contractOwnerDecryptResult = decrypt({
+        encryptedData: contractOwnerEncryptData,
+        privateKey: process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY,
+      });
+      console.log("contractOwnerDecryptResult:", contractOwnerDecryptResult);
 
-    res.json({
-      isLoggedIn: true,
-      prompt: contractOwnerDecryptResult,
-    });
+      res.json({
+        isLoggedIn: true,
+        prompt: contractOwnerDecryptResult,
+        error: undefined,
+      });
+    } catch (error) {
+      console.error(error);
+      res.json({
+        isLoggedIn: undefined,
+        prompt: undefined,
+        error: error,
+      });
+    }
   } else {
-    res.json({ isLoggedIn: false, prompt: "User is not logged in." });
+    res.json({
+      isLoggedIn: false,
+      prompt: "User is not logged in.",
+      error: undefined,
+    });
   }
 }
 
