@@ -31,6 +31,7 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
   //*----------------------------------------------------------------------------
   //* Define constance variables.
   //*----------------------------------------------------------------------------
+  const DEFAULT_MODEL_NAME = "STABLE_DIFFUSION";
   const CARD_MARGIN_BOTTOM = 500;
   const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
   // console.log("selectedChain: ", selectedChain);
@@ -92,9 +93,7 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
   const [imageUrl, setImageUrl] = React.useState();
   const [promptText, setPromptText] = React.useState("");
   const [negativePromptText, setNegativePromptText] = React.useState("");
-  const [buttonMessage, setButtonMessage] = React.useState(
-    <Typography>MINT</Typography>
-  );
+  const [buttonMessage, setButtonMessage] = React.useState("MINT");
   const [buttonDisabled, setButtonDisabled] = React.useState(false);
   const [cardImageHeight, setCardImageHeight] = React.useState(0);
 
@@ -274,12 +273,13 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
       contractOwnerEncryptNegativePromptData
     );
 
-    //* TODO: Add tokenOwnerEncryptNegativePromptData and contractOwnerEncryptNegativePromptData.
+    //* Add tokenOwnerEncryptNegativePromptData and contractOwnerEncryptNegativePromptData.
     const tx = await promptNftContract
       .connect(contractSigner)
       .safeMint(
         address,
         tokenURI,
+        DEFAULT_MODEL_NAME,
         tokenOwnerEncryptPromptData,
         tokenOwnerEncryptNegativePromptData,
         contractOwnerEncryptPromptData,
@@ -528,25 +528,52 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
                       fetchResponse.contractOwnerEncryptPromptData,
                     contractOwnerEncryptNegativePromptData:
                       fetchResponse.contractOwnerEncryptNegativePromptData,
-                  }).then(function (tx) {
-                    // console.log("tx: ", tx);
-                    // console.log("tx.transactionHash: ", tx.transactionHash);
+                  })
+                    .then(function (tx) {
+                      // console.log("tx: ", tx);
+                      // console.log("tx.transactionHash: ", tx.transactionHash);
 
-                    //* Go to thanks page.
-                    const imageUrlEncodedString = encodeURIComponent(imageUrl);
-                    router.push(`${THANKS_PAGE}${imageUrlEncodedString}`);
-                  });
+                      //* Go to thanks page.
+                      const imageUrlEncodedString =
+                        encodeURIComponent(imageUrl);
+                      router.push(`${THANKS_PAGE}${imageUrlEncodedString}`);
+                    })
+                    .catch(async function (error) {
+                      console.error(error);
+
+                      //* If mint failed, revert encrypted prompt to plain prompt(use flag).
+                      //* Sync cypto flag and event logs later.
+                      const fetchResponse = await fetchJson(
+                        { url: "/api/uncrypt" },
+                        {
+                          method: "POST",
+                          headers: {
+                            Accept: "application/json",
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({
+                            imageUrl: imageUrl,
+                          }),
+                        }
+                      );
+
+                      //* Show error message in snack bar.
+                      setSnackbarSeverity("error");
+                      setSnackbarMessage(error.toString());
+                      setOpenSnackbar(true);
+
+                      //* Make mint button disabled.
+                      setButtonMessage("MINT");
+                      setButtonDisabled(false);
+                    });
 
                   setButtonMessage(<CircularProgress />);
-
-                  //* TODO: If mint failed, revert encrypted prompt to plain prompt(use flag).
-                  //* TODO: Sync cypto flag and event logs later.
                 } catch (error) {
                   console.error(error);
                 }
               }}
             >
-              {buttonMessage}
+              <Typography>{buttonMessage}</Typography>
             </Button>
           </CardActions>
         </Card>
