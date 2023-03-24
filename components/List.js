@@ -21,10 +21,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
-import {
-  getChainId,
-  isWalletConnected,
-} from "../lib/util";
+import { getChainId, isWalletConnected } from "../lib/util";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
 import ListImage from "./ListImage";
@@ -114,6 +111,7 @@ function List({ mode, updated }) {
   } = useSWR({
     url: API_ALL_URL,
   });
+  console.log("dataImage: ", dataImage);
 
   //* Get all register data array.
   // const {
@@ -458,16 +456,7 @@ function List({ mode, updated }) {
         {mode === "image" ? (
           <div>
             {/* <ListImage data={dataImage} isLoading={isLoadingImage} /> */}
-            <Grid container>
-              <Grid item>
-                {dataImage?.newlyUpdatedData?.length > 0 ? (
-                  <Button>New images</Button>
-                ) : null}
-              </Grid>
-              <Grid item>
-                <CarouselImage data={dataImage} isLoading={isLoadingImage} />
-              </Grid>
-            </Grid>
+            <CarouselImage data={dataImage} isLoading={isLoadingImage} />
           </div>
         ) : mode === "nft" ? (
           <div>

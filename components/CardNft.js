@@ -52,7 +52,6 @@ function CardNft({
 
   const CARD_MARGIN_TOP = "60px";
   const CARD_MARGIN_BOTTOM = 250;
-  const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;
   const [cardImageHeight, setCardImageHeight] = React.useState(0);
@@ -201,8 +200,12 @@ function CardNft({
         ) : (
           <Skeleton
             variant="rounded"
-            width={CARD_MIN_WIDTH}
-            height={CARD_MIN_WIDTH}
+            // width={CARD_MIN_WIDTH}
+            // height={CARD_MIN_WIDTH}
+            sx={{
+              width: "90vw",
+              height: cardImageHeight,
+            }}
           />
         )}
         <CardContent

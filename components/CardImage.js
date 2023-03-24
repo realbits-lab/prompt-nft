@@ -19,7 +19,7 @@ function CardImage({ imageData }) {
   const CARD_PADDING = 1;
   
   //* Height of bottom pagination button and bar.
-  const CARD_MARGIN_BOTTOM = 250;
+  const CARD_MARGIN_BOTTOM = 200;
 
   const [cardImageHeight, setCardImageHeight] = React.useState(0);
 
