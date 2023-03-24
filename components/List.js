@@ -41,7 +41,8 @@ function List({ mode, updated }) {
   //*---------------------------------------------------------------------------
 
   //* Image refresh interval time by milli-second unit.
-  const IMAGE_REFRESH_INTERVAL_TIME = 1000;
+  const IMAGE_REFRESH_INTERVAL_TIME = 60000;
+
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const RENT_MARKET_CONTRACT_ADDRES =
     process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
@@ -146,8 +147,8 @@ function List({ mode, updated }) {
     },
     fetchJson,
     {
-      // use: [changeUpdateFlag],
-      // refreshInterval: IMAGE_REFRESH_INTERVAL_TIME,
+      use: [changeUpdateFlag],
+      refreshInterval: IMAGE_REFRESH_INTERVAL_TIME,
     }
   );
   // console.log("dataImage: ", dataImage);
