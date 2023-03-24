@@ -78,7 +78,9 @@ async function getAllOwnData({
   signer: any;
   ownerAddress: any;
 }) {
-  // console.log("call getAllMyOwnData()");
+  console.log("call getAllMyOwnData()");
+  console.log("promptNftContract: ", promptNftContract);
+  console.log("ownerAddress: ", ownerAddress);
   // console.log("signer: ", signer);
 
   //* If no signer, return zero data.
@@ -244,7 +246,7 @@ export default async function fetchJson<JSON = unknown>(
           signer: signer,
           ownerAddress: ownerAddress,
         });
-        // console.log("getAllMyOwnDataResult: ", getAllMyOwnDataResult);
+        console.log("getAllMyOwnDataResult: ", getAllMyOwnDataResult);
         return getAllMyOwnDataResult;
 
       case "getAllMyRentData":

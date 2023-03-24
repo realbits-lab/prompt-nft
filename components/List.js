@@ -205,6 +205,7 @@ function List({ mode, updated }) {
     signer: dataSigner,
     ownerAddress: address,
   });
+  console.log("dataOwn: ", dataOwn);
 
   //* Get all my rent data array.
   // const {
