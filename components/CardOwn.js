@@ -18,7 +18,7 @@ import {
 } from "../lib/util";
 import useUser from "../lib/useUser";
 
-function CardNft({
+function CardOwn({
   nftData,
   dataSigner,
   selectedChain,
@@ -28,7 +28,7 @@ function CardNft({
   promptNftContract,
   signTypedDataAsync,
 }) {
-  // console.log("call CardNft()");
+  // console.log("call CardOwn()");
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.
@@ -159,6 +159,7 @@ function CardNft({
                 selectedChain: selectedChain,
                 address: address,
                 mutateUser: mutateUser,
+                signTypedDataAsync: signTypedDataAsync,
               });
             }}
           >
@@ -170,4 +171,4 @@ function CardNft({
   );
 }
 
-export default CardNft;
+export default CardOwn;
