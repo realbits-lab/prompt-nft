@@ -1,7 +1,6 @@
 import { withIronSessionApiRoute } from "iron-session/next";
 import { sessionOptions } from "../../lib/session";
 import { PrismaClient } from "@prisma/client";
-import moment from "moment";
 
 async function handler(req, res) {
   //* Check method error.
@@ -16,12 +15,12 @@ async function handler(req, res) {
 
   //* Check query.
   const params = req.query.updated;
-  // console.log("params: ", params);
+  console.log("params: ", params);
 
   //* Check session for newly-updated images checking of all api.
   let fetchTimestamp;
   if (req.session.updated) {
-    // console.log("req.session.updated: ", req.session.updated);
+    console.log("req.session.updated: ", req.session.updated);
 
     if (params === "true") {
       //* Update fetch timestamp in a session.
@@ -33,7 +32,8 @@ async function handler(req, res) {
       fetchTimestamp = new Date(req.session.updated.fetchTimestamp);
     }
   } else {
-    // console.log("no req.session.updated");
+    console.log("no req.session.updated");
+
     fetchTimestamp = new Date();
     const updated = { fetchTimestamp: fetchTimestamp };
     req.session.updated = updated;

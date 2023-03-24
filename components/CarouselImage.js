@@ -118,9 +118,10 @@ function CarouselImage({ data, isLoading }) {
             })}
           </BindKeyboardSwipeableViews>
 
-          {data?.newlyUpdatedData?.length !== 0 ? (
+          {data?.newlyUpdatedData?.length > 0 ? (
             <MobileStepper
               steps={data?.newlyUpdatedData?.length}
+              activeStep={data?.newlyUpdatedData?.length - 1}
               variant="text"
               nextButton={<Button size="small" />}
               backButton={
