@@ -122,7 +122,7 @@ function CardNft({
   //* Get pending transactions.
   useWatchPendingTransactions({
     listener: function (tx) {
-      console.log("tx: ", tx);
+      // console.log("tx: ", tx);
     },
   });
 
@@ -314,7 +314,7 @@ function CardNft({
 
                   try {
                     setIsRenting(true);
-                    console.log("contractWrite: ", contractWrite);
+                    // console.log("contractWrite: ", contractWrite);
                     const tx = await contractWrite.writeAsync();
                     // console.log("tx: ", tx);
 

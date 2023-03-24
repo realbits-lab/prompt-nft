@@ -27,17 +27,21 @@ function CarouselImage({ data, isLoading }) {
   const [activeStep, setActiveStep] = React.useState(0);
   const maxSteps = data?.data?.length || 0;
 
-  const handleNext = () => {
+  function handleNext() {
+    // console.log("call handleNext()");
+
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
+  }
 
-  const handleBack = () => {
+  function handleBack() {
+    // console.log("call handleBack()");
+
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
+  }
 
-  const handleStepChange = (step) => {
+  function handleStepChange(step) {
     setActiveStep(step);
-  };
+  }
 
   function LoadingPage() {
     return (
@@ -84,7 +88,7 @@ function CarouselImage({ data, isLoading }) {
 
   const ImageCardList = React.useCallback(
     function ImageCardList() {
-      if (isLoading === true) {
+      if (!data && isLoading === true) {
         return <LoadingPage />;
       }
 
@@ -160,7 +164,7 @@ function CarouselImage({ data, isLoading }) {
         </>
       );
     },
-    [activeStep, maxSteps, data, isLoading]
+    [activeStep, data]
   );
 
   return <ImageCardList />;

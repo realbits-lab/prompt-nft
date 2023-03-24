@@ -50,8 +50,8 @@ function ListPage(props) {
   const router = useRouter();
   const queryMode = router.query.mode;
   const queryUpdated = router.query.updated;
-  console.log("router.query: ", router.query);
-  console.log("queryUpdated: ", queryUpdated);
+  // console.log("router.query: ", router.query);
+  // console.log("queryUpdated: ", queryUpdated);
   // console.log("queryMode: ", queryMode);
 
   const [mode, setMode] = React.useState("image");

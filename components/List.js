@@ -32,9 +32,9 @@ import ListRent from "./ListRent";
 import fetchJson from "../lib/fetchJson";
 
 function List({ mode, updated }) {
-  console.log("call List()");
+  // console.log("call List()");
   // console.log("mode: ", mode);
-  console.log("updated: ", updated);
+  // console.log("updated: ", updated);
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.
@@ -109,6 +109,8 @@ function List({ mode, updated }) {
 
   //* Change update flag middle function of image useSWR hook.
   function changeUpdateFlag(useSWRNext) {
+    // console.log("call changeUpdateFlag()");
+
     return (key, fetcher, config) => {
       if (imageFetchFinished.current === true) {
         key = {
@@ -144,11 +146,13 @@ function List({ mode, updated }) {
     },
     fetchJson,
     {
-      use: [changeUpdateFlag],
-      refreshInterval: IMAGE_REFRESH_INTERVAL_TIME,
+      // use: [changeUpdateFlag],
+      // refreshInterval: IMAGE_REFRESH_INTERVAL_TIME,
     }
   );
-  console.log("dataImage: ", dataImage);
+  // console.log("dataImage: ", dataImage);
+  // console.log("isLoadingImage: ", isLoadingImage);
+  // console.log("isValidatingImage: ", isValidatingImage);
 
   //* Get all register data array.
   // const {
