@@ -9,31 +9,43 @@ const sigUtil = require("@metamask/eth-sig-util");
 const prisma = new PrismaClient();
 
 async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
-  // console.log("call /api/login");
+  console.log("call /api/login");
 
   const { publicAddress, signature } = await req.body;
-  // console.log("publicAddress: ", publicAddress);
-  // console.log("signature: ", signature);
+  console.log("publicAddress: ", publicAddress);
+  console.log("signature: ", signature);
+  console.log("req.session.user: ", req.session.user);
 
-  let findUniqueResult;
-  try {
-    findUniqueResult = await prisma.user.findUnique({
-      where: {
-        publicAddress: publicAddress,
-      },
-    });
-  } catch (error) {
-    return res.status(500).json({ message: (error as Error).message });
+  //* Check if already logined.
+  if (
+    req.session.user &&
+    req.session.user.isLoggedIn === true &&
+    req.session.user.publicAddress.localeCompare(publicAddress, undefined, {
+      sensitivity: "accent",
+    }) === 0
+  ) {
+    return res.status(200).json(req.session.user);
   }
+
+  // let findUniqueResult;
+  // try {
+  //   findUniqueResult = await prisma.user.findUnique({
+  //     where: {
+  //       publicAddress: publicAddress,
+  //     },
+  //   });
+  // } catch (error) {
+  //   return res.status(500).json({ message: (error as Error).message });
+  // }
   // console.log("findUniqueResult: ", findUniqueResult);
 
-  if (!findUniqueResult) {
-    // console.log("Can't find unique public address: ", publicAddress);
-    //* : Handle error.
-    return res
-      .status(500)
-      .json({ message: `${publicAddress} account is not registered.` });
-  }
+  // if (!findUniqueResult) {
+  //   console.log("Can't find unique public address: ", publicAddress);
+  //   //* : Handle error.
+  //   return res
+  //     .status(500)
+  //     .json({ message: `${publicAddress} account is not registered.` });
+  // }
 
   const chainId = getChainId({
     chainName: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
@@ -83,14 +95,14 @@ async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
     ethUtil.toChecksumAddress(recovered) ===
     ethUtil.toChecksumAddress(publicAddress)
   ) {
-    console.error("Recovered address is the same as input address.")
+    console.error("Recovered address is the same as input address.");
     const user = { isLoggedIn: true, publicAddress: publicAddress } as User;
     req.session.user = user;
     await req.session.save();
 
-    return res.json(user);
+    return res.status(200).json(user);
   } else {
-    console.error("Recovered address is not the same as input address.")
+    console.error("Recovered address is not the same as input address.");
     return res.status(401).json({ error: "Signature verification failed." });
   }
 }

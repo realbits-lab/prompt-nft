@@ -32,7 +32,7 @@ import ListRent from "./ListRent";
 import fetchJson from "../lib/fetchJson";
 
 function List({ mode, updated }) {
-  // console.log("call List()");
+  console.log("call List()");
   // console.log("mode: ", mode);
   // console.log("updated: ", updated);
 
