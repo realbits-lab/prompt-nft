@@ -163,6 +163,7 @@ function CardRent({
                 selectedChain: selectedChain,
                 address: address,
                 mutateUser: mutateUser,
+                signTypedDataAsync: signTypedDataAsync,
               });
             }}
           >
