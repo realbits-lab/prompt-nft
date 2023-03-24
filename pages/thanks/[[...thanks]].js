@@ -18,8 +18,8 @@ function ThanksPage() {
   const CARD_MIN_WIDTH = 375;
 
   const router = useRouter();
-  const imageUrl = router.query.thanks;
-  // console.log("imageUrl: ", imageUrl);
+  const imageUrl = router.query.thanks[0];
+  console.log("imageUrl: ", imageUrl);
 
   const handleCardMediaImageError = (e) => {
     // console.log("call handleCardMediaImageError()");
