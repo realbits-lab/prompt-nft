@@ -32,7 +32,7 @@ import ListRent from "./ListRent";
 import fetchJson from "../lib/fetchJson";
 
 function List({ mode, updated }) {
-  console.log("call List()");
+  // console.log("call List()");
   // console.log("mode: ", mode);
   // console.log("updated: ", updated);
 
@@ -205,7 +205,7 @@ function List({ mode, updated }) {
     signer: dataSigner,
     ownerAddress: address,
   });
-  console.log("dataOwn: ", dataOwn);
+  // console.log("dataOwn: ", dataOwn);
 
   //* Get all my rent data array.
   // const {
