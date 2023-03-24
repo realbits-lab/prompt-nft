@@ -205,6 +205,7 @@ function List({ mode, updated }) {
     signer: dataSigner,
     ownerAddress: address,
   });
+  // console.log("dataOwn: ", dataOwn);
 
   //* Get all my rent data array.
   // const {
@@ -360,7 +361,7 @@ function List({ mode, updated }) {
         });
       });
       // console.log("ownDataArray: ", ownDataArray);
-      setAllOwnDataArray(ownDataArray);
+      setAllOwnDataArray(ownDataArray.reverse());
     }
 
     //* Set all rent data.
