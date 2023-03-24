@@ -27,10 +27,12 @@ const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
 });
 import promptNFTABI from "../contracts/promptNFT.json";
 
-function Mint({ inputImageUrl, inputPrompt }) {
+function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
   //*----------------------------------------------------------------------------
   //* Define constance variables.
   //*----------------------------------------------------------------------------
+  const DEFAULT_MODEL_NAME = "STABLE_DIFFUSION";
+  const CARD_MARGIN_BOTTOM = 500;
   const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
   // console.log("selectedChain: ", selectedChain);
   const { address, isConnected } = useAccount();
@@ -90,10 +92,10 @@ function Mint({ inputImageUrl, inputPrompt }) {
   //*---------------------------------------------------------------------------
   const [imageUrl, setImageUrl] = React.useState();
   const [promptText, setPromptText] = React.useState("");
-  const [buttonMessage, setButtonMessage] = React.useState(
-    <Typography>MINT</Typography>
-  );
+  const [negativePromptText, setNegativePromptText] = React.useState("");
+  const [buttonMessage, setButtonMessage] = React.useState("MINT");
   const [buttonDisabled, setButtonDisabled] = React.useState(false);
+  const [cardImageHeight, setCardImageHeight] = React.useState(0);
 
   React.useEffect(() => {
     // console.log("call useEffect()");
@@ -111,6 +113,12 @@ function Mint({ inputImageUrl, inputPrompt }) {
         setPromptText("");
       }
 
+      if (inputNegativePrompt !== undefined) {
+        setNegativePromptText(inputNegativePrompt);
+      } else {
+        setNegativePromptText("");
+      }
+
       try {
         if (isWalletConnected({ isConnected, selectedChain }) === false) {
           return;
@@ -121,6 +129,15 @@ function Mint({ inputImageUrl, inputPrompt }) {
     };
 
     initialize();
+
+    setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
+
+    //* Register window resize event.
+    window.addEventListener("resize", function () {
+      // console.log("call resize()");
+      // console.log("window.innerHeight: ", window.innerHeight);
+      setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
+    });
   }, [inputImageUrl, inputPrompt]);
 
   async function uploadMetadata({ name, description, inputImageUrl }) {
@@ -141,7 +158,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
     }
   }
 
-  async function encryptData({ prompt }) {
+  async function encryptData({ prompt, negativePrompt }) {
     // console.log("call encryptData()");
     // console.log("prompt: ", prompt);
 
@@ -159,28 +176,62 @@ function Mint({ inputImageUrl, inputPrompt }) {
     );
     // console.log("base64EncryptionPublicKey: ", base64EncryptionPublicKey);
 
-    const enc = encrypt({
+    const encryptPrompt = encrypt({
       publicKey: base64EncryptionPublicKey.toString("base64"),
       data: Base64.encode(prompt).toString(),
       version: "x25519-xsalsa20-poly1305",
     });
     // console.log("enc: ", enc);
+    const encryptNegativePrompt = encrypt({
+      publicKey: base64EncryptionPublicKey.toString("base64"),
+      data: Base64.encode(negativePrompt).toString(),
+      version: "x25519-xsalsa20-poly1305",
+    });
 
-    return enc;
+    return { encryptPrompt, encryptNegativePrompt };
   }
 
-  async function mintPromptNft({ prompt, tokenURI, contractOwnerEncryptData }) {
-    // console.log("call mintPromptNft()");
+  async function mintPromptNft({
+    prompt,
+    negativePrompt,
+    tokenURI,
+    contractOwnerEncryptPromptData,
+    contractOwnerEncryptNegativePromptData,
+  }) {
+    console.log("call mintPromptNft()");
+    console.log("prompt: ", prompt);
+    console.log("negativePrompt: ", negativePrompt);
 
     //* Check undefined error.
-    if (!prompt || !tokenURI || !contractOwnerEncryptData) {
+    if (
+      !tokenURI ||
+      !contractOwnerEncryptPromptData ||
+      !contractOwnerEncryptNegativePromptData
+    ) {
+      console.log("tokenURI: ", tokenURI);
+      console.log(
+        "contractOwnerEncryptPromptData: ",
+        contractOwnerEncryptPromptData
+      );
+      console.log(
+        "contractOwnerEncryptNegativePromptData: ",
+        contractOwnerEncryptNegativePromptData
+      );
       return;
     }
 
-    const tokenOwnerEncryptData = await encryptData({
+    const {
+      encryptPrompt: tokenOwnerEncryptPromptData,
+      encryptNegativePrompt: tokenOwnerEncryptNegativePromptData,
+    } = await encryptData({
       prompt: prompt,
+      negativePrompt: negativePrompt,
     });
-    // console.log("tokenOwnerEncryptData: ", tokenOwnerEncryptData);
+    console.log("tokenOwnerEncryptPromptData: ", tokenOwnerEncryptPromptData);
+    console.log(
+      "tokenOwnerEncryptNegativePromptData: ",
+      tokenOwnerEncryptNegativePromptData
+    );
 
     //* Mint nft with encrypted data.
     // console.log("signerRef.current: ", signerRef.current);
@@ -204,23 +255,38 @@ function Mint({ inputImageUrl, inputPrompt }) {
     } else {
       contractSigner = signer;
     }
-    // console.log("promptNftContract: ", promptNftContract);
-    // console.log("contractSigner: ", contractSigner);
-    // console.log("address: ", address);
-    // console.log("tokenURI: ", tokenURI);
-    // console.log("tokenOwnerEncryptData: ", tokenOwnerEncryptData);
-    // console.log("contractOwnerEncryptData: ", contractOwnerEncryptData);
+    console.log("promptNftContract: ", promptNftContract);
+    console.log("contractSigner: ", contractSigner);
+    console.log("address: ", address);
+    console.log("tokenURI: ", tokenURI);
+    console.log("tokenOwnerEncryptPromptData: ", tokenOwnerEncryptPromptData);
+    console.log(
+      "tokenOwnerEncryptNegativePromptData: ",
+      tokenOwnerEncryptNegativePromptData
+    );
+    console.log(
+      "contractOwnerEncryptPromptData: ",
+      contractOwnerEncryptPromptData
+    );
+    console.log(
+      "contractOwnerEncryptNegativePromptData: ",
+      contractOwnerEncryptNegativePromptData
+    );
 
+    //* Add tokenOwnerEncryptNegativePromptData and contractOwnerEncryptNegativePromptData.
     const tx = await promptNftContract
       .connect(contractSigner)
       .safeMint(
         address,
         tokenURI,
-        tokenOwnerEncryptData,
-        contractOwnerEncryptData
+        DEFAULT_MODEL_NAME,
+        tokenOwnerEncryptPromptData,
+        tokenOwnerEncryptNegativePromptData,
+        contractOwnerEncryptPromptData,
+        contractOwnerEncryptNegativePromptData
       );
     const response = await tx.wait();
-    // console.log("response: ", response);
+    console.log("response: ", response);
 
     //* Return token id.
     return response;
@@ -252,7 +318,8 @@ function Mint({ inputImageUrl, inputPrompt }) {
               image={imageUrl}
               onError={handleCardMediaImageError}
               sx={{
-                objectFit: "cover",
+                objectFit: "contain",
+                height: cardImageHeight,
               }}
             />
           ) : (
@@ -307,6 +374,18 @@ function Mint({ inputImageUrl, inputPrompt }) {
               label="Prompt"
               name="prompt"
               value={promptText}
+              inputProps={{ readOnly: true, style: { fontSize: 12 } }}
+              style={{
+                width: "100%",
+                paddingRight: "15px",
+              }}
+            />
+            <TextField
+              required
+              id="outlined-required"
+              label="Negative Prompt"
+              name="negative-prompt"
+              value={negativePromptText}
               inputProps={{ readOnly: true, style: { fontSize: 12 } }}
               style={{
                 width: "100%",
@@ -427,6 +506,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
                       },
                       body: JSON.stringify({
                         prompt: promptText,
+                        negativePrompt: negativePromptText,
                         imageUrl: imageUrl,
                       }),
                     }
@@ -442,28 +522,58 @@ function Mint({ inputImageUrl, inputPrompt }) {
 
                   mintPromptNft({
                     prompt: promptText,
+                    negativePrompt: negativePromptText,
                     tokenURI: tokenURI,
-                    contractOwnerEncryptData:
-                      fetchResponse.contractOwnerEncryptData,
-                  }).then(function (tx) {
-                    // console.log("tx: ", tx);
-                    // console.log("tx.transactionHash: ", tx.transactionHash);
+                    contractOwnerEncryptPromptData:
+                      fetchResponse.contractOwnerEncryptPromptData,
+                    contractOwnerEncryptNegativePromptData:
+                      fetchResponse.contractOwnerEncryptNegativePromptData,
+                  })
+                    .then(function (tx) {
+                      // console.log("tx: ", tx);
+                      // console.log("tx.transactionHash: ", tx.transactionHash);
 
-                    //* Go to thanks page.
-                    const imageUrlEncodedString = encodeURIComponent(imageUrl);
-                    router.push(`${THANKS_PAGE}${imageUrlEncodedString}`);
-                  });
+                      //* Go to thanks page.
+                      const imageUrlEncodedString =
+                        encodeURIComponent(imageUrl);
+                      router.push(`${THANKS_PAGE}${imageUrlEncodedString}`);
+                    })
+                    .catch(async function (error) {
+                      console.error(error);
+
+                      //* If mint failed, revert encrypted prompt to plain prompt(use flag).
+                      //* Sync cypto flag and event logs later.
+                      const fetchResponse = await fetchJson(
+                        { url: "/api/uncrypt" },
+                        {
+                          method: "POST",
+                          headers: {
+                            Accept: "application/json",
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({
+                            imageUrl: imageUrl,
+                          }),
+                        }
+                      );
+
+                      //* Show error message in snack bar.
+                      setSnackbarSeverity("error");
+                      setSnackbarMessage(error.toString());
+                      setOpenSnackbar(true);
+
+                      //* Make mint button disabled.
+                      setButtonMessage("MINT");
+                      setButtonDisabled(false);
+                    });
 
                   setButtonMessage(<CircularProgress />);
-
-                  //* TODO: If mint failed, revert encrypted prompt to plain prompt(use flag).
-                  //* TODO: Sync cypto flag and event logs later.
                 } catch (error) {
                   console.error(error);
                 }
               }}
             >
-              {buttonMessage}
+              <Typography>{buttonMessage}</Typography>
             </Button>
           </CardActions>
         </Card>

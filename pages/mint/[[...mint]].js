@@ -35,6 +35,7 @@ const MintPage = () => {
   //*---------------------------------------------------------------------------
   const router = useRouter();
   const [prompt, setPrompt] = React.useState();
+  const [negativePrompt, setNegativePrompt] = React.useState();
   const [imageUrl, setImageUrl] = React.useState();
   const [errorStatus, setErrorStatus] = React.useState();
 
@@ -42,7 +43,7 @@ const MintPage = () => {
   React.useEffect(() => {
     // console.log("call useEffect()");
 
-    const initialize = async () => {
+    const initialize = async function () {
       // console.log("call initialize()");
 
       const params = router.query.mint;
@@ -57,7 +58,8 @@ const MintPage = () => {
       //* Check params error.
       if (
         params !== undefined &&
-        (Array.isArray(params) === false || params.length !== 2)
+        (Array.isArray(params) === false ||
+          (params.length !== 2 && params.length !== 3))
       ) {
         setErrorStatus(
           "Invalid paramters. You should make a url like /mint/{prompt}/{image_url}"
@@ -68,17 +70,22 @@ const MintPage = () => {
       //* Get prompt and imageUrl.
       const inputPrompt = params[0];
       const inputImageUrl = params[1];
+      let inputNegativePrompt;
+      if (params.length === 3) {
+        inputNegativePrompt = params[2];
+      } else {
+        inputNegativePrompt = "";
+      }
       // console.log("inputPrompt: ", inputPrompt);
       // console.log("inputImageUrl: ", inputImageUrl);
 
       //* Check imageUrl and prompt was saved in sqlite already.
       //* Mint NFT only in case of pre-saved image.
-      const promptEncodedString = encodeURIComponent(inputPrompt);
       const imageUrlEncodedString = encodeURIComponent(inputImageUrl);
       const fetchImageDatabaseResponse = await fetch(
-        `${GET_API_URL}/${promptEncodedString}/${imageUrlEncodedString}`
+        `${GET_API_URL}/${imageUrlEncodedString}`
       );
-      // console.log("fetchImageDatabaseResponse: ", fetchImageDatabaseResponse);
+      console.log("fetchImageDatabaseResponse: ", fetchImageDatabaseResponse);
 
       if (fetchImageDatabaseResponse.status !== 200) {
         setErrorStatus(
@@ -87,7 +94,19 @@ const MintPage = () => {
         return;
       }
 
+      const fetchImageDatabaseResponseJson =
+        await fetchImageDatabaseResponse.json();
+      console.log(
+        "fetchImageDatabaseResponseJson: ",
+        fetchImageDatabaseResponseJson
+      );
+      if (fetchImageDatabaseResponseJson.data.isEncrypted === true) {
+        setErrorStatus("Image was already minted.");
+        return;
+      }
+
       setPrompt(inputPrompt);
+      setNegativePrompt(inputNegativePrompt);
       setImageUrl(inputImageUrl);
       //* TODO: Track page mounted status.
       setErrorStatus(undefined);
@@ -129,9 +148,12 @@ const MintPage = () => {
               padding: "10",
             }}
           >
+            <Typography variant="h5" color={"orange"}>
+              {errorStatus}
+            </Typography>
             <Typography variant="caption">
               Thanks for trying to mint your image with prompt. But error
-              happened to post image url and prompt. {inputErrorStatus}
+              happened to post image url and prompt.
             </Typography>
           </CardContent>
           <CardActions>
@@ -160,7 +182,7 @@ const MintPage = () => {
           }}
         >
           <Button variant="text">
-            Click the Connect Wallet or Wrong Network button
+            Click the connect wallet button or change network.
           </Button>
           {buildContentPage()}
         </Box>
@@ -175,7 +197,13 @@ const MintPage = () => {
     // console.log("errorStatus: ", errorStatus);
 
     if (errorStatus === undefined) {
-      return <Mint inputImageUrl={imageUrl} inputPrompt={prompt} />;
+      return (
+        <Mint
+          inputImageUrl={imageUrl}
+          inputPrompt={prompt}
+          inputNegativePrompt={negativePrompt}
+        />
+      );
     } else {
       return <ErrorPage errorStatus={errorStatus} />;
     }

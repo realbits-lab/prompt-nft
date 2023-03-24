@@ -13,20 +13,14 @@ import {
   useContractEvent,
 } from "wagmi";
 import useSWR from "swr";
-import { useRecoilValueLoadable } from "recoil";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
-import {
-  getChainId,
-  isWalletConnected,
-  readRentingDataState,
-} from "../lib/util";
+import { getChainId, isWalletConnected } from "../lib/util";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
 import ListImage from "./ListImage";
@@ -35,16 +29,21 @@ import ListNft from "./ListNft";
 import CarouselNft from "./CarouselNft";
 import ListOwn from "./ListOwn";
 import ListRent from "./ListRent";
+import fetchJson from "../lib/fetchJson";
 
 function List({ mode, updated }) {
   // console.log("call List()");
   // console.log("mode: ", mode);
+  // console.log("updated: ", updated);
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.
   //*---------------------------------------------------------------------------
+
+  //* Image refresh interval time by milli-second unit.
+  const IMAGE_REFRESH_INTERVAL_TIME = 60000;
+
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
-  const API_ALL_URL = `${process.env.NEXT_PUBLIC_API_ALL_URL}?updated=${updated}`;
   const RENT_MARKET_CONTRACT_ADDRES =
     process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
   // console.log("RENT_MARKET_CONTRACT_ADDRES: ", RENT_MARKET_CONTRACT_ADDRES);
@@ -53,6 +52,9 @@ function List({ mode, updated }) {
 
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
+
+  //* After the image fetching, remove updated flag.
+  const imageFetchFinished = React.useRef(false);
 
   //*---------------------------------------------------------------------------
   //* Define hook variables.
@@ -106,6 +108,32 @@ function List({ mode, updated }) {
     },
   });
 
+  //* Change update flag middle function of image useSWR hook.
+  function changeUpdateFlag(useSWRNext) {
+    // console.log("call changeUpdateFlag()");
+
+    return (key, fetcher, config) => {
+      if (imageFetchFinished.current === true) {
+        key = {
+          url: `${process.env.NEXT_PUBLIC_API_ALL_URL}`,
+        };
+      } else {
+        key = {
+          url: `${process.env.NEXT_PUBLIC_API_ALL_URL}?updated=${updated}`,
+        };
+      }
+
+      const swr = useSWRNext(key, fetcher, config);
+
+      //* After the image fetching finished, remove updated flag.
+      if (swr.isLoading !== true && swr.data) {
+        imageFetchFinished.current = true;
+      }
+
+      return swr;
+    };
+  }
+
   //* Get all image data array.
   const {
     data: dataImage,
@@ -113,9 +141,19 @@ function List({ mode, updated }) {
     isLoading: isLoadingImage,
     isValidating: isValidatingImage,
     mutate: mutateImage,
-  } = useSWR({
-    url: API_ALL_URL,
-  });
+  } = useSWR(
+    {
+      url: `${process.env.NEXT_PUBLIC_API_ALL_URL}?updated=${updated}`,
+    },
+    fetchJson,
+    {
+      use: [changeUpdateFlag],
+      refreshInterval: IMAGE_REFRESH_INTERVAL_TIME,
+    }
+  );
+  // console.log("dataImage: ", dataImage);
+  // console.log("isLoadingImage: ", isLoadingImage);
+  // console.log("isValidatingImage: ", isValidatingImage);
 
   //* Get all register data array.
   // const {
@@ -459,17 +497,8 @@ function List({ mode, updated }) {
       >
         {mode === "image" ? (
           <div>
+            <CarouselImage data={dataImage} isLoading={isLoadingImage} />
             {/* <ListImage data={dataImage} isLoading={isLoadingImage} /> */}
-            <Grid container>
-              <Grid item>
-                {dataImage?.newlyUpdatedData?.length > 0 ? (
-                  <Button>New images</Button>
-                ) : null}
-              </Grid>
-              <Grid item>
-                <CarouselImage data={dataImage} isLoading={isLoadingImage} />
-              </Grid>
-            </Grid>
           </div>
         ) : mode === "nft" ? (
           <div>

@@ -19,11 +19,12 @@ model User {
 }
 
 model Post {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  prompt      String   @default("")
-  imageUrl    String   @unique @default("")
-  isEncrypted Boolean  @default(false)
+  id             Int      @id @default(autoincrement())
+  createdAt      DateTime @default(now())
+  prompt         String   @default("")
+  negativePrompt String   @default("")
+  imageUrl       String   @unique @default("")
+  isEncrypted    Boolean  @default(false)
 }
 
 model Avatar {

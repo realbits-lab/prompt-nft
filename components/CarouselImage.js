@@ -3,7 +3,6 @@ import SwipeableViews from "react-swipeable-views";
 import { bindKeyboard } from "react-swipeable-views-utils";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -20,7 +19,6 @@ function CarouselImage({ data, isLoading }) {
   // console.log("isLoading: ", isLoading);
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
 
-  const CARD_MARGIN_TOP = "60px";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
 
@@ -29,17 +27,21 @@ function CarouselImage({ data, isLoading }) {
   const [activeStep, setActiveStep] = React.useState(0);
   const maxSteps = data?.data?.length || 0;
 
-  const handleNext = () => {
+  function handleNext() {
+    // console.log("call handleNext()");
+
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
+  }
 
-  const handleBack = () => {
+  function handleBack() {
+    // console.log("call handleBack()");
+
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
+  }
 
-  const handleStepChange = (step) => {
+  function handleStepChange(step) {
     setActiveStep(step);
-  };
+  }
 
   function LoadingPage() {
     return (
@@ -84,14 +86,9 @@ function CarouselImage({ data, isLoading }) {
     );
   }
 
-  function handleCardMediaImageError(e) {
-    e.target.onerror = null;
-    e.target.src = PLACEHOLDER_IMAGE_URL;
-  }
-
   const ImageCardList = React.useCallback(
     function ImageCardList() {
-      if (isLoading === true) {
+      if (!data && isLoading === true) {
         return <LoadingPage />;
       }
 
@@ -108,14 +105,6 @@ function CarouselImage({ data, isLoading }) {
       // console.log("activeStep: ", activeStep);
       return (
         <>
-          {data?.newlyUpdatedData?.length > 0 ? (
-            <Button
-              sx={{ marginTop: CARD_MARGIN_TOP }}
-              href="/list/image?updated=true"
-            >
-              New images
-            </Button>
-          ) : null}
           <BindKeyboardSwipeableViews
             axis={theme.direction === "rtl" ? "x-reverse" : "x"}
             index={activeStep}
@@ -133,43 +122,49 @@ function CarouselImage({ data, isLoading }) {
             })}
           </BindKeyboardSwipeableViews>
 
-          <MobileStepper
-            steps={maxSteps}
-            variant="progress"
-            activeStep={activeStep}
-            nextButton={
-              <Button
-                size="small"
-                onClick={handleNext}
-                disabled={activeStep === maxSteps - 1}
-              >
-                Next
-                {theme.direction === "rtl" ? (
-                  <KeyboardArrowLeft />
-                ) : (
+          {data?.newlyUpdatedData?.length > 0 ? (
+            <MobileStepper
+              steps={data?.newlyUpdatedData?.length}
+              activeStep={data?.newlyUpdatedData?.length - 1}
+              variant="text"
+              nextButton={<Button size="small" />}
+              backButton={
+                <Button size="small" href="/list/image?updated=true">
+                  New
+                </Button>
+              }
+            />
+          ) : (
+            <MobileStepper
+              steps={maxSteps}
+              variant="text"
+              activeStep={activeStep}
+              nextButton={
+                <Button
+                  size="small"
+                  onClick={handleNext}
+                  disabled={activeStep === maxSteps - 1}
+                >
+                  Next
                   <KeyboardArrowRight />
-                )}
-              </Button>
-            }
-            backButton={
-              <Button
-                size="small"
-                onClick={handleBack}
-                disabled={activeStep === 0}
-              >
-                {theme.direction === "rtl" ? (
-                  <KeyboardArrowRight />
-                ) : (
+                </Button>
+              }
+              backButton={
+                <Button
+                  size="small"
+                  onClick={handleBack}
+                  disabled={activeStep === 0}
+                >
                   <KeyboardArrowLeft />
-                )}
-                Back
-              </Button>
-            }
-          />
+                  Prev
+                </Button>
+              }
+            />
+          )}
         </>
       );
     },
-    [activeStep, maxSteps, data, isLoading]
+    [activeStep, data]
   );
 
   return <ImageCardList />;
