@@ -3,7 +3,6 @@ import SwipeableViews from "react-swipeable-views";
 import { bindKeyboard } from "react-swipeable-views-utils";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -20,7 +19,6 @@ function CarouselImage({ data, isLoading }) {
   // console.log("isLoading: ", isLoading);
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
 
-  const CARD_MARGIN_TOP = "60px";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
 
@@ -84,11 +82,6 @@ function CarouselImage({ data, isLoading }) {
     );
   }
 
-  function handleCardMediaImageError(e) {
-    e.target.onerror = null;
-    e.target.src = PLACEHOLDER_IMAGE_URL;
-  }
-
   const ImageCardList = React.useCallback(
     function ImageCardList() {
       if (isLoading === true) {
@@ -108,14 +101,15 @@ function CarouselImage({ data, isLoading }) {
       // console.log("activeStep: ", activeStep);
       return (
         <>
-          {data?.newlyUpdatedData?.length > 0 ? (
+          {/* {data?.newlyUpdatedData?.length > 0 ? (
             <Button
               sx={{ marginTop: CARD_MARGIN_TOP }}
               href="/list/image?updated=true"
             >
               New images
             </Button>
-          ) : null}
+          ) : null} */}
+
           <BindKeyboardSwipeableViews
             axis={theme.direction === "rtl" ? "x-reverse" : "x"}
             index={activeStep}

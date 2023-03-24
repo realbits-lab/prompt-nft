@@ -13,7 +13,6 @@ import {
   useContractEvent,
 } from "wagmi";
 import useSWR from "swr";
-import { useRecoilValueLoadable } from "recoil";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -25,7 +24,6 @@ import Typography from "@mui/material/Typography";
 import {
   getChainId,
   isWalletConnected,
-  readRentingDataState,
 } from "../lib/util";
 import promptNFTABI from "../contracts/promptNFT.json";
 import rentmarketABI from "../contracts/rentMarket.json";
