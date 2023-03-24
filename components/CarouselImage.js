@@ -101,15 +101,6 @@ function CarouselImage({ data, isLoading }) {
       // console.log("activeStep: ", activeStep);
       return (
         <>
-          {/* {data?.newlyUpdatedData?.length > 0 ? (
-            <Button
-              sx={{ marginTop: CARD_MARGIN_TOP }}
-              href="/list/image?updated=true"
-            >
-              New images
-            </Button>
-          ) : null} */}
-
           <BindKeyboardSwipeableViews
             axis={theme.direction === "rtl" ? "x-reverse" : "x"}
             index={activeStep}
@@ -127,39 +118,44 @@ function CarouselImage({ data, isLoading }) {
             })}
           </BindKeyboardSwipeableViews>
 
-          <MobileStepper
-            steps={maxSteps}
-            variant="progress"
-            activeStep={activeStep}
-            nextButton={
-              <Button
-                size="small"
-                onClick={handleNext}
-                disabled={activeStep === maxSteps - 1}
-              >
-                Next
-                {theme.direction === "rtl" ? (
-                  <KeyboardArrowLeft />
-                ) : (
+          {data?.newlyUpdatedData?.length !== 0 ? (
+            <MobileStepper
+              steps={data?.newlyUpdatedData?.length}
+              variant="text"
+              nextButton={<Button size="small" />}
+              backButton={
+                <Button size="small" href="/list/image?updated=true">
+                  New
+                </Button>
+              }
+            />
+          ) : (
+            <MobileStepper
+              steps={maxSteps}
+              variant="text"
+              activeStep={activeStep}
+              nextButton={
+                <Button
+                  size="small"
+                  onClick={handleNext}
+                  disabled={activeStep === maxSteps - 1}
+                >
+                  Next
                   <KeyboardArrowRight />
-                )}
-              </Button>
-            }
-            backButton={
-              <Button
-                size="small"
-                onClick={handleBack}
-                disabled={activeStep === 0}
-              >
-                {theme.direction === "rtl" ? (
-                  <KeyboardArrowRight />
-                ) : (
+                </Button>
+              }
+              backButton={
+                <Button
+                  size="small"
+                  onClick={handleBack}
+                  disabled={activeStep === 0}
+                >
                   <KeyboardArrowLeft />
-                )}
-                Back
-              </Button>
-            }
-          />
+                  Prev
+                </Button>
+              }
+            />
+          )}
         </>
       );
     },
