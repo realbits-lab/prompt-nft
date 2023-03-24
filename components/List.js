@@ -361,7 +361,7 @@ function List({ mode, updated }) {
         });
       });
       // console.log("ownDataArray: ", ownDataArray);
-      setAllOwnDataArray(ownDataArray);
+      setAllOwnDataArray(ownDataArray.reverse());
     }
 
     //* Set all rent data.
