@@ -18,8 +18,22 @@ function ThanksPage() {
   const CARD_MIN_WIDTH = 375;
 
   const router = useRouter();
-  const imageUrl = router.query.thanks[0];
-  console.log("imageUrl: ", imageUrl);
+  const thanksQuery = router.query.thanks;
+  console.log("thanksQuery: ", thanksQuery);
+  const [imageUrl, setImageUrl] = React.useState("");
+
+  React.useEffect(
+    function () {
+      if (
+        thanksQuery &&
+        Array.isArray(thanksQuery) === true &&
+        thanksQuery.length > 0
+      ) {
+        setImageUrl(thanksQuery[0]);
+      }
+    },
+    [imageUrl]
+  );
 
   const handleCardMediaImageError = (e) => {
     // console.log("call handleCardMediaImageError()");
@@ -65,6 +79,6 @@ function ThanksPage() {
       </Card>
     </Box>
   );
-};
+}
 
 export default ThanksPage;

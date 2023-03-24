@@ -198,9 +198,9 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
     contractOwnerEncryptPromptData,
     contractOwnerEncryptNegativePromptData,
   }) {
-    console.log("call mintPromptNft()");
-    console.log("prompt: ", prompt);
-    console.log("negativePrompt: ", negativePrompt);
+    // console.log("call mintPromptNft()");
+    // console.log("prompt: ", prompt);
+    // console.log("negativePrompt: ", negativePrompt);
 
     //* Check undefined error.
     if (
@@ -208,15 +208,15 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
       !contractOwnerEncryptPromptData ||
       !contractOwnerEncryptNegativePromptData
     ) {
-      console.log("tokenURI: ", tokenURI);
-      console.log(
-        "contractOwnerEncryptPromptData: ",
-        contractOwnerEncryptPromptData
-      );
-      console.log(
-        "contractOwnerEncryptNegativePromptData: ",
-        contractOwnerEncryptNegativePromptData
-      );
+      // console.log("tokenURI: ", tokenURI);
+      // console.log(
+      //   "contractOwnerEncryptPromptData: ",
+      //   contractOwnerEncryptPromptData
+      // );
+      // console.log(
+      //   "contractOwnerEncryptNegativePromptData: ",
+      //   contractOwnerEncryptNegativePromptData
+      // );
       return;
     }
 
@@ -227,11 +227,11 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
       prompt: prompt,
       negativePrompt: negativePrompt,
     });
-    console.log("tokenOwnerEncryptPromptData: ", tokenOwnerEncryptPromptData);
-    console.log(
-      "tokenOwnerEncryptNegativePromptData: ",
-      tokenOwnerEncryptNegativePromptData
-    );
+    // console.log("tokenOwnerEncryptPromptData: ", tokenOwnerEncryptPromptData);
+    // console.log(
+    //   "tokenOwnerEncryptNegativePromptData: ",
+    //   tokenOwnerEncryptNegativePromptData
+    // );
 
     //* Mint nft with encrypted data.
     // console.log("signerRef.current: ", signerRef.current);
@@ -255,23 +255,23 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
     } else {
       contractSigner = signer;
     }
-    console.log("promptNftContract: ", promptNftContract);
-    console.log("contractSigner: ", contractSigner);
-    console.log("address: ", address);
-    console.log("tokenURI: ", tokenURI);
-    console.log("tokenOwnerEncryptPromptData: ", tokenOwnerEncryptPromptData);
-    console.log(
-      "tokenOwnerEncryptNegativePromptData: ",
-      tokenOwnerEncryptNegativePromptData
-    );
-    console.log(
-      "contractOwnerEncryptPromptData: ",
-      contractOwnerEncryptPromptData
-    );
-    console.log(
-      "contractOwnerEncryptNegativePromptData: ",
-      contractOwnerEncryptNegativePromptData
-    );
+    // console.log("promptNftContract: ", promptNftContract);
+    // console.log("contractSigner: ", contractSigner);
+    // console.log("address: ", address);
+    // console.log("tokenURI: ", tokenURI);
+    // console.log("tokenOwnerEncryptPromptData: ", tokenOwnerEncryptPromptData);
+    // console.log(
+    //   "tokenOwnerEncryptNegativePromptData: ",
+    //   tokenOwnerEncryptNegativePromptData
+    // );
+    // console.log(
+    //   "contractOwnerEncryptPromptData: ",
+    //   contractOwnerEncryptPromptData
+    // );
+    // console.log(
+    //   "contractOwnerEncryptNegativePromptData: ",
+    //   contractOwnerEncryptNegativePromptData
+    // );
 
     //* Add tokenOwnerEncryptNegativePromptData and contractOwnerEncryptNegativePromptData.
     const tx = await promptNftContract
@@ -286,7 +286,7 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
         contractOwnerEncryptNegativePromptData
       );
     const response = await tx.wait();
-    console.log("response: ", response);
+    // console.log("response: ", response);
 
     //* Return token id.
     return response;
