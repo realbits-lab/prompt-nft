@@ -54,56 +54,70 @@ export default function DrawImage() {
   }
 
   return (
-    <Box
-      component="form"
-      sx={{
-        "& .MuiTextField-root": { m: 1 },
-      }}
-      noValidate
-      autoComplete="off"
-      display="flex"
-      flexDirection="column"
-    >
-      <TextField
-        required
-        id="outlined-required"
-        label="prompt"
-        defaultValue=""
-        error={prompt === "" ? true : false}
-        name="prompt"
-        value={prompt}
-        onChange={handleChange}
-        helperText="Write prompt."
-        style={{
-          width: "100%",
-          paddingRight: "15px",
-        }}
-      />
-      <TextField
-        required
-        id="outlined-required"
-        label="negative prompt"
-        defaultValue=""
-        error={negativePrompt === "" ? true : false}
-        name="negativePrompt"
-        value={negativePrompt}
-        onChange={handleChange}
-        helperText="Write negative prompt."
-        style={{
-          width: "100%",
-          paddingRight: "15px",
-        }}
-      />
-      <Button
-        variant="contained"
-        onClick={fetchImage}
+    <>
+      <Box
+        component="form"
         sx={{
-          m: 1,
+          "& .MuiTextField-root": { m: 1 },
         }}
+        noValidate
+        autoComplete="off"
+        display="flex"
+        flexDirection="column"
       >
-        Draw
-      </Button>
-      <Image src={imageUrl} width={500} />
-    </Box>
+        <TextField
+          required
+          id="outlined-required"
+          label="prompt"
+          defaultValue=""
+          error={prompt === "" ? true : false}
+          name="prompt"
+          value={prompt}
+          onChange={handleChange}
+          helperText="Write prompt."
+          style={{
+            width: "100%",
+            paddingRight: "15px",
+          }}
+        />
+        <TextField
+          required
+          id="outlined-required"
+          label="negative prompt"
+          defaultValue=""
+          error={negativePrompt === "" ? true : false}
+          name="negativePrompt"
+          value={negativePrompt}
+          onChange={handleChange}
+          helperText="Write negative prompt."
+          style={{
+            width: "100%",
+            paddingRight: "15px",
+          }}
+        />
+        <Button
+          variant="contained"
+          onClick={fetchImage}
+          sx={{
+            m: 1,
+          }}
+        >
+          Draw
+        </Button>
+      </Box>
+      <Box
+        component="form"
+        sx={{
+          "& .MuiTextField-root": { m: 1 },
+        }}
+        noValidate
+        autoComplete="off"
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+      >
+        <Image src={imageUrl} width={"50vw"} height={"50vh"} fit="contain" />
+      </Box>
+    </>
   );
 }
