@@ -15,9 +15,9 @@ export default async function handler(req, res) {
 
   // POST /api/crypt
   // Required fields in body: prompt, imageUrl
+  const imageUrl = req.body.imageUrl;
   const prompt = req.body.prompt;
   const negativePrompt = req.body.negativePrompt;
-  const imageUrl = req.body.imageUrl;
   // console.log("prompt: ", prompt);
   // console.log("imageUrl: ", imageUrl);
 
@@ -42,11 +42,15 @@ export default async function handler(req, res) {
   });
   // console.log("contractOwnerEncryptData: ", contractOwnerEncryptData);
 
-  const updatePostResult = await prisma.post.update({
+  const updatePostResult = await prisma.post.upsert({
     where: {
       imageUrl: imageUrl,
     },
-    data: {
+    update: {
+      isEncrypted: true,
+    },
+    create: {
+      imageUrl: imageUrl,
       isEncrypted: true,
     },
   });

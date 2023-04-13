@@ -98,9 +98,16 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
   const [cardImageHeight, setCardImageHeight] = React.useState(0);
 
   React.useEffect(() => {
-    // console.log("call useEffect()");
-    // console.log("inputImageUrl: ", inputImageUrl);
-    // console.log("inputPrompt: ", inputPrompt);
+    console.log("call useEffect()");
+    console.log("inputImageUrl: ", inputImageUrl);
+    console.log("inputPrompt: ", inputPrompt);
+    console.log("inputNegativePrompt: ", inputNegativePrompt);
+    console.log("isConnected: ", isConnected);
+    console.log("selectedChain: ", selectedChain);
+    console.log(
+      "isWalletConnected(): ",
+      isWalletConnected({ isConnected, selectedChain })
+    );
 
     const initialize = async () => {
       if (inputImageUrl !== undefined) {
@@ -138,7 +145,7 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
       // console.log("window.innerHeight: ", window.innerHeight);
       setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
     });
-  }, [inputImageUrl, inputPrompt]);
+  }, [inputImageUrl, inputPrompt, inputNegativePrompt]);
 
   async function uploadMetadata({ name, description, inputImageUrl }) {
     // console.log("call uploadMetadata()");
@@ -505,9 +512,9 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
                         "Content-Type": "application/json",
                       },
                       body: JSON.stringify({
+                        imageUrl: imageUrl,
                         prompt: promptText,
                         negativePrompt: negativePromptText,
-                        imageUrl: imageUrl,
                       }),
                     }
                   );

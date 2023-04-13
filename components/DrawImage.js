@@ -2,13 +2,17 @@ import * as React from "react";
 import Image from "mui-image";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import Slide from "@mui/material/Slide";
 import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
+import Mint from "./Mint";
 
 export default function DrawImage() {
   const DRAW_API_URL = "/api/draw";
   const [imageUrl, setImageUrl] = React.useState();
   const [loadingImage, setLoadingImage] = React.useState(false);
+  const [showMintDialog, setShowMintDialog] = React.useState(false);
 
   //*---------------------------------------------------------------------------
   //* Handle text input change.
@@ -27,6 +31,10 @@ export default function DrawImage() {
       };
     });
   };
+
+  const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+  });
 
   async function fetchImage() {
     setLoadingImage(true);
@@ -119,9 +127,6 @@ export default function DrawImage() {
       </Box>
       <Box
         component="form"
-        sx={{
-          "& .MuiTextField-root": { m: 1 },
-        }}
         noValidate
         autoComplete="off"
         display="flex"
@@ -133,14 +138,36 @@ export default function DrawImage() {
         ) : (
           <Image
             src={imageUrl}
-            width={"80vw"}
+            height={"50vh"}
             fit="contain"
             duration={100}
             easing="ease"
             shiftDuration={100}
           />
         )}
+        <Button
+          variant="contained"
+          onClick={() => setShowMintDialog(true)}
+          sx={{
+            m: 1,
+          }}
+          disabled={loadingImage}
+        >
+          Mint
+        </Button>
       </Box>
+      <Dialog
+        fullScreen
+        open={showMintDialog}
+        onClose={() => setShowMintDialog(false)}
+        TransitionComponent={Transition}
+      >
+        <Mint
+          inputImageUrl={imageUrl}
+          inputPrompt={prompt}
+          inputNegativePrompt={negativePrompt}
+        />
+      </Dialog>
     </>
   );
 }
