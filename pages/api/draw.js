@@ -42,6 +42,11 @@ export default async function handler(req, res) {
   });
   console.log("fetchResponse: ", fetchResponse);
 
+  if (fetchResponse.status !== 200) {
+    console.error(error);
+    res.status(500).json({ message: "Response is not success." });
+  }
+
   //* Get the stable diffusion api result by json.
   let jsonResponse;
   try {
@@ -49,13 +54,13 @@ export default async function handler(req, res) {
     console.log("jsonResponse: ", jsonResponse);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "jsonResponse.status is not success." });
+    res.status(500).json({ message: "Response is not success." });
   }
 
   //* Check error response.
   if (jsonResponse.status !== "success") {
     console.error("jsonResponse.status is not success.");
-    res.status(500).json({ message: "jsonResponse.status is not success." });
+    res.status(500).json({ message: "Response is not success." });
   }
 
   //* Return image url from image generation server.
