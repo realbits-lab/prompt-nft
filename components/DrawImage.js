@@ -3,11 +3,9 @@ import { useRouter } from "next/router";
 import Image from "mui-image";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
 import Slide from "@mui/material/Slide";
 import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
-import Mint from "./Mint";
 
 export default function DrawImage() {
   const DRAW_API_URL = "/api/draw";
