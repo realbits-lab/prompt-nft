@@ -172,7 +172,7 @@ function List({ mode, updated }) {
     isError: swrErrorRegisterData,
     isLoading: swrIsLoadingRegisterData,
     isValidating: swrIsValidatingRegisterData,
-    stetus: swrStatusRegisterData,
+    status: swrStatusRegisterData,
   } = useContractRead({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
