@@ -11,8 +11,10 @@ export default function DrawImage() {
   const DRAW_API_URL = "/api/draw";
   const POST_API_URL = "/api/post";
   const DISCORD_BOT_TOKEN = process.env.NEXT_PUBLIC_DISCORD_BOT_TOKEN;
+  const IMAGE_PADDING = 400;
   const [imageUrl, setImageUrl] = React.useState("");
   const [loadingImage, setLoadingImage] = React.useState(false);
+  const [imageHeight, setImageHeight] = React.useState(0);
   const router = useRouter();
 
   //*---------------------------------------------------------------------------
@@ -37,6 +39,18 @@ export default function DrawImage() {
   const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
   });
+
+  React.useEffect(() => {
+    setImageHeight(window.innerHeight - IMAGE_PADDING);
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  function handleResize() {
+    setImageHeight(window.innerHeight - IMAGE_PADDING);
+  }
 
   async function fetchImage() {
     setLoadingImage(true);
@@ -113,6 +127,7 @@ export default function DrawImage() {
         component="form"
         sx={{
           marginTop: 10,
+          // marginLeft: 10
         }}
         noValidate
         autoComplete="off"
@@ -129,8 +144,7 @@ export default function DrawImage() {
           onChange={handleChange}
           helperText="Write prompt."
           style={{
-            width: "100%",
-            paddingRight: "15px",
+            width: "80vw",
           }}
           disabled={loadingImage}
           autoComplete="on"
@@ -145,8 +159,7 @@ export default function DrawImage() {
           onChange={handleChange}
           helperText="Write negative prompt."
           style={{
-            width: "100%",
-            paddingRight: "15px",
+            width: "80vw",
           }}
           disabled={loadingImage}
           autoComplete="on"
@@ -171,11 +184,18 @@ export default function DrawImage() {
         alignItems="center"
       >
         {loadingImage ? (
-          <CircularProgress />
+          <Box
+            height={imageHeight}
+            display="flex"
+            flexDirection="row"
+            alignItems="center"
+          >
+            <CircularProgress size={imageHeight * 0.4} />
+          </Box>
         ) : (
           <Image
             src={imageUrl}
-            height={"50vh"}
+            height={imageHeight}
             fit="contain"
             duration={100}
             easing="ease"
@@ -194,7 +214,8 @@ export default function DrawImage() {
             router.push(link);
           }}
           sx={{
-            m: 1,
+            width: "80vw",
+            marginTop: 1,
           }}
           disabled={loadingImage}
         >
