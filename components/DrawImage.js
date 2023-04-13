@@ -3,10 +3,12 @@ import Image from "mui-image";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function DrawImage() {
   const DRAW_API_URL = "/api/draw";
   const [imageUrl, setImageUrl] = React.useState();
+  const [loadingImage, setLoadingImage] = React.useState(false);
 
   //*---------------------------------------------------------------------------
   //* Handle text input change.
@@ -27,6 +29,8 @@ export default function DrawImage() {
   };
 
   async function fetchImage() {
+    setLoadingImage(true);
+
     //* Make stable diffusion api option by json.
     const jsonData = {
       prompt: prompt,
@@ -38,19 +42,22 @@ export default function DrawImage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(jsonData),
     });
+    // console.log("fetchResponse: ", fetchResponse);
+
+    //* Check error response.
+    if (fetchResponse.status !== 200) {
+      console.error("jsonResponse.status is not success.");
+      setLoadingImage(false);
+      return;
+    }
 
     //* Get the stable diffusion api result by json.
     const jsonResponse = await fetchResponse.json();
-    console.log("jsonResponse: ", jsonResponse);
-
-    //* Check error response.
-    // if (jsonResponse.status !== "success") {
-    //   console.error("jsonResponse.status is not success.");
-    //   return;
-    // }
+    // console.log("jsonResponse: ", jsonResponse);
 
     //* Set image url from image generation server.
-    setImageUrl(jsonResponse.imageUrl);
+    setImageUrl(jsonResponse.imageUrl[0]);
+    setLoadingImage(false);
   }
 
   return (
@@ -58,7 +65,7 @@ export default function DrawImage() {
       <Box
         component="form"
         sx={{
-          "& .MuiTextField-root": { m: 1 },
+          marginTop: 10,
         }}
         noValidate
         autoComplete="off"
@@ -79,6 +86,8 @@ export default function DrawImage() {
             width: "100%",
             paddingRight: "15px",
           }}
+          disabled={loadingImage}
+          autoComplete="on"
         />
         <TextField
           required
@@ -94,6 +103,8 @@ export default function DrawImage() {
             width: "100%",
             paddingRight: "15px",
           }}
+          disabled={loadingImage}
+          autoComplete="on"
         />
         <Button
           variant="contained"
@@ -101,6 +112,7 @@ export default function DrawImage() {
           sx={{
             m: 1,
           }}
+          disabled={loadingImage}
         >
           Draw
         </Button>
@@ -116,7 +128,18 @@ export default function DrawImage() {
         flexDirection="column"
         alignItems="center"
       >
-        <Image src={imageUrl} width={"50vw"} height={"50vh"} fit="contain" />
+        {loadingImage ? (
+          <CircularProgress />
+        ) : (
+          <Image
+            src={imageUrl}
+            width={"80vw"}
+            fit="contain"
+            duration={100}
+            easing="ease"
+            shiftDuration={100}
+          />
+        )}
       </Box>
     </>
   );

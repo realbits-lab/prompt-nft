@@ -27,6 +27,7 @@ import ListImage from "./ListImage";
 import CarouselImage from "./CarouselImage";
 import ListNft from "./ListNft";
 import CarouselNft from "./CarouselNft";
+import DrawImage from "./DrawImage";
 import ListOwn from "./ListOwn";
 import ListRent from "./ListRent";
 import fetchJson from "../lib/fetchJson";
@@ -496,7 +497,11 @@ function List({ mode, updated }) {
         alignItems="center"
         flexDirection="column"
       >
-        {mode === "image" ? (
+        {mode === "draw" ? (
+          <div>
+            <DrawImage />
+          </div>
+        ) : mode === "image" ? (
           <div>
             <CarouselImage data={dataImage} isLoading={isLoadingImage} />
             {/* <ListImage data={dataImage} isLoading={isLoadingImage} /> */}
