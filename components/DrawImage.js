@@ -12,7 +12,7 @@ export default function DrawImage() {
   const DRAW_API_URL = "/api/draw";
   const POST_API_URL = "/api/post";
   const DISCORD_BOT_TOKEN = process.env.NEXT_PUBLIC_DISCORD_BOT_TOKEN;
-  const [imageUrl, setImageUrl] = React.useState();
+  const [imageUrl, setImageUrl] = React.useState("");
   const [loadingImage, setLoadingImage] = React.useState(false);
   const [showMintDialog, setShowMintDialog] = React.useState(false);
 
@@ -110,7 +110,6 @@ export default function DrawImage() {
           required
           id="outlined-required"
           label="prompt"
-          defaultValue=""
           error={prompt === "" ? true : false}
           name="prompt"
           value={prompt}
@@ -127,7 +126,6 @@ export default function DrawImage() {
           required
           id="outlined-required"
           label="negative prompt"
-          defaultValue=""
           error={negativePrompt === "" ? true : false}
           name="negativePrompt"
           value={negativePrompt}
@@ -182,6 +180,8 @@ export default function DrawImage() {
           Mint
         </Button>
       </Box>
+      
+      {/* //* Mint dialog. */}
       <Dialog
         fullScreen
         open={showMintDialog}
