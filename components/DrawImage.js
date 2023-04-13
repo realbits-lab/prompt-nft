@@ -10,6 +10,8 @@ import Mint from "./Mint";
 
 export default function DrawImage() {
   const DRAW_API_URL = "/api/draw";
+  const POST_API_URL = "/api/post";
+  const DISCORD_BOT_TOKEN = process.env.NEXT_PUBLIC_DISCORD_BOT_TOKEN;
   const [imageUrl, setImageUrl] = React.useState();
   const [loadingImage, setLoadingImage] = React.useState(false);
   const [showMintDialog, setShowMintDialog] = React.useState(false);
@@ -62,9 +64,33 @@ export default function DrawImage() {
     //* Get the stable diffusion api result by json.
     const jsonResponse = await fetchResponse.json();
     // console.log("jsonResponse: ", jsonResponse);
+    const imageUrl = jsonResponse.imageUrl[0];
+    console.log("imageUrl: ", imageUrl);
+
+    //* Post imageUrl and prompt to prompt server.
+    const imageUploadResponse = await fetch(POST_API_URL, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt: prompt,
+        negativePrompt: negativePrompt,
+        imageUrl: imageUrl,
+        discordBotToken: DISCORD_BOT_TOKEN,
+      }),
+    });
+    console.log("imageUploadResponse: ", imageUploadResponse);
+
+    if (imageUploadResponse.status !== 200) {
+      console.error(`imageUploadResponse: ${imageUploadResponse}`);
+      setLoadingImage(false);
+      return;
+    }
 
     //* Set image url from image generation server.
-    setImageUrl(jsonResponse.imageUrl[0]);
+    setImageUrl(imageUrl);
     setLoadingImage(false);
   }
 

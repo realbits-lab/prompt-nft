@@ -34,16 +34,23 @@ export default async function handler(req, res) {
     track_id: null,
   };
 
-	//* Fetch image from image generation server.
+  //* Fetch image from image generation server.
   const fetchResponse = await fetch(TEXT2IMG_API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(jsonData),
   });
+  console.log("fetchResponse: ", fetchResponse);
 
   //* Get the stable diffusion api result by json.
-  const jsonResponse = await fetchResponse.json();
-  console.log("jsonResponse: ", jsonResponse);
+  let jsonResponse;
+  try {
+    jsonResponse = await fetchResponse.json();
+    console.log("jsonResponse: ", jsonResponse);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "jsonResponse.status is not success." });
+  }
 
   //* Check error response.
   if (jsonResponse.status !== "success") {
