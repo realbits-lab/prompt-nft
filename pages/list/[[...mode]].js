@@ -161,6 +161,7 @@ function ListPage(props) {
           <Toolbar>
             <Box sx={{ flexGrow: 1, display: "block" }}></Box>
             <Box sx={{ flexDirection: "row", flexGrow: 1 }}>
+              <AppBarButton buttonMode="draw" />
               <AppBarButton buttonMode="image" />
               <AppBarButton buttonMode="nft" />
               <AppBarButton buttonMode="own" />

@@ -37,6 +37,7 @@ const MintPage = () => {
   const [prompt, setPrompt] = React.useState();
   const [negativePrompt, setNegativePrompt] = React.useState();
   const [imageUrl, setImageUrl] = React.useState();
+  const [modelName, setModelName] = React.useState();
   const [errorStatus, setErrorStatus] = React.useState();
 
   //* For async function, we use useEffect function.
@@ -75,6 +76,10 @@ const MintPage = () => {
         inputNegativePrompt = params[2];
       } else {
         inputNegativePrompt = "";
+      }
+
+      if (params.length === 4) {
+        setModelName(params[3]);
       }
       // console.log("inputPrompt: ", inputPrompt);
       // console.log("inputImageUrl: ", inputImageUrl);
@@ -202,6 +207,7 @@ const MintPage = () => {
           inputImageUrl={imageUrl}
           inputPrompt={prompt}
           inputNegativePrompt={negativePrompt}
+          inputModelName={modelName}
         />
       );
     } else {
