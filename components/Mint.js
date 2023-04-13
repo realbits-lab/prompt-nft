@@ -27,7 +27,12 @@ const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
 });
 import promptNFTABI from "../contracts/promptNFT.json";
 
-function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
+function Mint({
+  inputImageUrl,
+  inputPrompt,
+  inputNegativePrompt,
+  inputModelName,
+}) {
   //*----------------------------------------------------------------------------
   //* Define constance variables.
   //*----------------------------------------------------------------------------
@@ -90,8 +95,9 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
   //*---------------------------------------------------------------------------
   //* Other variables.
   //*---------------------------------------------------------------------------
-  const [imageUrl, setImageUrl] = React.useState();
+  const [imageUrl, setImageUrl] = React.useState("");
   const [promptText, setPromptText] = React.useState("");
+  const [modelName, setModelName] = React.useState("");
   const [negativePromptText, setNegativePromptText] = React.useState("");
   const [buttonMessage, setButtonMessage] = React.useState("MINT");
   const [buttonDisabled, setButtonDisabled] = React.useState(false);
@@ -110,21 +116,10 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
     );
 
     const initialize = async () => {
-      if (inputImageUrl !== undefined) {
-        setImageUrl(inputImageUrl);
-      }
-
-      if (inputPrompt !== undefined) {
-        setPromptText(inputPrompt);
-      } else {
-        setPromptText("");
-      }
-
-      if (inputNegativePrompt !== undefined) {
-        setNegativePromptText(inputNegativePrompt);
-      } else {
-        setNegativePromptText("");
-      }
+      setImageUrl(inputImageUrl || "");
+      setPromptText(inputPrompt || "");
+      setNegativePromptText(inputNegativePrompt || "");
+      setModelName(inputModelName || DEFAULT_MODEL_NAME);
 
       try {
         if (isWalletConnected({ isConnected, selectedChain }) === false) {
@@ -145,7 +140,7 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
       // console.log("window.innerHeight: ", window.innerHeight);
       setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
     });
-  }, [inputImageUrl, inputPrompt, inputNegativePrompt]);
+  }, [inputImageUrl, inputPrompt, inputNegativePrompt, inputModelName]);
 
   async function uploadMetadata({ name, description, inputImageUrl }) {
     // console.log("call uploadMetadata()");
@@ -201,6 +196,7 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
   async function mintPromptNft({
     prompt,
     negativePrompt,
+    modelName,
     tokenURI,
     contractOwnerEncryptPromptData,
     contractOwnerEncryptNegativePromptData,
@@ -286,7 +282,7 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
       .safeMint(
         address,
         tokenURI,
-        DEFAULT_MODEL_NAME,
+        modelName,
         tokenOwnerEncryptPromptData,
         tokenOwnerEncryptNegativePromptData,
         contractOwnerEncryptPromptData,
@@ -530,6 +526,7 @@ function Mint({ inputImageUrl, inputPrompt, inputNegativePrompt }) {
                   mintPromptNft({
                     prompt: promptText,
                     negativePrompt: negativePromptText,
+                    modelName: modelName,
                     tokenURI: tokenURI,
                     contractOwnerEncryptPromptData:
                       fetchResponse.contractOwnerEncryptPromptData,

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useRouter } from "next/router";
 import Image from "mui-image";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -14,7 +15,7 @@ export default function DrawImage() {
   const DISCORD_BOT_TOKEN = process.env.NEXT_PUBLIC_DISCORD_BOT_TOKEN;
   const [imageUrl, setImageUrl] = React.useState("");
   const [loadingImage, setLoadingImage] = React.useState(false);
-  const [showMintDialog, setShowMintDialog] = React.useState(false);
+  const router = useRouter();
 
   //*---------------------------------------------------------------------------
   //* Handle text input change.
@@ -22,8 +23,9 @@ export default function DrawImage() {
   const [formValue, setFormValue] = React.useState({
     prompt: "",
     negativePrompt: "",
+    modelName: "",
   });
-  const { prompt, negativePrompt } = formValue;
+  const { prompt, negativePrompt, modelName } = formValue;
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormValue((prevState) => {
@@ -64,10 +66,23 @@ export default function DrawImage() {
     //* Get the stable diffusion api result by json.
     const jsonResponse = await fetchResponse.json();
     // console.log("jsonResponse: ", jsonResponse);
-    const imageUrl = jsonResponse.imageUrl[0];
-    console.log("imageUrl: ", imageUrl);
+    const imageUrlResponse = jsonResponse.imageUrl[0];
+    const meta = jsonResponse.meta;
+    console.log("imageUrlResponse: ", imageUrlResponse);
+    console.log("meta.negative_prompt: ", meta.negative_prompt);
+    console.log("meta.prompt: ", meta.prompt);
+    console.log("meta.model: ", meta.model);
 
-    //* Post imageUrl and prompt to prompt server.
+    //* Change prompt, negativePrompt, modelName.
+    let event = {};
+    event.target = { name: "prompt", value: meta.prompt };
+    handleChange(event);
+    event.target = { name: "negativePrompt", value: meta.negative_prompt };
+    handleChange(event);
+    event.target = { name: "modelName", value: meta.model };
+    handleChange(event);
+
+    //* Post imageUrlResponse and prompt to prompt server.
     const imageUploadResponse = await fetch(POST_API_URL, {
       method: "POST",
       headers: {
@@ -75,9 +90,9 @@ export default function DrawImage() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prompt: prompt,
-        negativePrompt: negativePrompt,
-        imageUrl: imageUrl,
+        prompt: meta.prompt,
+        negativePrompt: meta.negative_prompt,
+        imageUrl: imageUrlResponse,
         discordBotToken: DISCORD_BOT_TOKEN,
       }),
     });
@@ -90,7 +105,7 @@ export default function DrawImage() {
     }
 
     //* Set image url from image generation server.
-    setImageUrl(imageUrl);
+    setImageUrl(imageUrlResponse);
     setLoadingImage(false);
   }
 
@@ -171,7 +186,15 @@ export default function DrawImage() {
         )}
         <Button
           variant="contained"
-          onClick={() => setShowMintDialog(true)}
+          onClick={() => {
+            //* Get URI encoded string.
+            const imageUrlEncodedString = encodeURIComponent(imageUrl);
+            const promptEncodedString = encodeURIComponent(prompt);
+            const negativePromptEncodedString =
+              encodeURIComponent(negativePrompt);
+            const link = `/mint/${promptEncodedString}/${imageUrlEncodedString}/${negativePromptEncodedString}`;
+            router.push(link);
+          }}
           sx={{
             m: 1,
           }}
@@ -180,20 +203,6 @@ export default function DrawImage() {
           Mint
         </Button>
       </Box>
-      
-      {/* //* Mint dialog. */}
-      <Dialog
-        fullScreen
-        open={showMintDialog}
-        onClose={() => setShowMintDialog(false)}
-        TransitionComponent={Transition}
-      >
-        <Mint
-          inputImageUrl={imageUrl}
-          inputPrompt={prompt}
-          inputNegativePrompt={negativePrompt}
-        />
-      </Dialog>
     </>
   );
 }

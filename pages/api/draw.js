@@ -57,6 +57,15 @@ export default async function handler(req, res) {
     res.status(500).json({ message: "Response is not success." });
   }
 
+  //* TODO: Handle processing response.
+  //* TODO: Post fetch_result url with api key.
+  // status: 'processing',
+  // tip: 'for faster speed, keep resolution upto 512x512',
+  // eta: 20.5611160064,
+  // messege: 'Try to fetch request after given estimated time',
+  // fetch_result: 'https://stablediffusionapi.com/api/v3/fetch/11431316',
+  // id: 11431316,
+
   //* Check error response.
   if (jsonResponse.status !== "success") {
     console.error("jsonResponse.status is not success.");
@@ -64,5 +73,7 @@ export default async function handler(req, res) {
   }
 
   //* Return image url from image generation server.
-  res.status(200).json({ imageUrl: jsonResponse.output });
+  res
+    .status(200)
+    .json({ imageUrl: jsonResponse.output, meta: jsonResponse.meta });
 }
