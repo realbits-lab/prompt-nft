@@ -19,7 +19,7 @@ export default async function handler(req, res) {
 
   //* Make stable diffusion api option by json.
   const jsonData = {
-    key: process.env.STABLE_DIFFUSION_API_KEY,
+    key: process.env.NEXT_PUBLIC_STABLE_DIFFUSION_API_KEY,
     prompt: prompt,
     negative_prompt: negativePrompt,
     width: "512",
