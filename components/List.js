@@ -40,6 +40,8 @@ function List({ mode, updated }) {
   //*---------------------------------------------------------------------------
   //* Define constant variables.
   //*---------------------------------------------------------------------------
+  const IMAGE_ALL_API_URL = "/api/all";
+NEXT_PUBLIC_API_ALL_URL=/api/all
 
   //* Image refresh interval time by milli-second unit.
   const IMAGE_REFRESH_INTERVAL_TIME = 60000;
@@ -116,11 +118,11 @@ function List({ mode, updated }) {
     return (key, fetcher, config) => {
       if (imageFetchFinished.current === true) {
         key = {
-          url: `${process.env.NEXT_PUBLIC_API_ALL_URL}`,
+          url: IMAGE_ALL_API_URL,
         };
       } else {
         key = {
-          url: `${process.env.NEXT_PUBLIC_API_ALL_URL}?updated=${updated}`,
+          url: `${IMAGE_ALL_API_URL}?updated=${updated}`,
         };
       }
 
@@ -144,7 +146,7 @@ function List({ mode, updated }) {
     mutate: mutateImage,
   } = useSWR(
     {
-      url: `${process.env.NEXT_PUBLIC_API_ALL_URL}?updated=${updated}`,
+      url: `${IMAGE_ALL_API_URL}?updated=${updated}`,
     },
     fetchJson,
     {
