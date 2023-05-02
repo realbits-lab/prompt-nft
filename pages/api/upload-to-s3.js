@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from "uuid";
 
 //* TODO: Wrap iron session.
 export default async function handler(req, res) {
-  // const BUCKET_NAME = processs.env.NEXT_PUBLIC_BUCKET_NAME;
   const BUCKET_NAME = "prompt-nft";
 
   // Check method error.
