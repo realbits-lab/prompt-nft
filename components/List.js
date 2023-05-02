@@ -41,7 +41,6 @@ function List({ mode, updated }) {
   //* Define constant variables.
   //*---------------------------------------------------------------------------
   const IMAGE_ALL_API_URL = "/api/all";
-NEXT_PUBLIC_API_ALL_URL=/api/all
 
   //* Image refresh interval time by milli-second unit.
   const IMAGE_REFRESH_INTERVAL_TIME = 60000;
