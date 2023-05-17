@@ -1,5 +1,5 @@
 import React from "react";
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
 import PropTypes from "prop-types";
 import { useRecoilStateLoadable, useRecoilValueLoadable } from "recoil";
 import AppBar from "@mui/material/AppBar";
@@ -8,6 +8,7 @@ import useScrollTrigger from "@mui/material/useScrollTrigger";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Slide from "@mui/material/Slide";
+import Badge from "@mui/material/Badge";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -45,7 +46,7 @@ HideOnScroll.propTypes = {
   children: PropTypes.element.isRequired,
 };
 
-function ListPage(props) {
+export default function ListPage(props) {
   // console.log("call ListPage()");
   const router = useRouter();
   const queryMode = router.query.mode;
@@ -55,6 +56,7 @@ function ListPage(props) {
   // console.log("queryMode: ", queryMode);
 
   const [mode, setMode] = React.useState("image");
+  const [newImageCount, setNewImageCount] = React.useState(0);
   const BUTTON_BORDER_RADIUS = 25;
   const SELECTED_BUTTON_BACKGROUND_COLOR = "#21b6ae";
   const SELECTED_BUTTON_PADDING = "2px 2px";
@@ -132,7 +134,7 @@ function ListPage(props) {
     [queryMode]
   );
 
-  const AppBarButton = ({ buttonMode }) => {
+  function AppBarButton({ buttonMode }) {
     return (
       <Button
         key={buttonMode}
@@ -144,14 +146,28 @@ function ListPage(props) {
         }}
         sx={{ my: 2, color: "white" }}
         onClick={(e) => {
-          // console.log("call onClick()");
+          console.log("call onClick()");
+          console.log("buttonMode: ", buttonMode);
+          console.log("newImageCount: ", newImageCount);
+
+          if (buttonMode === "image" && newImageCount > 0) {
+            console.log("route to /list/image?updated=true");
+            Router.reload("/list/image?updated=true");
+          }
+
           setMode(buttonMode);
         }}
       >
         {buttonMode.toUpperCase()}
       </Button>
     );
-  };
+  }
+
+  function setNewBadgeOnImageAppBarButton({ newImageCount }) {
+    console.log("call setNewBadgeOnImageAppBarButton()");
+    console.log("newImageCount: ", newImageCount);
+    setNewImageCount(newImageCount);
+  }
 
   //* Propagate wagmi client into List component.
   return (
@@ -162,7 +178,13 @@ function ListPage(props) {
             <Box sx={{ flexGrow: 1, display: "block" }}></Box>
             <Box sx={{ flexDirection: "row", flexGrow: 1 }}>
               <AppBarButton buttonMode="draw" />
-              <AppBarButton buttonMode="image" />
+              <Badge
+                badgeContent={newImageCount}
+                color="secondary"
+                overlap="circular"
+              >
+                <AppBarButton buttonMode="image" />
+              </Badge>
               <AppBarButton buttonMode="nft" />
               <AppBarButton buttonMode="own" />
               <AppBarButton buttonMode="rent" />
@@ -173,7 +195,11 @@ function ListPage(props) {
 
       <Container>
         <Box sx={{ my: 2 }}>
-          <List mode={mode} updated={queryUpdated}/>
+          <List
+            mode={mode}
+            updated={queryUpdated}
+            setNewImageCountFunc={setNewBadgeOnImageAppBarButton}
+          />
         </Box>
       </Container>
 
@@ -218,5 +244,3 @@ function ListPage(props) {
     </React.Fragment>
   );
 }
-
-export default ListPage;
