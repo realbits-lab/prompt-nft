@@ -32,7 +32,7 @@ import ListOwn from "./ListOwn";
 import ListRent from "./ListRent";
 import fetchJson from "../lib/fetchJson";
 
-function List({ mode, updated }) {
+function List({ mode, updated, setNewImageCountFunc }) {
   // console.log("call List()");
   // console.log("mode: ", mode);
   // console.log("updated: ", updated);
@@ -43,7 +43,8 @@ function List({ mode, updated }) {
   const IMAGE_ALL_API_URL = "/api/all";
 
   //* Image refresh interval time by milli-second unit.
-  const IMAGE_REFRESH_INTERVAL_TIME = 60000;
+  // const IMAGE_REFRESH_INTERVAL_TIME = 60000;
+  const IMAGE_REFRESH_INTERVAL_TIME = 1000;
 
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const RENT_MARKET_CONTRACT_ADDRES =
@@ -309,7 +310,19 @@ function List({ mode, updated }) {
 
   React.useEffect(
     function () {
-      // console.log("call useEffect()");
+      console.log("call useEffect()");
+      console.log("dataImage: ", dataImage);
+      console.log(
+        "dataImage?.newlyUpdatedData?.length: ",
+        dataImage?.newlyUpdatedData?.length
+      );
+
+      if ((dataImage?.newlyUpdatedData?.length || 0) > 0) {
+        setNewImageCountFunc({
+          newImageCount: dataImage.newlyUpdatedData.length,
+        });
+      }
+
       initialize();
     },
     [
@@ -322,6 +335,7 @@ function List({ mode, updated }) {
       swrDataRentData,
       swrDataCollection,
       dataOwn,
+      dataImage,
     ]
   );
 

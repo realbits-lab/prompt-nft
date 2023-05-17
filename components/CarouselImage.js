@@ -122,7 +122,7 @@ function CarouselImage({ data, isLoading }) {
             })}
           </BindKeyboardSwipeableViews>
 
-          {data?.newlyUpdatedData?.length > 0 ? (
+          {/* {data?.newlyUpdatedData?.length > 0 ? (
             <MobileStepper
               steps={data?.newlyUpdatedData?.length}
               activeStep={data?.newlyUpdatedData?.length - 1}
@@ -160,7 +160,33 @@ function CarouselImage({ data, isLoading }) {
                 </Button>
               }
             />
-          )}
+          )} */}
+
+          <MobileStepper
+            steps={maxSteps}
+            variant="text"
+            activeStep={activeStep}
+            nextButton={
+              <Button
+                size="small"
+                onClick={handleNext}
+                disabled={activeStep === maxSteps - 1}
+              >
+                Next
+                <KeyboardArrowRight />
+              </Button>
+            }
+            backButton={
+              <Button
+                size="small"
+                onClick={handleBack}
+                disabled={activeStep === 0}
+              >
+                <KeyboardArrowLeft />
+                Prev
+              </Button>
+            }
+          />
         </>
       );
     },

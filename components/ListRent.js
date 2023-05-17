@@ -10,7 +10,7 @@ import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
 import CardRent from "./CardRent";
 
-function ListRent({
+export default function ListRent({
   selectedChain,
   address,
   isConnected,
@@ -22,7 +22,7 @@ function ListRent({
   isLoading,
 }) {
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
-  const NUMBER_PER_PAGE = 5;
+  const NUMBER_PER_PAGE = 1;
 
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
@@ -99,7 +99,39 @@ function ListRent({
 
       return (
         <div>
-          <Box sx={{ marginTop: 10 }} display="flex" justifyContent="center">
+          <Box
+            sx={{ marginTop: 1 }}
+            display="flex"
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+          >
+            {data.map((nftData, idx) => {
+              // console.log("nftData: ", nftData);
+              // console.log("idx: ", idx);
+              // console.log("pageIndex: ", pageIndex);
+              // Check idx is in pagination.
+              // pageIndex.rent starts from 1.
+              // idx starts from 0.
+              if (
+                idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
+                idx < pageIndex * NUMBER_PER_PAGE
+              ) {
+                return (
+                  <CardRent
+                    nftData={nftData}
+                    key={idx}
+                    dataSigner={dataSigner}
+                    address={address}
+                    isConnected={isConnected}
+                    rentMarketContract={rentMarketContract}
+                    selectedChain={selectedChain}
+                    promptNftContract={promptNftContract}
+                    signTypedDataAsync={signTypedDataAsync}
+                  />
+                );
+              }
+            })}
             <Pagination
               count={Math.ceil(data.length / NUMBER_PER_PAGE)}
               page={pageIndex}
@@ -119,32 +151,6 @@ function ListRent({
               }}
             />
           </Box>
-          {data.map((nftData, idx) => {
-            // console.log("nftData: ", nftData);
-            // console.log("idx: ", idx);
-            // console.log("pageIndex: ", pageIndex);
-            // Check idx is in pagination.
-            // pageIndex.rent starts from 1.
-            // idx starts from 0.
-            if (
-              idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
-              idx < pageIndex * NUMBER_PER_PAGE
-            ) {
-              return (
-                <CardRent
-                  nftData={nftData}
-                  key={idx}
-                  dataSigner={dataSigner}
-                  address={address}
-                  isConnected={isConnected}
-                  rentMarketContract={rentMarketContract}
-                  selectedChain={selectedChain}
-                  promptNftContract={promptNftContract}
-                  signTypedDataAsync={signTypedDataAsync}
-                />
-              );
-            }
-          })}
         </div>
       );
     },
@@ -153,5 +159,3 @@ function ListRent({
 
   return <RentCardList />;
 }
-
-export default ListRent;

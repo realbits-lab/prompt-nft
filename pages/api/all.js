@@ -3,6 +3,8 @@ import { sessionOptions } from "../../lib/session";
 import { PrismaClient } from "@prisma/client";
 
 async function handler(req, res) {
+  const IMAGE_TAKE_COUNT = 100;
+
   //* Check method error.
   if (req.method !== "GET") {
     res.status(500).json({ error: "Unavailable method. Support only GET." });
@@ -53,9 +55,11 @@ async function handler(req, res) {
   //* Check imageUrl and prompt was saved in sqlite already.
   try {
     const findManyResult = await prisma.post.findMany({
+      take: IMAGE_TAKE_COUNT,
       where: {
         isEncrypted: false,
-        createdAt: { lte: fetchTimestamp, gte: endTimestamp },
+        createdAt: { lte: fetchTimestamp },
+        // createdAt: { lte: fetchTimestamp, gte: endTimestamp },
       },
       orderBy: {
         createdAt: "desc",
