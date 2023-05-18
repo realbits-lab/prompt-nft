@@ -15,6 +15,10 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Typography from "@mui/material/Typography";
+import MenuIcon from "@mui/icons-material/Menu";
 import List from "@/components/List";
 import {
   RBSnackbar,
@@ -60,6 +64,18 @@ export default function ListPage(props) {
   const BUTTON_BORDER_RADIUS = 25;
   const SELECTED_BUTTON_BACKGROUND_COLOR = "#21b6ae";
   const SELECTED_BUTTON_PADDING = "2px 2px";
+
+  //*---------------------------------------------------------------------------
+  //* Setting menu variables.
+  //*---------------------------------------------------------------------------
+  const [settingMenuAnchorEl, setSettingMenuAnchorEl] = React.useState(null);
+  const openSettingMenu = Boolean(settingMenuAnchorEl);
+  function handleSettingMenuOpen(event) {
+    setSettingMenuAnchorEl(event.currentTarget);
+  }
+  function handleSettingMenuClose() {
+    setSettingMenuAnchorEl(null);
+  }
 
   //*---------------------------------------------------------------------------
   //* Snackbar variables.
@@ -187,10 +203,61 @@ export default function ListPage(props) {
                 <AppBarButton buttonMode="image" />
               </Badge>
               <AppBarButton buttonMode="nft" />
-              <AppBarButton buttonMode="own" />
-              <AppBarButton buttonMode="rent" />
+              {/* <AppBarButton buttonMode="own" />
+              <AppBarButton buttonMode="rent" /> */}
             </Box>
-            <Box sx={{ flexGrow: 1, display: "block" }}></Box>
+
+            <Box>
+              <Button
+                id="basic-button"
+                aria-controls={openSettingMenu ? "basic-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={openSettingMenu ? "true" : undefined}
+                onClick={handleSettingMenuOpen}
+                style={{
+                  borderRadius: BUTTON_BORDER_RADIUS,
+                  backgroundColor: null,
+                  padding: SELECTED_BUTTON_PADDING,
+                }}
+                sx={{ my: 2, color: "white" }}
+              >
+                <MenuIcon />
+              </Button>
+              <Menu
+                id="basic-menu"
+                anchorEl={settingMenuAnchorEl}
+                open={openSettingMenu}
+                onClose={handleSettingMenuClose}
+                MenuListProps={{
+                  "aria-labelledby": "basic-button",
+                }}
+              >
+                <MenuItem
+                  onClick={() => {
+                    setMode("own");
+                    handleSettingMenuClose();
+                  }}
+                >
+                  OWN
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setMode("rent");
+                    handleSettingMenuClose();
+                  }}
+                >
+                  RENT
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setMode("theme");
+                    handleSettingMenuClose();
+                  }}
+                >
+                  THEME
+                </MenuItem>
+              </Menu>
+            </Box>
           </Toolbar>
         </AppBar>
       </HideOnScroll>
