@@ -11,12 +11,13 @@ import { SWRConfig } from "swr";
 import { RecoilRoot } from "recoil";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material";
+import { createTheme } from "@mui/material/styles";
 import { CacheProvider, EmotionCache } from "@emotion/react";
-import fetchJson from "../lib/fetchJson";
-import "../styles/globals.css";
-import { theme } from "../utils/theme";
-import createEmotionCache from "../utils/createEmotionCache";
-import { getChainName } from "../lib/util";
+import "@/styles/globals.css";
+import { themeOptions } from "@/utils/themeOptions";
+import createEmotionCache from "@/utils/createEmotionCache";
+import fetchJson from "@/lib/fetchJson";
+import { getChainName } from "@/lib/util";
 
 interface MyAppProps extends AppProps {
   emotionCache?: EmotionCache;
@@ -28,6 +29,7 @@ const clientSideEmotionCache = createEmotionCache();
 // Add more properties.
 const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
+  const theme = createTheme(themeOptions);
 
   let chains: any[] = [];
   if (

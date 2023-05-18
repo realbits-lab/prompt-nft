@@ -15,7 +15,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
-import List from "../../components/List";
+import List from "@/components/List";
 import {
   RBSnackbar,
   AlertSeverity,
@@ -23,7 +23,7 @@ import {
   readToastMessageState,
   writeDialogMessageState,
   readDialogMessageState,
-} from "../../lib/util";
+} from "@/lib/util";
 
 function HideOnScroll(props) {
   const { children, window } = props;
@@ -172,11 +172,12 @@ export default function ListPage(props) {
   //* Propagate wagmi client into List component.
   return (
     <React.Fragment>
+      {/*//*App bat menu. */}
       <HideOnScroll {...props}>
         <AppBar>
           <Toolbar>
             <Box sx={{ flexGrow: 1, display: "block" }}></Box>
-            <Box sx={{ flexDirection: "row", flexGrow: 1 }}>
+            <Box sx={{ flexGrow: 1, flexDirection: "row" }}>
               <AppBarButton buttonMode="draw" />
               <Badge
                 badgeContent={newImageCount}
@@ -189,10 +190,12 @@ export default function ListPage(props) {
               <AppBarButton buttonMode="own" />
               <AppBarButton buttonMode="rent" />
             </Box>
+            <Box sx={{ flexGrow: 1, display: "block" }}></Box>
           </Toolbar>
         </AppBar>
       </HideOnScroll>
 
+      {/*//*Image content part. */}
       <Container>
         <Box sx={{ my: 2 }}>
           <List
@@ -203,6 +206,7 @@ export default function ListPage(props) {
         </Box>
       </Container>
 
+      {/*//*Toast snackbar. */}
       <RBSnackbar
         open={readToastMessage.snackbarOpen}
         message={readToastMessage.snackbarMessage}
@@ -210,6 +214,7 @@ export default function ListPage(props) {
         currentTime={readToastMessage.snackbarTime}
       />
 
+      {/*//*Prompt dialog. */}
       <Dialog
         open={readDialogMessage.openDialog}
         onClose={() =>
