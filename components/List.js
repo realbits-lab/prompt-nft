@@ -310,12 +310,12 @@ function List({ mode, updated, setNewImageCountFunc }) {
 
   React.useEffect(
     function () {
-      console.log("call useEffect()");
-      console.log("dataImage: ", dataImage);
-      console.log(
-        "dataImage?.newlyUpdatedData?.length: ",
-        dataImage?.newlyUpdatedData?.length
-      );
+      // console.log("call useEffect()");
+      // console.log("dataImage: ", dataImage);
+      // console.log(
+      //   "dataImage?.newlyUpdatedData?.length: ",
+      //   dataImage?.newlyUpdatedData?.length
+      // );
 
       if ((dataImage?.newlyUpdatedData?.length || 0) > 0) {
         setNewImageCountFunc({
