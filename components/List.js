@@ -20,17 +20,18 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
-import { getChainId, isWalletConnected } from "../lib/util";
-import promptNFTABI from "../contracts/promptNFT.json";
-import rentmarketABI from "../contracts/rentMarket.json";
-import ListImage from "./ListImage";
-import CarouselImage from "./CarouselImage";
-import ListNft from "./ListNft";
-import CarouselNft from "./CarouselNft";
-import DrawImage from "./DrawImage";
-import ListOwn from "./ListOwn";
-import ListRent from "./ListRent";
-import fetchJson from "../lib/fetchJson";
+import ListImage from "@/components/ListImage";
+import CarouselImage from "@/components/CarouselImage";
+import ListNft from "@/components/ListNft";
+import CarouselNft from "@/components/CarouselNft";
+import DrawImage from "@/components/DrawImage";
+import ListOwn from "@/components/ListOwn";
+import ListRent from "@/components/ListRent";
+import ThemePage from "@/components/ThemePage";
+import fetchJson from "@/lib/fetchJson";
+import { getChainId, isWalletConnected } from "@/lib/util";
+import promptNFTABI from "@/contracts/promptNFT.json";
+import rentmarketABI from "@/contracts/rentMarket.json";
 
 function List({ mode, updated, setNewImageCountFunc }) {
   // console.log("call List()");
@@ -310,12 +311,12 @@ function List({ mode, updated, setNewImageCountFunc }) {
 
   React.useEffect(
     function () {
-      console.log("call useEffect()");
-      console.log("dataImage: ", dataImage);
-      console.log(
-        "dataImage?.newlyUpdatedData?.length: ",
-        dataImage?.newlyUpdatedData?.length
-      );
+      // console.log("call useEffect()");
+      // console.log("dataImage: ", dataImage);
+      // console.log(
+      //   "dataImage?.newlyUpdatedData?.length: ",
+      //   dataImage?.newlyUpdatedData?.length
+      // );
 
       if ((dataImage?.newlyUpdatedData?.length || 0) > 0) {
         setNewImageCountFunc({
@@ -584,6 +585,10 @@ function List({ mode, updated, setNewImageCountFunc }) {
                 isLoading={swrIsLoadingRentData}
               />
             )}
+          </div>
+        ) : mode === "theme" ? (
+          <div>
+            <ThemePage />
           </div>
         ) : null}
       </Box>

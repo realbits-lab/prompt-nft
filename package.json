@@ -1,10 +1,6 @@
 {
   "name": "prompt-nft",
   "version": "0.0.1",
-  "engines": {
-    "node": "16.x",
-    "npm": "8.x"
-  },
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -17,9 +13,10 @@
   ],
   "dependencies": {
     "@aws-sdk/client-s3": "^3.231.0",
-    "@emotion/react": "^11.10.5",
+    "@emotion/react": "^11.11.0",
     "@emotion/server": "^11.10.0",
-    "@emotion/styled": "^11.10.5",
+    "@emotion/styled": "^11.11.0",
+    "@fontsource/public-sans": "^4.5.12",
     "@metamask/detect-provider": "^2.0.0",
     "@metamask/eth-sig-util": "^5.0.2",
     "@motionone/utils": "^10.15.1",
