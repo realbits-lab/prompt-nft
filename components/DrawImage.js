@@ -67,6 +67,19 @@ export default function DrawImage() {
     // cacheOnBlock: true,
     // cacheTime: 60_000,
     // watch: false,
+    onSuccess(data) {
+      console.log("call onSuccess()");
+      console.log("data: ", data);
+    },
+    onError(error) {
+      console.log("call onError()");
+      console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      console.log("call onSettled()");
+      console.log("data: ", data);
+      console.log("error: ", error);
+    },
   });
 
   const {
@@ -87,9 +100,22 @@ export default function DrawImage() {
     // cacheOnBlock: true,
     // cacheTime: 60_000,
     // watch: false,
+    onSuccess(data) {
+      console.log("call onSuccess()");
+      console.log("data: ", data);
+    },
+    onError(error) {
+      console.log("call onError()");
+      console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      console.log("call onSettled()");
+      console.log("data: ", data);
+      console.log("error: ", error);
+    },
   });
 
-  const { config: configRentNFT, error: errorRentNFT } =
+  const { config: configPrepareRentNFT, error: errorPrepareRentNFT } =
     usePrepareContractWrite({
       address: RENT_MARKET_CONTRACT_ADDRES,
       abi: rentmarketABI.abi,
@@ -100,30 +126,51 @@ export default function DrawImage() {
         process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS,
       ],
       // overrides: { value: nftData.rentFee },
+      onError(error) {
+        console.log("call onError()");
+        console.log("error: ", error);
+      },
+      onMutate(args, overrides) {
+        console.log("call onMutate()");
+        console.log("args: ", args);
+        console.log("overrides: ", overrides);
+      },
+      onSettled(data, error) {
+        console.log("call onSettled()");
+        console.log("data: ", data);
+        console.log("error: ", error);
+      },
+      onSuccess(data) {
+        console.log("call onSuccess()");
+        console.log("data: ", data);
+      },
     });
 
   const {
     data: dataRentNFT,
+    error: errorRentNFT,
+    isError: isErrorRentNFT,
+    isIdle: isIdleRentNFT,
     isLoading: isLoadingRentNFT,
     isSuccess: isSuccessRentNFT,
     write: writeRentNFT,
-  } = useContractWrite(configRentNFT);
+    status: statusRentNFT,
+  } = useContractWrite(configPrepareRentNFT);
 
   const waitForTransaction = useWaitForTransaction({
     hash: dataRentNFT?.hash,
     onSuccess(data) {
-      // console.log("call onSuccess()");
-      // console.log("data: ", data);
+      console.log("call onSuccess()");
+      console.log("data: ", data);
     },
     onError(error) {
-      // console.log("call onSuccess()");
-      // console.log("error: ", error);
+      console.log("call onError()");
+      console.log("error: ", error);
     },
     onSettled(data, error) {
-      // console.log("call onSettled()");
-      // console.log("data: ", data);
-      // console.log("error: ", error);
-      // console.log("readRentingData: ", readRentingData);
+      console.log("call onSettled()");
+      console.log("data: ", data);
+      console.log("error: ", error);
     },
   });
 
