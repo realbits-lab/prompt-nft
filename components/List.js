@@ -6,12 +6,12 @@ import {
 } from "@web3modal/react";
 import {
   useAccount,
-  useSigner,
-  useContract,
+  useWalletClient,
   useContractRead,
   useSignTypedData,
   useContractEvent,
 } from "wagmi";
+import { getContract } from "wagmi/actions";
 import useSWR from "swr";
 import dynamic from "next/dynamic";
 import { useTheme } from "@mui/material/styles";
@@ -75,16 +75,16 @@ function List({ mode, updated, setNewImageCountFunc }) {
     data: dataSigner,
     isError: isErrorSigner,
     isLoading: isLoadingSigner,
-  } = useSigner();
+  } = useWalletClient();
   // console.log("dataSigner: ", dataSigner);
   // console.log("isError: ", isError);
   // console.log("isLoading: ", isLoading);
-  const promptNftContract = useContract({
+  const promptNftContract = getContract({
     address: PROMPT_NFT_CONTRACT_ADDRESS,
     abi: promptNFTABI["abi"],
   });
   // console.log("promptNftContract: ", promptNftContract);
-  const rentMarketContract = useContract({
+  const rentMarketContract = getContract({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI["abi"],
   });
@@ -312,39 +312,25 @@ function List({ mode, updated, setNewImageCountFunc }) {
 
   const theme = useTheme();
 
-  React.useEffect(
-    function () {
-      console.log("call useEffect()");
-      // console.log("dataImage: ", dataImage);
-      // console.log(
-      //   "dataImage?.newlyUpdatedData?.length: ",
-      //   dataImage?.newlyUpdatedData?.length
-      // );
+  React.useEffect(function () {
+    console.log("call useEffect()");
+    // console.log("dataImage: ", dataImage);
+    // console.log(
+    //   "dataImage?.newlyUpdatedData?.length: ",
+    //   dataImage?.newlyUpdatedData?.length
+    // );
 
-      if ((dataImage?.newlyUpdatedData?.length || 0) > 0) {
-        setNewImageCountFunc({
-          newImageCount: dataImage.newlyUpdatedData.length,
-        });
-      }
+    if ((dataImage?.newlyUpdatedData?.length || 0) > 0) {
+      setNewImageCountFunc({
+        newImageCount: dataImage.newlyUpdatedData.length,
+      });
+    }
 
-      initialize();
-    },
-    [
-      selectedChain,
-      address,
-      dataSigner,
-      promptNftContract,
-      rentMarketContract,
-      swrDataRegisterData,
-      swrDataRentData,
-      swrDataCollection,
-      dataOwn,
-      dataImage,
-    ]
-  );
+    initialize();
+  }, []);
 
   function initialize() {
-    // console.log("call useEffect()");
+    console.log("call useEffect()");
     // console.log("swrDataRegisterData: ", swrDataRegisterData);
     // console.log("swrErrorRegisterData: ", swrErrorRegisterData);
     // console.log("swrIsLoadingRegisterData: ", swrIsLoadingRegisterData);

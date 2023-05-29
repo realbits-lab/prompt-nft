@@ -52,6 +52,7 @@ HideOnScroll.propTypes = {
 
 export default function ListPage(props) {
   // console.log("call ListPage()");
+  const DEFAULT_MENU = "draw";
   const router = useRouter();
   const queryMode = router.query.mode;
   const queryUpdated = router.query.updated;
@@ -59,7 +60,7 @@ export default function ListPage(props) {
   // console.log("queryUpdated: ", queryUpdated);
   // console.log("queryMode: ", queryMode);
 
-  const [mode, setMode] = React.useState("draw");
+  const [mode, setMode] = React.useState(DEFAULT_MENU);
   const [newImageCount, setNewImageCount] = React.useState(0);
   const BUTTON_BORDER_RADIUS = 25;
   const SELECTED_BUTTON_BACKGROUND_COLOR = "#21b6ae";
@@ -144,7 +145,7 @@ export default function ListPage(props) {
         setMode(queryMode[0]);
       } else {
         // console.log("setMode(image)");
-        setMode("image");
+        setMode(DEFAULT_MENU);
       }
     },
     [queryMode]

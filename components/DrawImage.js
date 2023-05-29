@@ -125,7 +125,7 @@ export default function DrawImage() {
         process.env.NEXT_PUBLIC_PAYMENT_NFT_TOKEN,
         process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS,
       ],
-      // overrides: { value: nftData.rentFee },
+      enabled: false,
       onError(error) {
         console.log("call onError()");
         console.log("error: ", error);
@@ -344,8 +344,8 @@ export default function DrawImage() {
   }
 
   function buildDrawPage() {
-    console.log("call buildDrawPage()");
-    console.log("swrDataAllRentData: ", swrDataAllRentData);
+    // console.log("call buildDrawPage()");
+    // console.log("swrDataAllRentData: ", swrDataAllRentData);
 
     if (rentPaymentNft) {
       return (
@@ -470,21 +470,29 @@ export default function DrawImage() {
                 </Typography>
                 <Button
                   onClick={function () {
+                    console.log("dataRentNFT: ", dataRentNFT);
+                    console.log("errorRentNFT: ", errorRentNFT);
+                    console.log("isErrorRentNFT: ", isErrorRentNFT);
+                    console.log("isIdleRentNFT: ", isIdleRentNFT);
+                    console.log("isLoadingRentNFT: ", isLoadingRentNFT);
+                    console.log("isSuccessRentNFT: ", isSuccessRentNFT);
                     console.log("writeRentNFT: ", writeRentNFT);
-                    console.log("swrDataRentData: ", swrDataRentData);
+                    console.log("statusRentNFT: ", statusRentNFT);
+                    // console.log("swrDataRentData: ", swrDataRentData);
                     const rentFee = swrDataRentData.rentFee;
-                    console.log("rentFee: ", rentFee);
+                    // console.log("rentFee: ", rentFee);
 
                     if (writeRentNFT && swrDataRentData) {
                       if (
                         ethUtil.toChecksumAddress(
-                          swrDataRentData[0].nftAddress
+                          swrDataRentData.nftAddress
                         ) ===
                           ethUtil.toChecksumAddress(
                             process.env.NEXT_PUBLIC_PAYMENT_NFT_ADDRESS
                           ) &&
-                        swrDataRentData[0].tokenId ===
+                        swrDataRentData.tokenId.eq(
                           process.env.NEXT_PUBLIC_PAYMENT_NFT_TOKEN
+                        )
                       ) {
                         console.log("try to call writeRentNFT()");
                         writeRentNFT?.({

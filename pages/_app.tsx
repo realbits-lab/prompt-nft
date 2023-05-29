@@ -5,7 +5,7 @@ import {
   walletConnectProvider,
 } from "@web3modal/ethereum";
 import { Web3Modal } from "@web3modal/react";
-import { configureChains, createClient, WagmiConfig } from "wagmi";
+import { configureChains, WagmiConfig, createConfig } from "wagmi";
 import { polygon, polygonMumbai, localhost } from "wagmi/chains";
 import { SWRConfig } from "swr";
 import { RecoilRoot } from "recoil";
@@ -13,6 +13,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
 import { CacheProvider, EmotionCache } from "@emotion/react";
+
 import "@/styles/globals.css";
 import { themeOptions } from "@/utils/themeOptions";
 import createEmotionCache from "@/utils/createEmotionCache";
@@ -60,19 +61,19 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
   // );
 
   //* Wagmi client
-  const { provider } = configureChains(chains, [
+  const { publicClient } = configureChains(chains, [
     walletConnectProvider({
       projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID ?? "",
     }),
   ]);
-  const wagmiClient = createClient({
+  const wagmiConfig = createConfig({
     autoConnect: true,
     connectors: modalConnectors({ appName: "web3Modal", chains }),
-    provider,
+    publicClient,
   });
 
   //* Web3Modal Ethereum Client
-  const ethereumClient = new EthereumClient(wagmiClient, chains);
+  const ethereumClient = new EthereumClient(wagmiConfig, chains);
 
   return (
     <SWRConfig
@@ -88,7 +89,7 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
       <CacheProvider value={emotionCache}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <WagmiConfig client={wagmiClient}>
+          <WagmiConfig config={wagmiConfig}>
             <RecoilRoot>
               <Component {...pageProps} />
             </RecoilRoot>
