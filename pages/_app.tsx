@@ -7,6 +7,10 @@ import {
 import { Web3Modal } from "@web3modal/react";
 import { configureChains, WagmiConfig, createConfig } from "wagmi";
 import { polygon, polygonMumbai, localhost } from "wagmi/chains";
+import { alchemyProvider } from "wagmi/providers/alchemy";
+import { publicProvider } from "wagmi/providers/public";
+import { MetaMaskConnector } from "wagmi/connectors/metaMask";
+import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { SWRConfig } from "swr";
 import { RecoilRoot } from "recoil";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -61,15 +65,21 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
   // );
 
   //* Wagmi client
-  const { publicClient } = configureChains(chains, [
-    walletConnectProvider({
-      projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID ?? "",
-    }),
+  const {
+    chains: wagmiChains,
+    publicClient: wagmiPublicClient,
+    webSocketPublicClient: wagmiWebSocketPublicClient,
+  } = configureChains(chains, [
+    // walletConnectProvider({
+    //   projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID ?? "",
+    // }),
+    publicProvider(),
   ]);
   const wagmiConfig = createConfig({
     autoConnect: true,
-    connectors: modalConnectors({ appName: "web3Modal", chains }),
-    publicClient,
+    // connectors: modalConnectors({ appName: "web3Modal", chains }),
+    publicClient: wagmiPublicClient,
+    webSocketPublicClient: wagmiWebSocketPublicClient,
   });
 
   //* Web3Modal Ethereum Client

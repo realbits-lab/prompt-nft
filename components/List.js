@@ -191,17 +191,17 @@ function List({ mode, updated, setNewImageCountFunc }) {
   });
 
   //* Get all my own data array.
-  const {
-    data: dataOwn,
-    error: errorOwn,
-    isLoading: isLoadingOwn,
-    isValidating: isValidatingOwn,
-  } = useSWR({
-    command: "getAllMyOwnData",
-    promptNftContract: promptNftContract,
-    signer: dataWalletClient,
-    ownerAddress: address,
-  });
+  // const {
+  //   data: dataOwn,
+  //   error: errorOwn,
+  //   isLoading: isLoadingOwn,
+  //   isValidating: isValidatingOwn,
+  // } = useSWR({
+  //   command: "getAllMyOwnData",
+  //   promptNftContract: promptNftContract,
+  //   signer: dataWalletClient,
+  //   ownerAddress: address,
+  // });
   // console.log("dataOwn: ", dataOwn);
 
   //* Get all my rent data array.
