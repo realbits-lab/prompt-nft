@@ -266,11 +266,11 @@ export default function ListPage(props) {
       {/*//*Image content part. */}
       <Container>
         <Box sx={{ my: 2 }}>
-          <List
+          {/* <List
             mode={mode}
             updated={queryUpdated}
             setNewImageCountFunc={setNewBadgeOnImageAppBarButton}
-          />
+          /> */}
         </Box>
       </Container>
 

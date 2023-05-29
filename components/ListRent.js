@@ -14,7 +14,7 @@ export default function ListRent({
   selectedChain,
   address,
   isConnected,
-  dataSigner,
+  dataWalletClient,
   promptNftContract,
   rentMarketContract,
   signTypedDataAsync,
@@ -121,7 +121,7 @@ export default function ListRent({
                   <CardRent
                     nftData={nftData}
                     key={idx}
-                    dataSigner={dataSigner}
+                    dataWalletClient={dataWalletClient}
                     address={address}
                     isConnected={isConnected}
                     rentMarketContract={rentMarketContract}

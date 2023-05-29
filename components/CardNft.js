@@ -29,7 +29,7 @@ import rentmarketABI from "@/contracts/rentMarket.json";
 
 function CardNft({
   nftData,
-  dataSigner,
+  dataWalletClient,
   selectedChain,
   address,
   isConnected,
@@ -64,7 +64,7 @@ function CardNft({
   } = useSWR({
     command: "getMetadata",
     promptNftContract: promptNftContract,
-    signer: dataSigner,
+    signer: dataWalletClient,
     tokenId: nftData ? nftData.tokenId : 0,
   });
   const { user, mutateUser } = useUser();
@@ -234,7 +234,7 @@ function CardNft({
                   user: user,
                   nftData: nftData,
                   promptNftContract: promptNftContract,
-                  dataSigner: dataSigner,
+                  dataWalletClient: dataWalletClient,
                   isConnected: isConnected,
                   selectedChain: selectedChain,
                   address: address,
@@ -285,7 +285,7 @@ function CardNft({
                     return;
                   }
 
-                  if (!rentMarketContract || !dataSigner) {
+                  if (!rentMarketContract || !dataWalletClient) {
                     console.error(
                       "rentMarketContract or signer is null or undefined."
                     );
@@ -296,7 +296,7 @@ function CardNft({
                   // console.log("nftData.rentFee: ", nftData.rentFee);
                   // console.log("nftData.tokenId: ", nftData.tokenId);
                   // console.log("rentMarketContract: ", rentMarketContract);
-                  // console.log("dataSigner: ", dataSigner);
+                  // console.log("dataWalletClient: ", dataWalletClient);
                   // console.log(
                   //   "process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS: ",
                   //   process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS
@@ -321,7 +321,7 @@ function CardNft({
 
                     // console.log("tx: ", tx);
                     // const tx = await rentMarketContract
-                    //   .connect(dataSigner)
+                    //   .connect(dataWalletClient)
                     //   .rentNFT(
                     //     process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
                     //     nftData.tokenId,

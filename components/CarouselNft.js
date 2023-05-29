@@ -17,7 +17,7 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import CardNft from "./CardNft";
 
 function CarouselNft({
-  dataSigner,
+  dataWalletClient,
   rentMarketContract,
   promptNftContract,
   selectedChain,
@@ -145,7 +145,7 @@ function CarouselNft({
                   {Math.abs(activeStep - index) <= 2 ? (
                     <CardNft
                       nftData={nftData}
-                      dataSigner={dataSigner}
+                      dataWalletClient={dataWalletClient}
                       address={address}
                       isConnected={isConnected}
                       rentMarketContract={rentMarketContract}

@@ -64,21 +64,21 @@ function List({ mode, updated, setNewImageCountFunc }) {
   const imageFetchFinished = React.useRef(false);
 
   //*---------------------------------------------------------------------------
-  //* Define hook variables.
+  //* Wagmi and Web3Modal hook.
   //*---------------------------------------------------------------------------
   const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
   // console.log("selectedChain: ", selectedChain);
+
   const { address, isConnected } = useAccount();
   // console.log("address: ", address);
   // console.log("isConnected: ", isConnected);
+
   const {
-    data: dataSigner,
+    data: dataWalletClient,
     isError: isErrorSigner,
     isLoading: isLoadingSigner,
   } = useWalletClient();
-  // console.log("dataSigner: ", dataSigner);
-  // console.log("isError: ", isError);
-  // console.log("isLoading: ", isLoading);
+
   const promptNftContract = getContract({
     address: PROMPT_NFT_CONTRACT_ADDRESS,
     abi: promptNFTABI["abi"],
@@ -163,16 +163,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
   // console.log("isValidatingImage: ", isValidatingImage);
 
   //* Get all register data array.
-  // const {
-  //   data: swrDataRegisterData,
-  //   error: errorNft,
-  //   isLoading: isLoadingNft,
-  //   isValidating: isValidatingNft,
-  // } = useSWR({
-  //   command: "getAllRegisterData",
-  //   rentMarketContract: rentMarketContract,
-  //   signer: dataSigner,
-  // });
   const {
     data: swrDataRegisterData,
     isError: swrErrorRegisterData,
@@ -183,7 +173,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
     functionName: "getAllRegisterData",
-    cacheOnBlock: true,
+    // cacheOnBlock: true,
     // watch: true,
     onSuccess(data) {
       // console.log("call onSuccess()");
@@ -209,23 +199,12 @@ function List({ mode, updated, setNewImageCountFunc }) {
   } = useSWR({
     command: "getAllMyOwnData",
     promptNftContract: promptNftContract,
-    signer: dataSigner,
+    signer: dataWalletClient,
     ownerAddress: address,
   });
   // console.log("dataOwn: ", dataOwn);
 
   //* Get all my rent data array.
-  // const {
-  //   data: dataRent,
-  //   error: errorRent,
-  //   isLoading: isLoadingRent,
-  //   isValidating: isValidatingRent,
-  // } = useSWR({
-  //   command: "getAllMyRentData",
-  //   rentMarketContract: rentMarketContract,
-  //   signer: dataSigner,
-  //   renterAddress: address,
-  // });
   const {
     data: swrDataRentData,
     isError: swrErrorRentData,
@@ -237,7 +216,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
     functionName: "getAllRentData",
-    cacheOnBlock: true,
+    // cacheOnBlock: true,
     // watch: true,
     onSuccess(data) {
       // console.log("call onSuccess()");
@@ -265,7 +244,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
     functionName: "getAllCollection",
-    cacheOnBlock: true,
+    // cacheOnBlock: true,
     // watch: true,
   });
 
@@ -520,7 +499,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
                 selectedChain={selectedChain}
                 address={address}
                 isConnected={isConnected}
-                dataSigner={dataSigner}
+                dataWalletClient={dataWalletClient}
                 promptNftContract={promptNftContract}
                 rentMarketContract={rentMarketContract}
                 data={allNftDataArray}
@@ -531,7 +510,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
               //   selectedChain={selectedChain}
               //   address={address}
               //   isConnected={isConnected}
-              //   dataSigner={dataSigner}
+              //   dataWalletClient={dataWalletClient}
               //   promptNftContract={promptNftContract}
               //   rentMarketContract={rentMarketContract}
               //   data={allNftDataArray}
@@ -548,7 +527,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
                 selectedChain={selectedChain}
                 address={address}
                 isConnected={isConnected}
-                dataSigner={dataSigner}
+                dataWalletClient={dataWalletClient}
                 promptNftContract={promptNftContract}
                 rentMarketContract={rentMarketContract}
                 signTypedDataAsync={signTypedDataAsync}
@@ -566,7 +545,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
                 selectedChain={selectedChain}
                 address={address}
                 isConnected={isConnected}
-                dataSigner={dataSigner}
+                dataWalletClient={dataWalletClient}
                 promptNftContract={promptNftContract}
                 rentMarketContract={rentMarketContract}
                 signTypedDataAsync={signTypedDataAsync}
