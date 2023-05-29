@@ -1,9 +1,11 @@
 import { ethers } from "ethers";
 import { withIronSessionApiRoute } from "iron-session/next";
 import { NextApiRequest, NextApiResponse } from "next";
-import { sessionOptions } from "../../lib/session";
-import promptNFTABI from "../../contracts/promptNFT.json";
-import { getProvider } from "lib/util";
+
+import { sessionOptions } from "@/lib/session";
+import { getProvider } from "@/lib/util";
+import promptNFTABI from "@/contracts/promptNFT.json";
+
 const { decrypt } = require("@metamask/eth-sig-util");
 
 export type PromptResult = {
@@ -12,7 +14,7 @@ export type PromptResult = {
   error: any;
 };
 
-async function promptRoute(
+async function handler(
   req: NextApiRequest,
   res: NextApiResponse<PromptResult>
 ) {
@@ -23,6 +25,8 @@ async function promptRoute(
     const user = req.session.user;
     const publicAddress = user.publicAddress;
     const { tokenId } = await req.body;
+
+    //* TODO: Should check user rented this nft.
 
     //* Get the contract owner encrypted prompt from nft contract with token id.
     //* Get prompt nft contract.
@@ -89,4 +93,4 @@ async function promptRoute(
   }
 }
 
-export default withIronSessionApiRoute(promptRoute, sessionOptions);
+export default withIronSessionApiRoute(handler, sessionOptions);

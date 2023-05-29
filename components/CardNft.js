@@ -16,15 +16,16 @@ import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
+
 import {
   isWalletConnected,
   AlertSeverity,
   writeToastMessageState,
   writeDialogMessageState,
   handleCheckPrompt,
-} from "../lib/util";
-import rentmarketABI from "../contracts/rentMarket.json";
-import useUser from "../lib/useUser";
+} from "@/lib/util";
+import useUser from "@/lib/useUser";
+import rentmarketABI from "@/contracts/rentMarket.json";
 
 function CardNft({
   nftData,

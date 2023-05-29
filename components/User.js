@@ -1,10 +1,11 @@
 import { useWeb3ModalNetwork } from "@web3modal/react";
 import { useAccount, useSigner } from "wagmi";
 import Button from "@mui/material/Button";
-import useUser from "../lib/useUser";
-import fetchJson, { FetchError } from "../lib/fetchJson";
 
-const User = () => {
+import useUser from "@/lib/useUser";
+import fetchJson, { FetchError } from "@/lib/fetchJson";
+
+export default function User() {
   //*----------------------------------------------------------------------------
   //* Define constance variables.
   //*----------------------------------------------------------------------------
@@ -142,6 +143,4 @@ const User = () => {
       )}
     </div>
   );
-};
-
-export default User;
+}
