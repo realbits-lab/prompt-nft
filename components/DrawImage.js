@@ -48,17 +48,11 @@ export default function DrawImage() {
   //*---------------------------------------------------------------------------
   //* Wagmi hook.
   //*---------------------------------------------------------------------------
-  const { address, isConnected } = useAccount();
-  // console.log("address: ", address);
-  // console.log("isConnected: ", isConnected);
-  const {
-    data: dataSigner,
-    isError: isErrorSigner,
-    isLoading: isLoadingSigner,
-  } = useSigner();
-
   const RENT_MARKET_CONTRACT_ADDRES =
     process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
+  const { address, isConnected } = useAccount();
+  const [rentPaymentNft, setRentPaymentNft] = React.useState(false);
+
   const {
     data: swrDataAllRentData,
     isError: swrErrorAllRentData,
@@ -70,10 +64,11 @@ export default function DrawImage() {
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
     functionName: "getAllRentData",
-    cacheOnBlock: true,
-    cacheTime: 60_000,
-    watch: false,
+    // cacheOnBlock: true,
+    // cacheTime: 60_000,
+    // watch: false,
   });
+
   const {
     data: swrDataRentData,
     isError: swrErrorRentData,
@@ -85,17 +80,15 @@ export default function DrawImage() {
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
     functionName: "getRegisterData",
-    cacheOnBlock: true,
-    cacheTime: 60_000,
-    watch: false,
     args: [
       process.env.NEXT_PUBLIC_PAYMENT_NFT_ADDRESS,
       process.env.NEXT_PUBLIC_PAYMENT_NFT_TOKEN,
     ],
+    // cacheOnBlock: true,
+    // cacheTime: 60_000,
+    // watch: false,
   });
-  const [rentPaymentNft, setRentPaymentNft] = React.useState(false);
 
-  //* Wait for transactions.
   const { config: configRentNFT, error: errorRentNFT } =
     usePrepareContractWrite({
       address: RENT_MARKET_CONTRACT_ADDRES,
@@ -108,12 +101,14 @@ export default function DrawImage() {
       ],
       // overrides: { value: nftData.rentFee },
     });
+
   const {
     data: dataRentNFT,
     isLoading: isLoadingRentNFT,
     isSuccess: isSuccessRentNFT,
     write: writeRentNFT,
   } = useContractWrite(configRentNFT);
+
   const waitForTransaction = useWaitForTransaction({
     hash: dataRentNFT?.hash,
     onSuccess(data) {
@@ -125,13 +120,6 @@ export default function DrawImage() {
       // console.log("error: ", error);
     },
     onSettled(data, error) {
-      // setWriteToastMessage({
-      //   snackbarSeverity: AlertSeverity.info,
-      //   snackbarMessage: "Renting is finished.",
-      //   snackbarTime: new Date(),
-      //   snackbarOpen: true,
-      // });
-      // setIsRenting(false);
       // console.log("call onSettled()");
       // console.log("data: ", data);
       // console.log("error: ", error);
@@ -139,7 +127,6 @@ export default function DrawImage() {
     },
   });
 
-  //* Get pending transactions.
   useWatchPendingTransactions({
     listener: function (tx) {
       // console.log("tx: ", tx);
