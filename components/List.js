@@ -488,7 +488,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
         ) : mode === "image" ? (
           <div>
             <CarouselImage data={dataImage} isLoading={isLoadingImage} />
-            {/* <ListImage data={dataImage} isLoading={isLoadingImage} /> */}
           </div>
         ) : mode === "nft" ? (
           <div>
@@ -506,16 +505,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
                 isLoading={swrIsLoadingRegisterData}
                 signTypedDataAsync={signTypedDataAsync}
               />
-              // <ListNft
-              //   selectedChain={selectedChain}
-              //   address={address}
-              //   isConnected={isConnected}
-              //   dataWalletClient={dataWalletClient}
-              //   promptNftContract={promptNftContract}
-              //   rentMarketContract={rentMarketContract}
-              //   data={allNftDataArray}
-              //   isLoading={swrIsLoadingRegisterData}
-              // />
             )}
           </div>
         ) : mode === "own" ? (
