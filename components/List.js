@@ -13,6 +13,7 @@ import {
   useContractEvent,
 } from "wagmi";
 import useSWR from "swr";
+import dynamic from "next/dynamic";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -24,7 +25,6 @@ import ListImage from "@/components/ListImage";
 import CarouselImage from "@/components/CarouselImage";
 import ListNft from "@/components/ListNft";
 import CarouselNft from "@/components/CarouselNft";
-import DrawImage from "@/components/DrawImage";
 import ListOwn from "@/components/ListOwn";
 import ListRent from "@/components/ListRent";
 import ThemePage from "@/components/ThemePage";
@@ -32,6 +32,9 @@ import fetchJson from "@/lib/fetchJson";
 import { getChainId, isWalletConnected } from "@/lib/util";
 import promptNFTABI from "@/contracts/promptNFT.json";
 import rentmarketABI from "@/contracts/rentMarket.json";
+const DrawImage = dynamic(() => import("./DrawImage"), {
+  ssr: false,
+});
 
 function List({ mode, updated, setNewImageCountFunc }) {
   // console.log("call List()");
