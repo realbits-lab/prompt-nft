@@ -309,7 +309,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
   }, []);
 
   function initialize() {
-    console.log("call useEffect()");
+    console.log("call initialize()");
     // console.log("swrDataRegisterData: ", swrDataRegisterData);
     // console.log("swrErrorRegisterData: ", swrErrorRegisterData);
     // console.log("swrIsLoadingRegisterData: ", swrIsLoadingRegisterData);
