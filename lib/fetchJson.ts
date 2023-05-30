@@ -82,9 +82,9 @@ async function getAllMyOwnData({
   ownerAddress: any;
 }) {
   console.log("call getAllMyOwnData()");
-  console.log("promptNftContract: ", promptNftContract);
-  console.log("signer: ", signer);
-  console.log("ownerAddress: ", ownerAddress);
+  // console.log("promptNftContract: ", promptNftContract);
+  // console.log("signer: ", signer);
+  // console.log("ownerAddress: ", ownerAddress);
 
   //* Check error case.
   if (!promptNftContract) {
@@ -105,9 +105,7 @@ async function getAllMyOwnData({
   //   args: [ownerAddress],
   // })) as any;
   const totalSupply = await promptNftContract.read.balanceOf([ownerAddress]);
-  // console.log("totalSupplyBigNumber: ", totalSupplyBigNumber);
-  // const totalSupply = totalSupplyBigNumber.toNumber();
-  console.log("totalSupply: ", totalSupply);
+  // console.log("totalSupply: ", totalSupply);
 
   //* Get all metadata per each token as to token uri.
   let tokenDataArray: Array<any> = [];
@@ -121,7 +119,7 @@ async function getAllMyOwnData({
       tokenId: tokenId,
     });
   }
-  console.log("tokenDataArray: ", tokenDataArray);
+  // console.log("tokenDataArray: ", tokenDataArray);
 
   //* Return token data array.
   return tokenDataArray;
