@@ -21,9 +21,9 @@ export default function ListOwn({
   data,
   isLoading,
 }) {
-  console.log("call ListOwn()");
-  console.log("isLoading: ", isLoading);
-  console.log("data: ", data);
+  // console.log("call ListOwn()");
+  // console.log("isLoading: ", isLoading);
+  // console.log("data: ", data);
   // console.log("allMyOwnDataCount: ", allMyOwnDataCount);
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const NUMBER_PER_PAGE = 1;

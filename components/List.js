@@ -323,7 +323,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
   );
 
   function initialize() {
-    console.log("call initialize()");
+    // console.log("call initialize()");
     // console.log("swrDataRegisterData: ", swrDataRegisterData);
     // console.log("swrErrorRegisterData: ", swrErrorRegisterData);
     // console.log("swrIsLoadingRegisterData: ", swrIsLoadingRegisterData);
@@ -343,17 +343,17 @@ function List({ mode, updated, setNewImageCountFunc }) {
         });
       });
     }
-    console.log("registerData: ", registerData);
+    // console.log("registerData: ", registerData);
 
     //* Find the own nft from registered nft data.
-    console.log("PROMPT_NFT_CONTRACT_ADDRESS: ", PROMPT_NFT_CONTRACT_ADDRESS);
+    // console.log("PROMPT_NFT_CONTRACT_ADDRESS: ", PROMPT_NFT_CONTRACT_ADDRESS);
     let ownDataArray;
     if (registerData && dataOwn) {
       ownDataArray = registerData.filter(function (nft) {
-        console.log("nft: ", nft);
+        // console.log("nft: ", nft);
         // console.log("nft.tokenId: ", nft.tokenId);
         return dataOwn.some(function (element) {
-          console.log("element: ", element);
+          // console.log("element: ", element);
           return (
             nft.tokenId === element.tokenId &&
             nft.nftAddress.localeCompare(
@@ -366,13 +366,13 @@ function List({ mode, updated, setNewImageCountFunc }) {
           );
         });
       });
-      console.log("ownDataArray: ", ownDataArray);
+      // console.log("ownDataArray: ", ownDataArray);
       setAllOwnDataArray(ownDataArray.reverse());
     }
 
     //* Set all rent data.
     let allMyRentDataArray;
-    console.log("swrDataRentData: ", swrDataRentData);
+    // console.log("swrDataRentData: ", swrDataRentData);
     if (swrDataRentData) {
       // console.log("address: ", address);
       allMyRentDataArray = swrDataRentData.filter(
@@ -446,8 +446,8 @@ function List({ mode, updated, setNewImageCountFunc }) {
         };
       });
 
-      setAllNftDataArray(dataNftWithStatusArray.reverse());
       // console.log("dataNftWithStatusArray: ", dataNftWithStatusArray);
+      setAllNftDataArray(dataNftWithStatusArray.reverse());
     }
   }
 

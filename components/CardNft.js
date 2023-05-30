@@ -37,8 +37,8 @@ function CardNft({
   promptNftContract,
   signTypedDataAsync,
 }) {
-  // console.log("call CardNft()");
-  // console.log("nftData: ", nftData);
+  console.log("call CardNft()");
+  console.log("nftData: ", nftData);
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.
@@ -155,17 +155,22 @@ function CardNft({
           openDialog: false,
         };
 
-  React.useEffect(function () {
-    // console.log("call useEffect()");
-    setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
+  React.useEffect(
+    function () {
+      console.log("call useEffect()");
+      console.log("metadataData: ", metadataData);
 
-    //* Register window resize event.
-    window.addEventListener("resize", function () {
-      // console.log("call resize()");
-      // console.log("window.innerHeight: ", window.innerHeight);
       setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
-    });
-  });
+
+      //* Register window resize event.
+      window.addEventListener("resize", function () {
+        // console.log("call resize()");
+        // console.log("window.innerHeight: ", window.innerHeight);
+        setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
+      });
+    },
+    [metadataData]
+  );
 
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");

@@ -53,15 +53,14 @@ async function getMetadata({
   }
 
   try {
-    const tokenURI = await promptNftContract
-      .connect(signer)
-      .tokenURI(tokenId.toNumber());
-    // console.log("tokenURI: ", tokenURI);
+    const tokenURI = await promptNftContract.read.tokenURI([tokenId]);
+    console.log("tokenURI: ", tokenURI);
 
     //* Get token metadata from token uri.
     const fetchResult = await fetch(tokenURI);
     const tokenMetadata = await fetchResult.blob();
     const metadataJsonTextData = await tokenMetadata.text();
+    console.log("metadataJsonTextData: ", metadataJsonTextData);
     const metadataJsonData = JSON.parse(metadataJsonTextData);
 
     return metadataJsonData;

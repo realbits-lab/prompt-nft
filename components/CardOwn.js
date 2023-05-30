@@ -28,7 +28,8 @@ function CardOwn({
   promptNftContract,
   signTypedDataAsync,
 }) {
-  // console.log("call CardOwn()");
+  console.log("call CardOwn()");
+  console.log("nftData: ", nftData);
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.
@@ -49,6 +50,7 @@ function CardOwn({
     signer: dataWalletClient,
     tokenId: nftData.tokenId,
   });
+  console.log("metadataData: ", metadataData);
 
   const { user, mutateUser } = useUser();
   // const {
@@ -116,7 +118,7 @@ function CardOwn({
         )}
         <CardContent>
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-            token id: {nftData.tokenId}
+            token id: {nftData.tokenId.toString()}
           </Typography>
           <Typography
             sx={{ fontSize: 14 }}
@@ -140,7 +142,7 @@ function CardOwn({
             gutterBottom
             component="div"
           >
-            rent fee: {nftData.rentFee / BigInt(Math.pow(10, 18))} matic
+            rent fee: {(nftData.rentFee / 10n ** 18n).toString()} matic
           </Typography>
         </CardContent>
         <CardActions>
