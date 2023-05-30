@@ -111,8 +111,10 @@ async function getAllMyOwnData({
   let tokenDataArray: Array<any> = [];
   for (let i = 0; i < totalSupply; i++) {
     //* Get token id and uri.
-    const tokenId = await promptNftContract.read // .connect(signer)
-      .tokenOfOwnerByIndex([ownerAddress, i]);
+    const tokenId = await promptNftContract.read.tokenOfOwnerByIndex([
+      ownerAddress,
+      i,
+    ]);
 
     //* Add token metadata.
     tokenDataArray.push({
