@@ -1,11 +1,7 @@
 import React from "react";
 import { useRouter } from "next/router";
-import {
-  Web3Button,
-  Web3NetworkSwitch,
-  useWeb3ModalNetwork,
-} from "@web3modal/react";
-import { useAccount } from "wagmi";
+import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
+import { useAccount, useNetwork } from "wagmi";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
@@ -24,7 +20,7 @@ const MintPage = () => {
   //* Define constance variables.
   //*---------------------------------------------------------------------------
   const GET_API_URL = "/api/get";
-  const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
+  const { chains, chain: selectedChain } = useNetwork();
   // console.log("selectedChain: ", selectedChain);
   const { address, isConnected } = useAccount();
   // console.log("address: ", address);

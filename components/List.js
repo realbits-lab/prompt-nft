@@ -6,6 +6,7 @@ import {
 } from "@web3modal/react";
 import {
   useAccount,
+  useNetwork,
   useWalletClient,
   useContractRead,
   useSignTypedData,
@@ -37,7 +38,7 @@ const DrawImage = dynamic(() => import("./DrawImage"), {
 });
 
 function List({ mode, updated, setNewImageCountFunc }) {
-  // console.log("call List()");
+  console.log("call List()");
   // console.log("mode: ", mode);
   // console.log("updated: ", updated);
 
@@ -47,8 +48,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
   const IMAGE_ALL_API_URL = "/api/all";
 
   //* Image refresh interval time by milli-second unit.
-  // const IMAGE_REFRESH_INTERVAL_TIME = 60000;
-  const IMAGE_REFRESH_INTERVAL_TIME = 1000;
+  const IMAGE_REFRESH_INTERVAL_TIME = 60000;
 
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const RENT_MARKET_CONTRACT_ADDRES =
@@ -66,18 +66,22 @@ function List({ mode, updated, setNewImageCountFunc }) {
   //*---------------------------------------------------------------------------
   //* Wagmi and Web3Modal hook.
   //*---------------------------------------------------------------------------
-  const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
-  // console.log("selectedChain: ", selectedChain);
+  //* Handle a new useNetwork instead of useWeb3ModalNetwork hook.
+  // const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
+  const { chains, chain: selectedChain } = useNetwork();
+  console.log("selectedChain: ", selectedChain);
+  console.log("chains: ", chains);
 
   const { address, isConnected } = useAccount();
-  // console.log("address: ", address);
-  // console.log("isConnected: ", isConnected);
+  console.log("address: ", address);
+  console.log("isConnected: ", isConnected);
 
   const {
     data: dataWalletClient,
-    isError: isErrorSigner,
-    isLoading: isLoadingSigner,
+    isError: isErrorWalletClient,
+    isLoading: isLoadingWalletClient,
   } = useWalletClient();
+  console.log("dataWalletClient: ", dataWalletClient);
 
   const promptNftContract = getContract({
     address: PROMPT_NFT_CONTRACT_ADDRESS,
@@ -191,18 +195,23 @@ function List({ mode, updated, setNewImageCountFunc }) {
   });
 
   //* Get all my own data array.
+  let dataOwn = undefined;
   // const {
   //   data: dataOwn,
   //   error: errorOwn,
   //   isLoading: isLoadingOwn,
   //   isValidating: isValidatingOwn,
-  // } = useSWR({
-  //   command: "getAllMyOwnData",
-  //   promptNftContract: promptNftContract,
-  //   signer: dataWalletClient,
-  //   ownerAddress: address,
-  // });
-  // console.log("dataOwn: ", dataOwn);
+  // } = useSWR(
+  //   {
+  //     command: "getAllMyOwnData",
+  //     promptNftContract: promptNftContract,
+  //     signer: dataWalletClient,
+  //     ownerAddress: address,
+  //   },
+  //   fetchJson,
+  //   { refreshInterval: IMAGE_REFRESH_INTERVAL_TIME }
+  // );
+  console.log("dataOwn: ", dataOwn);
 
   //* Get all my rent data array.
   const {
@@ -305,8 +314,59 @@ function List({ mode, updated, setNewImageCountFunc }) {
       });
     }
 
+    // getAllOwnData({
+    //   promptNftContract: promptNftContract,
+    //   rentMarketContract: rentMarketContract,
+    //   signer: dataWalletClient,
+    //   ownerAddress: ownerAddress,
+    // }).then((result) => (dataOwn = result));
+
     initialize();
   }, []);
+
+  async function getAllOwnData({
+    promptNftContract,
+    rentMarketContract,
+    signer,
+    ownerAddress,
+  }) {
+    console.log("call getAllMyOwnData()");
+    console.log("promptNftContract: ", promptNftContract);
+    console.log("ownerAddress: ", ownerAddress);
+    console.log("signer: ", signer);
+
+    //* If no signer, return zero data.
+    if (!promptNftContract || !signer) {
+      //* Return error.
+      return [];
+    }
+
+    //* Get total supply of prompt nft.
+    // console.log("contract: ", contract);
+    const totalSupplyBigNumber = await promptNftContract
+      .connect(signer)
+      .balanceOf(ownerAddress);
+    const totalSupply = totalSupplyBigNumber.toNumber();
+    console.log("totalSupply: ", totalSupply);
+
+    //* Get all metadata per each token as to token uri.
+    let tokenDataArray = [];
+    for (let i = 0; i < totalSupply; i++) {
+      //* Get token id and uri.
+      const tokenId = await promptNftContract
+        .connect(signer)
+        .tokenOfOwnerByIndex(ownerAddress, i);
+
+      //* Add token metadata.
+      tokenDataArray.push({
+        tokenId: tokenId,
+      });
+    }
+    console.log("tokenDataArray: ", tokenDataArray);
+
+    //* Return token data array.
+    return tokenDataArray;
+  }
 
   function initialize() {
     console.log("call initialize()");

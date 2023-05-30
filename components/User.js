@@ -1,5 +1,4 @@
-import { useWeb3ModalNetwork } from "@web3modal/react";
-import { useAccount, useSigner } from "wagmi";
+import { useAccount, useSigner, useNetwork } from "wagmi";
 import Button from "@mui/material/Button";
 
 import useUser from "@/lib/useUser";
@@ -9,7 +8,7 @@ export default function User() {
   //*----------------------------------------------------------------------------
   //* Define constance variables.
   //*----------------------------------------------------------------------------
-  const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
+  const { chains, chain: selectedChain } = useNetwork();
   // console.log("selectedChain: ", selectedChain);
   const { address, isConnected } = useAccount();
   // console.log("address: ", address);

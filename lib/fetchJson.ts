@@ -78,10 +78,10 @@ async function getAllOwnData({
   signer: any;
   ownerAddress: any;
 }) {
-  // console.log("call getAllMyOwnData()");
-  // console.log("promptNftContract: ", promptNftContract);
-  // console.log("ownerAddress: ", ownerAddress);
-  // console.log("signer: ", signer);
+  console.log("call getAllMyOwnData()");
+  console.log("promptNftContract: ", promptNftContract);
+  console.log("ownerAddress: ", ownerAddress);
+  console.log("signer: ", signer);
 
   //* If no signer, return zero data.
   if (!promptNftContract || !signer) {
@@ -94,8 +94,8 @@ async function getAllOwnData({
   const totalSupplyBigNumber = await promptNftContract
     .connect(signer)
     .balanceOf(ownerAddress);
-  // console.log("totalSupply: ", totalSupply);
   const totalSupply = totalSupplyBigNumber.toNumber();
+  console.log("totalSupply: ", totalSupply);
 
   //* Get all metadata per each token as to token uri.
   let tokenDataArray: Array<any> = [];
@@ -110,7 +110,7 @@ async function getAllOwnData({
       tokenId: tokenId,
     });
   }
-  // console.log("tokenDataArray: ", tokenDataArray);
+  console.log("tokenDataArray: ", tokenDataArray);
 
   //* Return token data array.
   return tokenDataArray;
@@ -222,7 +222,7 @@ export default async function fetchJson<JSON = unknown>(
   },
   init?: RequestInit
 ): Promise<any> {
-  // console.log("call fetchJson()");
+  console.log("call fetchJson()");
   // console.log("url: ", url);
   // console.log("type: ", type);
   // console.log("contract: ", contract);
@@ -246,7 +246,7 @@ export default async function fetchJson<JSON = unknown>(
           signer: signer,
           ownerAddress: ownerAddress,
         });
-        // console.log("getAllMyOwnDataResult: ", getAllMyOwnDataResult);
+        console.log("getAllMyOwnDataResult: ", getAllMyOwnDataResult);
         return getAllMyOwnDataResult;
 
       case "getAllMyRentData":

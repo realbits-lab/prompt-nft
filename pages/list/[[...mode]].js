@@ -51,7 +51,8 @@ HideOnScroll.propTypes = {
 };
 
 export default function ListPage(props) {
-  // console.log("call ListPage()");
+  console.log("call ListPage()");
+
   const DEFAULT_MENU = "draw";
   const router = useRouter();
   const queryMode = router.query.mode;
@@ -132,7 +133,7 @@ export default function ListPage(props) {
 
   React.useEffect(
     function () {
-      // console.log("call useEffect()");
+      console.log("call useEffect()");
       // console.log("readDialogMessage: ", readDialogMessage);
       // console.log("queryMode: ", queryMode);
 
@@ -204,8 +205,6 @@ export default function ListPage(props) {
                 <AppBarButton buttonMode="image" />
               </Badge>
               <AppBarButton buttonMode="nft" />
-              {/* <AppBarButton buttonMode="own" />
-              <AppBarButton buttonMode="rent" /> */}
             </Box>
 
             <Box>
@@ -264,15 +263,13 @@ export default function ListPage(props) {
       </HideOnScroll>
 
       {/*//*Image content part. */}
-      <Container>
-        <Box sx={{ my: 2 }}>
-          <List
-            mode={mode}
-            updated={queryUpdated}
-            setNewImageCountFunc={setNewBadgeOnImageAppBarButton}
-          />
-        </Box>
-      </Container>
+      <Box sx={{ my: 2 }}>
+        <List
+          mode={mode}
+          updated={queryUpdated}
+          setNewImageCountFunc={setNewBadgeOnImageAppBarButton}
+        />
+      </Box>
 
       {/*//*Toast snackbar. */}
       <RBSnackbar
