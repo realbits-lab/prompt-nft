@@ -106,9 +106,9 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
       value={{
         fetcher: fetchJson,
         revalidateOnFocus: false,
-        keepPreviousData: true,
-        onError: (err) => {
-          console.error(err);
+        keepPreviousData: false,
+        onError: (error) => {
+          console.error(error);
         },
       }}
     >

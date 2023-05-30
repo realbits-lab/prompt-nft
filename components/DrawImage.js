@@ -68,17 +68,17 @@ export default function DrawImage() {
     // cacheTime: 60_000,
     // watch: false,
     onSuccess(data) {
-      console.log("call onSuccess()");
-      console.log("data: ", data);
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
     },
     onError(error) {
-      console.log("call onError()");
-      console.log("error: ", error);
+      // console.log("call onError()");
+      // console.log("error: ", error);
     },
     onSettled(data, error) {
-      console.log("call onSettled()");
-      console.log("data: ", data);
-      console.log("error: ", error);
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
     },
   });
 
@@ -101,17 +101,17 @@ export default function DrawImage() {
     // cacheTime: 60_000,
     // watch: false,
     onSuccess(data) {
-      console.log("call onSuccess()");
-      console.log("data: ", data);
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
     },
     onError(error) {
-      console.log("call onError()");
-      console.log("error: ", error);
+      // console.log("call onError()");
+      // console.log("error: ", error);
     },
     onSettled(data, error) {
-      console.log("call onSettled()");
-      console.log("data: ", data);
-      console.log("error: ", error);
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
     },
   });
 
@@ -127,22 +127,22 @@ export default function DrawImage() {
       ],
       enabled: false,
       onError(error) {
-        console.log("call onError()");
-        console.log("error: ", error);
+        // console.log("call onError()");
+        // console.log("error: ", error);
       },
       onMutate(args, overrides) {
-        console.log("call onMutate()");
-        console.log("args: ", args);
-        console.log("overrides: ", overrides);
+        // console.log("call onMutate()");
+        // console.log("args: ", args);
+        // console.log("overrides: ", overrides);
       },
       onSettled(data, error) {
-        console.log("call onSettled()");
-        console.log("data: ", data);
-        console.log("error: ", error);
+        // console.log("call onSettled()");
+        // console.log("data: ", data);
+        // console.log("error: ", error);
       },
       onSuccess(data) {
-        console.log("call onSuccess()");
-        console.log("data: ", data);
+        // console.log("call onSuccess()");
+        // console.log("data: ", data);
       },
     });
 
@@ -160,17 +160,17 @@ export default function DrawImage() {
   const waitForTransaction = useWaitForTransaction({
     hash: dataRentNFT?.hash,
     onSuccess(data) {
-      console.log("call onSuccess()");
-      console.log("data: ", data);
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
     },
     onError(error) {
-      console.log("call onError()");
-      console.log("error: ", error);
+      // console.log("call onError()");
+      // console.log("error: ", error);
     },
     onSettled(data, error) {
-      console.log("call onSettled()");
-      console.log("data: ", data);
-      console.log("error: ", error);
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
     },
   });
 
@@ -205,7 +205,7 @@ export default function DrawImage() {
 
   React.useEffect(
     function () {
-      console.log("call useEffect()");
+      // console.log("call useEffect()");
 
       //* Check user has rented the payment nft.
       if (swrDataAllRentData) {
@@ -261,10 +261,10 @@ export default function DrawImage() {
     // console.log("jsonResponse: ", jsonResponse);
     const imageUrlResponse = jsonResponse.imageUrl[0];
     const meta = jsonResponse.meta;
-    console.log("imageUrlResponse: ", imageUrlResponse);
-    console.log("meta.negative_prompt: ", meta.negative_prompt);
-    console.log("meta.prompt: ", meta.prompt);
-    console.log("meta.model: ", meta.model);
+    // console.log("imageUrlResponse: ", imageUrlResponse);
+    // console.log("meta.negative_prompt: ", meta.negative_prompt);
+    // console.log("meta.prompt: ", meta.prompt);
+    // console.log("meta.model: ", meta.model);
 
     //* Change prompt, negativePrompt, modelName.
     let event = {};
@@ -289,7 +289,7 @@ export default function DrawImage() {
         discordBotToken: DISCORD_BOT_TOKEN,
       }),
     });
-    console.log("imageUploadResponse: ", imageUploadResponse);
+    // console.log("imageUploadResponse: ", imageUploadResponse);
 
     if (imageUploadResponse.status !== 200) {
       console.error(`imageUploadResponse: ${imageUploadResponse}`);
@@ -334,7 +334,7 @@ export default function DrawImage() {
   }
 
   function buildLoadingPage() {
-    console.log("call buildLoadingPage()");
+    // console.log("call buildLoadingPage()");
 
     return (
       <>
@@ -470,14 +470,14 @@ export default function DrawImage() {
                 </Typography>
                 <Button
                   onClick={function () {
-                    console.log("dataRentNFT: ", dataRentNFT);
-                    console.log("errorRentNFT: ", errorRentNFT);
-                    console.log("isErrorRentNFT: ", isErrorRentNFT);
-                    console.log("isIdleRentNFT: ", isIdleRentNFT);
-                    console.log("isLoadingRentNFT: ", isLoadingRentNFT);
-                    console.log("isSuccessRentNFT: ", isSuccessRentNFT);
-                    console.log("writeRentNFT: ", writeRentNFT);
-                    console.log("statusRentNFT: ", statusRentNFT);
+                    // console.log("dataRentNFT: ", dataRentNFT);
+                    // console.log("errorRentNFT: ", errorRentNFT);
+                    // console.log("isErrorRentNFT: ", isErrorRentNFT);
+                    // console.log("isIdleRentNFT: ", isIdleRentNFT);
+                    // console.log("isLoadingRentNFT: ", isLoadingRentNFT);
+                    // console.log("isSuccessRentNFT: ", isSuccessRentNFT);
+                    // console.log("writeRentNFT: ", writeRentNFT);
+                    // console.log("statusRentNFT: ", statusRentNFT);
                     // console.log("swrDataRentData: ", swrDataRentData);
                     const rentFee = swrDataRentData.rentFee;
                     // console.log("rentFee: ", rentFee);
@@ -494,7 +494,7 @@ export default function DrawImage() {
                           process.env.NEXT_PUBLIC_PAYMENT_NFT_TOKEN
                         )
                       ) {
-                        console.log("try to call writeRentNFT()");
+                        // console.log("try to call writeRentNFT()");
                         writeRentNFT?.({
                           value: parseEther(rentFee),
                         });

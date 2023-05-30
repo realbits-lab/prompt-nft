@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  Web3Button,
-  Web3NetworkSwitch,
-  useWeb3ModalNetwork,
-} from "@web3modal/react";
+import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 import {
   useAccount,
   useNetwork,
@@ -22,9 +18,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
-import ListImage from "@/components/ListImage";
 import CarouselImage from "@/components/CarouselImage";
-import ListNft from "@/components/ListNft";
 import CarouselNft from "@/components/CarouselNft";
 import ListOwn from "@/components/ListOwn";
 import ListRent from "@/components/ListRent";
@@ -38,7 +32,7 @@ const DrawImage = dynamic(() => import("./DrawImage"), {
 });
 
 function List({ mode, updated, setNewImageCountFunc }) {
-  console.log("call List()");
+  // console.log("call List()");
   // console.log("mode: ", mode);
   // console.log("updated: ", updated);
 
@@ -67,31 +61,39 @@ function List({ mode, updated, setNewImageCountFunc }) {
   //* Wagmi and Web3Modal hook.
   //*---------------------------------------------------------------------------
   //* Handle a new useNetwork instead of useWeb3ModalNetwork hook.
-  // const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
   const { chains, chain: selectedChain } = useNetwork();
-  console.log("selectedChain: ", selectedChain);
-  console.log("chains: ", chains);
+  // console.log("selectedChain: ", selectedChain);
+  // console.log("chains: ", chains);
 
   const { address, isConnected } = useAccount();
-  console.log("address: ", address);
-  console.log("isConnected: ", isConnected);
+  // console.log("address: ", address);
+  // console.log("isConnected: ", isConnected);
 
   const {
     data: dataWalletClient,
     isError: isErrorWalletClient,
     isLoading: isLoadingWalletClient,
   } = useWalletClient();
-  console.log("dataWalletClient: ", dataWalletClient);
+  // console.log("dataWalletClient: ", dataWalletClient);
 
-  const promptNftContract = getContract({
-    address: PROMPT_NFT_CONTRACT_ADDRESS,
-    abi: promptNFTABI["abi"],
-  });
+  //* promptNftContract is used for useSWR params, so use useMemo.
+  const promptNftContract = React.useMemo(
+    () =>
+      getContract({
+        address: PROMPT_NFT_CONTRACT_ADDRESS,
+        abi: promptNFTABI["abi"],
+      }),
+    [PROMPT_NFT_CONTRACT_ADDRESS, promptNFTABI["abi"]]
+  );
   // console.log("promptNftContract: ", promptNftContract);
-  const rentMarketContract = getContract({
-    address: RENT_MARKET_CONTRACT_ADDRES,
-    abi: rentmarketABI["abi"],
-  });
+  const rentMarketContract = React.useMemo(
+    () =>
+      getContract({
+        address: RENT_MARKET_CONTRACT_ADDRES,
+        abi: rentmarketABI["abi"],
+      }),
+    [RENT_MARKET_CONTRACT_ADDRES, rentmarketABI["abi"]]
+  );
   // console.log("rentMarketContract: ", rentMarketContract);
 
   //* Listen contract event.
@@ -195,23 +197,22 @@ function List({ mode, updated, setNewImageCountFunc }) {
   });
 
   //* Get all my own data array.
-  let dataOwn = undefined;
-  // const {
-  //   data: dataOwn,
-  //   error: errorOwn,
-  //   isLoading: isLoadingOwn,
-  //   isValidating: isValidatingOwn,
-  // } = useSWR(
-  //   {
-  //     command: "getAllMyOwnData",
-  //     promptNftContract: promptNftContract,
-  //     signer: dataWalletClient,
-  //     ownerAddress: address,
-  //   },
-  //   fetchJson,
-  //   { refreshInterval: IMAGE_REFRESH_INTERVAL_TIME }
-  // );
-  console.log("dataOwn: ", dataOwn);
+  const {
+    data: dataOwn,
+    error: errorOwn,
+    isLoading: isLoadingOwn,
+    isValidating: isValidatingOwn,
+  } = useSWR(
+    {
+      command: "getAllMyOwnData",
+      promptNftContract: promptNftContract,
+      signer: dataWalletClient,
+      ownerAddress: address,
+    },
+    fetchJson,
+    { refreshInterval: IMAGE_REFRESH_INTERVAL_TIME }
+  );
+  // console.log("dataOwn: ", dataOwn);
 
   //* Get all my rent data array.
   const {
@@ -301,7 +302,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
   const theme = useTheme();
 
   React.useEffect(function () {
-    console.log("call useEffect()");
+    // console.log("call useEffect()");
     // console.log("dataImage: ", dataImage);
     // console.log(
     //   "dataImage?.newlyUpdatedData?.length: ",
@@ -314,62 +315,11 @@ function List({ mode, updated, setNewImageCountFunc }) {
       });
     }
 
-    // getAllOwnData({
-    //   promptNftContract: promptNftContract,
-    //   rentMarketContract: rentMarketContract,
-    //   signer: dataWalletClient,
-    //   ownerAddress: ownerAddress,
-    // }).then((result) => (dataOwn = result));
-
     initialize();
   }, []);
 
-  async function getAllOwnData({
-    promptNftContract,
-    rentMarketContract,
-    signer,
-    ownerAddress,
-  }) {
-    console.log("call getAllMyOwnData()");
-    console.log("promptNftContract: ", promptNftContract);
-    console.log("ownerAddress: ", ownerAddress);
-    console.log("signer: ", signer);
-
-    //* If no signer, return zero data.
-    if (!promptNftContract || !signer) {
-      //* Return error.
-      return [];
-    }
-
-    //* Get total supply of prompt nft.
-    // console.log("contract: ", contract);
-    const totalSupplyBigNumber = await promptNftContract
-      .connect(signer)
-      .balanceOf(ownerAddress);
-    const totalSupply = totalSupplyBigNumber.toNumber();
-    console.log("totalSupply: ", totalSupply);
-
-    //* Get all metadata per each token as to token uri.
-    let tokenDataArray = [];
-    for (let i = 0; i < totalSupply; i++) {
-      //* Get token id and uri.
-      const tokenId = await promptNftContract
-        .connect(signer)
-        .tokenOfOwnerByIndex(ownerAddress, i);
-
-      //* Add token metadata.
-      tokenDataArray.push({
-        tokenId: tokenId,
-      });
-    }
-    console.log("tokenDataArray: ", tokenDataArray);
-
-    //* Return token data array.
-    return tokenDataArray;
-  }
-
   function initialize() {
-    console.log("call initialize()");
+    // console.log("call initialize()");
     // console.log("swrDataRegisterData: ", swrDataRegisterData);
     // console.log("swrErrorRegisterData: ", swrErrorRegisterData);
     // console.log("swrIsLoadingRegisterData: ", swrIsLoadingRegisterData);
