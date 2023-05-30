@@ -116,7 +116,7 @@ function CardOwn({
         )}
         <CardContent>
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-            token id: {nftData.tokenId.toNumber()}
+            token id: {nftData.tokenId}
           </Typography>
           <Typography
             sx={{ fontSize: 14 }}
@@ -140,7 +140,7 @@ function CardOwn({
             gutterBottom
             component="div"
           >
-            rent fee: {nftData.rentFee / Math.pow(10, 18)} matic
+            rent fee: {nftData.rentFee / BigInt(Math.pow(10, 18))} matic
           </Typography>
         </CardContent>
         <CardActions>

@@ -196,24 +196,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
     },
   });
 
-  //* Get all my own data array.
-  const {
-    data: dataOwn,
-    error: errorOwn,
-    isLoading: isLoadingOwn,
-    isValidating: isValidatingOwn,
-  } = useSWR(
-    {
-      command: "getAllMyOwnData",
-      promptNftContract: promptNftContract,
-      signer: dataWalletClient,
-      ownerAddress: address,
-    },
-    fetchJson,
-    { refreshInterval: IMAGE_REFRESH_INTERVAL_TIME }
-  );
-  // console.log("dataOwn: ", dataOwn);
-
   //* Get all my rent data array.
   const {
     data: swrDataRentData,
@@ -258,6 +240,26 @@ function List({ mode, updated, setNewImageCountFunc }) {
     // watch: true,
   });
 
+  //* Get all my own data array.
+  const {
+    data: dataOwn,
+    error: errorOwn,
+    isLoading: isLoadingOwn,
+    isValidating: isValidatingOwn,
+  } = useSWR(
+    {
+      command: "getAllMyOwnData",
+      promptNftContract: promptNftContract,
+      signer: dataWalletClient,
+      ownerAddress: address,
+    },
+    fetchJson,
+    {
+      refreshInterval: IMAGE_REFRESH_INTERVAL_TIME,
+    }
+  );
+  // console.log("dataOwn: ", dataOwn);
+
   //*---------------------------------------------------------------------------
   //* Define state data.
   //*---------------------------------------------------------------------------
@@ -301,25 +303,28 @@ function List({ mode, updated, setNewImageCountFunc }) {
 
   const theme = useTheme();
 
-  React.useEffect(function () {
-    // console.log("call useEffect()");
-    // console.log("dataImage: ", dataImage);
-    // console.log(
-    //   "dataImage?.newlyUpdatedData?.length: ",
-    //   dataImage?.newlyUpdatedData?.length
-    // );
+  React.useEffect(
+    function () {
+      // console.log("call useEffect()");
+      // console.log("dataImage: ", dataImage);
+      // console.log(
+      //   "dataImage?.newlyUpdatedData?.length: ",
+      //   dataImage?.newlyUpdatedData?.length
+      // );
 
-    if ((dataImage?.newlyUpdatedData?.length || 0) > 0) {
-      setNewImageCountFunc({
-        newImageCount: dataImage.newlyUpdatedData.length,
-      });
-    }
+      if ((dataImage?.newlyUpdatedData?.length || 0) > 0) {
+        setNewImageCountFunc({
+          newImageCount: dataImage.newlyUpdatedData.length,
+        });
+      }
 
-    initialize();
-  }, []);
+      initialize();
+    },
+    [dataOwn]
+  );
 
   function initialize() {
-    // console.log("call initialize()");
+    console.log("call initialize()");
     // console.log("swrDataRegisterData: ", swrDataRegisterData);
     // console.log("swrErrorRegisterData: ", swrErrorRegisterData);
     // console.log("swrIsLoadingRegisterData: ", swrIsLoadingRegisterData);
@@ -329,6 +334,8 @@ function List({ mode, updated, setNewImageCountFunc }) {
     // console.log("dataOwn: ", dataOwn);
     // console.log("dataRent: ", dataRent);
 
+    //* Find the register data in registered collection.
+    //* After registering data, even though collection is removed, register data remains.
     let registerData;
     if (swrDataRegisterData && swrDataCollection) {
       registerData = swrDataRegisterData.filter(function (registerData) {
@@ -336,31 +343,37 @@ function List({ mode, updated, setNewImageCountFunc }) {
           return collection.collectionAddress === registerData.nftAddress;
         });
       });
-      // console.log("registerData: ", registerData);
     }
+    console.log("registerData: ", registerData);
 
+    //* Find the own nft from registered nft data.
+    console.log("PROMPT_NFT_CONTRACT_ADDRESS: ", PROMPT_NFT_CONTRACT_ADDRESS);
     let ownDataArray;
-    //* Set all own data array.
     if (registerData && dataOwn) {
       ownDataArray = registerData.filter(function (nft) {
-        // console.log("nft: ", nft);
+        console.log("nft: ", nft);
         // console.log("nft.tokenId: ", nft.tokenId);
         return dataOwn.some(function (element) {
-          // console.log("element.tokenId: ", element.tokenId);
+          console.log("element: ", element);
           return (
-            nft.tokenId.eq(element.tokenId) &&
-            nft.nftAddress.localeCompare(promptNftContract.address, undefined, {
-              sensitivity: "accent",
-            }) === 0
+            nft.tokenId === element.tokenId &&
+            nft.nftAddress.localeCompare(
+              PROMPT_NFT_CONTRACT_ADDRESS,
+              undefined,
+              {
+                sensitivity: "accent",
+              }
+            ) === 0
           );
         });
       });
-      // console.log("ownDataArray: ", ownDataArray);
+      console.log("ownDataArray: ", ownDataArray);
       setAllOwnDataArray(ownDataArray.reverse());
     }
 
     //* Set all rent data.
     let allMyRentDataArray;
+    console.log("swrDataRentData: ", swrDataRentData);
     if (swrDataRentData) {
       // console.log("address: ", address);
       allMyRentDataArray = swrDataRentData.filter(
@@ -385,9 +398,9 @@ function List({ mode, updated, setNewImageCountFunc }) {
         if (ownDataArray) {
           const someResult = ownDataArray.some(function (ownData) {
             return (
-              ownData.tokenId.eq(nft.tokenId) &&
+              ownData.tokenId === nft.tokenId &&
               ownData.nftAddress.localeCompare(
-                promptNftContract.address,
+                PROMPT_NFT_CONTRACT_ADDRESS,
                 undefined,
                 {
                   sensitivity: "accent",
@@ -407,7 +420,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
           const someResult = allMyRentDataArray.some(function (rentData) {
             // console.log("rentData: ", rentData);
             return (
-              rentData.tokenId.eq(nft.tokenId) &&
+              rentData.tokenId === nft.tokenId &&
               rentData.renteeAddress.localeCompare(address, undefined, {
                 sensitivity: "accent",
               }) === 0
