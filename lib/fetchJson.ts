@@ -40,8 +40,8 @@ async function getMetadata({
   promptNftContract: any;
   signer: any;
 }) {
-  // console.log("call getMetadata()");
-  // console.log("tokenId: ", tokenId);
+  console.log("call getMetadata()");
+  console.log("tokenId: ", tokenId);
 
   if (!promptNftContract || !signer || !tokenId) {
     console.error(
@@ -72,13 +72,9 @@ async function getMetadata({
 
 async function getAllMyOwnData({
   promptNftContract,
-  rentMarketContract,
-  signer,
   ownerAddress,
 }: {
   promptNftContract: any;
-  rentMarketContract: any;
-  signer: any;
   ownerAddress: any;
 }) {
   console.log("call getAllMyOwnData()");
@@ -90,20 +86,8 @@ async function getAllMyOwnData({
   if (!promptNftContract) {
     throw new Error("Prompt nft contract is undefined.");
   }
-  // if (!signer) {
-  //   throw new Error("Signer is undefined.");
-  // }
 
   //* Get total supply of prompt nft.
-  const publicClient = getPublicClient();
-  // const totalSupply = (await publicClient.readContract({
-  //   address: `0x${process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS?.slice(
-  //     2
-  //   )}`,
-  //   abi: promptNFTABI["abi"],
-  //   functionName: "balanceOf",
-  //   args: [ownerAddress],
-  // })) as any;
   const totalSupply = await promptNftContract.read.balanceOf([ownerAddress]);
   // console.log("totalSupply: ", totalSupply);
 
@@ -253,8 +237,6 @@ export default async function fetchJson<JSON = unknown>(
       case "getAllMyOwnData":
         const getAllMyOwnDataResult = await getAllMyOwnData({
           promptNftContract: promptNftContract,
-          rentMarketContract: rentMarketContract,
-          signer: signer,
           ownerAddress: ownerAddress,
         });
         console.log("getAllMyOwnDataResult: ", getAllMyOwnDataResult);

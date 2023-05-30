@@ -250,7 +250,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
     {
       command: "getAllMyOwnData",
       promptNftContract: promptNftContract,
-      signer: dataWalletClient,
       ownerAddress: address,
     },
     fetchJson,
