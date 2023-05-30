@@ -220,10 +220,10 @@ function CardNft({
           }}
         >
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-            # {nftData.tokenId.toNumber()} /{" "}
+            # {nftData.tokenId.toString()} /{" "}
             {metadataData ? metadataData.name : "loading..."} /{" "}
             {metadataData ? metadataData.description : "loading..."} /{" "}
-            {nftData.rentFee / Math.pow(10, 18)} matic
+            {(nftData.rentFee / 10n ** 18n).toString()} matic
           </Typography>
         </CardContent>
         <CardActions>
