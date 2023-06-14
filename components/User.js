@@ -1,5 +1,4 @@
 import { useAccount, useWalletClient, useNetwork } from "wagmi";
-import Button from "@mui/material/Button";
 import { Typography } from "@mui/material";
 import useUser from "@/lib/useUser";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
@@ -15,10 +14,7 @@ export default function User() {
   // console.log("isConnected: ", isConnected);
   const { data: walletClient } = useWalletClient();
   // console.log("walletClient: ", walletClient);
-  // console.log("isError: ", isError);
-  // console.log("isLoading: ", isLoading);
   const { user, mutateUser } = useUser();
-  // const { status, connect, account, chainId, ethereum } = useMetaMask();
 
   // console.log("user: ", user);
 
