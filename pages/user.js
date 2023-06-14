@@ -1,7 +1,5 @@
-import User from "../components/User";
+import User from "@/components/User";
 
-const UserPage = () => {
+export default function UserPage() {
   return <User />;
-};
-
-export default UserPage;
+}

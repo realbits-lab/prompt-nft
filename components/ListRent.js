@@ -14,7 +14,7 @@ export default function ListRent({
   selectedChain,
   address,
   isConnected,
-  dataSigner,
+  dataWalletClient,
   promptNftContract,
   rentMarketContract,
   signTypedDataAsync,
@@ -61,14 +61,14 @@ export default function ListRent({
         alignItems="center"
         minHeight="100vh"
       >
-        <Grid container spacing={2} justifyContent="space-around" padding={2}>
+        {/* <Grid container spacing={2} justifyContent="space-around" padding={2}>
           <Grid item>
             <Web3Button />
           </Grid>
           <Grid item>
             <Web3NetworkSwitch />
           </Grid>
-        </Grid>
+        </Grid> */}
         <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
           <CardMedia component="img" image={PLACEHOLDER_IMAGE_URL} />
           <CardContent
@@ -121,7 +121,7 @@ export default function ListRent({
                   <CardRent
                     nftData={nftData}
                     key={idx}
-                    dataSigner={dataSigner}
+                    dataWalletClient={dataWalletClient}
                     address={address}
                     isConnected={isConnected}
                     rentMarketContract={rentMarketContract}

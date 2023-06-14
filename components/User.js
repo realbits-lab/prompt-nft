@@ -1,24 +1,20 @@
-import { useWeb3ModalNetwork } from "@web3modal/react";
-import { useAccount, useSigner } from "wagmi";
-import Button from "@mui/material/Button";
-import useUser from "../lib/useUser";
-import fetchJson, { FetchError } from "../lib/fetchJson";
+import { useAccount, useWalletClient, useNetwork } from "wagmi";
+import { Typography } from "@mui/material";
+import useUser from "@/lib/useUser";
+import fetchJson, { FetchError } from "@/lib/fetchJson";
 
-const User = () => {
+export default function User() {
   //*----------------------------------------------------------------------------
   //* Define constance variables.
   //*----------------------------------------------------------------------------
-  const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
+  const { chains, chain: selectedChain } = useNetwork();
   // console.log("selectedChain: ", selectedChain);
   const { address, isConnected } = useAccount();
   // console.log("address: ", address);
   // console.log("isConnected: ", isConnected);
-  const { data: signer, isError, isLoading } = useSigner();
-  // console.log("signer: ", signer);
-  // console.log("isError: ", isError);
-  // console.log("isLoading: ", isLoading);
+  const { data: walletClient } = useWalletClient();
+  // console.log("walletClient: ", walletClient);
   const { user, mutateUser } = useUser();
-  // const { status, connect, account, chainId, ethereum } = useMetaMask();
 
   // console.log("user: ", user);
 
@@ -26,16 +22,8 @@ const User = () => {
     const publicAddress = address.toLowerCase();
     // console.log("publicAddress: ", publicAddress);
 
-    // Check user with public address and receive nonce as to user.
-    // If user does not exist, back-end would add user data.
-    const jsonResult = await fetchJson({ url: `/api/nonce/${publicAddress}` });
-    // console.log("jsonResult: ", jsonResult);
-
     // Popup MetaMask confirmation modal to sign message with nonce data.
-    const signMessageResult = await handleSignMessage({
-      publicAddress: publicAddress,
-      nonce: jsonResult.data.nonce,
-    });
+    const signMessageResult = await handleSignMessage();
     // console.log("signMessageResult: ", signMessageResult);
 
     // Send signature to back-end on the /auth route.
@@ -45,8 +33,7 @@ const User = () => {
     });
   };
 
-  const handleSignMessage = async ({ publicAddress, nonce }) => {
-    // console.log("selectedChain.id: ", selectedChain.id);
+  const handleSignMessage = async () => {
     const msgParams = JSON.stringify({
       domain: {
         chainId: selectedChain.id,
@@ -55,7 +42,7 @@ const User = () => {
 
       // Defining the message signing data content.
       message: {
-        contents: `Login with ${nonce} nonce number.`,
+        contents: process.env.NEXT_PUBLIC_LOGIN_SIGN_MESSAGE,
       },
       // Refers to the keys of the *types* object below.
       primaryType: "Login",
@@ -119,29 +106,27 @@ const User = () => {
   };
 
   return (
-    <div>
+    <>
       {(user === undefined || user.isLoggedIn === false) && (
-        <Button
+        <Typography
           sx={{ my: 2, color: "white", display: "block" }}
           onClick={async () => {
             await handleLoginClick();
           }}
         >
           Login
-        </Button>
+        </Typography>
       )}
       {user !== undefined && user.isLoggedIn === true && (
-        <Button
+        <Typography
           sx={{ my: 2, color: "white", display: "block" }}
           onClick={async () => {
             await handleLogoutClick();
           }}
         >
           Logout
-        </Button>
+        </Typography>
       )}
-    </div>
+    </>
   );
-};
-
-export default User;
+}

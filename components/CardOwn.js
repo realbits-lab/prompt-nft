@@ -20,7 +20,7 @@ import useUser from "../lib/useUser";
 
 function CardOwn({
   nftData,
-  dataSigner,
+  dataWalletClient,
   selectedChain,
   address,
   isConnected,
@@ -28,7 +28,8 @@ function CardOwn({
   promptNftContract,
   signTypedDataAsync,
 }) {
-  // console.log("call CardOwn()");
+  console.log("call CardOwn()");
+  console.log("nftData: ", nftData);
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.
@@ -46,9 +47,10 @@ function CardOwn({
   } = useSWR({
     command: "getMetadata",
     promptNftContract: promptNftContract,
-    signer: dataSigner,
+    signer: dataWalletClient,
     tokenId: nftData.tokenId,
   });
+  console.log("metadataData: ", metadataData);
 
   const { user, mutateUser } = useUser();
   // const {
@@ -116,7 +118,7 @@ function CardOwn({
         )}
         <CardContent>
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-            token id: {nftData.tokenId.toNumber()}
+            token id: {nftData.tokenId.toString()}
           </Typography>
           <Typography
             sx={{ fontSize: 14 }}
@@ -140,7 +142,7 @@ function CardOwn({
             gutterBottom
             component="div"
           >
-            rent fee: {nftData.rentFee / Math.pow(10, 18)} matic
+            rent fee: {(nftData.rentFee / 10n ** 18n).toString()} matic
           </Typography>
         </CardContent>
         <CardActions>
@@ -154,7 +156,7 @@ function CardOwn({
                 user: user,
                 nftData: nftData,
                 promptNftContract: promptNftContract,
-                dataSigner: dataSigner,
+                dataWalletClient: dataWalletClient,
                 isConnected: isConnected,
                 selectedChain: selectedChain,
                 address: address,

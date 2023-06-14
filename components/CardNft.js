@@ -16,19 +16,20 @@ import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
+
 import {
   isWalletConnected,
   AlertSeverity,
   writeToastMessageState,
   writeDialogMessageState,
   handleCheckPrompt,
-} from "../lib/util";
-import rentmarketABI from "../contracts/rentMarket.json";
-import useUser from "../lib/useUser";
+} from "@/lib/util";
+import useUser from "@/lib/useUser";
+import rentmarketABI from "@/contracts/rentMarket.json";
 
 function CardNft({
   nftData,
-  dataSigner,
+  dataWalletClient,
   selectedChain,
   address,
   isConnected,
@@ -36,8 +37,8 @@ function CardNft({
   promptNftContract,
   signTypedDataAsync,
 }) {
-  // console.log("call CardNft()");
-  // console.log("nftData: ", nftData);
+  console.log("call CardNft()");
+  console.log("nftData: ", nftData);
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.
@@ -63,7 +64,7 @@ function CardNft({
   } = useSWR({
     command: "getMetadata",
     promptNftContract: promptNftContract,
-    signer: dataSigner,
+    signer: dataWalletClient,
     tokenId: nftData ? nftData.tokenId : 0,
   });
   const { user, mutateUser } = useUser();
@@ -154,17 +155,22 @@ function CardNft({
           openDialog: false,
         };
 
-  React.useEffect(function () {
-    // console.log("call useEffect()");
-    setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
+  React.useEffect(
+    function () {
+      console.log("call useEffect()");
+      console.log("metadataData: ", metadataData);
 
-    //* Register window resize event.
-    window.addEventListener("resize", function () {
-      // console.log("call resize()");
-      // console.log("window.innerHeight: ", window.innerHeight);
       setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
-    });
-  });
+
+      //* Register window resize event.
+      window.addEventListener("resize", function () {
+        // console.log("call resize()");
+        // console.log("window.innerHeight: ", window.innerHeight);
+        setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
+      });
+    },
+    [metadataData]
+  );
 
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
@@ -214,10 +220,10 @@ function CardNft({
           }}
         >
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-            # {nftData.tokenId.toNumber()} /{" "}
+            # {nftData.tokenId.toString()} /{" "}
             {metadataData ? metadataData.name : "loading..."} /{" "}
             {metadataData ? metadataData.description : "loading..."} /{" "}
-            {nftData.rentFee / Math.pow(10, 18)} matic
+            {(nftData.rentFee / 10n ** 18n).toString()} matic
           </Typography>
         </CardContent>
         <CardActions>
@@ -233,7 +239,7 @@ function CardNft({
                   user: user,
                   nftData: nftData,
                   promptNftContract: promptNftContract,
-                  dataSigner: dataSigner,
+                  dataWalletClient: dataWalletClient,
                   isConnected: isConnected,
                   selectedChain: selectedChain,
                   address: address,
@@ -284,7 +290,7 @@ function CardNft({
                     return;
                   }
 
-                  if (!rentMarketContract || !dataSigner) {
+                  if (!rentMarketContract || !dataWalletClient) {
                     console.error(
                       "rentMarketContract or signer is null or undefined."
                     );
@@ -295,7 +301,7 @@ function CardNft({
                   // console.log("nftData.rentFee: ", nftData.rentFee);
                   // console.log("nftData.tokenId: ", nftData.tokenId);
                   // console.log("rentMarketContract: ", rentMarketContract);
-                  // console.log("dataSigner: ", dataSigner);
+                  // console.log("dataWalletClient: ", dataWalletClient);
                   // console.log(
                   //   "process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS: ",
                   //   process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS
@@ -320,7 +326,7 @@ function CardNft({
 
                     // console.log("tx: ", tx);
                     // const tx = await rentMarketContract
-                    //   .connect(dataSigner)
+                    //   .connect(dataWalletClient)
                     //   .rentNFT(
                     //     process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
                     //     nftData.tokenId,

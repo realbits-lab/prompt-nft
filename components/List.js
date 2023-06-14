@@ -1,18 +1,16 @@
 import React from "react";
-import {
-  Web3Button,
-  Web3NetworkSwitch,
-  useWeb3ModalNetwork,
-} from "@web3modal/react";
+import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 import {
   useAccount,
-  useSigner,
-  useContract,
+  useNetwork,
+  useWalletClient,
   useContractRead,
   useSignTypedData,
   useContractEvent,
 } from "wagmi";
+import { getContract } from "wagmi/actions";
 import useSWR from "swr";
+import dynamic from "next/dynamic";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -20,11 +18,8 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
-import ListImage from "@/components/ListImage";
 import CarouselImage from "@/components/CarouselImage";
-import ListNft from "@/components/ListNft";
 import CarouselNft from "@/components/CarouselNft";
-import DrawImage from "@/components/DrawImage";
 import ListOwn from "@/components/ListOwn";
 import ListRent from "@/components/ListRent";
 import ThemePage from "@/components/ThemePage";
@@ -32,6 +27,9 @@ import fetchJson from "@/lib/fetchJson";
 import { getChainId, isWalletConnected } from "@/lib/util";
 import promptNFTABI from "@/contracts/promptNFT.json";
 import rentmarketABI from "@/contracts/rentMarket.json";
+const DrawImage = dynamic(() => import("./DrawImage"), {
+  ssr: false,
+});
 
 function List({ mode, updated, setNewImageCountFunc }) {
   // console.log("call List()");
@@ -44,8 +42,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
   const IMAGE_ALL_API_URL = "/api/all";
 
   //* Image refresh interval time by milli-second unit.
-  // const IMAGE_REFRESH_INTERVAL_TIME = 60000;
-  const IMAGE_REFRESH_INTERVAL_TIME = 1000;
+  const IMAGE_REFRESH_INTERVAL_TIME = 60000;
 
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const RENT_MARKET_CONTRACT_ADDRES =
@@ -61,30 +58,42 @@ function List({ mode, updated, setNewImageCountFunc }) {
   const imageFetchFinished = React.useRef(false);
 
   //*---------------------------------------------------------------------------
-  //* Define hook variables.
+  //* Wagmi and Web3Modal hook.
   //*---------------------------------------------------------------------------
-  const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
+  //* Handle a new useNetwork instead of useWeb3ModalNetwork hook.
+  const { chains, chain: selectedChain } = useNetwork();
   // console.log("selectedChain: ", selectedChain);
+  // console.log("chains: ", chains);
+
   const { address, isConnected } = useAccount();
   // console.log("address: ", address);
   // console.log("isConnected: ", isConnected);
+
   const {
-    data: dataSigner,
-    isError: isErrorSigner,
-    isLoading: isLoadingSigner,
-  } = useSigner();
-  // console.log("dataSigner: ", dataSigner);
-  // console.log("isError: ", isError);
-  // console.log("isLoading: ", isLoading);
-  const promptNftContract = useContract({
-    address: PROMPT_NFT_CONTRACT_ADDRESS,
-    abi: promptNFTABI["abi"],
-  });
+    data: dataWalletClient,
+    isError: isErrorWalletClient,
+    isLoading: isLoadingWalletClient,
+  } = useWalletClient();
+  // console.log("dataWalletClient: ", dataWalletClient);
+
+  //* promptNftContract is used for useSWR params, so use useMemo.
+  const promptNftContract = React.useMemo(
+    () =>
+      getContract({
+        address: PROMPT_NFT_CONTRACT_ADDRESS,
+        abi: promptNFTABI["abi"],
+      }),
+    [PROMPT_NFT_CONTRACT_ADDRESS, promptNFTABI["abi"]]
+  );
   // console.log("promptNftContract: ", promptNftContract);
-  const rentMarketContract = useContract({
-    address: RENT_MARKET_CONTRACT_ADDRES,
-    abi: rentmarketABI["abi"],
-  });
+  const rentMarketContract = React.useMemo(
+    () =>
+      getContract({
+        address: RENT_MARKET_CONTRACT_ADDRES,
+        abi: rentmarketABI["abi"],
+      }),
+    [RENT_MARKET_CONTRACT_ADDRES, rentmarketABI["abi"]]
+  );
   // console.log("rentMarketContract: ", rentMarketContract);
 
   //* Listen contract event.
@@ -160,16 +169,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
   // console.log("isValidatingImage: ", isValidatingImage);
 
   //* Get all register data array.
-  // const {
-  //   data: swrDataRegisterData,
-  //   error: errorNft,
-  //   isLoading: isLoadingNft,
-  //   isValidating: isValidatingNft,
-  // } = useSWR({
-  //   command: "getAllRegisterData",
-  //   rentMarketContract: rentMarketContract,
-  //   signer: dataSigner,
-  // });
   const {
     data: swrDataRegisterData,
     isError: swrErrorRegisterData,
@@ -180,7 +179,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
     functionName: "getAllRegisterData",
-    cacheOnBlock: true,
+    // cacheOnBlock: true,
     // watch: true,
     onSuccess(data) {
       // console.log("call onSuccess()");
@@ -197,32 +196,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
     },
   });
 
-  //* Get all my own data array.
-  const {
-    data: dataOwn,
-    error: errorOwn,
-    isLoading: isLoadingOwn,
-    isValidating: isValidatingOwn,
-  } = useSWR({
-    command: "getAllMyOwnData",
-    promptNftContract: promptNftContract,
-    signer: dataSigner,
-    ownerAddress: address,
-  });
-  // console.log("dataOwn: ", dataOwn);
-
   //* Get all my rent data array.
-  // const {
-  //   data: dataRent,
-  //   error: errorRent,
-  //   isLoading: isLoadingRent,
-  //   isValidating: isValidatingRent,
-  // } = useSWR({
-  //   command: "getAllMyRentData",
-  //   rentMarketContract: rentMarketContract,
-  //   signer: dataSigner,
-  //   renterAddress: address,
-  // });
   const {
     data: swrDataRentData,
     isError: swrErrorRentData,
@@ -234,7 +208,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
     functionName: "getAllRentData",
-    cacheOnBlock: true,
+    // cacheOnBlock: true,
     // watch: true,
     onSuccess(data) {
       // console.log("call onSuccess()");
@@ -262,9 +236,28 @@ function List({ mode, updated, setNewImageCountFunc }) {
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
     functionName: "getAllCollection",
-    cacheOnBlock: true,
+    // cacheOnBlock: true,
     // watch: true,
   });
+
+  //* Get all my own data array.
+  const {
+    data: dataOwn,
+    error: errorOwn,
+    isLoading: isLoadingOwn,
+    isValidating: isValidatingOwn,
+  } = useSWR(
+    {
+      command: "getAllMyOwnData",
+      promptNftContract: promptNftContract,
+      ownerAddress: address,
+    },
+    fetchJson,
+    {
+      refreshInterval: IMAGE_REFRESH_INTERVAL_TIME,
+    }
+  );
+  // console.log("dataOwn: ", dataOwn);
 
   //*---------------------------------------------------------------------------
   //* Define state data.
@@ -326,22 +319,11 @@ function List({ mode, updated, setNewImageCountFunc }) {
 
       initialize();
     },
-    [
-      selectedChain,
-      address,
-      dataSigner,
-      promptNftContract,
-      rentMarketContract,
-      swrDataRegisterData,
-      swrDataRentData,
-      swrDataCollection,
-      dataOwn,
-      dataImage,
-    ]
+    [dataOwn]
   );
 
   function initialize() {
-    // console.log("call useEffect()");
+    // console.log("call initialize()");
     // console.log("swrDataRegisterData: ", swrDataRegisterData);
     // console.log("swrErrorRegisterData: ", swrErrorRegisterData);
     // console.log("swrIsLoadingRegisterData: ", swrIsLoadingRegisterData);
@@ -351,6 +333,8 @@ function List({ mode, updated, setNewImageCountFunc }) {
     // console.log("dataOwn: ", dataOwn);
     // console.log("dataRent: ", dataRent);
 
+    //* Find the register data in registered collection.
+    //* After registering data, even though collection is removed, register data remains.
     let registerData;
     if (swrDataRegisterData && swrDataCollection) {
       registerData = swrDataRegisterData.filter(function (registerData) {
@@ -358,22 +342,27 @@ function List({ mode, updated, setNewImageCountFunc }) {
           return collection.collectionAddress === registerData.nftAddress;
         });
       });
-      // console.log("registerData: ", registerData);
     }
+    // console.log("registerData: ", registerData);
 
+    //* Find the own nft from registered nft data.
+    // console.log("PROMPT_NFT_CONTRACT_ADDRESS: ", PROMPT_NFT_CONTRACT_ADDRESS);
     let ownDataArray;
-    //* Set all own data array.
     if (registerData && dataOwn) {
       ownDataArray = registerData.filter(function (nft) {
         // console.log("nft: ", nft);
         // console.log("nft.tokenId: ", nft.tokenId);
         return dataOwn.some(function (element) {
-          // console.log("element.tokenId: ", element.tokenId);
+          // console.log("element: ", element);
           return (
-            nft.tokenId.eq(element.tokenId) &&
-            nft.nftAddress.localeCompare(promptNftContract.address, undefined, {
-              sensitivity: "accent",
-            }) === 0
+            nft.tokenId === element.tokenId &&
+            nft.nftAddress.localeCompare(
+              PROMPT_NFT_CONTRACT_ADDRESS,
+              undefined,
+              {
+                sensitivity: "accent",
+              }
+            ) === 0
           );
         });
       });
@@ -383,6 +372,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
 
     //* Set all rent data.
     let allMyRentDataArray;
+    // console.log("swrDataRentData: ", swrDataRentData);
     if (swrDataRentData) {
       // console.log("address: ", address);
       allMyRentDataArray = swrDataRentData.filter(
@@ -407,9 +397,9 @@ function List({ mode, updated, setNewImageCountFunc }) {
         if (ownDataArray) {
           const someResult = ownDataArray.some(function (ownData) {
             return (
-              ownData.tokenId.eq(nft.tokenId) &&
+              ownData.tokenId === nft.tokenId &&
               ownData.nftAddress.localeCompare(
-                promptNftContract.address,
+                PROMPT_NFT_CONTRACT_ADDRESS,
                 undefined,
                 {
                   sensitivity: "accent",
@@ -429,7 +419,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
           const someResult = allMyRentDataArray.some(function (rentData) {
             // console.log("rentData: ", rentData);
             return (
-              rentData.tokenId.eq(nft.tokenId) &&
+              rentData.tokenId === nft.tokenId &&
               rentData.renteeAddress.localeCompare(address, undefined, {
                 sensitivity: "accent",
               }) === 0
@@ -456,8 +446,8 @@ function List({ mode, updated, setNewImageCountFunc }) {
         };
       });
 
-      setAllNftDataArray(dataNftWithStatusArray.reverse());
       // console.log("dataNftWithStatusArray: ", dataNftWithStatusArray);
+      setAllNftDataArray(dataNftWithStatusArray.reverse());
     }
   }
 
@@ -520,7 +510,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
         ) : mode === "image" ? (
           <div>
             <CarouselImage data={dataImage} isLoading={isLoadingImage} />
-            {/* <ListImage data={dataImage} isLoading={isLoadingImage} /> */}
           </div>
         ) : mode === "nft" ? (
           <div>
@@ -531,23 +520,13 @@ function List({ mode, updated, setNewImageCountFunc }) {
                 selectedChain={selectedChain}
                 address={address}
                 isConnected={isConnected}
-                dataSigner={dataSigner}
+                dataWalletClient={dataWalletClient}
                 promptNftContract={promptNftContract}
                 rentMarketContract={rentMarketContract}
                 data={allNftDataArray}
                 isLoading={swrIsLoadingRegisterData}
                 signTypedDataAsync={signTypedDataAsync}
               />
-              // <ListNft
-              //   selectedChain={selectedChain}
-              //   address={address}
-              //   isConnected={isConnected}
-              //   dataSigner={dataSigner}
-              //   promptNftContract={promptNftContract}
-              //   rentMarketContract={rentMarketContract}
-              //   data={allNftDataArray}
-              //   isLoading={swrIsLoadingRegisterData}
-              // />
             )}
           </div>
         ) : mode === "own" ? (
@@ -559,7 +538,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
                 selectedChain={selectedChain}
                 address={address}
                 isConnected={isConnected}
-                dataSigner={dataSigner}
+                dataWalletClient={dataWalletClient}
                 promptNftContract={promptNftContract}
                 rentMarketContract={rentMarketContract}
                 signTypedDataAsync={signTypedDataAsync}
@@ -577,7 +556,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
                 selectedChain={selectedChain}
                 address={address}
                 isConnected={isConnected}
-                dataSigner={dataSigner}
+                dataWalletClient={dataWalletClient}
                 promptNftContract={promptNftContract}
                 rentMarketContract={rentMarketContract}
                 signTypedDataAsync={signTypedDataAsync}

@@ -17,7 +17,7 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import CardNft from "./CardNft";
 
 function CarouselNft({
-  dataSigner,
+  dataWalletClient,
   rentMarketContract,
   promptNftContract,
   selectedChain,
@@ -84,14 +84,14 @@ function CarouselNft({
         alignItems="center"
         minHeight="100vh"
       >
-        <Grid container spacing={2} justifyContent="space-around" padding={2}>
+        {/* <Grid container spacing={2} justifyContent="space-around" padding={2}>
           <Grid item>
             <Web3Button />
           </Grid>
           <Grid item>
             <Web3NetworkSwitch />
           </Grid>
-        </Grid>
+        </Grid> */}
         <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
           <CardMedia component="img" image={PLACEHOLDER_IMAGE_URL} />
           <CardContent
@@ -145,7 +145,7 @@ function CarouselNft({
                   {Math.abs(activeStep - index) <= 2 ? (
                     <CardNft
                       nftData={nftData}
-                      dataSigner={dataSigner}
+                      dataWalletClient={dataWalletClient}
                       address={address}
                       isConnected={isConnected}
                       rentMarketContract={rentMarketContract}

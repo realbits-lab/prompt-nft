@@ -1,4 +1,5 @@
 import React from "react";
+import dynamic from "next/dynamic";
 import Router, { useRouter } from "next/router";
 import PropTypes from "prop-types";
 import { useRecoilStateLoadable, useRecoilValueLoadable } from "recoil";
@@ -6,7 +7,6 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
 import Slide from "@mui/material/Slide";
 import Badge from "@mui/material/Badge";
 import Button from "@mui/material/Button";
@@ -17,9 +17,12 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import Typography from "@mui/material/Typography";
 import MenuIcon from "@mui/icons-material/Menu";
 import List from "@/components/List";
+const User = dynamic(() => import("../../components/User"), {
+  ssr: false,
+});
+import useUser from "@/lib/useUser";
 import {
   RBSnackbar,
   AlertSeverity,
@@ -28,6 +31,7 @@ import {
   writeDialogMessageState,
   readDialogMessageState,
 } from "@/lib/util";
+import fetchJson, { FetchError } from "@/lib/fetchJson";
 
 function HideOnScroll(props) {
   const { children, window } = props;
@@ -52,6 +56,8 @@ HideOnScroll.propTypes = {
 
 export default function ListPage(props) {
   // console.log("call ListPage()");
+
+  const DEFAULT_MENU = "draw";
   const router = useRouter();
   const queryMode = router.query.mode;
   const queryUpdated = router.query.updated;
@@ -59,7 +65,8 @@ export default function ListPage(props) {
   // console.log("queryUpdated: ", queryUpdated);
   // console.log("queryMode: ", queryMode);
 
-  const [mode, setMode] = React.useState("image");
+  const { user, mutateUser } = useUser();
+  const [mode, setMode] = React.useState(DEFAULT_MENU);
   const [newImageCount, setNewImageCount] = React.useState(0);
   const BUTTON_BORDER_RADIUS = 25;
   const SELECTED_BUTTON_BACKGROUND_COLOR = "#21b6ae";
@@ -144,7 +151,7 @@ export default function ListPage(props) {
         setMode(queryMode[0]);
       } else {
         // console.log("setMode(image)");
-        setMode("image");
+        setMode(DEFAULT_MENU);
       }
     },
     [queryMode]
@@ -162,12 +169,12 @@ export default function ListPage(props) {
         }}
         sx={{ my: 2, color: "white" }}
         onClick={(e) => {
-          console.log("call onClick()");
-          console.log("buttonMode: ", buttonMode);
-          console.log("newImageCount: ", newImageCount);
+          // console.log("call onClick()");
+          // console.log("buttonMode: ", buttonMode);
+          // console.log("newImageCount: ", newImageCount);
 
           if (buttonMode === "image" && newImageCount > 0) {
-            console.log("route to /list/image?updated=true");
+            // console.log("route to /list/image?updated=true");
             Router.reload("/list/image?updated=true");
           }
 
@@ -180,8 +187,8 @@ export default function ListPage(props) {
   }
 
   function setNewBadgeOnImageAppBarButton({ newImageCount }) {
-    console.log("call setNewBadgeOnImageAppBarButton()");
-    console.log("newImageCount: ", newImageCount);
+    // console.log("call setNewBadgeOnImageAppBarButton()");
+    // console.log("newImageCount: ", newImageCount);
     setNewImageCount(newImageCount);
   }
 
@@ -203,26 +210,31 @@ export default function ListPage(props) {
                 <AppBarButton buttonMode="image" />
               </Badge>
               <AppBarButton buttonMode="nft" />
-              {/* <AppBarButton buttonMode="own" />
-              <AppBarButton buttonMode="rent" /> */}
             </Box>
 
             <Box>
-              <Button
-                id="basic-button"
-                aria-controls={openSettingMenu ? "basic-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={openSettingMenu ? "true" : undefined}
-                onClick={handleSettingMenuOpen}
-                style={{
-                  borderRadius: BUTTON_BORDER_RADIUS,
-                  backgroundColor: null,
-                  padding: SELECTED_BUTTON_PADDING,
-                }}
-                sx={{ my: 2, color: "white" }}
-              >
-                <MenuIcon />
-              </Button>
+              {(user === undefined || user.isLoggedIn === false) && <User />}
+              {user !== undefined && user.isLoggedIn === true && (
+                <Button
+                  id="basic-button"
+                  aria-controls={openSettingMenu ? "basic-menu" : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={openSettingMenu ? "true" : undefined}
+                  onClick={(event) => {
+                    if (user !== undefined && user.isLoggedIn === true) {
+                      handleSettingMenuOpen(event);
+                    }
+                  }}
+                  style={{
+                    borderRadius: BUTTON_BORDER_RADIUS,
+                    backgroundColor: null,
+                    padding: SELECTED_BUTTON_PADDING,
+                  }}
+                  sx={{ my: 2, color: "white" }}
+                >
+                  <MenuIcon />
+                </Button>
+              )}
               <Menu
                 id="basic-menu"
                 anchorEl={settingMenuAnchorEl}
@@ -256,6 +268,29 @@ export default function ListPage(props) {
                 >
                   THEME
                 </MenuItem>
+                <MenuItem
+                  onClick={async () => {
+                    try {
+                      mutateUser(
+                        await fetchJson(
+                          { url: "/api/logout" },
+                          { method: "POST" }
+                        ),
+                        false
+                      );
+                    } catch (error) {
+                      if (error instanceof FetchError) {
+                        console.error(error.data.message);
+                      } else {
+                        console.error("An unexpected error happened:", error);
+                      }
+                    }
+                    setMode("image");
+                    handleSettingMenuClose();
+                  }}
+                >
+                  LOGOUT
+                </MenuItem>
               </Menu>
             </Box>
           </Toolbar>
@@ -263,15 +298,13 @@ export default function ListPage(props) {
       </HideOnScroll>
 
       {/*//*Image content part. */}
-      <Container>
-        <Box sx={{ my: 2 }}>
-          <List
-            mode={mode}
-            updated={queryUpdated}
-            setNewImageCountFunc={setNewBadgeOnImageAppBarButton}
-          />
-        </Box>
-      </Container>
+      <Box sx={{ my: 2 }}>
+        <List
+          mode={mode}
+          updated={queryUpdated}
+          setNewImageCountFunc={setNewBadgeOnImageAppBarButton}
+        />
+      </Box>
 
       {/*//*Toast snackbar. */}
       <RBSnackbar

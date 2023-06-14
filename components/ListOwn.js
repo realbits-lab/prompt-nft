@@ -14,14 +14,16 @@ export default function ListOwn({
   selectedChain,
   address,
   isConnected,
-  dataSigner,
+  dataWalletClient,
   promptNftContract,
   rentMarketContract,
   signTypedDataAsync,
   data,
   isLoading,
 }) {
-  // console.log("call OwnCardList()");
+  // console.log("call ListOwn()");
+  // console.log("isLoading: ", isLoading);
+  // console.log("data: ", data);
   // console.log("allMyOwnDataCount: ", allMyOwnDataCount);
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const NUMBER_PER_PAGE = 1;
@@ -63,14 +65,14 @@ export default function ListOwn({
         alignItems="center"
         minHeight="100vh"
       >
-        <Grid container spacing={2} justifyContent="space-around" padding={2}>
+        {/* <Grid container spacing={2} justifyContent="space-around" padding={2}>
           <Grid item>
             <Web3Button />
           </Grid>
           <Grid item>
             <Web3NetworkSwitch />
           </Grid>
-        </Grid>
+        </Grid> */}
         <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
           <CardMedia component="img" image={PLACEHOLDER_IMAGE_URL} />
           <CardContent
@@ -121,7 +123,7 @@ export default function ListOwn({
                   <CardOwn
                     nftData={nftData}
                     key={idx}
-                    dataSigner={dataSigner}
+                    dataWalletClient={dataWalletClient}
                     address={address}
                     isConnected={isConnected}
                     rentMarketContract={rentMarketContract}
@@ -154,7 +156,7 @@ export default function ListOwn({
         </div>
       );
     },
-    [data, pageIndex]
+    [data, pageIndex, isLoading]
   );
 
   return <OwnCardList />;

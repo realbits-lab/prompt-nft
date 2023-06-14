@@ -1,7 +1,6 @@
 import * as React from "react";
 import { ethers } from "ethers";
-import { useWeb3ModalNetwork } from "@web3modal/react";
-import { useAccount, useSigner, useContract } from "wagmi";
+import { useAccount, useSigner, useContract, useNetwork } from "wagmi";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { isMobile } from "react-device-detect";
 import { encrypt } from "@metamask/eth-sig-util";
@@ -19,8 +18,9 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
-import { isWalletConnected } from "../lib/util";
-import fetchJson from "../lib/fetchJson";
+
+import { isWalletConnected } from "@/lib/util";
+import fetchJson from "@/lib/fetchJson";
 
 const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
   ssr: false,
@@ -38,7 +38,7 @@ function Mint({
   //*----------------------------------------------------------------------------
   const DEFAULT_MODEL_NAME = "STABLE_DIFFUSION";
   const CARD_MARGIN_BOTTOM = 500;
-  const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
+  const { chains, chain: selectedChain } = useNetwork();
   // console.log("selectedChain: ", selectedChain);
   const { address, isConnected } = useAccount();
   // console.log("address: ", address);

@@ -21,7 +21,7 @@ import useUser from "../lib/useUser";
 
 function CardRent({
   nftData,
-  dataSigner,
+  dataWalletClient,
   selectedChain,
   address,
   isConnected,
@@ -56,7 +56,7 @@ function CardRent({
   } = useSWR({
     command: "getMetadata",
     promptNftContract: promptNftContract,
-    signer: dataSigner,
+    signer: dataWalletClient,
     tokenId: nftData.tokenId,
   });
   const { user, mutateUser } = useUser();
@@ -158,7 +158,7 @@ function CardRent({
                 user: user,
                 nftData: nftData,
                 promptNftContract: promptNftContract,
-                dataSigner: dataSigner,
+                dataWalletClient: dataWalletClient,
                 isConnected: isConnected,
                 selectedChain: selectedChain,
                 address: address,
