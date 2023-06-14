@@ -1,4 +1,7 @@
-export default async function handler(req, res) {
+import { withIronSessionApiRoute } from "iron-session/next";
+import { sessionOptions } from "@/lib/session";
+
+async function handler(req, res) {
   console.log("call /api/draw");
 
   //* Stable diffusion api url.
@@ -11,7 +14,11 @@ export default async function handler(req, res) {
     return;
   }
 
-  //* TODO: Check user's login.
+  //* Check if already logined.
+  if (!req.session.user || req.session.user.isLoggedIn !== true) {
+    return res.status(500).json({ data: "nok" });
+  }
+
   //* Required fields in body: prompt, imageUrl
   const { prompt, negativePrompt } = req.body;
   console.log("prompt: ", prompt);
@@ -77,3 +84,5 @@ export default async function handler(req, res) {
     .status(200)
     .json({ imageUrl: jsonResponse.output, meta: jsonResponse.meta });
 }
+
+export default withIronSessionApiRoute(handler, sessionOptions);

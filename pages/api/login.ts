@@ -3,8 +3,6 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { sessionOptions } from "@/lib/session";
 import { getChainId } from "@/lib/util";
 import type { User } from "@/pages/api/user";
-
-const ethUtil = require("ethereumjs-util");
 const sigUtil = require("@metamask/eth-sig-util");
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
