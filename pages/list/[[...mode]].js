@@ -212,26 +212,28 @@ export default function ListPage(props) {
             </Box>
 
             <Box>
-              <Button
-                id="basic-button"
-                aria-controls={openSettingMenu ? "basic-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={openSettingMenu ? "true" : undefined}
-                onClick={() => {
-                  if (user !== undefined && user.isLoggedIn === true) {
-                    handleSettingMenuOpen();
-                  }
-                }}
-                style={{
-                  borderRadius: BUTTON_BORDER_RADIUS,
-                  backgroundColor: null,
-                  padding: SELECTED_BUTTON_PADDING,
-                }}
-                sx={{ my: 2, color: "white" }}
-              >
-                {(user === undefined || user.isLoggedIn === false) && <User />}
-                {user !== undefined && user.isLoggedIn === true && <MenuIcon />}
-              </Button>
+              {(user === undefined || user.isLoggedIn === false) && <User />}
+              {user !== undefined && user.isLoggedIn === true && (
+                <Button
+                  id="basic-button"
+                  aria-controls={openSettingMenu ? "basic-menu" : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={openSettingMenu ? "true" : undefined}
+                  onClick={() => {
+                    if (user !== undefined && user.isLoggedIn === true) {
+                      handleSettingMenuOpen();
+                    }
+                  }}
+                  style={{
+                    borderRadius: BUTTON_BORDER_RADIUS,
+                    backgroundColor: null,
+                    padding: SELECTED_BUTTON_PADDING,
+                  }}
+                  sx={{ my: 2, color: "white" }}
+                >
+                  <MenuIcon />
+                </Button>
+              )}
               <Menu
                 id="basic-menu"
                 anchorEl={settingMenuAnchorEl}
