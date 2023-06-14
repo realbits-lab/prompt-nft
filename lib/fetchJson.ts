@@ -54,13 +54,13 @@ async function getMetadata({
 
   try {
     const tokenURI = await promptNftContract.read.tokenURI([tokenId]);
-    console.log("tokenURI: ", tokenURI);
+    // console.log("tokenURI: ", tokenURI);
 
     //* Get token metadata from token uri.
     const fetchResult = await fetch(tokenURI);
     const tokenMetadata = await fetchResult.blob();
     const metadataJsonTextData = await tokenMetadata.text();
-    console.log("metadataJsonTextData: ", metadataJsonTextData);
+    // console.log("metadataJsonTextData: ", metadataJsonTextData);
     const metadataJsonData = JSON.parse(metadataJsonTextData);
 
     return metadataJsonData;
@@ -216,7 +216,7 @@ export default async function fetchJson<JSON = unknown>(
   },
   init?: RequestInit
 ): Promise<any> {
-  console.log("call fetchJson()");
+  // console.log("call fetchJson()");
   // console.log("url: ", url);
   // console.log("type: ", type);
   // console.log("contract: ", contract);
@@ -238,7 +238,7 @@ export default async function fetchJson<JSON = unknown>(
           promptNftContract: promptNftContract,
           ownerAddress: ownerAddress,
         });
-        console.log("getAllMyOwnDataResult: ", getAllMyOwnDataResult);
+        // console.log("getAllMyOwnDataResult: ", getAllMyOwnDataResult);
         return getAllMyOwnDataResult;
 
       case "getAllMyRentData":

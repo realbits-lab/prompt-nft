@@ -1,4 +1,5 @@
 import React from "react";
+import dynamic from "next/dynamic";
 import Router, { useRouter } from "next/router";
 import PropTypes from "prop-types";
 import { useRecoilStateLoadable, useRecoilValueLoadable } from "recoil";
@@ -6,7 +7,6 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
 import Slide from "@mui/material/Slide";
 import Badge from "@mui/material/Badge";
 import Button from "@mui/material/Button";
@@ -17,9 +17,12 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import Typography from "@mui/material/Typography";
 import MenuIcon from "@mui/icons-material/Menu";
 import List from "@/components/List";
+const User = dynamic(() => import("../../components/User"), {
+  ssr: false,
+});
+import useUser from "@/lib/useUser";
 import {
   RBSnackbar,
   AlertSeverity,
@@ -51,7 +54,7 @@ HideOnScroll.propTypes = {
 };
 
 export default function ListPage(props) {
-  console.log("call ListPage()");
+  // console.log("call ListPage()");
 
   const DEFAULT_MENU = "draw";
   const router = useRouter();
@@ -61,6 +64,7 @@ export default function ListPage(props) {
   // console.log("queryUpdated: ", queryUpdated);
   // console.log("queryMode: ", queryMode);
 
+  const { user, mutateUser } = useUser();
   const [mode, setMode] = React.useState(DEFAULT_MENU);
   const [newImageCount, setNewImageCount] = React.useState(0);
   const BUTTON_BORDER_RADIUS = 25;
@@ -133,7 +137,7 @@ export default function ListPage(props) {
 
   React.useEffect(
     function () {
-      console.log("call useEffect()");
+      // console.log("call useEffect()");
       // console.log("readDialogMessage: ", readDialogMessage);
       // console.log("queryMode: ", queryMode);
 
@@ -164,12 +168,12 @@ export default function ListPage(props) {
         }}
         sx={{ my: 2, color: "white" }}
         onClick={(e) => {
-          console.log("call onClick()");
-          console.log("buttonMode: ", buttonMode);
-          console.log("newImageCount: ", newImageCount);
+          // console.log("call onClick()");
+          // console.log("buttonMode: ", buttonMode);
+          // console.log("newImageCount: ", newImageCount);
 
           if (buttonMode === "image" && newImageCount > 0) {
-            console.log("route to /list/image?updated=true");
+            // console.log("route to /list/image?updated=true");
             Router.reload("/list/image?updated=true");
           }
 
@@ -182,8 +186,8 @@ export default function ListPage(props) {
   }
 
   function setNewBadgeOnImageAppBarButton({ newImageCount }) {
-    console.log("call setNewBadgeOnImageAppBarButton()");
-    console.log("newImageCount: ", newImageCount);
+    // console.log("call setNewBadgeOnImageAppBarButton()");
+    // console.log("newImageCount: ", newImageCount);
     setNewImageCount(newImageCount);
   }
 
@@ -213,7 +217,11 @@ export default function ListPage(props) {
                 aria-controls={openSettingMenu ? "basic-menu" : undefined}
                 aria-haspopup="true"
                 aria-expanded={openSettingMenu ? "true" : undefined}
-                onClick={handleSettingMenuOpen}
+                onClick={() => {
+                  if (user !== undefined && user.isLoggedIn === true) {
+                    handleSettingMenuOpen();
+                  }
+                }}
                 style={{
                   borderRadius: BUTTON_BORDER_RADIUS,
                   backgroundColor: null,
@@ -221,7 +229,8 @@ export default function ListPage(props) {
                 }}
                 sx={{ my: 2, color: "white" }}
               >
-                <MenuIcon />
+                {(user === undefined || user.isLoggedIn === false) && <User />}
+                {user !== undefined && user.isLoggedIn === true && <MenuIcon />}
               </Button>
               <Menu
                 id="basic-menu"

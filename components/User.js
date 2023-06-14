@@ -1,6 +1,5 @@
-import { useAccount, useSigner, useNetwork } from "wagmi";
+import { useAccount, useWalletClient, useNetwork } from "wagmi";
 import Button from "@mui/material/Button";
-
 import useUser from "@/lib/useUser";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
 
@@ -13,8 +12,8 @@ export default function User() {
   const { address, isConnected } = useAccount();
   // console.log("address: ", address);
   // console.log("isConnected: ", isConnected);
-  const { data: signer, isError, isLoading } = useSigner();
-  // console.log("signer: ", signer);
+  const { data: walletClient } = useWalletClient();
+  // console.log("walletClient: ", walletClient);
   // console.log("isError: ", isError);
   // console.log("isLoading: ", isLoading);
   const { user, mutateUser } = useUser();
@@ -119,7 +118,7 @@ export default function User() {
   };
 
   return (
-    <div>
+    <>
       {(user === undefined || user.isLoggedIn === false) && (
         <Button
           sx={{ my: 2, color: "white", display: "block" }}
@@ -140,6 +139,6 @@ export default function User() {
           Logout
         </Button>
       )}
-    </div>
+    </>
   );
 }
