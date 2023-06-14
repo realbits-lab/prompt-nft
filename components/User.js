@@ -1,5 +1,6 @@
 import { useAccount, useWalletClient, useNetwork } from "wagmi";
 import Button from "@mui/material/Button";
+import { Typography } from "@mui/material";
 import useUser from "@/lib/useUser";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
 
@@ -25,16 +26,8 @@ export default function User() {
     const publicAddress = address.toLowerCase();
     // console.log("publicAddress: ", publicAddress);
 
-    // Check user with public address and receive nonce as to user.
-    // If user does not exist, back-end would add user data.
-    const jsonResult = await fetchJson({ url: `/api/nonce/${publicAddress}` });
-    // console.log("jsonResult: ", jsonResult);
-
     // Popup MetaMask confirmation modal to sign message with nonce data.
-    const signMessageResult = await handleSignMessage({
-      publicAddress: publicAddress,
-      nonce: jsonResult.data.nonce,
-    });
+    const signMessageResult = await handleSignMessage();
     // console.log("signMessageResult: ", signMessageResult);
 
     // Send signature to back-end on the /auth route.
@@ -44,8 +37,7 @@ export default function User() {
     });
   };
 
-  const handleSignMessage = async ({ publicAddress, nonce }) => {
-    // console.log("selectedChain.id: ", selectedChain.id);
+  const handleSignMessage = async () => {
     const msgParams = JSON.stringify({
       domain: {
         chainId: selectedChain.id,
@@ -54,7 +46,7 @@ export default function User() {
 
       // Defining the message signing data content.
       message: {
-        contents: `Login with ${nonce} nonce number.`,
+        contents: process.env.NEXT_PUBLIC_LOGIN_SIGN_MESSAGE,
       },
       // Refers to the keys of the *types* object below.
       primaryType: "Login",
@@ -120,24 +112,24 @@ export default function User() {
   return (
     <>
       {(user === undefined || user.isLoggedIn === false) && (
-        <Button
+        <Typography
           sx={{ my: 2, color: "white", display: "block" }}
           onClick={async () => {
             await handleLoginClick();
           }}
         >
           Login
-        </Button>
+        </Typography>
       )}
       {user !== undefined && user.isLoggedIn === true && (
-        <Button
+        <Typography
           sx={{ my: 2, color: "white", display: "block" }}
           onClick={async () => {
             await handleLogoutClick();
           }}
         >
           Logout
-        </Button>
+        </Typography>
       )}
     </>
   );

@@ -1,14 +1,11 @@
 import { withIronSessionApiRoute } from "iron-session/next";
 import { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient } from "@prisma/client";
-
 import { sessionOptions } from "@/lib/session";
 import { getChainId } from "@/lib/util";
 import type { User } from "@/pages/api/user";
 
 const ethUtil = require("ethereumjs-util");
 const sigUtil = require("@metamask/eth-sig-util");
-const prisma = new PrismaClient();
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log("call /api/login");
@@ -22,32 +19,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (
     req.session.user &&
     req.session.user.isLoggedIn === true &&
-    req.session.user.publicAddress.localeCompare(publicAddress, undefined, {
-      sensitivity: "accent",
-    }) === 0
+    req.session.user.publicAddress.toLowerCase() === publicAddress.toLowerCase()
   ) {
     return res.status(200).json(req.session.user);
   }
-
-  // let findUniqueResult;
-  // try {
-  //   findUniqueResult = await prisma.user.findUnique({
-  //     where: {
-  //       publicAddress: publicAddress,
-  //     },
-  //   });
-  // } catch (error) {
-  //   return res.status(500).json({ message: (error as Error).message });
-  // }
-  // console.log("findUniqueResult: ", findUniqueResult);
-
-  // if (!findUniqueResult) {
-  //   console.log("Can't find unique public address: ", publicAddress);
-  //   //* : Handle error.
-  //   return res
-  //     .status(500)
-  //     .json({ message: `${publicAddress} account is not registered.` });
-  // }
 
   const chainId = getChainId({
     chainName: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
@@ -84,7 +59,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     recovered = sigUtil.recoverTypedSignature({
       data: JSON.parse(msgParams),
       signature: signature,
-      version: sigUtil.SignTypedDataVersion.V3,
+      version: sigUtil.SignTypedDataVersion.V4,
     });
   } catch (error) {
     console.error(error);
@@ -93,11 +68,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   // console.log("recovered: ", recovered);
   // console.log("publicAddress: ", publicAddress);
 
-  if (
-    ethUtil.toChecksumAddress(recovered) ===
-    ethUtil.toChecksumAddress(publicAddress)
-  ) {
-    console.error("Recovered address is the same as input address.");
+  if (recovered.toLowerCase() === publicAddress.toLowerCase()) {
+    // console.log("Recovered address is the same as input address.");
     const user = { isLoggedIn: true, publicAddress: publicAddress } as User;
     req.session.user = user;
     await req.session.save();

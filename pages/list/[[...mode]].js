@@ -31,6 +31,7 @@ import {
   writeDialogMessageState,
   readDialogMessageState,
 } from "@/lib/util";
+import fetchJson, { FetchError } from "@/lib/fetchJson";
 
 function HideOnScroll(props) {
   const { children, window } = props;
@@ -219,9 +220,9 @@ export default function ListPage(props) {
                   aria-controls={openSettingMenu ? "basic-menu" : undefined}
                   aria-haspopup="true"
                   aria-expanded={openSettingMenu ? "true" : undefined}
-                  onClick={() => {
+                  onClick={(event) => {
                     if (user !== undefined && user.isLoggedIn === true) {
-                      handleSettingMenuOpen();
+                      handleSettingMenuOpen(event);
                     }
                   }}
                   style={{
@@ -266,6 +267,29 @@ export default function ListPage(props) {
                   }}
                 >
                   THEME
+                </MenuItem>
+                <MenuItem
+                  onClick={async () => {
+                    try {
+                      mutateUser(
+                        await fetchJson(
+                          { url: "/api/logout" },
+                          { method: "POST" }
+                        ),
+                        false
+                      );
+                    } catch (error) {
+                      if (error instanceof FetchError) {
+                        console.error(error.data.message);
+                      } else {
+                        console.error("An unexpected error happened:", error);
+                      }
+                    }
+                    setMode("image");
+                    handleSettingMenuClose();
+                  }}
+                >
+                  LOGOUT
                 </MenuItem>
               </Menu>
             </Box>
