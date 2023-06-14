@@ -27,6 +27,7 @@ import Typography from "@mui/material/Typography";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import useUser from "@/lib/useUser";
 import { parseEther } from "viem";
+import moment from "moment";
 
 export default function DrawImage() {
   const DRAW_API_URL = "/api/draw";
@@ -58,6 +59,8 @@ export default function DrawImage() {
   const { address, isConnected } = useAccount();
   const [rentPaymentNft, setRentPaymentNft] = React.useState(false);
   const [paymentNftRentFee, setPaymentNftRentFee] = React.useState();
+  const [currentTimestamp, setCurrentTimestamp] = React.useState();
+  const [paymentNftRentEndTime, setPaymentNftRentEndTime] = React.useState();
 
   const {
     data: swrDataAllRentData,
@@ -217,6 +220,16 @@ export default function DrawImage() {
     return <Slide direction="up" ref={ref} {...props} />;
   });
 
+  React.useEffect(() => {
+    console.log("call useEffect()");
+    const countdown = setInterval(() => {
+      const timestamp = Math.floor(Date.now() / 1000);
+      console.log("timestamp: ", timestamp);
+      setCurrentTimestamp(timestamp);
+    }, 1000);
+    return () => clearInterval(countdown);
+  }, [currentTimestamp]);
+
   React.useEffect(
     function () {
       // console.log("call useEffect()");
@@ -224,12 +237,17 @@ export default function DrawImage() {
       //* Check user has rented the payment nft.
       if (swrDataAllRentData) {
         swrDataAllRentData.map(function (rentData) {
+          console.log("rentData: ", rentData);
           if (
             rentData.renteeAddress.toLowerCase() === address.toLowerCase() &&
             rentData.nftAddress.toLowerCase() ===
               PAYMENT_NFT_CONTRACT_ADDRESS.toLowerCase() &&
             Number(rentData.tokenId) === Number(PAYMENT_NFT_TOKEN_ID)
           ) {
+            const rentEndTime =
+              Number(rentData.rentStartTimestamp) +
+              Number(rentData.rentDuration);
+            setPaymentNftRentEndTime(rentEndTime);
             setRentPaymentNft(true);
           }
         });
@@ -423,6 +441,23 @@ export default function DrawImage() {
           display="flex"
           flexDirection="column"
         >
+          <Typography color="black">
+            {moment
+              .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+              .hours()}
+            :
+            {moment
+              .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+              .minutes()}
+            :
+            {moment
+              .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+              .seconds()}{" "}
+            /
+            {moment
+              .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+              .humanize()}
+          </Typography>
           <TextField
             required
             id="outlined-required"
