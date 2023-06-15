@@ -294,7 +294,7 @@ export default function DrawImage() {
 
     //* Get the stable diffusion api result by json.
     const jsonResponse = await fetchResponse.json();
-    // console.log("jsonResponse: ", jsonResponse);
+    console.log("jsonResponse: ", jsonResponse);
 
     //* TODO: Handle fetch result.
     if (jsonResponse.status === "processing") {
@@ -509,7 +509,7 @@ export default function DrawImage() {
           display="flex"
           flexDirection="column"
         >
-          {paymentNftRentEndTime && (
+          {paymentNftRentEndTime && currentTimestamp && (
             <Typography color="black">
               {moment
                 .duration((paymentNftRentEndTime - currentTimestamp) * 1000)

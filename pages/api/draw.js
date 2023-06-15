@@ -64,6 +64,7 @@ async function handler(req, res) {
     console.error(error);
     res.status(500).json({ message: "Response is not success." });
   }
+  console.log("jsonResponse: ", jsonResponse);
 
   //* Processing status case.
   // status: 'processing',
@@ -80,19 +81,17 @@ async function handler(req, res) {
       fetch_result: jsonResponse.fetch_result,
       id: jsonResponse.id,
     });
-  }
-
-  //* Success status case.
-  if (jsonResponse.status === "success") {
+  } else if (jsonResponse.status === "success") {
+    //* Success status case.
     res.status(200).json({
       status: jsonResponse.status,
       imageUrl: jsonResponse.output,
       meta: jsonResponse.meta,
     });
+  } else {
+    console.error("jsonResponse.status is not success.");
+    res.status(500).json({ message: "Response is not success." });
   }
-
-  console.error("jsonResponse.status is not success.");
-  res.status(500).json({ message: "Response is not success." });
 }
 
 export default withIronSessionApiRoute(handler, sessionOptions);
