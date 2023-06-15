@@ -48,7 +48,8 @@
     "recoil": "^0.7.6",
     "swr": "^2.1.5",
     "viem": "^0.3.37",
-    "wagmi": "^1.0.8"
+    "wagmi": "^1.0.8",
+    "web3": "^4.0.1"
   },
   "devDependencies": {
     "eslint": "^8.33.0",

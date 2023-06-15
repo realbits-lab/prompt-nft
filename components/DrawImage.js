@@ -637,6 +637,25 @@ export default function DrawImage() {
     );
   }
 
+  function buildPage() {
+    if (isConnected === false) {
+      return buildWalletConnectPage();
+    }
+
+    if (!swrDataAllRentData) {
+      return buildLoadingPage();
+    }
+
+    if (user === undefined || user.isLoggedIn === false) {
+      return buildWalletLoginPage();
+    }
+    if (user !== undefined && user.rentPaymentNft === true) {
+      return buildDrawPage();
+    } else {
+      return buildPaymentPage();
+    }
+  }
+
   return (
     <>
       <Grid
@@ -652,15 +671,7 @@ export default function DrawImage() {
           <Web3NetworkSwitch />
         </Grid>
       </Grid>
-      {isConnected === false
-        ? buildWalletConnectPage()
-        : user === undefined || user.isLoggedIn === false
-        ? buildWalletLoginPage()
-        : swrDataAllRentData
-        ? rentPaymentNft
-          ? buildDrawPage()
-          : buildPaymentPage()
-        : buildLoadingPage()}
+      {buildPage()}
     </>
   );
 }

@@ -12,7 +12,11 @@ async function handler(req, res) {
   }
 
   //* Check if already logined.
-  if (!req.session.user || req.session.user.isLoggedIn !== true) {
+  if (
+    !req.session.user ||
+    req.session.user.isLoggedIn !== true ||
+    req.session.user.rentPaymentNft !== true
+  ) {
     return res.status(500).json({ data: "nok" });
   }
 

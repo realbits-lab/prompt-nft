@@ -58,7 +58,7 @@ async function uploadMoimPost({ title, imageUrl }) {
 }
 
 async function handler(req, res) {
-  console.log("call /api/post");
+  // console.log("call /api/post");
 
   //* Check method error.
   if (req.method !== "POST") {
