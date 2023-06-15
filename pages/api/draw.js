@@ -6,7 +6,7 @@ async function handler(req, res) {
 
   //* Check method error.
   if (req.method !== "POST") {
-    console.log("req.method: ", req.method);
+    // console.log("req.method: ", req.method);
     res.status(500).json({ error: "Invalid method. Support only POST." });
     return;
   }
@@ -63,15 +63,15 @@ async function handler(req, res) {
   let jsonResponse;
   try {
     jsonResponse = await fetchResponse.json();
-    console.log("jsonResponse: ", jsonResponse);
+    // console.log("jsonResponse: ", jsonResponse);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Response is not success." });
   }
-  console.log("jsonResponse: ", jsonResponse);
+  // console.log("jsonResponse: ", jsonResponse);
 
   if (jsonResponse.status === "processing") {
-    //* TODO: Processing status case.
+    //* Processing status case.
     // status: 'processing',
     // tip: 'for faster speed, keep resolution upto 512x512',
     // eta: 20.5611160064,

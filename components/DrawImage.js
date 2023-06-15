@@ -32,6 +32,7 @@ import { sleep } from "@/lib/util";
 export default function DrawImage() {
   const DRAW_API_URL = "/api/draw";
   const POST_API_URL = "/api/post";
+  const UPLOAD_IMAGE_TO_S3_URL = "/api/upload-image-to-s3";
   const FETCH_RESULT_API_URL = "/api/fetch-result";
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const DISCORD_BOT_TOKEN = process.env.NEXT_PUBLIC_DISCORD_BOT_TOKEN;
@@ -294,9 +295,9 @@ export default function DrawImage() {
 
     //* Get the stable diffusion api result by json.
     const jsonResponse = await fetchResponse.json();
-    console.log("jsonResponse: ", jsonResponse);
+    // console.log("jsonResponse: ", jsonResponse);
 
-    //* TODO: Handle fetch result.
+    //* Handle fetch result.
     if (jsonResponse.status === "processing") {
       const eta = jsonResponse.eta;
       const timestamp = Math.floor(Date.now() / 1000);
@@ -328,7 +329,9 @@ export default function DrawImage() {
       //* Set image url.
       setImageUrl(jsonResponse.output[0]);
       setLoadingImage(false);
-    } else {
+    }
+
+    if (jsonResponse.status === "success") {
       const imageUrlResponse = jsonResponse.imageUrl[0];
       const meta = jsonResponse.meta;
       // console.log("imageUrlResponse: ", imageUrlResponse);
@@ -345,6 +348,34 @@ export default function DrawImage() {
       event.target = { name: "modelName", value: meta.model };
       handleChange(event);
 
+      //* Upload image to S3.
+      const uploadImageJsonData = {
+        imageUrl: imageUrlResponse,
+      };
+      let responseUploadImageToS3;
+      try {
+        responseUploadImageToS3 = await fetch(UPLOAD_IMAGE_TO_S3_URL, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(uploadImageJsonData),
+        });
+      } catch (error) {
+        console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
+        setLoadingImage(false);
+        return;
+      }
+
+      if (responseUploadImageToS3.status !== 200) {
+        console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
+        setLoadingImage(false);
+        return;
+      }
+      const imageUploadJsonResponse = await responseUploadImageToS3.json();
+      // console.log("imageUploadJsonResponse: ", imageUploadJsonResponse);
+
       //* Post imageUrlResponse and prompt to prompt server.
       const imageUploadResponse = await fetch(POST_API_URL, {
         method: "POST",
@@ -355,7 +386,7 @@ export default function DrawImage() {
         body: JSON.stringify({
           prompt: meta.prompt,
           negativePrompt: meta.negative_prompt,
-          imageUrl: imageUrlResponse,
+          imageUrl: imageUploadJsonResponse.url,
           discordBotToken: DISCORD_BOT_TOKEN,
         }),
       });
@@ -608,9 +639,9 @@ export default function DrawImage() {
               src={imageUrl}
               height={imageHeight}
               fit="contain"
-              duration={100}
+              duration={10}
               easing="ease"
-              shiftDuration={100}
+              shiftDuration={10}
             />
           )}
           <Button
