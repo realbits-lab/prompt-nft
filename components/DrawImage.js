@@ -352,14 +352,22 @@ export default function DrawImage() {
       const uploadImageJsonData = {
         imageUrl: imageUrlResponse,
       };
-      const responseUploadImageToS3 = await fetch(UPLOAD_IMAGE_TO_S3_URL, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(uploadImageJsonData),
-      });
+      let responseUploadImageToS3;
+      try {
+        responseUploadImageToS3 = await fetch(UPLOAD_IMAGE_TO_S3_URL, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(uploadImageJsonData),
+        });
+      } catch (error) {
+        console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
+        setLoadingImage(false);
+        return;
+      }
+
       if (responseUploadImageToS3.status !== 200) {
         console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
         setLoadingImage(false);
