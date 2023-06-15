@@ -71,7 +71,7 @@ async function handler(req, res) {
   console.log("jsonResponse: ", jsonResponse);
 
   if (jsonResponse.status === "processing") {
-    //* TODO: Processing status case.
+    //* Processing status case.
     // status: 'processing',
     // tip: 'for faster speed, keep resolution upto 512x512',
     // eta: 20.5611160064,

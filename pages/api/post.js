@@ -1,7 +1,7 @@
-import { withIronSessionApiRoute } from "iron-session/next";
-import { sessionOptions } from "@/lib/session";
-import { PrismaClient } from "@prisma/client";
 import axios from "axios";
+import { withIronSessionApiRoute } from "iron-session/next";
+import { PrismaClient } from "@prisma/client";
+import { sessionOptions } from "@/lib/session";
 
 const prisma = new PrismaClient();
 
@@ -62,22 +62,22 @@ async function handler(req, res) {
 
   //* Check method error.
   if (req.method !== "POST") {
-    console.log("req.method: ", req.method);
+    // console.log("req.method: ", req.method);
     res.status(500).json({ error: "Invalid method. Support only POST." });
     return;
   }
 
   //* Check if already logined.
   if (!req.session.user || req.session.user.isLoggedIn !== true) {
-    return res.status(500).json({ data: "nok" });
+    return res.status(500).json({ error: "User is not logined." });
   }
 
   //* Required fields in body: prompt, imageUrl, discordBotToken
   const { prompt, negativePrompt, imageUrl, discordBotToken } = req.body;
-  console.log("prompt: ", prompt);
-  console.log("negativePrompt: ", negativePrompt);
-  console.log("imageUrl: ", imageUrl);
-  console.log("discordBotToken: ", discordBotToken);
+  // console.log("prompt: ", prompt);
+  // console.log("negativePrompt: ", negativePrompt);
+  // console.log("imageUrl: ", imageUrl);
+  // console.log("discordBotToken: ", discordBotToken);
 
   //* Check discord bot token match.
   if (
@@ -111,7 +111,7 @@ async function handler(req, res) {
     return;
   }
 
-  //* Write miom post.
+  //* Write moim post.
   let resultUploadMoimPost;
   try {
     resultUploadMoimPost = await uploadMoimPost({

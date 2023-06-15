@@ -147,7 +147,7 @@ function Mint({
     // console.log("inputImageUrl: ", inputImageUrl);
     // console.log("imageUrl: ", imageUrl);
 
-    const response = await axios.post("/api/upload-to-s3", {
+    const response = await axios.post("/api/upload-nft-to-s3", {
       name: name,
       description: description,
       inputImageUrl: inputImageUrl,
@@ -241,7 +241,7 @@ function Mint({
     // console.log("address: ", address);
     let contractSigner;
     if (isMobile) {
-    	//* TODO: Change 2 version.
+      //* TODO: Change 2 version.
       //* https://docs.walletconnect.com/2.0/advanced/migration-from-v1.x/dapps
       const provider = new WalletConnectProvider({
         rpc: {
