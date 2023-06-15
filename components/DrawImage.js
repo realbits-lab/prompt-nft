@@ -223,10 +223,10 @@ export default function DrawImage() {
   });
 
   React.useEffect(() => {
-    console.log("call useEffect()");
+    // console.log("call useEffect()");
     const countdown = setInterval(() => {
       const timestamp = Math.floor(Date.now() / 1000);
-      console.log("timestamp: ", timestamp);
+      // console.log("timestamp: ", timestamp);
       setCurrentTimestamp(timestamp);
     }, 1000);
     return () => clearInterval(countdown);
@@ -239,7 +239,7 @@ export default function DrawImage() {
       //* Check user has rented the payment nft.
       if (swrDataAllRentData) {
         swrDataAllRentData.map(function (rentData) {
-          console.log("rentData: ", rentData);
+          // console.log("rentData: ", rentData);
           if (
             rentData.renteeAddress.toLowerCase() === address?.toLowerCase() &&
             rentData.nftAddress.toLowerCase() ===
@@ -294,7 +294,7 @@ export default function DrawImage() {
 
     //* Get the stable diffusion api result by json.
     const jsonResponse = await fetchResponse.json();
-    console.log("jsonResponse: ", jsonResponse);
+    // console.log("jsonResponse: ", jsonResponse);
 
     //* TODO: Handle fetch result.
     if (jsonResponse.status === "processing") {
@@ -323,7 +323,7 @@ export default function DrawImage() {
 
       //* Get the stable diffusion api result by json.
       const jsonResponse = await fetchResultResponse.json();
-      console.log("jsonResponse: ", jsonResponse);
+      // console.log("jsonResponse: ", jsonResponse);
 
       //* Set image url.
       setImageUrl(jsonResponse.output[0]);
@@ -476,9 +476,9 @@ export default function DrawImage() {
                   // console.log("isIdleRentNFT: ", isIdleRentNFT);
                   // console.log("isLoadingRentNFT: ", isLoadingRentNFT);
                   // console.log("isSuccessRentNFT: ", isSuccessRentNFT);
-                  console.log("writeRentNFT: ", writeRentNFT);
+                  // console.log("writeRentNFT: ", writeRentNFT);
                   // console.log("statusRentNFT: ", statusRentNFT);
-                  console.log("swrDataRentData: ", swrDataRentData);
+                  // console.log("swrDataRentData: ", swrDataRentData);
 
                   if (writeRentNFT && swrDataRentData) {
                     writeRentNFT?.({
@@ -509,23 +509,25 @@ export default function DrawImage() {
           display="flex"
           flexDirection="column"
         >
-          <Typography color="black">
-            {moment
-              .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-              .hours()}
-            :
-            {moment
-              .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-              .minutes()}
-            :
-            {moment
-              .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-              .seconds()}{" "}
-            /
-            {moment
-              .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-              .humanize()}
-          </Typography>
+          {paymentNftRentEndTime && (
+            <Typography color="black">
+              {moment
+                .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+                .hours()}
+              :
+              {moment
+                .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+                .minutes()}
+              :
+              {moment
+                .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+                .seconds()}{" "}
+              /
+              {moment
+                .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+                .humanize()}
+            </Typography>
+          )}
           <TextField
             required
             id="outlined-required"

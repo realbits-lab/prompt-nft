@@ -40,8 +40,8 @@ async function getMetadata({
   promptNftContract: any;
   signer: any;
 }) {
-  console.log("call getMetadata()");
-  console.log("tokenId: ", tokenId);
+  // console.log("call getMetadata()");
+  // console.log("tokenId: ", tokenId);
 
   if (!promptNftContract || !signer || !tokenId) {
     console.error(
@@ -76,7 +76,7 @@ async function getAllMyOwnData({
   promptNftContract: any;
   ownerAddress: any;
 }) {
-  console.log("call getAllMyOwnData()");
+  // console.log("call getAllMyOwnData()");
   // console.log("promptNftContract: ", promptNftContract);
   // console.log("signer: ", signer);
   // console.log("ownerAddress: ", ownerAddress);
