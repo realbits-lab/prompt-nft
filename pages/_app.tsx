@@ -6,17 +6,15 @@ import {
 } from "@web3modal/ethereum";
 import { Web3Modal } from "@web3modal/react";
 import { configureChains, WagmiConfig, createConfig } from "wagmi";
-import { polygon, polygonMumbai, localhost, mainnet } from "wagmi/chains";
+import { polygon, polygonMumbai, localhost } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
-import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { SWRConfig } from "swr";
 import { RecoilRoot } from "recoil";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
 import { CacheProvider, EmotionCache } from "@emotion/react";
-
 import "@/styles/globals.css";
 import { themeOptions } from "@/utils/themeOptions";
 import createEmotionCache from "@/utils/createEmotionCache";
@@ -81,19 +79,11 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
 
   const wagmiConfig = createConfig({
     autoConnect: true,
-    connectors: [
-      ...w3mConnectors({
-        version: 1,
-        chains,
-        projectId: WALLET_CONNECT_PROJECT_ID,
-      }),
-      new WalletConnectConnector({
-        chains,
-        options: {
-          projectId: WALLET_CONNECT_PROJECT_ID,
-        },
-      }),
-    ],
+    connectors: w3mConnectors({
+      version: 2,
+      chains: wagmiChains,
+      projectId: WALLET_CONNECT_PROJECT_ID,
+    }),
     publicClient: wagmiPublicClient,
     webSocketPublicClient: wagmiWebSocketPublicClient,
   });

@@ -2,7 +2,7 @@ import { withIronSessionApiRoute } from "iron-session/next";
 import { sessionOptions } from "@/lib/session";
 
 async function handler(req, res) {
-  // console.log("call /api/draw");
+  // console.log("call /api/fetch-result");
 
   //* Check method error.
   if (req.method !== "POST") {
@@ -17,32 +17,20 @@ async function handler(req, res) {
   }
 
   //* Stable diffusion api url.
-  const TEXT2IMG_API_URL = "https://stablediffusionapi.com/api/v3/text2img";
+  const FETCH_API_URL = "https://stablediffusionapi.com/api/v3/fetch";
 
-  //* Required fields in body: prompt, negativePrompt
-  const { prompt, negativePrompt } = req.body;
-  // console.log("prompt: ", prompt);
-  // console.log("negativePrompt: ", negativePrompt);
+  //* Required fields in body: id
+  const { id } = req.body;
+  // console.log("id: ", id);
 
   //* Stable diffusion api option.
   const jsonData = {
     key: process.env.NEXT_PUBLIC_STABLE_DIFFUSION_API_KEY,
-    prompt: prompt,
-    negative_prompt: negativePrompt,
-    width: "512",
-    height: "512",
-    samples: "1",
-    num_inference_steps: "20",
-    safety_checker: "yes",
-    enhance_prompt: "no",
-    seed: null,
-    guidance_scale: 7.5,
-    webhook: null,
-    track_id: null,
+    id: id,
   };
 
   //* Fetch image from image generation server.
-  const fetchResponse = await fetch(TEXT2IMG_API_URL, {
+  const fetchResponse = await fetch(FETCH_API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(jsonData),
@@ -65,29 +53,12 @@ async function handler(req, res) {
     res.status(500).json({ message: "Response is not success." });
   }
 
-  //* Processing status case.
-  // status: 'processing',
-  // tip: 'for faster speed, keep resolution upto 512x512',
-  // eta: 20.5611160064,
-  // messege: 'Try to fetch request after given estimated time',
-  // fetch_result: 'https://stablediffusionapi.com/api/v3/fetch/11431316',
-  // id: 11431316,
-  if (jsonResponse.status === "processing") {
-    res.status(200).json({
-      status: jsonResponse.status,
-      message: jsonResponse.message,
-      eta: jsonResponse.eta,
-      fetch_result: jsonResponse.fetch_result,
-      id: jsonResponse.id,
-    });
-  }
-
   //* Success status case.
   if (jsonResponse.status === "success") {
     res.status(200).json({
       status: jsonResponse.status,
-      imageUrl: jsonResponse.output,
-      meta: jsonResponse.meta,
+      id: jsonResponse.id,
+      output: jsonResponse.output,
     });
   }
 

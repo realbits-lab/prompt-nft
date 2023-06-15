@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useRouter } from "next/router";
 import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
+import moment from "moment";
 import {
   useAccount,
   useSigner,
@@ -26,12 +27,12 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import useUser from "@/lib/useUser";
-import { parseEther } from "viem";
-import moment from "moment";
+import { sleep } from "@/lib/util";
 
 export default function DrawImage() {
   const DRAW_API_URL = "/api/draw";
   const POST_API_URL = "/api/post";
+  const FETCH_RESULT_API_URL = "/api/fetch-result";
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const DISCORD_BOT_TOKEN = process.env.NEXT_PUBLIC_DISCORD_BOT_TOKEN;
   const CARD_MARGIN_TOP = "60px";
@@ -60,6 +61,7 @@ export default function DrawImage() {
   const [rentPaymentNft, setRentPaymentNft] = React.useState(false);
   const [paymentNftRentFee, setPaymentNftRentFee] = React.useState();
   const [currentTimestamp, setCurrentTimestamp] = React.useState();
+  const [imageFetchEndTime, setImageFetchEndTime] = React.useState();
   const [paymentNftRentEndTime, setPaymentNftRentEndTime] = React.useState();
 
   const {
@@ -239,7 +241,7 @@ export default function DrawImage() {
         swrDataAllRentData.map(function (rentData) {
           console.log("rentData: ", rentData);
           if (
-            rentData.renteeAddress.toLowerCase() === address.toLowerCase() &&
+            rentData.renteeAddress.toLowerCase() === address?.toLowerCase() &&
             rentData.nftAddress.toLowerCase() ===
               PAYMENT_NFT_CONTRACT_ADDRESS.toLowerCase() &&
             Number(rentData.tokenId) === Number(PAYMENT_NFT_TOKEN_ID)
@@ -292,48 +294,114 @@ export default function DrawImage() {
 
     //* Get the stable diffusion api result by json.
     const jsonResponse = await fetchResponse.json();
-    // console.log("jsonResponse: ", jsonResponse);
-    const imageUrlResponse = jsonResponse.imageUrl[0];
-    const meta = jsonResponse.meta;
-    // console.log("imageUrlResponse: ", imageUrlResponse);
-    // console.log("meta.negative_prompt: ", meta.negative_prompt);
-    // console.log("meta.prompt: ", meta.prompt);
-    // console.log("meta.model: ", meta.model);
+    console.log("jsonResponse: ", jsonResponse);
 
-    //* Change prompt, negativePrompt, modelName.
-    let event = {};
-    event.target = { name: "prompt", value: meta.prompt };
-    handleChange(event);
-    event.target = { name: "negativePrompt", value: meta.negative_prompt };
-    handleChange(event);
-    event.target = { name: "modelName", value: meta.model };
-    handleChange(event);
+    //* TODO: Handle fetch result.
+    if (jsonResponse.status === "processing") {
+      const eta = jsonResponse.eta;
+      const timestamp = Math.floor(Date.now() / 1000);
+      setImageFetchEndTime(timestamp + eta);
 
-    //* Post imageUrlResponse and prompt to prompt server.
-    const imageUploadResponse = await fetch(POST_API_URL, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        prompt: meta.prompt,
-        negativePrompt: meta.negative_prompt,
-        imageUrl: imageUrlResponse,
-        discordBotToken: DISCORD_BOT_TOKEN,
-      }),
-    });
-    // console.log("imageUploadResponse: ", imageUploadResponse);
+      await sleep((eta + 1) * 1000);
+      setImageFetchEndTime(undefined);
 
-    if (imageUploadResponse.status !== 200) {
-      console.error(`imageUploadResponse: ${imageUploadResponse}`);
+      const fetchJsonData = {
+        id: jsonResponse.id,
+      };
+      const fetchResultResponse = await fetch(FETCH_RESULT_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(fetchJsonData),
+      });
+
+      //* Check error response.
+      if (fetchResultResponse.status !== 200) {
+        console.error("jsonResponse.status is not success.");
+        setLoadingImage(false);
+        return;
+      }
+
+      //* Get the stable diffusion api result by json.
+      const jsonResponse = await fetchResultResponse.json();
+      console.log("jsonResponse: ", jsonResponse);
+
+      //* Set image url.
+      setImageUrl(jsonResponse.output[0]);
       setLoadingImage(false);
-      return;
-    }
+    } else {
+      const imageUrlResponse = jsonResponse.imageUrl[0];
+      const meta = jsonResponse.meta;
+      // console.log("imageUrlResponse: ", imageUrlResponse);
+      // console.log("meta.negative_prompt: ", meta.negative_prompt);
+      // console.log("meta.prompt: ", meta.prompt);
+      // console.log("meta.model: ", meta.model);
 
-    //* Set image url from image generation server.
-    setImageUrl(imageUrlResponse);
-    setLoadingImage(false);
+      //* Change prompt, negativePrompt, modelName.
+      let event = {};
+      event.target = { name: "prompt", value: meta.prompt };
+      handleChange(event);
+      event.target = { name: "negativePrompt", value: meta.negative_prompt };
+      handleChange(event);
+      event.target = { name: "modelName", value: meta.model };
+      handleChange(event);
+
+      //* Post imageUrlResponse and prompt to prompt server.
+      const imageUploadResponse = await fetch(POST_API_URL, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: meta.prompt,
+          negativePrompt: meta.negative_prompt,
+          imageUrl: imageUrlResponse,
+          discordBotToken: DISCORD_BOT_TOKEN,
+        }),
+      });
+      // console.log("imageUploadResponse: ", imageUploadResponse);
+
+      if (imageUploadResponse.status !== 200) {
+        console.error(`imageUploadResponse: ${imageUploadResponse}`);
+        setLoadingImage(false);
+        return;
+      }
+
+      //* Set image url from image generation server.
+      setImageUrl(imageUrlResponse);
+      setLoadingImage(false);
+    }
+  }
+
+  function buildWalletConnectPage() {
+    return (
+      <>
+        <Box
+          sx={{
+            "& .MuiTextField-root": { m: 1, width: "25ch" },
+          }}
+          display="flex"
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="100vh"
+        >
+          <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
+            <CardMedia component="img" image={PLACEHOLDER_IMAGE_URL} />
+            <CardContent
+              sx={{
+                padding: "10",
+              }}
+            >
+              <Typography variant="h7">
+                You should connect with your wallet such as metamask. Click the
+                upper "Connect Wallet" button.
+              </Typography>
+            </CardContent>
+          </Card>
+        </Box>
+      </>
+    );
   }
 
   function buildWalletLoginPage() {
@@ -505,6 +573,25 @@ export default function DrawImage() {
           flexDirection="column"
           alignItems="center"
         >
+          {imageFetchEndTime && (
+            <Typography color="black">
+              {moment
+                .duration((imageFetchEndTime - currentTimestamp) * 1000)
+                .hours()}
+              :
+              {moment
+                .duration((imageFetchEndTime - currentTimestamp) * 1000)
+                .minutes()}
+              :
+              {moment
+                .duration((imageFetchEndTime - currentTimestamp) * 1000)
+                .seconds()}{" "}
+              /
+              {moment
+                .duration((imageFetchEndTime - currentTimestamp) * 1000)
+                .humanize()}
+            </Typography>
+          )}
           {loadingImage ? (
             <Box
               height={imageHeight}
@@ -563,7 +650,9 @@ export default function DrawImage() {
           <Web3NetworkSwitch />
         </Grid>
       </Grid>
-      {user === undefined || user.isLoggedIn === false
+      {isConnected === false
+        ? buildWalletConnectPage()
+        : user === undefined || user.isLoggedIn === false
         ? buildWalletLoginPage()
         : swrDataAllRentData
         ? rentPaymentNft
