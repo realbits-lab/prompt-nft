@@ -1,3 +1,5 @@
+import { withIronSessionApiRoute } from "iron-session/next";
+import { sessionOptions } from "@/lib/session";
 import { PrismaClient } from "@prisma/client";
 import axios from "axios";
 
@@ -55,14 +57,19 @@ async function uploadMoimPost({ title, imageUrl }) {
   return postResponse;
 }
 
-export default async function handler(req, res) {
-  console.log("call /api/post");
+async function handler(req, res) {
+  // console.log("call /api/post");
 
   //* Check method error.
   if (req.method !== "POST") {
     console.log("req.method: ", req.method);
     res.status(500).json({ error: "Invalid method. Support only POST." });
     return;
+  }
+
+  //* Check if already logined.
+  if (!req.session.user || req.session.user.isLoggedIn !== true) {
+    return res.status(500).json({ data: "nok" });
   }
 
   //* Required fields in body: prompt, imageUrl, discordBotToken
@@ -129,3 +136,5 @@ export default async function handler(req, res) {
     res.status(500).json({ message: "data creation failed." });
   }
 }
+
+export default withIronSessionApiRoute(handler, sessionOptions);

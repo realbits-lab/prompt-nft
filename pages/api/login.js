@@ -1,17 +1,24 @@
 import { withIronSessionApiRoute } from "iron-session/next";
-import { NextApiRequest, NextApiResponse } from "next";
+import Web3 from "web3";
 import { sessionOptions } from "@/lib/session";
 import { getChainId } from "@/lib/util";
-import type { User } from "@/pages/api/user";
+import rentmarketABI from "@/contracts/rentMarket.json";
 const sigUtil = require("@metamask/eth-sig-util");
 
-async function handler(req: NextApiRequest, res: NextApiResponse) {
-  console.log("call /api/login");
+async function handler(req, res) {
+  // console.log("call /api/login");
 
+  const RENT_MARKET_CONTRACT_ADDRES =
+    process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
+  const PAYMENT_NFT_CONTRACT_ADDRESS =
+    process.env.NEXT_PUBLIC_PAYMENT_NFT_ADDRESS;
+  const PAYMENT_NFT_TOKEN_ID = process.env.NEXT_PUBLIC_PAYMENT_NFT_TOKEN;
+  const ALCHEMY_API_URL =
+    "https://polygon-mumbai.g.alchemy.com/v2/oRV4hG4cLckxr4KcIgiFbOIiaNmoCTf1";
   const { publicAddress, signature } = await req.body;
-  console.log("publicAddress: ", publicAddress);
-  console.log("signature: ", signature);
-  console.log("req.session.user: ", req.session.user);
+  // console.log("publicAddress: ", publicAddress);
+  // console.log("signature: ", signature);
+  // console.log("req.session.user: ", req.session.user);
 
   //* Check if already logined.
   if (
@@ -51,7 +58,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     },
   });
 
-  // console.log("start to call sigUtil.recoverTypedSignature()");
   let recovered;
   try {
     recovered = sigUtil.recoverTypedSignature({
@@ -61,14 +67,44 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: (error as Error).message });
+    return res.status(500).json({ message: error.message });
   }
   // console.log("recovered: ", recovered);
   // console.log("publicAddress: ", publicAddress);
 
   if (recovered.toLowerCase() === publicAddress.toLowerCase()) {
-    // console.log("Recovered address is the same as input address.");
-    const user = { isLoggedIn: true, publicAddress: publicAddress } as User;
+    //* TODO: Check whether or not user rented the payment nft.
+    const web3 = new Web3(ALCHEMY_API_URL);
+    const rentMarketContract = new web3.eth.Contract(
+      rentmarketABI.abi,
+      RENT_MARKET_CONTRACT_ADDRES
+    );
+    const result = await rentMarketContract.methods.getAllRentData().call();
+    let found = false;
+    result?.map(function (rentData) {
+      console.log("rentData: ", rentData);
+      console.log("publicAddress: ", publicAddress);
+      console.log(
+        "PAYMENT_NFT_CONTRACT_ADDRESS: ",
+        PAYMENT_NFT_CONTRACT_ADDRESS
+      );
+      console.log("PAYMENT_NFT_TOKEN_ID: ", PAYMENT_NFT_TOKEN_ID);
+      if (
+        rentData.renteeAddress.toLowerCase() === publicAddress?.toLowerCase() &&
+        rentData.nftAddress.toLowerCase() ===
+          PAYMENT_NFT_CONTRACT_ADDRESS.toLowerCase() &&
+        Number(rentData.tokenId) === Number(PAYMENT_NFT_TOKEN_ID)
+      ) {
+        found = true;
+      }
+    });
+    console.log("found: ", found);
+
+    const user = {
+      isLoggedIn: true,
+      publicAddress: publicAddress,
+      rentPaymentNft: found,
+    };
     req.session.user = user;
     await req.session.save();
 

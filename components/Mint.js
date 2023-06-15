@@ -241,6 +241,8 @@ function Mint({
     // console.log("address: ", address);
     let contractSigner;
     if (isMobile) {
+    	//* TODO: Change 2 version.
+      //* https://docs.walletconnect.com/2.0/advanced/migration-from-v1.x/dapps
       const provider = new WalletConnectProvider({
         rpc: {
           137: "https://rpc-mainnet.maticvigil.com",

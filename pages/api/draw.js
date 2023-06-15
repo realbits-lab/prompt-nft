@@ -2,10 +2,7 @@ import { withIronSessionApiRoute } from "iron-session/next";
 import { sessionOptions } from "@/lib/session";
 
 async function handler(req, res) {
-  console.log("call /api/draw");
-
-  //* Stable diffusion api url.
-  const TEXT2IMG_API_URL = "https://stablediffusionapi.com/api/v3/text2img";
+  // console.log("call /api/draw");
 
   //* Check method error.
   if (req.method !== "POST") {
@@ -15,16 +12,23 @@ async function handler(req, res) {
   }
 
   //* Check if already logined.
-  if (!req.session.user || req.session.user.isLoggedIn !== true) {
+  if (
+    !req.session.user ||
+    req.session.user.isLoggedIn !== true ||
+    req.session.user.rentPaymentNft !== true
+  ) {
     return res.status(500).json({ data: "nok" });
   }
 
-  //* Required fields in body: prompt, imageUrl
-  const { prompt, negativePrompt } = req.body;
-  console.log("prompt: ", prompt);
-  console.log("negativePrompt: ", negativePrompt);
+  //* Stable diffusion api url.
+  const TEXT2IMG_API_URL = "https://stablediffusionapi.com/api/v3/text2img";
 
-  //* Make stable diffusion api option by json.
+  //* Required fields in body: prompt, negativePrompt
+  const { prompt, negativePrompt } = req.body;
+  // console.log("prompt: ", prompt);
+  // console.log("negativePrompt: ", negativePrompt);
+
+  //* Stable diffusion api option.
   const jsonData = {
     key: process.env.NEXT_PUBLIC_STABLE_DIFFUSION_API_KEY,
     prompt: prompt,
@@ -34,7 +38,7 @@ async function handler(req, res) {
     samples: "1",
     num_inference_steps: "20",
     safety_checker: "yes",
-    enhance_prompt: "yes",
+    enhance_prompt: "no",
     seed: null,
     guidance_scale: 7.5,
     webhook: null,
@@ -47,8 +51,9 @@ async function handler(req, res) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(jsonData),
   });
-  console.log("fetchResponse: ", fetchResponse);
+  // console.log("fetchResponse: ", fetchResponse);
 
+  //* Check the response error.
   if (fetchResponse.status !== 200) {
     console.error(error);
     res.status(500).json({ message: "Response is not success." });
@@ -63,26 +68,34 @@ async function handler(req, res) {
     console.error(error);
     res.status(500).json({ message: "Response is not success." });
   }
+  console.log("jsonResponse: ", jsonResponse);
 
-  //* TODO: Handle processing response.
-  //* TODO: Post fetch_result url with api key.
-  // status: 'processing',
-  // tip: 'for faster speed, keep resolution upto 512x512',
-  // eta: 20.5611160064,
-  // messege: 'Try to fetch request after given estimated time',
-  // fetch_result: 'https://stablediffusionapi.com/api/v3/fetch/11431316',
-  // id: 11431316,
-
-  //* Check error response.
-  if (jsonResponse.status !== "success") {
+  if (jsonResponse.status === "processing") {
+    //* TODO: Processing status case.
+    // status: 'processing',
+    // tip: 'for faster speed, keep resolution upto 512x512',
+    // eta: 20.5611160064,
+    // messege: 'Try to fetch request after given estimated time',
+    // fetch_result: 'https://stablediffusionapi.com/api/v3/fetch/11431316',
+    // id: 11431316,
+    res.status(200).json({
+      status: jsonResponse.status,
+      message: jsonResponse.message,
+      eta: jsonResponse.eta,
+      fetch_result: jsonResponse.fetch_result,
+      id: jsonResponse.id,
+    });
+  } else if (jsonResponse.status === "success") {
+    //* Success status case.
+    res.status(200).json({
+      status: jsonResponse.status,
+      imageUrl: jsonResponse.output,
+      meta: jsonResponse.meta,
+    });
+  } else {
     console.error("jsonResponse.status is not success.");
     res.status(500).json({ message: "Response is not success." });
   }
-
-  //* Return image url from image generation server.
-  res
-    .status(200)
-    .json({ imageUrl: jsonResponse.output, meta: jsonResponse.meta });
 }
 
 export default withIronSessionApiRoute(handler, sessionOptions);
