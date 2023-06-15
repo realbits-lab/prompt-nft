@@ -74,16 +74,17 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
       projectId: WALLET_CONNECT_PROJECT_ID,
     }),
     alchemyProvider({ apiKey: ALCHEMY_API_KEY }),
-    publicProvider(),
   ]);
 
   const wagmiConfig = createConfig({
     autoConnect: true,
-    connectors: w3mConnectors({
-      version: 2,
-      chains: wagmiChains,
-      projectId: WALLET_CONNECT_PROJECT_ID,
-    }),
+    connectors: [
+      ...w3mConnectors({
+        version: 2,
+        chains: wagmiChains,
+        projectId: WALLET_CONNECT_PROJECT_ID,
+      }),
+    ],
     publicClient: wagmiPublicClient,
     webSocketPublicClient: wagmiWebSocketPublicClient,
   });
