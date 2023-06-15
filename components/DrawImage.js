@@ -639,9 +639,9 @@ export default function DrawImage() {
               src={imageUrl}
               height={imageHeight}
               fit="contain"
-              duration={100}
+              duration={10}
               easing="ease"
-              shiftDuration={100}
+              shiftDuration={10}
             />
           )}
           <Button
