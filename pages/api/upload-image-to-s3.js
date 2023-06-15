@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { sessionOptions } from "@/lib/session";
 
 async function handler(req, res) {
-  console.log("call /api/upload-image-to-s3");
+  // console.log("call /api/upload-image-to-s3");
 
   const BUCKET_NAME = "fictures-images";
 
@@ -21,9 +21,9 @@ async function handler(req, res) {
   }
 
   //* Required fields in body: imageUrl
-  console.log("req.body: ", req.body);
+  // console.log("req.body: ", req.body);
   const imageUrl = req.body.imageUrl;
-  console.log("imageUrl: ", imageUrl);
+  // console.log("imageUrl: ", imageUrl);
 
   let fetchResult;
   try {
@@ -68,7 +68,7 @@ async function handler(req, res) {
   };
   const imagePutCommand = new PutObjectCommand(imageBucketParams);
   const imagePutCommandResult = await s3Client.send(imagePutCommand);
-  console.log("imagePutCommandResult: ", imagePutCommandResult);
+  // console.log("imagePutCommandResult: ", imagePutCommandResult);
 
   //* Send 200 OK response with url.
   res.status(200).json({
