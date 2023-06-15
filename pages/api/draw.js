@@ -70,14 +70,14 @@ async function handler(req, res) {
   }
   console.log("jsonResponse: ", jsonResponse);
 
-  //* Processing status case.
-  // status: 'processing',
-  // tip: 'for faster speed, keep resolution upto 512x512',
-  // eta: 20.5611160064,
-  // messege: 'Try to fetch request after given estimated time',
-  // fetch_result: 'https://stablediffusionapi.com/api/v3/fetch/11431316',
-  // id: 11431316,
   if (jsonResponse.status === "processing") {
+    //* TODO: Processing status case.
+    // status: 'processing',
+    // tip: 'for faster speed, keep resolution upto 512x512',
+    // eta: 20.5611160064,
+    // messege: 'Try to fetch request after given estimated time',
+    // fetch_result: 'https://stablediffusionapi.com/api/v3/fetch/11431316',
+    // id: 11431316,
     res.status(200).json({
       status: jsonResponse.status,
       message: jsonResponse.message,
