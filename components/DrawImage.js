@@ -33,6 +33,7 @@ const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
   ssr: false,
 });
 export default function DrawImage() {
+  const DEFAULT_MODEL_NAME = "runwayml/stable-diffusion-v1-5";
   const DRAW_API_URL = "/api/draw";
   const POST_API_URL = "/api/post";
   const UPLOAD_IMAGE_TO_S3_URL = "/api/upload-image-to-s3";
@@ -221,7 +222,7 @@ export default function DrawImage() {
   const [formValue, setFormValue] = React.useState({
     prompt: "",
     negativePrompt: "",
-    modelName: "",
+    modelName: DEFAULT_MODEL_NAME,
   });
   const { prompt, negativePrompt, modelName } = formValue;
   const handleChange = (event) => {
@@ -286,6 +287,10 @@ export default function DrawImage() {
   }
 
   async function fetchImage() {
+    let inputPrompt = prompt;
+    let inputNegativePrompt = negativePrompt;
+    let inputModelName = modelName;
+
     setLoadingImage(true);
 
     if (!prompt || prompt === "") {
@@ -324,7 +329,7 @@ export default function DrawImage() {
 
     //* Check error response.
     if (
-      jsonResponse.status !== "processing" ||
+      jsonResponse.status !== "processing" &&
       jsonResponse.status !== "success"
     ) {
       console.error("jsonResponse.status is not processing or success.");
@@ -382,6 +387,10 @@ export default function DrawImage() {
       handleChange(event);
       event.target = { name: "modelName", value: meta.model };
       handleChange(event);
+
+      inputPrompt = meta.prompt;
+      inputNegativePrompt = meta.negative_prompt;
+      inputModelName = meta.model;
     }
 
     //* Upload image to S3.
@@ -420,8 +429,8 @@ export default function DrawImage() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prompt: meta.prompt,
-        negativePrompt: meta.negative_prompt,
+        prompt: inputPrompt,
+        negativePrompt: inputNegativePrompt,
         imageUrl: imageUploadJsonResponse.url,
         discordBotToken: DISCORD_BOT_TOKEN,
       }),
