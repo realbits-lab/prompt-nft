@@ -46,7 +46,7 @@ export default function DrawImage() {
   const [loadingImage, setLoadingImage] = React.useState(false);
   const [imageHeight, setImageHeight] = React.useState(0);
   const router = useRouter();
-  const MARGIN_TOP = "40px";
+  const MARGIN_TOP = "60px";
 
   //*---------------------------------------------------------------------------
   //* Wagmi hook.
@@ -540,25 +540,27 @@ export default function DrawImage() {
           display="flex"
           flexDirection="column"
         >
-          {paymentNftRentEndTime && currentTimestamp && (
-            <Typography color="black">
-              {moment
-                .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                .hours()}
-              :
-              {moment
-                .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                .minutes()}
-              :
-              {moment
-                .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                .seconds()}{" "}
-              /
-              {moment
-                .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                .humanize()}
-            </Typography>
-          )}
+          {paymentNftRentEndTime &&
+            currentTimestamp &&
+            currentTimestamp > paymentNftRentEndTime && (
+              <Typography color="black">
+                {moment
+                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+                  .hours()}
+                :
+                {moment
+                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+                  .minutes()}
+                :
+                {moment
+                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+                  .seconds()}{" "}
+                /
+                {moment
+                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+                  .humanize()}
+              </Typography>
+            )}
           <TextField
             required
             id="outlined-required"
