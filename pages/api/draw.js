@@ -68,7 +68,7 @@ async function handler(req, res) {
     console.error(error);
     res.status(500).json({ message: "Response is not success." });
   }
-  // console.log("jsonResponse: ", jsonResponse);
+  console.log("jsonResponse: ", jsonResponse);
 
   if (jsonResponse.status === "processing") {
     //* Processing status case.

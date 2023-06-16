@@ -2,6 +2,7 @@ import * as React from "react";
 import { useRouter } from "next/router";
 import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 import moment from "moment";
+import dynamic from "next/dynamic";
 import {
   useAccount,
   useSigner,
@@ -28,7 +29,9 @@ import Typography from "@mui/material/Typography";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import useUser from "@/lib/useUser";
 import { sleep } from "@/lib/util";
-
+const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
+  ssr: false,
+});
 export default function DrawImage() {
   const DRAW_API_URL = "/api/draw";
   const POST_API_URL = "/api/post";
@@ -176,8 +179,7 @@ export default function DrawImage() {
       SERVICE_ACCOUNT_ADDRESS,
     ],
   });
-
-  const waitForTransaction = useWaitForTransaction({
+  const waitForTransactionRentNFT = useWaitForTransaction({
     hash: dataRentNFT?.hash,
     onSuccess(data) {
       // console.log("call onSuccess()");
@@ -199,6 +201,19 @@ export default function DrawImage() {
       // console.log("tx: ", tx);
     },
   });
+
+  //*---------------------------------------------------------------------------
+  //* Handle snackbar.
+  //*---------------------------------------------------------------------------
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
+  const [openSnackbar, setOpenSnackbar] = React.useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState("info");
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
 
   //*---------------------------------------------------------------------------
   //* Handle text input change.
@@ -273,6 +288,16 @@ export default function DrawImage() {
   async function fetchImage() {
     setLoadingImage(true);
 
+    if (!prompt || prompt === "") {
+      setSnackbarSeverity("warning");
+      setSnackbarMessage("Prompt is empty.");
+      setOpenSnackbar(true);
+
+      setLoadingImage(false);
+
+      return;
+    }
+
     //* Make stable diffusion api option by json.
     const jsonData = {
       prompt: prompt,
@@ -284,20 +309,31 @@ export default function DrawImage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(jsonData),
     });
-    // console.log("fetchResponse: ", fetchResponse);
+    console.log("fetchResponse: ", fetchResponse);
 
     //* Check error response.
     if (fetchResponse.status !== 200) {
-      console.error("jsonResponse.status is not success.");
+      console.error("fetchResponse.status is not 200.");
       setLoadingImage(false);
       return;
     }
 
     //* Get the stable diffusion api result by json.
     const jsonResponse = await fetchResponse.json();
-    // console.log("jsonResponse: ", jsonResponse);
+    console.log("jsonResponse: ", jsonResponse);
+
+    //* Check error response.
+    if (
+      jsonResponse.status !== "processing" ||
+      jsonResponse.status !== "success"
+    ) {
+      console.error("jsonResponse.status is not processing or success.");
+      setLoadingImage(false);
+      return;
+    }
 
     //* Handle fetch result.
+    let imageUrlResponse;
     if (jsonResponse.status === "processing") {
       const eta = jsonResponse.eta;
       const timestamp = Math.floor(Date.now() / 1000);
@@ -327,12 +363,11 @@ export default function DrawImage() {
       // console.log("jsonResponse: ", jsonResponse);
 
       //* Set image url.
-      setImageUrl(jsonResponse.output[0]);
-      setLoadingImage(false);
+      imageUrlResponse = jsonResponse.output[0];
     }
 
     if (jsonResponse.status === "success") {
-      const imageUrlResponse = jsonResponse.imageUrl[0];
+      imageUrlResponse = jsonResponse.imageUrl[0];
       const meta = jsonResponse.meta;
       // console.log("imageUrlResponse: ", imageUrlResponse);
       // console.log("meta.negative_prompt: ", meta.negative_prompt);
@@ -347,61 +382,61 @@ export default function DrawImage() {
       handleChange(event);
       event.target = { name: "modelName", value: meta.model };
       handleChange(event);
+    }
 
-      //* Upload image to S3.
-      const uploadImageJsonData = {
-        imageUrl: imageUrlResponse,
-      };
-      let responseUploadImageToS3;
-      try {
-        responseUploadImageToS3 = await fetch(UPLOAD_IMAGE_TO_S3_URL, {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(uploadImageJsonData),
-        });
-      } catch (error) {
-        console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
-        setLoadingImage(false);
-        return;
-      }
-
-      if (responseUploadImageToS3.status !== 200) {
-        console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
-        setLoadingImage(false);
-        return;
-      }
-      const imageUploadJsonResponse = await responseUploadImageToS3.json();
-      // console.log("imageUploadJsonResponse: ", imageUploadJsonResponse);
-
-      //* Post imageUrlResponse and prompt to prompt server.
-      const imageUploadResponse = await fetch(POST_API_URL, {
+    //* Upload image to S3.
+    const uploadImageJsonData = {
+      imageUrl: imageUrlResponse,
+    };
+    let responseUploadImageToS3;
+    try {
+      responseUploadImageToS3 = await fetch(UPLOAD_IMAGE_TO_S3_URL, {
         method: "POST",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          prompt: meta.prompt,
-          negativePrompt: meta.negative_prompt,
-          imageUrl: imageUploadJsonResponse.url,
-          discordBotToken: DISCORD_BOT_TOKEN,
-        }),
+        body: JSON.stringify(uploadImageJsonData),
       });
-      // console.log("imageUploadResponse: ", imageUploadResponse);
-
-      if (imageUploadResponse.status !== 200) {
-        console.error(`imageUploadResponse: ${imageUploadResponse}`);
-        setLoadingImage(false);
-        return;
-      }
-
-      //* Set image url from image generation server.
-      setImageUrl(imageUrlResponse);
+    } catch (error) {
+      console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
       setLoadingImage(false);
+      return;
     }
+
+    if (responseUploadImageToS3.status !== 200) {
+      console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
+      setLoadingImage(false);
+      return;
+    }
+    const imageUploadJsonResponse = await responseUploadImageToS3.json();
+    // console.log("imageUploadJsonResponse: ", imageUploadJsonResponse);
+
+    //* Post imageUrlResponse and prompt to prompt server.
+    const imageUploadResponse = await fetch(POST_API_URL, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt: meta.prompt,
+        negativePrompt: meta.negative_prompt,
+        imageUrl: imageUploadJsonResponse.url,
+        discordBotToken: DISCORD_BOT_TOKEN,
+      }),
+    });
+    // console.log("imageUploadResponse: ", imageUploadResponse);
+
+    if (imageUploadResponse.status !== 200) {
+      console.error(`imageUploadResponse: ${imageUploadResponse}`);
+      setLoadingImage(false);
+      return;
+    }
+
+    //* Set image url from image generation server.
+    setImageUrl(imageUploadJsonResponse.url);
+    setLoadingImage(false);
   }
 
   function buildWalletConnectPage() {
@@ -705,6 +740,14 @@ export default function DrawImage() {
         </Grid>
       </Grid>
       {buildPage()}
+
+      <MessageSnackbar
+        open={openSnackbar}
+        autoHideDuration={10000}
+        onClose={handleCloseSnackbar}
+        severity={snackbarSeverity}
+        message={snackbarMessage}
+      />
     </>
   );
 }

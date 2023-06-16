@@ -1,6 +1,19 @@
 import * as React from "react";
 import { ethers } from "ethers";
-import { useAccount, useSigner, useContract, useNetwork } from "wagmi";
+import {
+  useAccount,
+  useSigner,
+  useContract,
+  useWalletClient,
+  useNetwork,
+  useContractRead,
+  useSignTypedData,
+  useContractEvent,
+  useContractWrite,
+  usePrepareContractWrite,
+  useWaitForTransaction,
+  useWatchPendingTransactions,
+} from "wagmi";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { isMobile } from "react-device-detect";
 import { encrypt } from "@metamask/eth-sig-util";
@@ -18,14 +31,12 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
-
 import { isWalletConnected } from "@/lib/util";
 import fetchJson from "@/lib/fetchJson";
-
+import promptNFTABI from "@/contracts/promptNFT.json";
 const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
   ssr: false,
 });
-import promptNFTABI from "../contracts/promptNFT.json";
 
 function Mint({
   inputImageUrl,
@@ -36,22 +47,53 @@ function Mint({
   //*----------------------------------------------------------------------------
   //* Define constance variables.
   //*----------------------------------------------------------------------------
-  const DEFAULT_MODEL_NAME = "STABLE_DIFFUSION";
+  const PROMPT_NFT_CONTRACT_ADDRESS =
+    process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS;
   const CARD_MARGIN_BOTTOM = 500;
   const { chains, chain: selectedChain } = useNetwork();
   // console.log("selectedChain: ", selectedChain);
   const { address, isConnected } = useAccount();
   // console.log("address: ", address);
   // console.log("isConnected: ", isConnected);
-  const { data: signer, isError, isLoading } = useSigner();
+  const { data: signer, isError, isLoading } = useWalletClient();
   // console.log("signer: ", signer);
   // console.log("isError: ", isError);
   // console.log("isLoading: ", isLoading);
-  const promptNftContract = useContract({
-    address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-    abi: promptNFTABI["abi"],
+
+  // const promptNftContract = useContract({
+  //   address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
+  //   abi: promptNFTABI.abi,
+  // });
+  const {
+    data: dataSafeMint,
+    error: errorSafeMint,
+    isError: isErrorSafeMint,
+    isIdle: isIdleSafeMint,
+    isLoading: isLoadingSafeMint,
+    isSuccess: isSuccessSafeMint,
+    write: writeSafeMint,
+    status: statusSafeMint,
+  } = useContractWrite({
+    address: PROMPT_NFT_CONTRACT_ADDRESS,
+    abi: promptNFTABI.abi,
+    functionName: "safeMint",
   });
-  // console.log("promptNftContract: ", promptNftContract);
+  const waitForTransactionSafeMint = useWaitForTransaction({
+    hash: dataSafeMint?.hash,
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+    },
+    onError(error) {
+      // console.log("call onError()");
+      // console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
+    },
+  });
 
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const THANKS_PAGE = "/thanks/";
@@ -119,7 +161,7 @@ function Mint({
       setImageUrl(inputImageUrl || "");
       setPromptText(inputPrompt || "");
       setNegativePromptText(inputNegativePrompt || "");
-      setModelName(inputModelName || DEFAULT_MODEL_NAME);
+      setModelName(inputModelName || "");
 
       try {
         if (isWalletConnected({ isConnected, selectedChain }) === false) {
@@ -260,8 +302,6 @@ function Mint({
     } else {
       contractSigner = signer;
     }
-    // console.log("promptNftContract: ", promptNftContract);
-    // console.log("contractSigner: ", contractSigner);
     // console.log("address: ", address);
     // console.log("tokenURI: ", tokenURI);
     // console.log("tokenOwnerEncryptPromptData: ", tokenOwnerEncryptPromptData);
@@ -278,20 +318,30 @@ function Mint({
     //   contractOwnerEncryptNegativePromptData
     // );
 
-    //* Add tokenOwnerEncryptNegativePromptData and contractOwnerEncryptNegativePromptData.
-    const tx = await promptNftContract
-      .connect(contractSigner)
-      .safeMint(
+    // const tx = await promptNftContract
+    //   .connect(contractSigner)
+    //   .safeMint(
+    //     address,
+    //     tokenURI,
+    //     modelName,
+    //     tokenOwnerEncryptPromptData,
+    //     tokenOwnerEncryptNegativePromptData,
+    //     contractOwnerEncryptPromptData,
+    //     contractOwnerEncryptNegativePromptData
+    //   );
+    // const response = await tx.wait();
+    // console.log("response: ", response);
+    writeSafeMint?.({
+      args: [
         address,
         tokenURI,
         modelName,
         tokenOwnerEncryptPromptData,
         tokenOwnerEncryptNegativePromptData,
         contractOwnerEncryptPromptData,
-        contractOwnerEncryptNegativePromptData
-      );
-    const response = await tx.wait();
-    // console.log("response: ", response);
+        contractOwnerEncryptNegativePromptData,
+      ],
+    });
 
     //* Return token id.
     return response;
