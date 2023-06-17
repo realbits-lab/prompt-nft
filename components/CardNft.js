@@ -13,13 +13,10 @@ import {
   useWatchPendingTransactions,
 } from "wagmi";
 import { useRecoilStateLoadable } from "recoil";
-import Image from "mui-image";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
-import CircularProgress from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -28,7 +25,6 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
@@ -167,9 +163,9 @@ export default function CardNft({
       // console.log("error: ", error);
     },
   });
-  console.log("isLoadingRentData: ", isLoadingRentData);
-  console.log("isValidatingRentData: ", isValidatingRentData);
-  console.log("dataRentData: ", dataRentData);
+  // console.log("isLoadingRentData: ", isLoadingRentData);
+  // console.log("isValidatingRentData: ", isValidatingRentData);
+  // console.log("dataRentData: ", dataRentData);
 
   const {
     data: dataOwnerOf,
@@ -310,7 +306,7 @@ export default function CardNft({
 
   const [isRenting, setIsRenting] = React.useState(false);
   const [isOwnerOrRentee, setIsOwnerOrRentee] = React.useState();
-  console.log("isOwnerOrRentee: ", isOwnerOrRentee);
+  // console.log("isOwnerOrRentee: ", isOwnerOrRentee);
 
   React.useEffect(function () {
     // console.log("call useEffect()");
@@ -480,7 +476,7 @@ export default function CardNft({
                   </StyledTableCell>
                 </StyledTableRow>
 
-                {nftData.rentFeeByToken && (
+                {nftData.rentFeeByToken ? (
                   <StyledTableRow>
                     <StyledTableCell align="left">
                       <Button
@@ -511,7 +507,7 @@ export default function CardNft({
                       token
                     </StyledTableCell>
                   </StyledTableRow>
-                )}
+                ) : null}
               </TableBody>
             </Table>
           </TableContainer>
