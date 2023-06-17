@@ -319,7 +319,12 @@ export default function DrawImage() {
     //* Check error response.
     if (fetchResponse.status !== 200) {
       console.error("fetchResponse.status is not 200.");
+      setSnackbarSeverity("warning");
+      setSnackbarMessage("Drawing image failed.");
+      setOpenSnackbar(true);
+
       setLoadingImage(false);
+
       return;
     }
 
@@ -333,7 +338,13 @@ export default function DrawImage() {
       jsonResponse.status !== "success"
     ) {
       console.error("jsonResponse.status is not processing or success.");
+
+      setSnackbarSeverity("warning");
+      setSnackbarMessage("Drawing image failed.");
+      setOpenSnackbar(true);
+
       setLoadingImage(false);
+
       return;
     }
 
@@ -359,6 +370,11 @@ export default function DrawImage() {
       //* Check error response.
       if (fetchResultResponse.status !== 200) {
         console.error("jsonResponse.status is not success.");
+
+        setSnackbarSeverity("warning");
+        setSnackbarMessage("Fetching image failed.");
+        setOpenSnackbar(true);
+
         setLoadingImage(false);
         return;
       }
@@ -409,12 +425,22 @@ export default function DrawImage() {
       });
     } catch (error) {
       console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
+
+      setSnackbarSeverity("warning");
+      setSnackbarMessage(`Image url(${imageUrlResponse}) is invalid.`);
+      setOpenSnackbar(true);
+
       setLoadingImage(false);
       return;
     }
 
     if (responseUploadImageToS3.status !== 200) {
       console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
+
+      setSnackbarSeverity("warning");
+      setSnackbarMessage("S3 upload failed.");
+      setOpenSnackbar(true);
+
       setLoadingImage(false);
       return;
     }
@@ -439,7 +465,13 @@ export default function DrawImage() {
 
     if (imageUploadResponse.status !== 200) {
       console.error(`imageUploadResponse: ${imageUploadResponse}`);
+
+      setSnackbarSeverity("warning");
+      setSnackbarMessage(`Image upload response error: ${imageUploadResponse}`);
+      setOpenSnackbar(true);
+
       setLoadingImage(false);
+
       return;
     }
 

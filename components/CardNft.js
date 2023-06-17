@@ -311,10 +311,8 @@ export default function CardNft({
           <CardMedia
             component="img"
             image={metadata?.image}
-            onError={handleCardMediaImageError}
+            // onError={handleCardMediaImageError}
             sx={{
-              objectFit: "contain",
-              width: "90vw",
               height: cardImageHeight,
             }}
           />
@@ -322,7 +320,6 @@ export default function CardNft({
           <Skeleton
             variant="rounded"
             sx={{
-              width: "90vw",
               height: cardImageHeight,
             }}
           />
