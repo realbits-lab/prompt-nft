@@ -118,8 +118,9 @@ export default function CardNft({
     args: [nftData?.nftAddress, nftData?.tokenId],
     watch: true,
     onSuccess(data) {
-      console.log("call onSuccess()");
-      console.log("data: ", data);
+      // console.log("call onSuccess()");
+      // console.log("data.renteeAddress: ", data.renteeAddress);
+      // console.log("address: ", address);
       if (data.renteeAddress.toLowerCase() === address.toLowerCase()) {
         setIsOwnerOrRentee(true);
       }
@@ -148,8 +149,9 @@ export default function CardNft({
     args: [nftData?.tokenId],
     watch: true,
     onSuccess(data) {
-      console.log("call onSuccess()");
-      console.log("data: ", data);
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+      // console.log("address: ", address);
       if (data.toLowerCase() === address.toLowerCase()) {
         setIsOwnerOrRentee(true);
       }
@@ -376,9 +378,9 @@ export default function CardNft({
                   return;
                 }
 
-                console.log("nftData.rentFee: ", nftData.rentFee);
-                console.log("nftData.tokenId: ", nftData.tokenId);
-                console.log("writeRentNFT: ", writeRentNFT);
+                // console.log("nftData.rentFee: ", nftData.rentFee);
+                // console.log("nftData.tokenId: ", nftData.tokenId);
+                // console.log("writeRentNFT: ", writeRentNFT);
                 setIsRenting(true);
                 writeRentNFT?.();
               }
