@@ -443,7 +443,7 @@ export default function DrawImage() {
     const imageUploadJsonResponse = await responseUploadImageToS3.json();
     // console.log("imageUploadJsonResponse: ", imageUploadJsonResponse);
 
-    //* Post imageUrlResponse and prompt to prompt server.
+    //* Post image and prompt to prompt server.
     const imageUploadResponse = await fetch(POST_API_URL, {
       method: "POST",
       headers: {

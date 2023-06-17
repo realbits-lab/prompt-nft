@@ -82,6 +82,8 @@ function Mint({
       // console.log("call onSuccess()");
       // console.log("data: ", data);
 
+      //* TODO: Remove moim post.
+
       //* Go to thanks page.
       const imageUrlEncodedString = encodeURIComponent(imageUrl);
       router.push(`${THANKS_PAGE}${imageUrlEncodedString}`);

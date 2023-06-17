@@ -1,6 +1,5 @@
 import React from "react";
 import { isMobile } from "react-device-detect";
-import useSWR from "swr";
 import {
   useAccount,
   useNetwork,
@@ -14,11 +13,16 @@ import {
   useWatchPendingTransactions,
 } from "wagmi";
 import { useRecoilStateLoadable } from "recoil";
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
+import Image from "mui-image";
+import { styled } from "@mui/material/styles";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell, { tableCellClasses } from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
@@ -28,6 +32,7 @@ import {
   writeToastMessageState,
   writeDialogMessageState,
   handleCheckPrompt,
+  shortenAddress,
 } from "@/lib/util";
 import useUser from "@/lib/useUser";
 import rentmarketABI from "@/contracts/rentMarket.json";
@@ -40,7 +45,27 @@ export default function CardNft({
   signTypedDataAsync,
 }) {
   // console.log("call CardNft()");
-  // console.log("nftData: ", nftData);
+  console.log("nftData: ", nftData);
+
+  const StyledTableCell = styled(TableCell)(({ theme }) => ({
+    [`&.${tableCellClasses.head}`]: {
+      backgroundColor: theme.palette.common.black,
+      color: theme.palette.common.white,
+    },
+    [`&.${tableCellClasses.body}`]: {
+      fontSize: 14,
+    },
+  }));
+
+  const StyledTableRow = styled(TableRow)(({ theme }) => ({
+    "&:nth-of-type(odd)": {
+      backgroundColor: theme.palette.action.hover,
+    },
+    // hide last border
+    "&:last-child td, &:last-child th": {
+      border: 0,
+    },
+  }));
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.
@@ -294,104 +319,183 @@ export default function CardNft({
     e.target.src = PLACEHOLDER_IMAGE_URL;
   }
 
+  async function handleRentPayment() {
+    if (isOwnerOrRentee === true) {
+      await handleCheckPrompt({
+        setWriteToastMessage: setWriteToastMessage,
+        setWriteDialogMessage: setWriteDialogMessage,
+        isMobile: isMobile,
+        user: user,
+        nftData: nftData,
+        promptNftContract: promptNftContract,
+        dataWalletClient: dataWalletClient,
+        isConnected: isConnected,
+        selectedChain: selectedChain,
+        address: address,
+        mutateUser: mutateUser,
+        signTypedDataAsync: signTypedDataAsync,
+      });
+
+      return;
+    } else {
+      if (isWalletConnected({ isConnected, selectedChain }) === false) {
+        setWriteToastMessage({
+          snackbarSeverity: AlertSeverity.warning,
+          snackbarMessage: `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`,
+          snackbarTime: new Date(),
+          snackbarOpen: true,
+        });
+        return;
+      }
+
+      // console.log("nftData.rentFee: ", nftData.rentFee);
+      // console.log("nftData.tokenId: ", nftData.tokenId);
+      // console.log("writeRentNFT: ", writeRentNFT);
+      setIsRenting(true);
+      writeRentNFT?.();
+    }
+  }
+
   return (
-    <Box
-      sx={{
-        m: CARD_PADDING,
-        marginTop: CARD_MARGIN_TOP,
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Card>
-        {metadata ? (
-          <CardMedia
-            component="img"
-            image={metadata?.image}
-            onError={handleCardMediaImageError}
-            sx={{
-              height: cardImageHeight,
-            }}
-          />
-        ) : (
-          <Skeleton
-            variant="rounded"
-            sx={{
-              height: cardImageHeight,
-            }}
-          />
-        )}
-        <CardContent
-          sx={{
-            width: "90vw",
-          }}
-        >
-          <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-            # {nftData.tokenId.toString()} /{" "}
-            {metadata ? metadata.name : "loading..."} /{" "}
-            {metadata ? metadata.description : "loading..."} /{" "}
-            {(
-              Number((nftData.rentFee * 1000000n) / 10n ** 18n) / 1000000
-            ).toString()}{" "}
-            matic
-          </Typography>
-        </CardContent>
-        <CardActions>
-          <Button
-            size="small"
-            disabled={isRenting}
-            variant="contained"
-            onClick={async function () {
-              if (isOwnerOrRentee === true) {
-                await handleCheckPrompt({
-                  setWriteToastMessage: setWriteToastMessage,
-                  setWriteDialogMessage: setWriteDialogMessage,
-                  isMobile: isMobile,
-                  user: user,
-                  nftData: nftData,
-                  promptNftContract: promptNftContract,
-                  dataWalletClient: dataWalletClient,
-                  isConnected: isConnected,
-                  selectedChain: selectedChain,
-                  address: address,
-                  mutateUser: mutateUser,
-                  signTypedDataAsync: signTypedDataAsync,
-                });
+    <>
+      <Grid
+        container
+        spacing={0}
+        sx={{
+          m: CARD_PADDING,
+          marginTop: CARD_MARGIN_TOP,
+        }}
+      >
+        <Grid item xs={7} sx={{ p: 2 }}>
+          {metadata ? (
+            <Image
+              src={metadata?.image}
+              fit="contain"
+              duration={10}
+              easing="ease"
+              shiftDuration={10}
+            />
+          ) : (
+            // <Skeleton
+            //   variant="rectangular"
+            //   height={cardImageHeight}
+            //   component={Paper}
+            // />
+            <Skeleton variant="rectangular" height={cardImageHeight} />
+          )}
+        </Grid>
+        <Grid item xs={5} sx={{ p: 2 }}>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <StyledTableCell align="center">Item</StyledTableCell>
+                  <StyledTableCell align="center">Value</StyledTableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <StyledTableRow>
+                  <StyledTableCell align="left">Token ID</StyledTableCell>
+                  <StyledTableCell align="left">
+                    {nftData.tokenId.toString()}
+                  </StyledTableCell>
+                </StyledTableRow>
 
-                return;
-              } else {
-                if (
-                  isWalletConnected({ isConnected, selectedChain }) === false
-                ) {
-                  setWriteToastMessage({
-                    snackbarSeverity: AlertSeverity.warning,
-                    snackbarMessage: `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`,
-                    snackbarTime: new Date(),
-                    snackbarOpen: true,
-                  });
-                  return;
-                }
+                <StyledTableRow>
+                  <StyledTableCell align="left">Name</StyledTableCell>
+                  <StyledTableCell align="left">
+                    {metadata ? metadata.name : "loading..."}
+                  </StyledTableCell>
+                </StyledTableRow>
 
-                // console.log("nftData.rentFee: ", nftData.rentFee);
-                // console.log("nftData.tokenId: ", nftData.tokenId);
-                // console.log("writeRentNFT: ", writeRentNFT);
-                setIsRenting(true);
-                writeRentNFT?.();
-              }
-            }}
-          >
-            {isRenting ? (
-              <Typography>Renting...</Typography>
-            ) : isOwnerOrRentee ? (
-              <Typography>View Prompt</Typography>
-            ) : (
-              <Typography>Rent Prompt</Typography>
-            )}
-          </Button>
-        </CardActions>
-      </Card>
-    </Box>
+                <StyledTableRow>
+                  <StyledTableCell align="left">Description</StyledTableCell>
+                  <StyledTableCell align="left">
+                    {metadata ? metadata.description : "loading..."}
+                  </StyledTableCell>
+                </StyledTableRow>
+
+                <StyledTableRow>
+                  <StyledTableCell align="left">Opensea</StyledTableCell>
+                  <StyledTableCell align="left">
+                    {shortenAddress({
+                      address: nftData?.nftAddress,
+                      withLink: "opensea",
+                    })}
+                  </StyledTableCell>
+                </StyledTableRow>
+
+                <StyledTableRow>
+                  <StyledTableCell align="left">Explorer</StyledTableCell>
+                  <StyledTableCell align="left">
+                    {shortenAddress({
+                      address: nftData?.nftAddress,
+                      withLink: "scan",
+                    })}
+                  </StyledTableCell>
+                </StyledTableRow>
+
+                <StyledTableRow>
+                  <StyledTableCell align="left">
+                    <Button
+                      fullWidth
+                      size="small"
+                      disabled={isRenting}
+                      variant="contained"
+                      onClick={handleRentPayment}
+                    >
+                      {isRenting ? (
+                        <Typography>Renting...</Typography>
+                      ) : isOwnerOrRentee ? (
+                        <Typography>Prompt</Typography>
+                      ) : (
+                        <Typography>Rent by matic</Typography>
+                      )}
+                    </Button>
+                  </StyledTableCell>
+                  <StyledTableCell align="left">
+                    {(
+                      Number((nftData.rentFee * 1000000n) / 10n ** 18n) /
+                      1000000
+                    ).toString()}{" "}
+                    matic
+                  </StyledTableCell>
+                </StyledTableRow>
+
+                {nftData.rentFeeByToken && (
+                  <StyledTableRow>
+                    <StyledTableCell align="left">
+                      <Button
+                        fullWidth
+                        size="small"
+                        disabled={isRenting}
+                        variant="contained"
+                        onClick={handleRentPayment}
+                      >
+                        {isRenting ? (
+                          <Typography>Renting...</Typography>
+                        ) : isOwnerOrRentee ? (
+                          <Typography>Prompt</Typography>
+                        ) : (
+                          <Typography>Rent by token</Typography>
+                        )}
+                      </Button>
+                    </StyledTableCell>
+                    <StyledTableCell align="left">
+                      {(
+                        Number(
+                          (nftData.rentFeeByToken * 1000000n) / 10n ** 18n
+                        ) / 1000000
+                      ).toString()}{" "}
+                      token
+                    </StyledTableCell>
+                  </StyledTableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Grid>
+      </Grid>
+    </>
   );
 }

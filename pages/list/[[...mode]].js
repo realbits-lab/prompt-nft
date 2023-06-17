@@ -60,6 +60,12 @@ export default function ListPage(props) {
 
   const DEFAULT_MENU = "draw";
   const BOARD_URL = "https://muve.moim.co/forums/QEUREBYLO";
+  let MARKET_URL;
+  if (NEXT_PUBLIC_BLOCKCHAIN_NETWORK === "matic") {
+    MARKET_URL = "https://rent-market-production.vercel.app/";
+  } else {
+    MARKET_URL = "https://rent-market-development.vercel.app/";
+  }
   const router = useRouter();
   const queryMode = router.query.mode;
   const queryUpdated = router.query.updated;
@@ -214,17 +220,6 @@ export default function ListPage(props) {
               <AppBarButton buttonMode="nft" />
               <AppBarButton buttonMode="own" />
               <AppBarButton buttonMode="rent" />
-              <Link href={BOARD_URL} target="_blank">
-                <Button
-                  style={{
-                    borderRadius: BUTTON_BORDER_RADIUS,
-                    padding: SELECTED_BUTTON_PADDING,
-                  }}
-                  sx={{ my: 2, color: "white" }}
-                >
-                  Board
-                </Button>
-              </Link>
             </Box>
 
             <Box>
@@ -259,13 +254,30 @@ export default function ListPage(props) {
                   "aria-labelledby": "basic-button",
                 }}
               >
-                <Link href={BOARD_URL} target="_blank">
+                <Link
+                  href={BOARD_URL}
+                  target="_blank"
+                  style={{ color: "inherit", textDecoration: "inherit" }}
+                >
                   <MenuItem
                     onClick={() => {
                       handleSettingMenuClose();
                     }}
                   >
-                    Board
+                    MARKET
+                  </MenuItem>
+                </Link>
+                <Link
+                  href={BOARD_URL}
+                  target="_blank"
+                  style={{ color: "inherit", textDecoration: "inherit" }}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      handleSettingMenuClose();
+                    }}
+                  >
+                    BOARD
                   </MenuItem>
                 </Link>
                 <MenuItem
