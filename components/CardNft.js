@@ -106,29 +106,62 @@ export default function CardNft({
   });
 
   const {
-    data: dataIsOwnerOrRenter,
-    isError: isErrorIsOwnerOrRenter,
-    isLoading: isLoadingIsOwnerOrRenter,
-    isValidating: isValidatingIsOwnerOrRenter,
-    status: statusIsOwnerOrRenter,
+    data: dataRentData,
+    isError: isErrorRentData,
+    isLoading: isLoadingRentData,
+    isValidating: isValidatingRentData,
+    status: statusRentData,
   } = useContractRead({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
-    functionName: "isOwnerOrRenter",
-    args: [address],
+    functionName: "getRentData",
+    args: [nftData?.nftAddress, nftData?.tokenId],
     watch: true,
     onSuccess(data) {
-      // console.log("call onSuccess()");
-      // console.log("data: ", data);
+      console.log("call onSuccess()");
+      console.log("data: ", data);
+      if (data.renteeAddress.toLowerCase() === address.toLowerCase()) {
+        setIsOwnerOrRentee(true);
+      }
     },
     onError(error) {
       // console.log("call onError()");
       // console.log("error: ", error);
     },
     onSettled(data, error) {
-      console.log("call onSettled()");
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
+    },
+  });
+
+  const {
+    data: dataOwnerOf,
+    isError: isErrorOwnerOf,
+    isLoading: isLoadingOwnerOf,
+    isValidating: isValidatingOwnerOf,
+    status: statusOwnerOf,
+  } = useContractRead({
+    address: PROMPT_NFT_CONTRACT_ADDRESS,
+    abi: promptNFTABI.abi,
+    functionName: "ownerOf",
+    args: [nftData?.tokenId],
+    watch: true,
+    onSuccess(data) {
+      console.log("call onSuccess()");
       console.log("data: ", data);
-      console.log("error: ", error);
+      if (data.toLowerCase() === address.toLowerCase()) {
+        setIsOwnerOrRentee(true);
+      }
+    },
+    onError(error) {
+      // console.log("call onError()");
+      // console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
     },
   });
 
@@ -147,10 +180,37 @@ export default function CardNft({
     functionName: "rentNFT",
     args: [
       PROMPT_NFT_CONTRACT_ADDRESS,
-      nftData.tokenId,
+      nftData?.tokenId,
       SERVICE_ACCOUNT_ADDRESS,
     ],
-    overrides: { value: nftData.rentFee },
+    value: nftData?.rentFee,
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.info,
+        snackbarMessage:
+          "Rent transaction is just started and wait a moment...",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+    onError(error) {
+      // console.log("call onSuccess()");
+      // console.log("error: ", error);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.error,
+        snackbarMessage: `${error}`,
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+    onSettled(data, error) {
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
+      setIsRenting(false);
+    },
   });
   const waitForTransaction = useWaitForTransaction({
     hash: dataRentNFT?.hash,
@@ -167,7 +227,6 @@ export default function CardNft({
       // console.log("data: ", data);
       // console.log("error: ", error);
 
-      setIsRenting(false);
       setWriteToastMessage({
         snackbarSeverity: AlertSeverity.info,
         snackbarMessage: "Renting is finished.",
@@ -212,6 +271,9 @@ export default function CardNft({
           openDialog: false,
         };
 
+  const [isRenting, setIsRenting] = React.useState(false);
+  const [isOwnerOrRentee, setIsOwnerOrRentee] = React.useState(false);
+
   React.useEffect(function () {
     // console.log("call useEffect()");
 
@@ -230,8 +292,6 @@ export default function CardNft({
     e.target.onerror = null;
     e.target.src = PLACEHOLDER_IMAGE_URL;
   }
-
-  const [isRenting, setIsRenting] = React.useState(false);
 
   return (
     <Box
@@ -274,7 +334,10 @@ export default function CardNft({
             # {nftData.tokenId.toString()} /{" "}
             {metadata ? metadata.name : "loading..."} /{" "}
             {metadata ? metadata.description : "loading..."} /{" "}
-            {(nftData.rentFee / 10n ** 18n).toString()} matic
+            {(
+              Number((nftData.rentFee * 1000000n) / 10n ** 18n) / 1000000
+            ).toString()}{" "}
+            matic
           </Typography>
         </CardContent>
         <CardActions>
@@ -283,7 +346,7 @@ export default function CardNft({
             disabled={isRenting}
             variant="contained"
             onClick={async function () {
-              if (dataIsOwnerOrRenter === true) {
+              if (isOwnerOrRentee === true) {
                 await handleCheckPrompt({
                   setWriteToastMessage: setWriteToastMessage,
                   setWriteDialogMessage: setWriteDialogMessage,
@@ -313,26 +376,11 @@ export default function CardNft({
                   return;
                 }
 
-                //* Rent this nft with rent fee.
-                // console.log("nftData.rentFee: ", nftData.rentFee);
-                // console.log("nftData.tokenId: ", nftData.tokenId);
-                setWriteToastMessage({
-                  snackbarSeverity: AlertSeverity.info,
-                  snackbarMessage: "Trying to rent this nft...",
-                  snackbarTime: new Date(),
-                  snackbarOpen: true,
-                });
-
+                console.log("nftData.rentFee: ", nftData.rentFee);
+                console.log("nftData.tokenId: ", nftData.tokenId);
+                console.log("writeRentNFT: ", writeRentNFT);
                 setIsRenting(true);
                 writeRentNFT?.();
-
-                setWriteToastMessage({
-                  snackbarSeverity: AlertSeverity.info,
-                  snackbarMessage:
-                    "Rent transaction is just started and wait a moment...",
-                  snackbarTime: new Date(),
-                  snackbarOpen: true,
-                });
               }
             }}
           >
