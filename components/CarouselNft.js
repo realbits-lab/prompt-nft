@@ -22,17 +22,13 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Grid from "@mui/material/Grid";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
-import CardNft from "./CardNft";
+import CardNft from "@/components/CardNft";
+import rentmarketABI from "@/contracts/rentMarket.json";
 
 function CarouselNft({
   dataWalletClient,
   rentMarketContract,
   promptNftContract,
-  selectedChain,
-  address,
-  isConnected,
-  data,
-  isLoading,
   signTypedDataAsync,
 }) {
   // console.log("call CarouselNft()");
@@ -46,23 +42,6 @@ function CarouselNft({
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
 
-  const BindKeyboardSwipeableViews = bindKeyboard(SwipeableViews);
-  const theme = useTheme();
-  const [activeStep, setActiveStep] = React.useState(0);
-  const maxSteps = data?.length || 0;
-
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-  const handleStepChange = (step) => {
-    setActiveStep(step);
-  };
-
   //*---------------------------------------------------------------------------
   //* Wagmi hook
   //*---------------------------------------------------------------------------
@@ -71,11 +50,11 @@ function CarouselNft({
   const { chains, chain: selectedChain } = useNetwork();
   const { address, isConnected } = useAccount();
   const {
-    data: dataRegisterData,
-    isError: errorRegisterData,
-    isLoading: isLoadingRegisterData,
-    isValidating: isValidatingRegisterData,
-    status: statusRegisterData,
+    data: dataAllRegisterData,
+    isError: errorAllRegisterData,
+    isLoading: isLoadingAllRegisterData,
+    isValidating: isValidatingAllRegisterData,
+    status: statusAllRegisterData,
   } = useContractRead({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
@@ -123,76 +102,23 @@ function CarouselNft({
     },
   });
 
-  function initialize() {
-    //* Find the register data in registered collection.
-    //* After registering data, even though collection is removed, register data remains.
-    let registerData;
-    if (dataRegisterData && dataAllCollection) {
-      registerData = dataRegisterData.filter(function (registerData) {
-        return dataAllCollection.some(function (collection) {
-          return (
-            collection.collectionAddress.toLowerCase() ===
-            registerData.nftAddress.toLowerCase()
-          );
-        });
-      });
-    }
-    // console.log("registerData: ", registerData);
+  //* Set pagination.
+  const BindKeyboardSwipeableViews = bindKeyboard(SwipeableViews);
+  const theme = useTheme();
+  const [activeStep, setActiveStep] = React.useState(0);
+  const maxSteps = dataAllRegisterData?.length || 0;
 
-    //* Set all registered nft data.
-    if (registerData) {
-      // console.log("registerData: ", registerData);
-      const dataNftWithStatusArray = registerData.map(function (nft) {
-        let isOwn = false;
-        let isRent = false;
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
 
-        //* Check own status.
-        if (ownDataArray) {
-          const someResult = ownDataArray.some(function (ownData) {
-            return (
-              ownData.tokenId === nft.tokenId &&
-              ownData.nftAddress.toLowerCase() ===
-                PROMPT_NFT_CONTRACT_ADDRESS.toLowerCase()
-            );
-          });
-          if (someResult === true) {
-            isOwn = true;
-          } else {
-            isOwn = false;
-          }
-        }
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
 
-        //* Check rent status.
-        if (allMyRentDataArray) {
-          const someResult = allMyRentDataArray.some(function (rentData) {
-            // console.log("rentData: ", rentData);
-            return (
-              rentData.tokenId === nft.tokenId &&
-              rentData.renteeAddress.toLowerCase() === address.toLowerCase()
-            );
-          });
-          if (someResult === true) {
-            isRent = true;
-          } else {
-            isRent = false;
-          }
-        }
-
-        // console.log("nft.tokenId: ", nft.tokenId.toNumber());
-        // console.log("isOwn: ", isOwn);
-        // console.log("isRent: ", isRent);
-
-        return {
-          ...nft,
-          isOwn: isOwn,
-          isRent: isRent,
-        };
-      });
-
-      // console.log("dataNftWithStatusArray: ", dataNftWithStatusArray);
-      setAllNftDataArray(dataNftWithStatusArray.reverse());
-    }
-  }
+  const handleStepChange = (step) => {
+    setActiveStep(step);
+  };
 
   function LoadingPage() {
     return (
@@ -255,17 +181,7 @@ function CarouselNft({
         );
       }
 
-      if (!data) {
-        return (
-          <NoContentPage
-            message={
-              "This service is just started. Soon, image list with prompt will be updated."
-            }
-          />
-        );
-      }
-
-      if (isLoading === true) {
+      if (isLoadingAllRegisterData === true) {
         return <LoadingPage />;
       }
 
@@ -278,7 +194,7 @@ function CarouselNft({
             onChangeIndex={handleStepChange}
             enableMouseEvents
           >
-            {data.map(function (nftData, index) {
+            {dataAllRegisterData.map(function (nftData, index) {
               return (
                 <div key={index}>
                   {Math.abs(activeStep - index) <= 2 ? (
@@ -334,7 +250,7 @@ function CarouselNft({
         </>
       );
     },
-    [activeStep, maxSteps, data, isLoading]
+    [activeStep, maxSteps, dataAllRegisterData, isLoadingAllRegisterData]
   );
 
   return <NftCardList />;

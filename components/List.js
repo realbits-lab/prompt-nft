@@ -514,14 +514,9 @@ function List({ mode, updated, setNewImageCountFunc }) {
               <NoLoginPage />
             ) : (
               <CarouselNft
-                selectedChain={selectedChain}
-                address={address}
-                isConnected={isConnected}
                 dataWalletClient={dataWalletClient}
                 promptNftContract={promptNftContract}
                 rentMarketContract={rentMarketContract}
-                data={allNftDataArray}
-                isLoading={swrIsLoadingRegisterData}
                 signTypedDataAsync={signTypedDataAsync}
               />
             )}
