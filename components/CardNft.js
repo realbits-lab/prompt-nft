@@ -15,6 +15,11 @@ import {
 import { useRecoilStateLoadable } from "recoil";
 import Image from "mui-image";
 import { styled } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import CardActions from "@mui/material/CardActions";
+import CardContent from "@mui/material/CardContent";
+import CardMedia from "@mui/material/CardMedia";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
@@ -45,7 +50,7 @@ export default function CardNft({
   signTypedDataAsync,
 }) {
   // console.log("call CardNft()");
-  console.log("nftData: ", nftData);
+  // console.log("nftData: ", nftData);
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -79,7 +84,8 @@ export default function CardNft({
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
 
   const CARD_MARGIN_TOP = "60px";
-  const CARD_MARGIN_BOTTOM = 250;
+  const CARD_MARGIN_BOTTOM = 550;
+  const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;
   const [cardImageHeight, setCardImageHeight] = React.useState(0);
@@ -357,34 +363,40 @@ export default function CardNft({
   }
 
   return (
-    <>
-      <Grid
-        container
-        spacing={0}
-        sx={{
-          m: CARD_PADDING,
-          marginTop: CARD_MARGIN_TOP,
-        }}
-      >
-        <Grid item xs={7} sx={{ p: 2 }}>
-          {metadata ? (
-            <Image
-              src={metadata?.image}
-              fit="contain"
-              duration={10}
-              easing="ease"
-              shiftDuration={10}
-            />
-          ) : (
-            // <Skeleton
-            //   variant="rectangular"
-            //   height={cardImageHeight}
-            //   component={Paper}
-            // />
-            <Skeleton variant="rectangular" height={cardImageHeight} />
-          )}
-        </Grid>
-        <Grid item xs={5} sx={{ p: 2 }}>
+    <Box
+      sx={{
+        m: CARD_PADDING,
+        marginTop: CARD_MARGIN_TOP,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Card>
+        {metadata ? (
+          <CardMedia
+            component="img"
+            image={metadata?.image}
+            onError={handleCardMediaImageError}
+            sx={{
+              height: cardImageHeight,
+              objectFit: "contain",
+            }}
+          />
+        ) : (
+          <Skeleton
+            variant="rounded"
+            sx={{
+              height: cardImageHeight,
+            }}
+          />
+        )}
+        <CardContent
+          sx={{
+            width: "90vw",
+          }}
+        >
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
@@ -438,7 +450,6 @@ export default function CardNft({
                 <StyledTableRow>
                   <StyledTableCell align="left">
                     <Button
-                      fullWidth
                       size="small"
                       disabled={isRenting}
                       variant="contained"
@@ -449,7 +460,7 @@ export default function CardNft({
                       ) : isOwnerOrRentee ? (
                         <Typography>Prompt</Typography>
                       ) : (
-                        <Typography>Rent by matic</Typography>
+                        <Typography>Rent</Typography>
                       )}
                     </Button>
                   </StyledTableCell>
@@ -466,7 +477,6 @@ export default function CardNft({
                   <StyledTableRow>
                     <StyledTableCell align="left">
                       <Button
-                        fullWidth
                         size="small"
                         disabled={isRenting}
                         variant="contained"
@@ -477,7 +487,7 @@ export default function CardNft({
                         ) : isOwnerOrRentee ? (
                           <Typography>Prompt</Typography>
                         ) : (
-                          <Typography>Rent by token</Typography>
+                          <Typography>Rent</Typography>
                         )}
                       </Button>
                     </StyledTableCell>
@@ -494,8 +504,8 @@ export default function CardNft({
               </TableBody>
             </Table>
           </TableContainer>
-        </Grid>
-      </Grid>
-    </>
+        </CardContent>
+      </Card>
+    </Box>
   );
 }
