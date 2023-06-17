@@ -290,7 +290,6 @@ export default function CardNft({
   }, []);
 
   function handleCardMediaImageError(e) {
-    // console.log("call handleCardMediaImageError()");
     e.target.onerror = null;
     e.target.src = PLACEHOLDER_IMAGE_URL;
   }
@@ -311,7 +310,7 @@ export default function CardNft({
           <CardMedia
             component="img"
             image={metadata?.image}
-            // onError={handleCardMediaImageError}
+            onError={handleCardMediaImageError}
             sx={{
               height: cardImageHeight,
             }}
