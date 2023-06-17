@@ -7,6 +7,7 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import Box from "@mui/material/Box";
+import Link from "@mui/material/Link";
 import Slide from "@mui/material/Slide";
 import Badge from "@mui/material/Badge";
 import Button from "@mui/material/Button";
@@ -19,9 +20,6 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import MenuIcon from "@mui/icons-material/Menu";
 import List from "@/components/List";
-const User = dynamic(() => import("../../components/User"), {
-  ssr: false,
-});
 import useUser from "@/lib/useUser";
 import {
   RBSnackbar,
@@ -32,6 +30,9 @@ import {
   readDialogMessageState,
 } from "@/lib/util";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
+const User = dynamic(() => import("../../components/User"), {
+  ssr: false,
+});
 
 function HideOnScroll(props) {
   const { children, window } = props;
@@ -58,6 +59,13 @@ export default function ListPage(props) {
   // console.log("call ListPage()");
 
   const DEFAULT_MENU = "draw";
+  const BOARD_URL = "https://muve.moim.co/forums/QEUREBYLO";
+  let MARKET_URL;
+  if (process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK === "matic") {
+    MARKET_URL = "https://rent-market-production.vercel.app/";
+  } else {
+    MARKET_URL = "https://rent-market-development.vercel.app/";
+  }
   const router = useRouter();
   const queryMode = router.query.mode;
   const queryUpdated = router.query.updated;
@@ -210,6 +218,8 @@ export default function ListPage(props) {
                 <AppBarButton buttonMode="image" />
               </Badge>
               <AppBarButton buttonMode="nft" />
+              <AppBarButton buttonMode="own" />
+              <AppBarButton buttonMode="rent" />
             </Box>
 
             <Box>
@@ -244,22 +254,32 @@ export default function ListPage(props) {
                   "aria-labelledby": "basic-button",
                 }}
               >
-                <MenuItem
-                  onClick={() => {
-                    setMode("own");
-                    handleSettingMenuClose();
-                  }}
+                <Link
+                  href={MARKET_URL}
+                  target="_blank"
+                  style={{ color: "inherit", textDecoration: "inherit" }}
                 >
-                  OWN
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    setMode("rent");
-                    handleSettingMenuClose();
-                  }}
+                  <MenuItem
+                    onClick={() => {
+                      handleSettingMenuClose();
+                    }}
+                  >
+                    MARKET
+                  </MenuItem>
+                </Link>
+                <Link
+                  href={BOARD_URL}
+                  target="_blank"
+                  style={{ color: "inherit", textDecoration: "inherit" }}
                 >
-                  RENT
-                </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      handleSettingMenuClose();
+                    }}
+                  >
+                    BOARD
+                  </MenuItem>
+                </Link>
                 <MenuItem
                   onClick={() => {
                     setMode("theme");

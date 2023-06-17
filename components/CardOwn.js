@@ -28,8 +28,8 @@ function CardOwn({
   promptNftContract,
   signTypedDataAsync,
 }) {
-  console.log("call CardOwn()");
-  console.log("nftData: ", nftData);
+  // console.log("call CardOwn()");
+  // console.log("nftData: ", nftData);
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.
@@ -50,7 +50,7 @@ function CardOwn({
     signer: dataWalletClient,
     tokenId: nftData.tokenId,
   });
-  console.log("metadataData: ", metadataData);
+  // console.log("metadataData: ", metadataData);
 
   const { user, mutateUser } = useUser();
   // const {

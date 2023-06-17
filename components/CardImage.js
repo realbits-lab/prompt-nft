@@ -17,7 +17,7 @@ function CardImage({ imageData }) {
   const CARD_MARGIN_TOP = "60px";
   const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;
-  
+
   //* Height of bottom pagination button and bar.
   const CARD_MARGIN_BOTTOM = 200;
 
@@ -59,9 +59,6 @@ function CardImage({ imageData }) {
             image={imageData ? imageData.imageUrl : ""}
             onError={handleCardMediaImageError}
             sx={{
-              objectFit: "contain",
-              width: "90vw",
-              // height: "50vh",
               height: cardImageHeight,
             }}
           />

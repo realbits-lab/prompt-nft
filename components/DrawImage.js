@@ -2,6 +2,7 @@ import * as React from "react";
 import { useRouter } from "next/router";
 import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 import moment from "moment";
+import dynamic from "next/dynamic";
 import {
   useAccount,
   useSigner,
@@ -28,8 +29,11 @@ import Typography from "@mui/material/Typography";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import useUser from "@/lib/useUser";
 import { sleep } from "@/lib/util";
-
+const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
+  ssr: false,
+});
 export default function DrawImage() {
+  const DEFAULT_MODEL_NAME = "runwayml/stable-diffusion-v1-5";
   const DRAW_API_URL = "/api/draw";
   const POST_API_URL = "/api/post";
   const UPLOAD_IMAGE_TO_S3_URL = "/api/upload-image-to-s3";
@@ -46,7 +50,7 @@ export default function DrawImage() {
   const [loadingImage, setLoadingImage] = React.useState(false);
   const [imageHeight, setImageHeight] = React.useState(0);
   const router = useRouter();
-  const MARGIN_TOP = "40px";
+  const MARGIN_TOP = "60px";
 
   //*---------------------------------------------------------------------------
   //* Wagmi hook.
@@ -59,19 +63,18 @@ export default function DrawImage() {
   const SERVICE_ACCOUNT_ADDRESS =
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
   const { address, isConnected } = useAccount();
-  const [rentPaymentNft, setRentPaymentNft] = React.useState(false);
   const [paymentNftRentFee, setPaymentNftRentFee] = React.useState();
   const [currentTimestamp, setCurrentTimestamp] = React.useState();
   const [imageFetchEndTime, setImageFetchEndTime] = React.useState();
   const [paymentNftRentEndTime, setPaymentNftRentEndTime] = React.useState();
 
   const {
-    data: swrDataAllRentData,
-    isError: swrErrorAllRentData,
-    isLoading: swrIsLoadingAllRentData,
-    isValidating: swrIsValidatingAllRentData,
-    status: swrStatusAllRentData,
-    refetch: swrRefetchAllRentData,
+    data: dataAllRentData,
+    isError: errorAllRentData,
+    isLoading: isLoadingAllRentData,
+    isValidating: isValidatingAllRentData,
+    status: statusAllRentData,
+    refetch: refetchAllRentData,
   } = useContractRead({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
@@ -95,12 +98,12 @@ export default function DrawImage() {
   });
 
   const {
-    data: swrDataRentData,
-    isError: swrErrorRentData,
-    isLoading: swrIsLoadingRentData,
-    isValidating: swrIsValidatingRentData,
-    status: swrStatusRentData,
-    refetch: swrRefetchRentData,
+    data: dataRentData,
+    isError: errorRentData,
+    isLoading: isLoadingRentData,
+    isValidating: isValidatingRentData,
+    status: statusRentData,
+    refetch: refetchRentData,
   } = useContractRead({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
@@ -156,7 +159,6 @@ export default function DrawImage() {
         // console.log("data: ", data);
       },
     });
-
   const {
     data: dataRentNFT,
     error: errorRentNFT,
@@ -176,8 +178,7 @@ export default function DrawImage() {
       SERVICE_ACCOUNT_ADDRESS,
     ],
   });
-
-  const waitForTransaction = useWaitForTransaction({
+  const waitForTransactionRentNFT = useWaitForTransaction({
     hash: dataRentNFT?.hash,
     onSuccess(data) {
       // console.log("call onSuccess()");
@@ -193,7 +194,6 @@ export default function DrawImage() {
       // console.log("error: ", error);
     },
   });
-
   useWatchPendingTransactions({
     listener: function (tx) {
       // console.log("tx: ", tx);
@@ -201,12 +201,25 @@ export default function DrawImage() {
   });
 
   //*---------------------------------------------------------------------------
+  //* Handle snackbar.
+  //*---------------------------------------------------------------------------
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
+  const [openSnackbar, setOpenSnackbar] = React.useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState("info");
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
+  //*---------------------------------------------------------------------------
   //* Handle text input change.
   //*---------------------------------------------------------------------------
   const [formValue, setFormValue] = React.useState({
     prompt: "",
     negativePrompt: "",
-    modelName: "",
+    modelName: DEFAULT_MODEL_NAME,
   });
   const { prompt, negativePrompt, modelName } = formValue;
   const handleChange = (event) => {
@@ -238,8 +251,8 @@ export default function DrawImage() {
       // console.log("call useEffect()");
 
       //* Check user has rented the payment nft.
-      if (swrDataAllRentData) {
-        swrDataAllRentData.map(function (rentData) {
+      if (dataAllRentData) {
+        dataAllRentData.map(function (rentData) {
           // console.log("rentData: ", rentData);
           if (
             rentData.renteeAddress.toLowerCase() === address?.toLowerCase() &&
@@ -251,7 +264,6 @@ export default function DrawImage() {
               Number(rentData.rentStartTimestamp) +
               Number(rentData.rentDuration);
             setPaymentNftRentEndTime(rentEndTime);
-            setRentPaymentNft(true);
           }
         });
       }
@@ -263,7 +275,7 @@ export default function DrawImage() {
         window.removeEventListener("resize", handleResize);
       };
     },
-    [swrDataAllRentData]
+    [dataAllRentData]
   );
 
   function handleResize() {
@@ -271,7 +283,21 @@ export default function DrawImage() {
   }
 
   async function fetchImage() {
+    let inputPrompt = prompt;
+    let inputNegativePrompt = negativePrompt;
+    let inputModelName = modelName;
+
     setLoadingImage(true);
+
+    if (!prompt || prompt === "") {
+      setSnackbarSeverity("warning");
+      setSnackbarMessage("Prompt is empty.");
+      setOpenSnackbar(true);
+
+      setLoadingImage(false);
+
+      return;
+    }
 
     //* Make stable diffusion api option by json.
     const jsonData = {
@@ -284,20 +310,42 @@ export default function DrawImage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(jsonData),
     });
-    // console.log("fetchResponse: ", fetchResponse);
+    console.log("fetchResponse: ", fetchResponse);
 
     //* Check error response.
     if (fetchResponse.status !== 200) {
-      console.error("jsonResponse.status is not success.");
+      console.error("fetchResponse.status is not 200.");
+      setSnackbarSeverity("warning");
+      setSnackbarMessage("Drawing image failed.");
+      setOpenSnackbar(true);
+
       setLoadingImage(false);
+
       return;
     }
 
     //* Get the stable diffusion api result by json.
     const jsonResponse = await fetchResponse.json();
-    // console.log("jsonResponse: ", jsonResponse);
+    console.log("jsonResponse: ", jsonResponse);
+
+    //* Check error response.
+    if (
+      jsonResponse.status !== "processing" &&
+      jsonResponse.status !== "success"
+    ) {
+      console.error("jsonResponse.status is not processing or success.");
+
+      setSnackbarSeverity("warning");
+      setSnackbarMessage("Drawing image failed.");
+      setOpenSnackbar(true);
+
+      setLoadingImage(false);
+
+      return;
+    }
 
     //* Handle fetch result.
+    let imageUrlResponse;
     if (jsonResponse.status === "processing") {
       const eta = jsonResponse.eta;
       const timestamp = Math.floor(Date.now() / 1000);
@@ -318,6 +366,11 @@ export default function DrawImage() {
       //* Check error response.
       if (fetchResultResponse.status !== 200) {
         console.error("jsonResponse.status is not success.");
+
+        setSnackbarSeverity("warning");
+        setSnackbarMessage("Fetching image failed.");
+        setOpenSnackbar(true);
+
         setLoadingImage(false);
         return;
       }
@@ -327,12 +380,11 @@ export default function DrawImage() {
       // console.log("jsonResponse: ", jsonResponse);
 
       //* Set image url.
-      setImageUrl(jsonResponse.output[0]);
-      setLoadingImage(false);
+      imageUrlResponse = jsonResponse.output[0];
     }
 
     if (jsonResponse.status === "success") {
-      const imageUrlResponse = jsonResponse.imageUrl[0];
+      imageUrlResponse = jsonResponse.imageUrl[0];
       const meta = jsonResponse.meta;
       // console.log("imageUrlResponse: ", imageUrlResponse);
       // console.log("meta.negative_prompt: ", meta.negative_prompt);
@@ -348,60 +400,80 @@ export default function DrawImage() {
       event.target = { name: "modelName", value: meta.model };
       handleChange(event);
 
-      //* Upload image to S3.
-      const uploadImageJsonData = {
-        imageUrl: imageUrlResponse,
-      };
-      let responseUploadImageToS3;
-      try {
-        responseUploadImageToS3 = await fetch(UPLOAD_IMAGE_TO_S3_URL, {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(uploadImageJsonData),
-        });
-      } catch (error) {
-        console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
-        setLoadingImage(false);
-        return;
-      }
+      inputPrompt = meta.prompt;
+      inputNegativePrompt = meta.negative_prompt;
+      inputModelName = meta.model;
+    }
 
-      if (responseUploadImageToS3.status !== 200) {
-        console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
-        setLoadingImage(false);
-        return;
-      }
-      const imageUploadJsonResponse = await responseUploadImageToS3.json();
-      // console.log("imageUploadJsonResponse: ", imageUploadJsonResponse);
-
-      //* Post imageUrlResponse and prompt to prompt server.
-      const imageUploadResponse = await fetch(POST_API_URL, {
+    //* Upload image to S3.
+    const uploadImageJsonData = {
+      imageUrl: imageUrlResponse,
+    };
+    let responseUploadImageToS3;
+    try {
+      responseUploadImageToS3 = await fetch(UPLOAD_IMAGE_TO_S3_URL, {
         method: "POST",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          prompt: meta.prompt,
-          negativePrompt: meta.negative_prompt,
-          imageUrl: imageUploadJsonResponse.url,
-          discordBotToken: DISCORD_BOT_TOKEN,
-        }),
+        body: JSON.stringify(uploadImageJsonData),
       });
-      // console.log("imageUploadResponse: ", imageUploadResponse);
+    } catch (error) {
+      console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
 
-      if (imageUploadResponse.status !== 200) {
-        console.error(`imageUploadResponse: ${imageUploadResponse}`);
-        setLoadingImage(false);
-        return;
-      }
+      setSnackbarSeverity("warning");
+      setSnackbarMessage(`Image url(${imageUrlResponse}) is invalid.`);
+      setOpenSnackbar(true);
 
-      //* Set image url from image generation server.
-      setImageUrl(imageUrlResponse);
       setLoadingImage(false);
+      return;
     }
+
+    if (responseUploadImageToS3.status !== 200) {
+      console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
+
+      setSnackbarSeverity("warning");
+      setSnackbarMessage("S3 upload failed.");
+      setOpenSnackbar(true);
+
+      setLoadingImage(false);
+      return;
+    }
+    const imageUploadJsonResponse = await responseUploadImageToS3.json();
+    // console.log("imageUploadJsonResponse: ", imageUploadJsonResponse);
+
+    //* Post image and prompt to prompt server.
+    const imageUploadResponse = await fetch(POST_API_URL, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt: inputPrompt,
+        negativePrompt: inputNegativePrompt,
+        imageUrl: imageUploadJsonResponse.url,
+        discordBotToken: DISCORD_BOT_TOKEN,
+      }),
+    });
+    // console.log("imageUploadResponse: ", imageUploadResponse);
+
+    if (imageUploadResponse.status !== 200) {
+      console.error(`imageUploadResponse: ${imageUploadResponse}`);
+
+      setSnackbarSeverity("warning");
+      setSnackbarMessage(`Image upload response error: ${imageUploadResponse}`);
+      setOpenSnackbar(true);
+
+      setLoadingImage(false);
+
+      return;
+    }
+
+    //* Set image url from image generation server.
+    setImageUrl(imageUploadJsonResponse.url);
+    setLoadingImage(false);
   }
 
   function buildWalletConnectPage() {
@@ -501,19 +573,9 @@ export default function DrawImage() {
               </Typography>
               <Button
                 onClick={function () {
-                  // console.log("dataRentNFT: ", dataRentNFT);
-                  // console.log("errorRentNFT: ", errorRentNFT);
-                  // console.log("isErrorRentNFT: ", isErrorRentNFT);
-                  // console.log("isIdleRentNFT: ", isIdleRentNFT);
-                  // console.log("isLoadingRentNFT: ", isLoadingRentNFT);
-                  // console.log("isSuccessRentNFT: ", isSuccessRentNFT);
-                  // console.log("writeRentNFT: ", writeRentNFT);
-                  // console.log("statusRentNFT: ", statusRentNFT);
-                  // console.log("swrDataRentData: ", swrDataRentData);
-
-                  if (writeRentNFT && swrDataRentData) {
+                  if (writeRentNFT && dataRentData) {
                     writeRentNFT?.({
-                      value: swrDataRentData.rentFee,
+                      value: dataRentData.rentFee,
                     });
                   }
                 }}
@@ -529,7 +591,6 @@ export default function DrawImage() {
 
   function buildDrawPage() {
     // console.log("call buildDrawPage()");
-    // console.log("swrDataAllRentData: ", swrDataAllRentData);
 
     return (
       <>
@@ -540,25 +601,27 @@ export default function DrawImage() {
           display="flex"
           flexDirection="column"
         >
-          {paymentNftRentEndTime && currentTimestamp && (
-            <Typography color="black">
-              {moment
-                .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                .hours()}
-              :
-              {moment
-                .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                .minutes()}
-              :
-              {moment
-                .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                .seconds()}{" "}
-              /
-              {moment
-                .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                .humanize()}
-            </Typography>
-          )}
+          {paymentNftRentEndTime &&
+            currentTimestamp &&
+            currentTimestamp > paymentNftRentEndTime && (
+              <Typography color="black">
+                {moment
+                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+                  .hours()}
+                :
+                {moment
+                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+                  .minutes()}
+                :
+                {moment
+                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+                  .seconds()}{" "}
+                /
+                {moment
+                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+                  .humanize()}
+              </Typography>
+            )}
           <TextField
             required
             id="outlined-required"
@@ -673,7 +736,7 @@ export default function DrawImage() {
       return buildWalletConnectPage();
     }
 
-    if (!swrDataAllRentData) {
+    if (!dataAllRentData) {
       return buildLoadingPage();
     }
 
@@ -703,6 +766,14 @@ export default function DrawImage() {
         </Grid>
       </Grid>
       {buildPage()}
+
+      <MessageSnackbar
+        open={openSnackbar}
+        autoHideDuration={10000}
+        onClose={handleCloseSnackbar}
+        severity={snackbarSeverity}
+        message={snackbarMessage}
+      />
     </>
   );
 }

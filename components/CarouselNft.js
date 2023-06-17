@@ -1,5 +1,13 @@
 import React from "react";
 import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
+import {
+  useAccount,
+  useNetwork,
+  useWalletClient,
+  useContractRead,
+  useSignTypedData,
+  useContractEvent,
+} from "wagmi";
 import SwipeableViews from "react-swipeable-views";
 import { bindKeyboard } from "react-swipeable-views-utils";
 import { useTheme } from "@mui/material/styles";
@@ -14,17 +22,13 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Grid from "@mui/material/Grid";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
-import CardNft from "./CardNft";
+import CardNft from "@/components/CardNft";
+import rentmarketABI from "@/contracts/rentMarket.json";
 
 function CarouselNft({
   dataWalletClient,
   rentMarketContract,
   promptNftContract,
-  selectedChain,
-  address,
-  isConnected,
-  data,
-  isLoading,
   signTypedDataAsync,
 }) {
   // console.log("call CarouselNft()");
@@ -38,10 +42,71 @@ function CarouselNft({
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
 
+  //*---------------------------------------------------------------------------
+  //* Wagmi hook
+  //*---------------------------------------------------------------------------
+  const RENT_MARKET_CONTRACT_ADDRES =
+    process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
+  const { chains, chain } = useNetwork();
+  const { address, isConnected } = useAccount();
+  const {
+    data: dataAllRegisterData,
+    isError: errorAllRegisterData,
+    isLoading: isLoadingAllRegisterData,
+    isValidating: isValidatingAllRegisterData,
+    status: statusAllRegisterData,
+  } = useContractRead({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI.abi,
+    functionName: "getAllRegisterData",
+    watch: true,
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+    },
+    onError(error) {
+      // console.log("call onError()");
+      // console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
+    },
+  });
+
+  const {
+    data: dataAllCollection,
+    isError: errorAllCollection,
+    isLoading: isLoadingAllCollection,
+    isValidating: isValidatingAllCollection,
+    status: statusAllCollection,
+    refetch: refetchAllCollection,
+  } = useContractRead({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI.abi,
+    functionName: "getAllCollection",
+    watch: true,
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+    },
+    onError(error) {
+      // console.log("call onError()");
+      // console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
+    },
+  });
+
+  //* Set pagination.
   const BindKeyboardSwipeableViews = bindKeyboard(SwipeableViews);
   const theme = useTheme();
   const [activeStep, setActiveStep] = React.useState(0);
-  const maxSteps = data?.length || 0;
+  const maxSteps = dataAllRegisterData?.length || 0;
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -116,17 +181,7 @@ function CarouselNft({
         );
       }
 
-      if (!data) {
-        return (
-          <NoContentPage
-            message={
-              "This service is just started. Soon, image list with prompt will be updated."
-            }
-          />
-        );
-      }
-
-      if (isLoading === true) {
+      if (isLoadingAllRegisterData === true) {
         return <LoadingPage />;
       }
 
@@ -139,17 +194,13 @@ function CarouselNft({
             onChangeIndex={handleStepChange}
             enableMouseEvents
           >
-            {data.map(function (nftData, index) {
+            {dataAllRegisterData.toReversed().map(function (nftData, index) {
               return (
                 <div key={index}>
                   {Math.abs(activeStep - index) <= 2 ? (
                     <CardNft
                       nftData={nftData}
                       dataWalletClient={dataWalletClient}
-                      address={address}
-                      isConnected={isConnected}
-                      rentMarketContract={rentMarketContract}
-                      selectedChain={selectedChain}
                       promptNftContract={promptNftContract}
                       signTypedDataAsync={signTypedDataAsync}
                     />
@@ -195,7 +246,7 @@ function CarouselNft({
         </>
       );
     },
-    [activeStep, maxSteps, data, isLoading]
+    [activeStep, maxSteps, dataAllRegisterData, isLoadingAllRegisterData]
   );
 
   return <NftCardList />;
