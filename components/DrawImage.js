@@ -63,7 +63,6 @@ export default function DrawImage() {
   const SERVICE_ACCOUNT_ADDRESS =
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
   const { address, isConnected } = useAccount();
-  const [rentPaymentNft, setRentPaymentNft] = React.useState(false);
   const [paymentNftRentFee, setPaymentNftRentFee] = React.useState();
   const [currentTimestamp, setCurrentTimestamp] = React.useState();
   const [imageFetchEndTime, setImageFetchEndTime] = React.useState();
@@ -265,7 +264,6 @@ export default function DrawImage() {
               Number(rentData.rentStartTimestamp) +
               Number(rentData.rentDuration);
             setPaymentNftRentEndTime(rentEndTime);
-            setRentPaymentNft(true);
           }
         });
       }
