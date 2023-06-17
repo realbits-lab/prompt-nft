@@ -255,7 +255,7 @@ export default function ListPage(props) {
                 }}
               >
                 <Link
-                  href={BOARD_URL}
+                  href={MARKET_URL}
                   target="_blank"
                   style={{ color: "inherit", textDecoration: "inherit" }}
                 >
