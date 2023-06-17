@@ -2,6 +2,12 @@ import React from "react";
 import { isMobile } from "react-device-detect";
 import useSWR from "swr";
 import {
+  useAccount,
+  useNetwork,
+  useWalletClient,
+  useContractRead,
+  useSignTypedData,
+  useContractEvent,
   useContractWrite,
   usePrepareContractWrite,
   useWaitForTransaction,
@@ -16,7 +22,6 @@ import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
-
 import {
   isWalletConnected,
   AlertSeverity,
@@ -26,19 +31,16 @@ import {
 } from "@/lib/util";
 import useUser from "@/lib/useUser";
 import rentmarketABI from "@/contracts/rentMarket.json";
+import promptNFTABI from "@/contracts/promptNFT.json";
 
-function CardNft({
+export default function CardNft({
   nftData,
   dataWalletClient,
-  selectedChain,
-  address,
-  isConnected,
-  rentMarketContract,
   promptNftContract,
   signTypedDataAsync,
 }) {
-  console.log("call CardNft()");
-  console.log("nftData: ", nftData);
+  // console.log("call CardNft()");
+  // console.log("nftData: ", nftData);
 
   //*---------------------------------------------------------------------------
   //* Define constant variables.
@@ -56,21 +58,90 @@ function CardNft({
   const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;
   const [cardImageHeight, setCardImageHeight] = React.useState(0);
-
-  const {
-    data: metadataData,
-    error: metadataError,
-    isValidating: metadataIsValidating,
-  } = useSWR({
-    command: "getMetadata",
-    promptNftContract: promptNftContract,
-    signer: dataWalletClient,
-    tokenId: nftData ? nftData.tokenId : 0,
-  });
+  const [metadata, setMetadata] = React.useState();
   const { user, mutateUser } = useUser();
 
-  //* Wait for transactions.
-  const { config, error } = usePrepareContractWrite({
+  //*---------------------------------------------------------------------------
+  //* Wagmi hook
+  //*---------------------------------------------------------------------------
+  const { chains, chain: selectedChain } = useNetwork();
+  const { address, isConnected } = useAccount();
+
+  const {
+    data: dataTokenURI,
+    isError: isErrorTokenURI,
+    isLoading: isLoadingTokenURI,
+    isValidating: isValidatingTokenURI,
+    status: statusTokenURI,
+  } = useContractRead({
+    address: PROMPT_NFT_CONTRACT_ADDRESS,
+    abi: promptNFTABI.abi,
+    functionName: "tokenURI",
+    args: [nftData?.tokenId],
+    watch: true,
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+
+      fetch(data).then((fetchResult) =>
+        fetchResult.blob().then((tokenMetadata) =>
+          tokenMetadata.text().then((metadataJsonTextData) => {
+            // console.log("metadataJsonTextData: ", metadataJsonTextData);
+            const metadata = JSON.parse(metadataJsonTextData);
+            // console.log("metadata: ", metadata);
+            setMetadata(metadata);
+          })
+        )
+      );
+    },
+    onError(error) {
+      // console.log("call onError()");
+      // console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
+    },
+  });
+
+  const {
+    data: dataIsOwnerOrRenter,
+    isError: isErrorIsOwnerOrRenter,
+    isLoading: isLoadingIsOwnerOrRenter,
+    isValidating: isValidatingIsOwnerOrRenter,
+    status: statusIsOwnerOrRenter,
+  } = useContractRead({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI.abi,
+    functionName: "isOwnerOrRenter",
+    args: [address],
+    watch: true,
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+    },
+    onError(error) {
+      // console.log("call onError()");
+      // console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      console.log("call onSettled()");
+      console.log("data: ", data);
+      console.log("error: ", error);
+    },
+  });
+
+  const {
+    data: dataRentNFT,
+    error: errorRentNFT,
+    isError: isErrorRentNFT,
+    isIdle: isIdleRentNFT,
+    isLoading: isLoadingRentNFT,
+    isSuccess: isSuccessRentNFT,
+    write: writeRentNFT,
+    status: statusRentNFT,
+  } = useContractWrite({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
     functionName: "rentNFT",
@@ -81,19 +152,8 @@ function CardNft({
     ],
     overrides: { value: nftData.rentFee },
   });
-  const contractWrite = useContractWrite(config);
-  // console.log("RENT_MARKET_CONTRACT_ADDRES: ", RENT_MARKET_CONTRACT_ADDRES);
-  // console.log("PROMPT_NFT_CONTRACT_ADDRESS: ", PROMPT_NFT_CONTRACT_ADDRESS);
-  // console.log("SERVICE_ACCOUNT_ADDRESS: ", SERVICE_ACCOUNT_ADDRESS);
-  // console.log("nftData: ", nftData);
-  // console.log("config: ", config);
-  // console.log("error: ", error);
-  // console.log("contractWrite: ", contractWrite);
-  // console.log("contractWrite.write: ", contractWrite.write);
-  // console.log("contractWrite.status: ", contractWrite.status);
-  // console.log("contractWrite.data?.hash: ", contractWrite.data?.hash);
   const waitForTransaction = useWaitForTransaction({
-    hash: contractWrite.data?.hash,
+    hash: dataRentNFT?.hash,
     onSuccess(data) {
       // console.log("call onSuccess()");
       // console.log("data: ", data);
@@ -103,22 +163,19 @@ function CardNft({
       // console.log("error: ", error);
     },
     onSettled(data, error) {
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
+
+      setIsRenting(false);
       setWriteToastMessage({
         snackbarSeverity: AlertSeverity.info,
         snackbarMessage: "Renting is finished.",
         snackbarTime: new Date(),
         snackbarOpen: true,
       });
-      setIsRenting(false);
-      // console.log("call onSettled()");
-      // console.log("data: ", data);
-      // console.log("error: ", error);
-      // console.log("readRentingData: ", readRentingData);
     },
   });
-  // console.log("waitForTransaction: ", waitForTransaction);
-  // console.log("waitForTransaction.data: ", waitForTransaction.data);
-  // console.log("waitForTransaction.status: ", waitForTransaction.status);
 
   //* Get pending transactions.
   useWatchPendingTransactions({
@@ -127,9 +184,9 @@ function CardNft({
     },
   });
 
-  //* --------------------------------------------------------------------------
+  //*---------------------------------------------------------------------------
   //* Snackbar variables.
-  //* --------------------------------------------------------------------------
+  //*---------------------------------------------------------------------------
   const [writeToastMessageLoadable, setWriteToastMessage] =
     useRecoilStateLoadable(writeToastMessageState);
   const writeToastMessage =
@@ -142,9 +199,9 @@ function CardNft({
           snackbarOpen: true,
         };
 
-  //* --------------------------------------------------------------------------
+  //*---------------------------------------------------------------------------
   //* Prompt dialog variables.
-  //* --------------------------------------------------------------------------
+  //*---------------------------------------------------------------------------
   const [writeDialogMessageLoadable, setWriteDialogMessage] =
     useRecoilStateLoadable(writeDialogMessageState);
   const writeDialogMessage =
@@ -155,22 +212,18 @@ function CardNft({
           openDialog: false,
         };
 
-  React.useEffect(
-    function () {
-      console.log("call useEffect()");
-      console.log("metadataData: ", metadataData);
+  React.useEffect(function () {
+    // console.log("call useEffect()");
 
+    setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
+
+    //* Register window resize event.
+    window.addEventListener("resize", function () {
+      // console.log("call resize()");
+      // console.log("window.innerHeight: ", window.innerHeight);
       setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
-
-      //* Register window resize event.
-      window.addEventListener("resize", function () {
-        // console.log("call resize()");
-        // console.log("window.innerHeight: ", window.innerHeight);
-        setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
-      });
-    },
-    [metadataData]
-  );
+    });
+  }, []);
 
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
@@ -192,10 +245,10 @@ function CardNft({
       }}
     >
       <Card>
-        {metadataData ? (
+        {metadata ? (
           <CardMedia
             component="img"
-            image={metadataData ? metadataData.image : ""}
+            image={metadata?.image}
             onError={handleCardMediaImageError}
             sx={{
               objectFit: "contain",
@@ -206,8 +259,6 @@ function CardNft({
         ) : (
           <Skeleton
             variant="rounded"
-            // width={CARD_MIN_WIDTH}
-            // height={CARD_MIN_WIDTH}
             sx={{
               width: "90vw",
               height: cardImageHeight,
@@ -221,17 +272,18 @@ function CardNft({
         >
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
             # {nftData.tokenId.toString()} /{" "}
-            {metadataData ? metadataData.name : "loading..."} /{" "}
-            {metadataData ? metadataData.description : "loading..."} /{" "}
+            {metadata ? metadata.name : "loading..."} /{" "}
+            {metadata ? metadata.description : "loading..."} /{" "}
             {(nftData.rentFee / 10n ** 18n).toString()} matic
           </Typography>
         </CardContent>
         <CardActions>
-          {nftData.isOwn === true || nftData.isRent === true ? (
-            <Button
-              size="small"
-              variant="contained"
-              onClick={async function () {
+          <Button
+            size="small"
+            disabled={isRenting}
+            variant="contained"
+            onClick={async function () {
+              if (dataIsOwnerOrRenter === true) {
                 await handleCheckPrompt({
                   setWriteToastMessage: setWriteToastMessage,
                   setWriteDialogMessage: setWriteDialogMessage,
@@ -246,127 +298,52 @@ function CardNft({
                   mutateUser: mutateUser,
                   signTypedDataAsync: signTypedDataAsync,
                 });
-              }}
-            >
-              PROMPT
-            </Button>
-          ) : isRenting === true ? (
-            <Typography
-              color="text.secondary"
-              variant="h7"
-              gutterBottom
-              component="div"
-            >
-              RENTING
-            </Typography>
-          ) : (
-            <>
-              <Button
-                size="small"
-                variant="contained"
-                onClick={async () => {
-                  //* Handle usePrepareContractWrite error.
-                  if (error) {
-                    setWriteToastMessage({
-                      snackbarSeverity: AlertSeverity.warning,
-                      snackbarMessage: `Error: ${
-                        error.data ? error.data.message : error.message
-                      }`,
-                      snackbarTime: new Date(),
-                      snackbarOpen: true,
-                    });
-                    return;
-                  }
 
-                  if (
-                    isWalletConnected({ isConnected, selectedChain }) === false
-                  ) {
-                    setWriteToastMessage({
-                      snackbarSeverity: AlertSeverity.warning,
-                      snackbarMessage: `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`,
-                      snackbarTime: new Date(),
-                      snackbarOpen: true,
-                    });
-                    return;
-                  }
-
-                  if (!rentMarketContract || !dataWalletClient) {
-                    console.error(
-                      "rentMarketContract or signer is null or undefined."
-                    );
-                    return;
-                  }
-
-                  //* Rent this nft with rent fee.
-                  // console.log("nftData.rentFee: ", nftData.rentFee);
-                  // console.log("nftData.tokenId: ", nftData.tokenId);
-                  // console.log("rentMarketContract: ", rentMarketContract);
-                  // console.log("dataWalletClient: ", dataWalletClient);
-                  // console.log(
-                  //   "process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS: ",
-                  //   process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS
-                  // );
-                  // console.log(
-                  //   "process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS: ",
-                  //   process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS
-                  // );
-
+                return;
+              } else {
+                if (
+                  isWalletConnected({ isConnected, selectedChain }) === false
+                ) {
                   setWriteToastMessage({
-                    snackbarSeverity: AlertSeverity.info,
-                    snackbarMessage: "Trying to rent this nft...",
+                    snackbarSeverity: AlertSeverity.warning,
+                    snackbarMessage: `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`,
                     snackbarTime: new Date(),
                     snackbarOpen: true,
                   });
+                  return;
+                }
 
-                  try {
-                    setIsRenting(true);
-                    // console.log("contractWrite: ", contractWrite);
-                    const tx = await contractWrite.writeAsync();
-                    // console.log("tx: ", tx);
+                //* Rent this nft with rent fee.
+                // console.log("nftData.rentFee: ", nftData.rentFee);
+                // console.log("nftData.tokenId: ", nftData.tokenId);
+                setWriteToastMessage({
+                  snackbarSeverity: AlertSeverity.info,
+                  snackbarMessage: "Trying to rent this nft...",
+                  snackbarTime: new Date(),
+                  snackbarOpen: true,
+                });
 
-                    // console.log("tx: ", tx);
-                    // const tx = await rentMarketContract
-                    //   .connect(dataWalletClient)
-                    //   .rentNFT(
-                    //     process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-                    //     nftData.tokenId,
-                    //     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS,
-                    //     {
-                    //       value: nftData.rentFee,
-                    //     }
-                    //   );
-                    // const txResult = await tx.wait();
-                  } catch (error) {
-                    console.error("error: ", error);
-                    setWriteToastMessage({
-                      snackbarSeverity: AlertSeverity.error,
-                      snackbarMessage: error.data
-                        ? error.data.message
-                        : error.message,
-                      snackbarTime: new Date(),
-                      snackbarOpen: true,
-                    });
-                    setIsRenting(false);
-                    return;
-                  }
+                setIsRenting(true);
+                writeRentNFT?.();
 
-                  setWriteToastMessage({
-                    snackbarSeverity: AlertSeverity.info,
-                    snackbarMessage:
-                      "Rent transaction is just started and wait a moment...",
-                    snackbarTime: new Date(),
-                    snackbarOpen: true,
-                  });
-                }}
-              >
-                RENT
-              </Button>
-            </>
-          )}
+                setWriteToastMessage({
+                  snackbarSeverity: AlertSeverity.info,
+                  snackbarMessage:
+                    "Rent transaction is just started and wait a moment...",
+                  snackbarTime: new Date(),
+                  snackbarOpen: true,
+                });
+              }
+            }}
+          >
+            {isRenting ? (
+              <Typography>Renting...</Typography>
+            ) : (
+              <Typography>View Prompt</Typography>
+            )}
+          </Button>
         </CardActions>
       </Card>
     </Box>
   );
 }
-
-export default CardNft;

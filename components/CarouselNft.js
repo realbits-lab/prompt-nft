@@ -47,7 +47,7 @@ function CarouselNft({
   //*---------------------------------------------------------------------------
   const RENT_MARKET_CONTRACT_ADDRES =
     process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
-  const { chains, chain: selectedChain } = useNetwork();
+  const { chains, chain } = useNetwork();
   const { address, isConnected } = useAccount();
   const {
     data: dataAllRegisterData,
@@ -194,17 +194,13 @@ function CarouselNft({
             onChangeIndex={handleStepChange}
             enableMouseEvents
           >
-            {dataAllRegisterData.map(function (nftData, index) {
+            {dataAllRegisterData.toReversed().map(function (nftData, index) {
               return (
                 <div key={index}>
                   {Math.abs(activeStep - index) <= 2 ? (
                     <CardNft
                       nftData={nftData}
                       dataWalletClient={dataWalletClient}
-                      address={address}
-                      isConnected={isConnected}
-                      rentMarketContract={rentMarketContract}
-                      selectedChain={selectedChain}
                       promptNftContract={promptNftContract}
                       signTypedDataAsync={signTypedDataAsync}
                     />
