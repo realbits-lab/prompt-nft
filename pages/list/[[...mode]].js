@@ -259,6 +259,15 @@ export default function ListPage(props) {
                   "aria-labelledby": "basic-button",
                 }}
               >
+                <Link href={BOARD_URL} target="_blank">
+                  <MenuItem
+                    onClick={() => {
+                      handleSettingMenuClose();
+                    }}
+                  >
+                    Board
+                  </MenuItem>
+                </Link>
                 <MenuItem
                   onClick={() => {
                     setMode("theme");

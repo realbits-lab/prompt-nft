@@ -70,12 +70,12 @@ export default function DrawImage() {
   const [paymentNftRentEndTime, setPaymentNftRentEndTime] = React.useState();
 
   const {
-    data: swrDataAllRentData,
-    isError: swrErrorAllRentData,
-    isLoading: swrIsLoadingAllRentData,
-    isValidating: swrIsValidatingAllRentData,
-    status: swrStatusAllRentData,
-    refetch: swrRefetchAllRentData,
+    data: dataAllRentData,
+    isError: errorAllRentData,
+    isLoading: isLoadingAllRentData,
+    isValidating: isValidatingAllRentData,
+    status: statusAllRentData,
+    refetch: refetchAllRentData,
   } = useContractRead({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
@@ -99,12 +99,12 @@ export default function DrawImage() {
   });
 
   const {
-    data: swrDataRentData,
-    isError: swrErrorRentData,
-    isLoading: swrIsLoadingRentData,
-    isValidating: swrIsValidatingRentData,
-    status: swrStatusRentData,
-    refetch: swrRefetchRentData,
+    data: dataRentData,
+    isError: errorRentData,
+    isLoading: isLoadingRentData,
+    isValidating: isValidatingRentData,
+    status: statusRentData,
+    refetch: refetchRentData,
   } = useContractRead({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
@@ -160,7 +160,6 @@ export default function DrawImage() {
         // console.log("data: ", data);
       },
     });
-
   const {
     data: dataRentNFT,
     error: errorRentNFT,
@@ -196,7 +195,6 @@ export default function DrawImage() {
       // console.log("error: ", error);
     },
   });
-
   useWatchPendingTransactions({
     listener: function (tx) {
       // console.log("tx: ", tx);
@@ -254,8 +252,8 @@ export default function DrawImage() {
       // console.log("call useEffect()");
 
       //* Check user has rented the payment nft.
-      if (swrDataAllRentData) {
-        swrDataAllRentData.map(function (rentData) {
+      if (dataAllRentData) {
+        dataAllRentData.map(function (rentData) {
           // console.log("rentData: ", rentData);
           if (
             rentData.renteeAddress.toLowerCase() === address?.toLowerCase() &&
@@ -279,7 +277,7 @@ export default function DrawImage() {
         window.removeEventListener("resize", handleResize);
       };
     },
-    [swrDataAllRentData]
+    [dataAllRentData]
   );
 
   function handleResize() {
@@ -577,19 +575,9 @@ export default function DrawImage() {
               </Typography>
               <Button
                 onClick={function () {
-                  // console.log("dataRentNFT: ", dataRentNFT);
-                  // console.log("errorRentNFT: ", errorRentNFT);
-                  // console.log("isErrorRentNFT: ", isErrorRentNFT);
-                  // console.log("isIdleRentNFT: ", isIdleRentNFT);
-                  // console.log("isLoadingRentNFT: ", isLoadingRentNFT);
-                  // console.log("isSuccessRentNFT: ", isSuccessRentNFT);
-                  // console.log("writeRentNFT: ", writeRentNFT);
-                  // console.log("statusRentNFT: ", statusRentNFT);
-                  // console.log("swrDataRentData: ", swrDataRentData);
-
-                  if (writeRentNFT && swrDataRentData) {
+                  if (writeRentNFT && dataRentData) {
                     writeRentNFT?.({
-                      value: swrDataRentData.rentFee,
+                      value: dataRentData.rentFee,
                     });
                   }
                 }}
@@ -605,7 +593,6 @@ export default function DrawImage() {
 
   function buildDrawPage() {
     // console.log("call buildDrawPage()");
-    // console.log("swrDataAllRentData: ", swrDataAllRentData);
 
     return (
       <>
@@ -751,7 +738,7 @@ export default function DrawImage() {
       return buildWalletConnectPage();
     }
 
-    if (!swrDataAllRentData) {
+    if (!dataAllRentData) {
       return buildLoadingPage();
     }
 
