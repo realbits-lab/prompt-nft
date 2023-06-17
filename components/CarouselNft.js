@@ -1,5 +1,13 @@
 import React from "react";
 import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
+import {
+  useAccount,
+  useNetwork,
+  useWalletClient,
+  useContractRead,
+  useSignTypedData,
+  useContractEvent,
+} from "wagmi";
 import SwipeableViews from "react-swipeable-views";
 import { bindKeyboard } from "react-swipeable-views-utils";
 import { useTheme } from "@mui/material/styles";
@@ -54,6 +62,137 @@ function CarouselNft({
   const handleStepChange = (step) => {
     setActiveStep(step);
   };
+
+  //*---------------------------------------------------------------------------
+  //* Wagmi hook
+  //*---------------------------------------------------------------------------
+  const RENT_MARKET_CONTRACT_ADDRES =
+    process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
+  const { chains, chain: selectedChain } = useNetwork();
+  const { address, isConnected } = useAccount();
+  const {
+    data: dataRegisterData,
+    isError: errorRegisterData,
+    isLoading: isLoadingRegisterData,
+    isValidating: isValidatingRegisterData,
+    status: statusRegisterData,
+  } = useContractRead({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI.abi,
+    functionName: "getAllRegisterData",
+    watch: true,
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+    },
+    onError(error) {
+      // console.log("call onError()");
+      // console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
+    },
+  });
+
+  const {
+    data: dataAllCollection,
+    isError: errorAllCollection,
+    isLoading: isLoadingAllCollection,
+    isValidating: isValidatingAllCollection,
+    status: statusAllCollection,
+    refetch: refetchAllCollection,
+  } = useContractRead({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI.abi,
+    functionName: "getAllCollection",
+    watch: true,
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+    },
+    onError(error) {
+      // console.log("call onError()");
+      // console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
+    },
+  });
+
+  function initialize() {
+    //* Find the register data in registered collection.
+    //* After registering data, even though collection is removed, register data remains.
+    let registerData;
+    if (dataRegisterData && dataAllCollection) {
+      registerData = dataRegisterData.filter(function (registerData) {
+        return dataAllCollection.some(function (collection) {
+          return (
+            collection.collectionAddress.toLowerCase() ===
+            registerData.nftAddress.toLowerCase()
+          );
+        });
+      });
+    }
+    // console.log("registerData: ", registerData);
+
+    //* Set all registered nft data.
+    if (registerData) {
+      // console.log("registerData: ", registerData);
+      const dataNftWithStatusArray = registerData.map(function (nft) {
+        let isOwn = false;
+        let isRent = false;
+
+        //* Check own status.
+        if (ownDataArray) {
+          const someResult = ownDataArray.some(function (ownData) {
+            return (
+              ownData.tokenId === nft.tokenId &&
+              ownData.nftAddress.toLowerCase() ===
+                PROMPT_NFT_CONTRACT_ADDRESS.toLowerCase()
+            );
+          });
+          if (someResult === true) {
+            isOwn = true;
+          } else {
+            isOwn = false;
+          }
+        }
+
+        //* Check rent status.
+        if (allMyRentDataArray) {
+          const someResult = allMyRentDataArray.some(function (rentData) {
+            // console.log("rentData: ", rentData);
+            return (
+              rentData.tokenId === nft.tokenId &&
+              rentData.renteeAddress.toLowerCase() === address.toLowerCase()
+            );
+          });
+          if (someResult === true) {
+            isRent = true;
+          } else {
+            isRent = false;
+          }
+        }
+
+        // console.log("nft.tokenId: ", nft.tokenId.toNumber());
+        // console.log("isOwn: ", isOwn);
+        // console.log("isRent: ", isRent);
+
+        return {
+          ...nft,
+          isOwn: isOwn,
+          isRent: isRent,
+        };
+      });
+
+      // console.log("dataNftWithStatusArray: ", dataNftWithStatusArray);
+      setAllNftDataArray(dataNftWithStatusArray.reverse());
+    }
+  }
 
   function LoadingPage() {
     return (

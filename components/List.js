@@ -391,7 +391,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
       const dataNftWithStatusArray = registerData.map(function (nft) {
         let isOwn = false;
         let isRent = false;
-        let isRenting = false;
 
         //* Check own status.
         if (ownDataArray) {
@@ -436,13 +435,11 @@ function List({ mode, updated, setNewImageCountFunc }) {
         // console.log("nft.tokenId: ", nft.tokenId.toNumber());
         // console.log("isOwn: ", isOwn);
         // console.log("isRent: ", isRent);
-        // console.log("isRenting: ", isRenting);
 
         return {
           ...nft,
           isOwn: isOwn,
           isRent: isRent,
-          isRenting: isRenting,
         };
       });
 
