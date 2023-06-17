@@ -7,6 +7,7 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import Box from "@mui/material/Box";
+import Link from "@mui/material/Link";
 import Slide from "@mui/material/Slide";
 import Badge from "@mui/material/Badge";
 import Button from "@mui/material/Button";
@@ -58,6 +59,7 @@ export default function ListPage(props) {
   // console.log("call ListPage()");
 
   const DEFAULT_MENU = "draw";
+  const BOARD_URL = "https://muve.moim.co/forums/QEUREBYLO";
   const router = useRouter();
   const queryMode = router.query.mode;
   const queryUpdated = router.query.updated;
@@ -212,6 +214,17 @@ export default function ListPage(props) {
               <AppBarButton buttonMode="nft" />
               <AppBarButton buttonMode="own" />
               <AppBarButton buttonMode="rent" />
+              <Link href={BOARD_URL} target="_blank">
+                <Button
+                  style={{
+                    borderRadius: BUTTON_BORDER_RADIUS,
+                    padding: SELECTED_BUTTON_PADDING,
+                  }}
+                  sx={{ my: 2, color: "white" }}
+                >
+                  Board
+                </Button>
+              </Link>
             </Box>
 
             <Box>
