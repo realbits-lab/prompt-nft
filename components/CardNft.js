@@ -19,6 +19,7 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
+import CircularProgress from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -84,7 +85,7 @@ export default function CardNft({
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
 
   const CARD_MARGIN_TOP = "60px";
-  const CARD_MARGIN_BOTTOM = 550;
+  const CARD_MARGIN_BOTTOM = 600;
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;
@@ -166,6 +167,9 @@ export default function CardNft({
       // console.log("error: ", error);
     },
   });
+  console.log("isLoadingRentData: ", isLoadingRentData);
+  console.log("isValidatingRentData: ", isValidatingRentData);
+  console.log("dataRentData: ", dataRentData);
 
   const {
     data: dataOwnerOf,
@@ -305,7 +309,8 @@ export default function CardNft({
         };
 
   const [isRenting, setIsRenting] = React.useState(false);
-  const [isOwnerOrRentee, setIsOwnerOrRentee] = React.useState(false);
+  const [isOwnerOrRentee, setIsOwnerOrRentee] = React.useState();
+  console.log("isOwnerOrRentee: ", isOwnerOrRentee);
 
   React.useEffect(function () {
     // console.log("call useEffect()");
@@ -455,7 +460,9 @@ export default function CardNft({
                       variant="contained"
                       onClick={handleRentPayment}
                     >
-                      {isRenting ? (
+                      {isOwnerOrRentee === undefined ? (
+                        <Typography>Loading...</Typography>
+                      ) : isRenting ? (
                         <Typography>Renting...</Typography>
                       ) : isOwnerOrRentee ? (
                         <Typography>Prompt</Typography>
@@ -478,11 +485,15 @@ export default function CardNft({
                     <StyledTableCell align="left">
                       <Button
                         size="small"
-                        disabled={isRenting}
+                        disabled={
+                          isRenting || isLoadingRentData || isLoadingOwnerOf
+                        }
                         variant="contained"
                         onClick={handleRentPayment}
                       >
-                        {isRenting ? (
+                        {isOwnerOrRentee === undefined ? (
+                          <Typography>Loading...</Typography>
+                        ) : isRenting ? (
                           <Typography>Renting...</Typography>
                         ) : isOwnerOrRentee ? (
                           <Typography>Prompt</Typography>
