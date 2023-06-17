@@ -384,8 +384,10 @@ export default function CardNft({
           >
             {isRenting ? (
               <Typography>Renting...</Typography>
-            ) : (
+            ) : isOwnerOrRentee ? (
               <Typography>View Prompt</Typography>
+            ) : (
+              <Typography>Rent Prompt</Typography>
             )}
           </Button>
         </CardActions>
