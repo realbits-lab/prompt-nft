@@ -3,7 +3,6 @@ const { json } = require("express");
 const exec = util.promisify(require("child_process").exec);
 const dotenv = require("dotenv");
 const wait = require("waait");
-const equal = require("deep-equal");
 const { Command } = require("commander");
 const program = new Command();
 
@@ -69,22 +68,42 @@ async function setConfig() {
 
 async function compare() {
   //* Compare the heroku config list and .env config list.
+
+  //* Get heroku config list.
+  console.log("-- Heroku config list");
   const { stdout, stderr } = await exec(HEROKU_CONFIG_JSON_COMMAND);
   // console.log("stdout: ", stdout);
-  console.log("-- Heroku config list");
   const jsonConfigResponse = JSON.parse(stdout);
-  Object.entries(jsonConfigResponse).map(([key, value]) => {
-    console.log(`${key}=${value}`);
-  });
+  const herokuConfigList = Object.entries(jsonConfigResponse);
+  // herokuConfigList.map(([key, value]) => console.log(`${key}=${value}`));
+  // console.log("herokuConfigList: ", herokuConfigList);
+
+  //* Get .env config list.
+  console.log("-- .env config list");
   dotenvConfig = dotenv.config();
   // console.log("dotenvConfig: ", dotenvConfig);
-  console.log("-- .env config list");
-  Object.entries(dotenvConfig.parsed).map(([key, value]) => {
-    console.log(`${key}=${value}`);
-  });
+  const envConfigList = Object.entries(dotenvConfig.parsed);
+  // envConfigList.map(([key, value]) => console.log(`${key}=${value}`));
+  // console.log("envConfigList: ", envConfigList);
 
-  const equalResult = equal(stdout, dotenvConfig);
-  console.log("equalResult: ", equalResult);
+  const herokuConfigDiff = herokuConfigList.filter((herokuConfig) => {
+    const result = envConfigList.filter((envConfig) => {
+      return (
+        envConfig[0] === herokuConfig[0] && envConfig[1] === herokuConfig[1]
+      );
+    });
+    return result.length === 0;
+  });
+  console.log("herokuConfigDiff: ", herokuConfigDiff);
+  const envConfigDiff = envConfigList.filter((envConfig) => {
+    const result = herokuConfigList.filter((herokuConfig) => {
+      return (
+        herokuConfig[0] === envConfig[0] && herokuConfig[1] === envConfig[1]
+      );
+    });
+    return result.length === 0;
+  });
+  console.log("envConfigDiff: ", envConfigDiff);
 }
 
 async function main() {
