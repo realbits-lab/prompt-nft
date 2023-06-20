@@ -37,6 +37,8 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
   const WALLET_CONNECT_PROJECT_ID =
     process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "";
   const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || "";
+  // const METAMASK_DEEP_LINK = "test.fictures.xyz";
+  const METAMASK_DEEP_LINK = "7096-218-238-111-214.ngrok-free.app";
 
   let chains: any[] = [];
   if (
@@ -86,6 +88,12 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
         chains: wagmiChains,
         projectId: WALLET_CONNECT_PROJECT_ID,
       }),
+      // new WalletConnectConnector({
+      //   chains: [polygon, polygonMumbai],
+      //   options: {
+      //     projectId: WALLET_CONNECT_PROJECT_ID,
+      //   },
+      // }),
       new MetaMaskConnector({
         chains: wagmiChains,
       }),
@@ -120,6 +128,16 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
           <Web3Modal
             projectId={WALLET_CONNECT_PROJECT_ID}
             ethereumClient={ethereumClient}
+            mobileWallets={[
+              {
+                id: "metaMask",
+                name: "Metamask",
+                links: {
+                  native: "metamask://",
+                  universal: `https://metamask.app.link/dapp/${METAMASK_DEEP_LINK}`,
+                },
+              },
+            ]}
           />
         </ThemeProvider>
       </CacheProvider>
