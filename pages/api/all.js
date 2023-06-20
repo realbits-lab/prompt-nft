@@ -17,7 +17,7 @@ async function handler(req, res) {
 
   //* Check query.
   const params = req.query.updated;
-  console.log("params: ", params);
+  // console.log("params: ", params);
 
   //* Check session for newly-updated images checking of all api.
   let fetchTimestamp;

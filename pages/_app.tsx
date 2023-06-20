@@ -6,6 +6,8 @@ import {
 } from "@web3modal/ethereum";
 import { Web3Modal } from "@web3modal/react";
 import { configureChains, WagmiConfig, createConfig } from "wagmi";
+import { MetaMaskConnector } from "wagmi/connectors/metaMask";
+import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { polygon, polygonMumbai, localhost } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
@@ -83,6 +85,9 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
         version: 2,
         chains: wagmiChains,
         projectId: WALLET_CONNECT_PROJECT_ID,
+      }),
+      new MetaMaskConnector({
+        chains: wagmiChains,
       }),
     ],
     publicClient: wagmiPublicClient,
