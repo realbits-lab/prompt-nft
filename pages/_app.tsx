@@ -7,7 +7,6 @@ import {
 import { Web3Modal } from "@web3modal/react";
 import { configureChains, WagmiConfig, createConfig } from "wagmi";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
-import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { polygon, polygonMumbai, localhost } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
@@ -89,18 +88,12 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
         chains,
         projectId: WALLET_CONNECT_PROJECT_ID,
       }),
-      // new WalletConnectConnector({
-      //   chains: [polygon, polygonMumbai],
-      //   options: {
-      //     projectId: WALLET_CONNECT_PROJECT_ID,
-      //   },
-      // }),
       new MetaMaskConnector({
         chains,
       }),
     ],
     publicClient: wagmiPublicClient,
-    // webSocketPublicClient: wagmiWebSocketPublicClient,
+    webSocketPublicClient: wagmiWebSocketPublicClient,
   });
 
   //* Web3Modal Ethereum Client
@@ -129,17 +122,17 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
           <Web3Modal
             projectId={WALLET_CONNECT_PROJECT_ID}
             ethereumClient={ethereumClient}
-            mobileWallets={[
-              {
-                id: "metaMask",
-                name: "Metamask",
-                links: {
-                  native: "metamask://",
-                  universal: UNIVERSAL_LINK,
-                },
-              },
-            ]}
-            // walletImages={metaMask: "/metamask-logo.png"}
+            // mobileWallets={[
+            //   {
+            //     id: "metaMask",
+            //     name: "Metamask",
+            //     links: {
+            //       native: "metamask://",
+            //       universal: UNIVERSAL_LINK,
+            //     },
+            //   },
+            // ]}
+            // walletImages={{ metaMask: "/metamask-logo.png" }}
           />
         </ThemeProvider>
       </CacheProvider>
