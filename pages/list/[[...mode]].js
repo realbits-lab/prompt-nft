@@ -203,7 +203,7 @@ export default function ListPage(props) {
   //* Propagate wagmi client into List component.
   return (
     <React.Fragment>
-      {/*//*App bat menu. */}
+      {/*//*App bar menu. */}
       <HideOnScroll {...props}>
         <AppBar>
           <Toolbar>

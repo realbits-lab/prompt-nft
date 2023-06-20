@@ -22,7 +22,7 @@ async function handler(req, res) {
   //* Check session for newly-updated images checking of all api.
   let fetchTimestamp;
   if (req.session.updated) {
-    console.log("req.session.updated: ", req.session.updated);
+    // console.log("req.session.updated: ", req.session.updated);
 
     if (params === "true") {
       //* Update fetch timestamp in a session.
@@ -34,7 +34,7 @@ async function handler(req, res) {
       fetchTimestamp = new Date(req.session.updated.fetchTimestamp);
     }
   } else {
-    console.log("no req.session.updated");
+    // console.log("no req.session.updated");
 
     fetchTimestamp = new Date();
     const updated = { fetchTimestamp: fetchTimestamp };

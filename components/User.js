@@ -1,7 +1,16 @@
 import { useAccount, useWalletClient, useNetwork } from "wagmi";
 import { Typography } from "@mui/material";
+import { useRecoilStateLoadable } from "recoil";
 import useUser from "@/lib/useUser";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
+import {
+  RBSnackbar,
+  AlertSeverity,
+  writeToastMessageState,
+  readToastMessageState,
+  writeDialogMessageState,
+  readDialogMessageState,
+} from "@/lib/util";
 
 export default function User() {
   //*----------------------------------------------------------------------------
@@ -15,10 +24,34 @@ export default function User() {
   const { data: walletClient } = useWalletClient();
   // console.log("walletClient: ", walletClient);
   const { user, mutateUser } = useUser();
-
   // console.log("user: ", user);
 
+  //*---------------------------------------------------------------------------
+  //* Snackbar variables.
+  //*---------------------------------------------------------------------------
+  const [writeToastMessageLoadable, setWriteToastMessage] =
+    useRecoilStateLoadable(writeToastMessageState);
+  const writeToastMessage =
+    writeToastMessageLoadable?.state === "hasValue"
+      ? writeToastMessageLoadable.contents
+      : {
+          snackbarSeverity: AlertSeverity.info,
+          snackbarMessage: undefined,
+          snackbarTime: new Date(),
+          snackbarOpen: false,
+        };
+
   const handleLoginClick = async () => {
+    if (!address) {
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: "Wallet is not connected.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+      return;
+    }
+
     const publicAddress = address.toLowerCase();
     // console.log("publicAddress: ", publicAddress);
 
