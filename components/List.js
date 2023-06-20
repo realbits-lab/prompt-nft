@@ -240,6 +240,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
     // watch: true,
   });
 
+	//* TODO: Use useContractRead hook.
   //* Get all my own data array.
   const {
     data: dataOwn,

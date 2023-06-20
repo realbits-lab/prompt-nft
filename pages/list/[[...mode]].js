@@ -203,7 +203,7 @@ export default function ListPage(props) {
   //* Propagate wagmi client into List component.
   return (
     <React.Fragment>
-      {/*//*App bat menu. */}
+      {/*//*App bar menu. */}
       <HideOnScroll {...props}>
         <AppBar>
           <Toolbar>
@@ -218,8 +218,8 @@ export default function ListPage(props) {
                 <AppBarButton buttonMode="image" />
               </Badge>
               <AppBarButton buttonMode="nft" />
-              <AppBarButton buttonMode="own" />
-              <AppBarButton buttonMode="rent" />
+              {/* <AppBarButton buttonMode="own" />
+              <AppBarButton buttonMode="rent" /> */}
             </Box>
 
             <Box>
@@ -254,6 +254,22 @@ export default function ListPage(props) {
                   "aria-labelledby": "basic-button",
                 }}
               >
+                <MenuItem
+                  onClick={() => {
+                    setMode("own");
+                    handleSettingMenuClose();
+                  }}
+                >
+                  OWN
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setMode("rent");
+                    handleSettingMenuClose();
+                  }}
+                >
+                  RENT
+                </MenuItem>
                 <Link
                   href={MARKET_URL}
                   target="_blank"

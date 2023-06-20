@@ -6,6 +6,7 @@ import {
 } from "@web3modal/ethereum";
 import { Web3Modal } from "@web3modal/react";
 import { configureChains, WagmiConfig, createConfig } from "wagmi";
+import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { polygon, polygonMumbai, localhost } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
@@ -35,6 +36,9 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
   const WALLET_CONNECT_PROJECT_ID =
     process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "";
   const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || "";
+  // const METAMASK_DEEP_LINK = "test.fictures.xyz";
+  // const METAMASK_DEEP_LINK = "7096-218-238-111-214.ngrok-free.app";
+  const UNIVERSAL_LINK = "https://7096-218-238-111-214.ngrok-free.app";
 
   let chains: any[] = [];
   if (
@@ -66,7 +70,6 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
 
   //* Wagmi client
   const {
-    chains: wagmiChains,
     publicClient: wagmiPublicClient,
     webSocketPublicClient: wagmiWebSocketPublicClient,
   } = configureChains(chains, [
@@ -75,14 +78,18 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
     }),
     alchemyProvider({ apiKey: ALCHEMY_API_KEY }),
   ]);
+  // console.log("chains: ", chains);
 
   const wagmiConfig = createConfig({
     autoConnect: true,
     connectors: [
       ...w3mConnectors({
         version: 2,
-        chains: wagmiChains,
+        chains,
         projectId: WALLET_CONNECT_PROJECT_ID,
+      }),
+      new MetaMaskConnector({
+        chains,
       }),
     ],
     publicClient: wagmiPublicClient,
@@ -115,6 +122,17 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
           <Web3Modal
             projectId={WALLET_CONNECT_PROJECT_ID}
             ethereumClient={ethereumClient}
+            // mobileWallets={[
+            //   {
+            //     id: "metaMask",
+            //     name: "Metamask",
+            //     links: {
+            //       native: "metamask://",
+            //       universal: UNIVERSAL_LINK,
+            //     },
+            //   },
+            // ]}
+            // walletImages={{ metaMask: "/metamask-logo.png" }}
           />
         </ThemeProvider>
       </CacheProvider>

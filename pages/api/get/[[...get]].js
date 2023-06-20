@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   // GET /api/get/{prompt}/{imageUrl}
   // Required fields in body: prompt, imageUrl
   const params = req.query.get;
-  console.log("params: ", params);
+  // console.log("params: ", params);
 
   // Check params error.
   if (
