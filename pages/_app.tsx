@@ -38,7 +38,8 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
     process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "";
   const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || "";
   // const METAMASK_DEEP_LINK = "test.fictures.xyz";
-  const METAMASK_DEEP_LINK = "7096-218-238-111-214.ngrok-free.app";
+  // const METAMASK_DEEP_LINK = "7096-218-238-111-214.ngrok-free.app";
+  const UNIVERSAL_LINK = "https://7096-218-238-111-214.ngrok-free.app";
 
   let chains: any[] = [];
   if (
@@ -70,7 +71,6 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
 
   //* Wagmi client
   const {
-    chains: wagmiChains,
     publicClient: wagmiPublicClient,
     webSocketPublicClient: wagmiWebSocketPublicClient,
   } = configureChains(chains, [
@@ -79,13 +79,14 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
     }),
     alchemyProvider({ apiKey: ALCHEMY_API_KEY }),
   ]);
+  // console.log("chains: ", chains);
 
   const wagmiConfig = createConfig({
     autoConnect: true,
     connectors: [
       ...w3mConnectors({
         version: 2,
-        chains: wagmiChains,
+        chains,
         projectId: WALLET_CONNECT_PROJECT_ID,
       }),
       // new WalletConnectConnector({
@@ -95,11 +96,11 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
       //   },
       // }),
       new MetaMaskConnector({
-        chains: wagmiChains,
+        chains,
       }),
     ],
     publicClient: wagmiPublicClient,
-    webSocketPublicClient: wagmiWebSocketPublicClient,
+    // webSocketPublicClient: wagmiWebSocketPublicClient,
   });
 
   //* Web3Modal Ethereum Client
@@ -134,10 +135,11 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
                 name: "Metamask",
                 links: {
                   native: "metamask://",
-                  universal: `https://metamask.app.link/dapp/${METAMASK_DEEP_LINK}`,
+                  universal: UNIVERSAL_LINK,
                 },
               },
             ]}
+            // walletImages={metaMask: "/metamask-logo.png"}
           />
         </ThemeProvider>
       </CacheProvider>
