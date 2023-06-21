@@ -62,10 +62,10 @@ export default function ListPage(props) {
   const DEFAULT_MENU = "draw";
   const BOARD_URL = "https://muve.moim.co/forums/QEUREBYLO";
   let MARKET_URL;
-  if (process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK === "matic") {
-    MARKET_URL = "https://rent-market-production.vercel.app/";
+  if (process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK === "maticmum") {
+    MARKET_URL = "https://test-market.realbits.co";
   } else {
-    MARKET_URL = "https://rent-market-development.vercel.app/";
+    MARKET_URL = "https://market.realbits.co";
   }
   const router = useRouter();
   const queryMode = router.query.mode;
