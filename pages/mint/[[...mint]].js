@@ -130,9 +130,6 @@ const MintPage = () => {
 
     return (
       <Box
-        sx={{
-          "& .MuiTextField-root": { m: 1, width: "25ch" },
-        }}
         display="flex"
         justifyContent="center"
         alignItems="center"
@@ -142,6 +139,7 @@ const MintPage = () => {
           <CardMedia
             component="img"
             image={PLACEHOLDER_IMAGE_URL}
+            height={300}
             onError={handleCardMediaImageError}
           />
           <CardContent

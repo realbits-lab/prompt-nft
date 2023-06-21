@@ -924,27 +924,8 @@ export default function DrawImage() {
                 )}
               </Button>
             </Grid>
-            <Grid item xs={4}>
-              <Button
-                fullWidth
-                variant="contained"
-                onClick={() => {
-                  //* Get URI encoded string.
-                  const imageUrlEncodedString = encodeURIComponent(imageUrl);
-                  const promptEncodedString = encodeURIComponent(prompt);
-                  const negativePromptEncodedString =
-                    encodeURIComponent(negativePrompt);
-                  const link = `/mint/${promptEncodedString}/${imageUrlEncodedString}/${negativePromptEncodedString}`;
-                  router.push(link);
-                }}
-                sx={{
-                  m: 1,
-                }}
-                disabled={!imageUrl || loadingImage}
-              >
-                Mint
-              </Button>
-            </Grid>
+
+						
             <Grid item xs={4}>
               <Button
                 fullWidth
@@ -970,6 +951,28 @@ export default function DrawImage() {
                 ) : (
                   <Typography>Post</Typography>
                 )}
+              </Button>
+            </Grid>
+
+            <Grid item xs={4}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => {
+                  //* Get URI encoded string.
+                  const imageUrlEncodedString = encodeURIComponent(imageUrl);
+                  const promptEncodedString = encodeURIComponent(prompt);
+                  const negativePromptEncodedString =
+                    encodeURIComponent(negativePrompt);
+                  const link = `/mint/${promptEncodedString}/${imageUrlEncodedString}/${negativePromptEncodedString}`;
+                  router.push(link);
+                }}
+                sx={{
+                  m: 1,
+                }}
+                disabled={!imageUrl || loadingImage || !isImagePosted}
+              >
+                Mint
               </Button>
             </Grid>
           </Grid>
