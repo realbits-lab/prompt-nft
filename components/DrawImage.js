@@ -52,6 +52,8 @@ export default function DrawImage() {
   const { user, mutateUser } = useUser();
   const [imageUrl, setImageUrl] = React.useState("");
   const [loadingImage, setLoadingImage] = React.useState(false);
+  const [postingImage, setPostingImage] = React.useState(false);
+  const [isImagePosted, setIsImagePosted] = React.useState(false);
   const [imageHeight, setImageHeight] = React.useState(0);
   const router = useRouter();
   const MARGIN_TOP = "60px";
@@ -393,11 +395,11 @@ export default function DrawImage() {
   }
 
   async function fetchImage() {
+    setLoadingImage(true);
+
     let inputPrompt = prompt;
     let inputNegativePrompt = negativePrompt;
     let inputModelName = modelName;
-
-    setLoadingImage(true);
 
     if (!prompt || prompt === "") {
       setSnackbarSeverity("warning");
@@ -436,7 +438,6 @@ export default function DrawImage() {
 
     //* Get the stable diffusion api result by json.
     const jsonResponse = await fetchResponse.json();
-    // console.log("jsonResponse: ", jsonResponse);
 
     //* Check error response.
     if (
@@ -457,6 +458,7 @@ export default function DrawImage() {
     //* Handle fetch result.
     let imageUrlResponse;
     if (jsonResponse.status === "processing") {
+      console.log("jsonResponse: ", jsonResponse);
       const eta = jsonResponse.eta;
       const timestamp = Math.floor(Date.now() / 1000);
       setImageFetchEndTime(timestamp + eta);
@@ -517,6 +519,7 @@ export default function DrawImage() {
 
     setImageUrl(imageUrlResponse);
     setLoadingImage(false);
+    setIsImagePosted(false);
     return;
 
     //* Upload image to S3.
@@ -591,6 +594,8 @@ export default function DrawImage() {
   }
 
   async function postImage({ postImageUrl, inputPrompt, inputNegativePrompt }) {
+    setPostingImage(true);
+
     //* Upload image to S3.
     const uploadImageJsonData = {
       imageUrl: postImageUrl,
@@ -609,7 +614,7 @@ export default function DrawImage() {
       console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
 
       setSnackbarSeverity("warning");
-      setSnackbarMessage(`Image url(${imageUrlResponse}) is invalid.`);
+      setSnackbarMessage(`Image url(${postImageUrl}) is invalid.`);
       setOpenSnackbar(true);
 
       setLoadingImage(false);
@@ -659,7 +664,8 @@ export default function DrawImage() {
 
     //* Set image url from image generation server.
     setImageUrl(imageUploadJsonResponse.url);
-    setLoadingImage(false);
+    setPostingImage(false);
+    setIsImagePosted(true);
   }
 
   function WalletConnectPage() {
@@ -820,6 +826,7 @@ export default function DrawImage() {
           duration={10}
           easing="ease"
           shiftDuration={10}
+          sx={{ marginTop: "50px" }}
         />
       );
     },
@@ -892,7 +899,7 @@ export default function DrawImage() {
           flexDirection="column"
           alignItems="center"
         >
-        	{/*//*TODO: Show image fetch time. */}
+          {/*//*TODO: Show image fetch time. */}
           {/* {imageFetchEndTime && (
             <Typography color="black">
               {moment
@@ -913,53 +920,72 @@ export default function DrawImage() {
             </Typography>
           )} */}
 
-          <Grid container>
-            <Button
-              variant="contained"
-              onClick={fetchImage}
-              sx={{
-                m: 1,
-              }}
-              disabled={loadingImage}
-            >
-              Draw
-            </Button>
-
-            <Button
-              variant="contained"
-              onClick={() => {
-                //* Get URI encoded string.
-                const imageUrlEncodedString = encodeURIComponent(imageUrl);
-                const promptEncodedString = encodeURIComponent(prompt);
-                const negativePromptEncodedString =
-                  encodeURIComponent(negativePrompt);
-                const link = `/mint/${promptEncodedString}/${imageUrlEncodedString}/${negativePromptEncodedString}`;
-                router.push(link);
-              }}
-              sx={{
-                m: 1,
-              }}
-              disabled={!imageUrl || loadingImage}
-            >
-              Mint
-            </Button>
-
-            <Button
-              variant="contained"
-              onClick={() =>
-                postImage({
-                  postImageUrl: imageUrl,
-                  inputPrompt: prompt,
-                  inputNegativePrompt: negativePrompt,
-                })
-              }
-              sx={{
-                m: 1,
-              }}
-              disabled={!imageUrl || loadingImage}
-            >
-              Publish
-            </Button>
+          <Grid container spacing={5}>
+            <Grid item xs={4}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={fetchImage}
+                sx={{
+                  m: 1,
+                }}
+                disabled={loadingImage}
+              >
+                {loadingImage ? (
+                  <Typography>Drawing...</Typography>
+                ) : (
+                  <Typography>Draw</Typography>
+                )}
+              </Button>
+            </Grid>
+            <Grid item xs={4}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => {
+                  //* Get URI encoded string.
+                  const imageUrlEncodedString = encodeURIComponent(imageUrl);
+                  const promptEncodedString = encodeURIComponent(prompt);
+                  const negativePromptEncodedString =
+                    encodeURIComponent(negativePrompt);
+                  const link = `/mint/${promptEncodedString}/${imageUrlEncodedString}/${negativePromptEncodedString}`;
+                  router.push(link);
+                }}
+                sx={{
+                  m: 1,
+                }}
+                disabled={!imageUrl || loadingImage}
+              >
+                Mint
+              </Button>
+            </Grid>
+            <Grid item xs={4}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() =>
+                  postImage({
+                    postImageUrl: imageUrl,
+                    inputPrompt: prompt,
+                    inputNegativePrompt: negativePrompt,
+                  })
+                }
+                sx={{
+                  m: 1,
+                }}
+                disabled={
+                  !imageUrl || loadingImage || postingImage || isImagePosted
+                }
+              >
+                {postingImage ? (
+                  <Typography>Posting...</Typography>
+                ) : isImagePosted ? (
+                  <Typography>Posted</Typography>
+                ) : (
+                  <Typography>Post</Typography>
+                )}
+              </Button>
+            </Grid>
           </Grid>
         </Box>
       </>
@@ -1010,6 +1036,7 @@ export default function DrawImage() {
           height={imageHeight}
           display="flex"
           flexDirection="row"
+          justifyContent="center"
           alignItems="center"
         >
           <CircularProgress size={imageHeight * 0.4} />
