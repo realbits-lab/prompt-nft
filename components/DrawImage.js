@@ -49,7 +49,7 @@ export default function DrawImage() {
   const CARD_MIN_WIDTH = 375;
   const CARD_MAX_WIDTH = 420;
   const CARD_PADDING = 1;
-  const IMAGE_PADDING = 400;
+  const IMAGE_PADDING = 450;
   const { user, mutateUser } = useUser();
   const [imageUrl, setImageUrl] = React.useState("");
   const [loadingImage, setLoadingImage] = React.useState(false);
@@ -694,7 +694,7 @@ export default function DrawImage() {
                 You have to rent NFT for drawing.
               </Typography>
               <Button
-                disabled={isLoadingRentNFTTx}
+                disabled={isLoadingRentNFT || isLoadingRentNFTTx}
                 fullWidth
                 sx={{ marginTop: "10px" }}
                 variant="contained"
@@ -706,7 +706,7 @@ export default function DrawImage() {
                   }
                 }}
               >
-                {isLoadingRentNFTTx ? (
+                {isLoadingRentNFT || isLoadingRentNFTTx ? (
                   <Typography>
                     Renting NFT... ({paymentNftRentFee} matic)
                   </Typography>
@@ -765,6 +765,7 @@ export default function DrawImage() {
             style={{
               width: "80vw",
             }}
+            sx={{ m: 2 }}
             disabled={loadingImage}
             autoComplete="on"
           />
@@ -779,6 +780,7 @@ export default function DrawImage() {
             style={{
               width: "80vw",
             }}
+            sx={{ m: 2 }}
             disabled={loadingImage}
             autoComplete="on"
           />
