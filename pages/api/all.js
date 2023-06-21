@@ -1,6 +1,6 @@
 import { withIronSessionApiRoute } from "iron-session/next";
-import { sessionOptions } from "../../lib/session";
 import { PrismaClient } from "@prisma/client";
+import { sessionOptions } from "@/lib/session";
 
 async function handler(req, res) {
   const IMAGE_TAKE_COUNT = 100;
