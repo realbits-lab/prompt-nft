@@ -578,6 +578,78 @@ export default function DrawImage() {
     setLoadingImage(false);
   }
 
+  async function postImage() {
+    //* Upload image to S3.
+    const uploadImageJsonData = {
+      imageUrl: imageUrlResponse,
+    };
+    let responseUploadImageToS3;
+    try {
+      responseUploadImageToS3 = await fetch(UPLOAD_IMAGE_TO_S3_URL, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(uploadImageJsonData),
+      });
+    } catch (error) {
+      console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
+
+      setSnackbarSeverity("warning");
+      setSnackbarMessage(`Image url(${imageUrlResponse}) is invalid.`);
+      setOpenSnackbar(true);
+
+      setLoadingImage(false);
+      return;
+    }
+
+    if (responseUploadImageToS3.status !== 200) {
+      console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
+
+      setSnackbarSeverity("warning");
+      setSnackbarMessage("S3 upload failed.");
+      setOpenSnackbar(true);
+
+      setLoadingImage(false);
+      return;
+    }
+    const imageUploadJsonResponse = await responseUploadImageToS3.json();
+    // console.log("imageUploadJsonResponse: ", imageUploadJsonResponse);
+
+    //* Post image and prompt to prompt server.
+    const imageUploadResponse = await fetch(POST_API_URL, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt: inputPrompt,
+        negativePrompt: inputNegativePrompt,
+        imageUrl: imageUploadJsonResponse.url,
+        discordBotToken: DISCORD_BOT_TOKEN,
+      }),
+    });
+    // console.log("imageUploadResponse: ", imageUploadResponse);
+
+    if (imageUploadResponse.status !== 200) {
+      console.error(`imageUploadResponse: ${imageUploadResponse}`);
+
+      setSnackbarSeverity("warning");
+      setSnackbarMessage(`Image upload response error: ${imageUploadResponse}`);
+      setOpenSnackbar(true);
+
+      setLoadingImage(false);
+
+      return;
+    }
+
+    //* Set image url from image generation server.
+    setImageUrl(imageUploadJsonResponse.url);
+    setLoadingImage(false);
+  }
+
   function WalletConnectPage() {
     return (
       <>
@@ -861,11 +933,11 @@ export default function DrawImage() {
 
             <Button
               variant="contained"
-              onClick={fetchImage}
+              onClick={postImage}
               sx={{
                 m: 1,
               }}
-              disabled={loadingImage}
+              disabled={!imageUrl || loadingImage}
             >
               Publish
             </Button>
