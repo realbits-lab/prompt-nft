@@ -19,6 +19,7 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import CarouselImage from "@/components/CarouselImage";
+import ListImage from "@/components/ListImage";
 import CarouselNft from "@/components/CarouselNft";
 import ListOwn from "@/components/ListOwn";
 import ListRent from "@/components/ListRent";
@@ -147,7 +148,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
     };
   }
 
-  //* Get all image data array.
   const {
     data: dataImage,
     error: errorImage,
@@ -504,7 +504,8 @@ function List({ mode, updated, setNewImageCountFunc }) {
           </div>
         ) : mode === "image" ? (
           <div>
-            <CarouselImage data={dataImage} isLoading={isLoadingImage} />
+            {/* <CarouselImage data={dataImage} isLoading={isLoadingImage} /> */}
+            <ListImage />
           </div>
         ) : mode === "nft" ? (
           <div>

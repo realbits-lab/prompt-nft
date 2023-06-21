@@ -59,7 +59,7 @@ HideOnScroll.propTypes = {
 export default function ListPage(props) {
   // console.log("call ListPage()");
 
-  const DEFAULT_MENU = "draw";
+  const DEFAULT_MENU = "image";
   const BOARD_URL = "https://muve.moim.co/forums/QEUREBYLO";
   let MARKET_URL;
   if (process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK === "maticmum") {
