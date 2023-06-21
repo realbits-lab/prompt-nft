@@ -592,25 +592,25 @@ export default function DrawImage() {
     return (
       <>
         <Box
-          sx={{
-            "& .MuiTextField-root": { m: 1, width: "25ch" },
-          }}
           display="flex"
           flexDirection="column"
           justifyContent="center"
           alignItems="center"
-          minHeight="100vh"
+          sx={{ marginTop: "50px" }}
         >
           <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-            <CardMedia component="img" image={PLACEHOLDER_IMAGE_URL} />
+            <CardMedia
+              component="img"
+              image={PLACEHOLDER_IMAGE_URL}
+              height={"200px"}
+            />
             <CardContent
               sx={{
                 padding: "10",
               }}
             >
               <Typography variant="h7">
-                You should login with your wallet such as metamask. Click the
-                upper-right "Login" button.
+                Click the upper-right "Login" button.
               </Typography>
             </CardContent>
           </Card>

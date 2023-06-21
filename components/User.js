@@ -56,7 +56,9 @@ export default function User() {
     // console.log("publicAddress: ", publicAddress);
 
     // Popup MetaMask confirmation modal to sign message with nonce data.
-    const signMessageResult = await handleSignMessage();
+    const signMessageResult = await handleSignMessage({
+      accountAddress: publicAddress,
+    });
     // console.log("signMessageResult: ", signMessageResult);
 
     // Send signature to back-end on the /auth route.
@@ -66,7 +68,7 @@ export default function User() {
     });
   };
 
-  const handleSignMessage = async () => {
+  const handleSignMessage = async ({ accountAddress }) => {
     const msgParams = JSON.stringify({
       domain: {
         chainId: selectedChain.id,
@@ -90,7 +92,7 @@ export default function User() {
       },
     });
 
-    const params = [address, msgParams];
+    const params = [accountAddress, msgParams];
     const method = "eth_signTypedData_v4";
 
     const requestResult = await ethereum.request({
