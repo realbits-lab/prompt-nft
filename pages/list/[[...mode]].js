@@ -306,6 +306,9 @@ export default function ListPage(props) {
                 </MenuItem>
                 <MenuItem
                   onClick={async () => {
+                    setMode("image");
+                    handleSettingMenuClose();
+
                     try {
                       mutateUser(
                         await fetchJson(
@@ -321,8 +324,6 @@ export default function ListPage(props) {
                         console.error("An unexpected error happened:", error);
                       }
                     }
-                    setMode("image");
-                    handleSettingMenuClose();
                   }}
                 >
                   LOGOUT
