@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 import moment from "moment";
 import momentDurationFormatSetup from "moment-duration-format";
-import dynamic from "next/dynamic";
 import { useRecoilStateLoadable } from "recoil";
 import {
   useAccount,
@@ -21,7 +20,6 @@ import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
-import Slide from "@mui/material/Slide";
 import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
@@ -30,9 +28,6 @@ import fetchJson, { FetchError } from "@/lib/fetchJson";
 import useUser from "@/lib/useUser";
 import { handleSignMessage, handleAuthenticate } from "@/components/User";
 import { sleep, writeToastMessageState, AlertSeverity } from "@/lib/util";
-const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
-  ssr: false,
-});
 
 export default function DrawImage() {
   // console.log("call DrawImage()");
@@ -40,6 +35,7 @@ export default function DrawImage() {
   const DEFAULT_MODEL_NAME = "runwayml/stable-diffusion-v1-5";
   const DRAW_API_URL = "/api/draw";
   const POST_API_URL = "/api/post";
+  const POSTED_API_URL = "/api/posted";
   const UPLOAD_IMAGE_TO_S3_URL = "/api/upload-image-to-s3";
   const FETCH_RESULT_API_URL = "/api/fetch-result";
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
@@ -72,19 +68,6 @@ export default function DrawImage() {
           snackbarTime: new Date(),
           snackbarOpen: true,
         };
-
-  //*---------------------------------------------------------------------------
-  //* Handle snackbar.
-  //*---------------------------------------------------------------------------
-  const [snackbarMessage, setSnackbarMessage] = React.useState("");
-  const [openSnackbar, setOpenSnackbar] = React.useState(false);
-  const [snackbarSeverity, setSnackbarSeverity] = React.useState("info");
-  const handleCloseSnackbar = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setOpenSnackbar(false);
-  };
 
   //*---------------------------------------------------------------------------
   //* Handle text input change.
@@ -402,9 +385,12 @@ export default function DrawImage() {
     let inputModelName = modelName;
 
     if (!prompt || prompt === "") {
-      setSnackbarSeverity("warning");
-      setSnackbarMessage("Prompt is empty.");
-      setOpenSnackbar(true);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: "Prompt is empty.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
 
       setLoadingImage(false);
 
@@ -427,9 +413,12 @@ export default function DrawImage() {
     //* Check error response.
     if (fetchResponse.status !== 200) {
       console.error("fetchResponse.status is not 200.");
-      setSnackbarSeverity("warning");
-      setSnackbarMessage("Drawing image failed.");
-      setOpenSnackbar(true);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: "Drawing image is failed..",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
 
       setLoadingImage(false);
 
@@ -446,9 +435,12 @@ export default function DrawImage() {
     ) {
       console.error("jsonResponse.status is not processing or success.");
 
-      setSnackbarSeverity("warning");
-      setSnackbarMessage("Drawing image failed.");
-      setOpenSnackbar(true);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: "Drawing image is failed.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
 
       setLoadingImage(false);
 
@@ -479,9 +471,12 @@ export default function DrawImage() {
       if (fetchResultResponse.status !== 200) {
         console.error("jsonResponse.status is not success.");
 
-        setSnackbarSeverity("warning");
-        setSnackbarMessage("Fetching image failed.");
-        setOpenSnackbar(true);
+        setWriteToastMessage({
+          snackbarSeverity: AlertSeverity.warning,
+          snackbarMessage: "Fetching image is failed.",
+          snackbarTime: new Date(),
+          snackbarOpen: true,
+        });
 
         setLoadingImage(false);
         return;
@@ -539,9 +534,12 @@ export default function DrawImage() {
     } catch (error) {
       console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
 
-      setSnackbarSeverity("warning");
-      setSnackbarMessage(`Image url(${imageUrlResponse}) is invalid.`);
-      setOpenSnackbar(true);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: `Image url(${imageUrlResponse}) is invalid.`,
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
 
       setLoadingImage(false);
       return;
@@ -550,9 +548,12 @@ export default function DrawImage() {
     if (responseUploadImageToS3.status !== 200) {
       console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
 
-      setSnackbarSeverity("warning");
-      setSnackbarMessage("S3 upload failed.");
-      setOpenSnackbar(true);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: "S3 uploading is failed.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
 
       setLoadingImage(false);
       return;
@@ -579,9 +580,12 @@ export default function DrawImage() {
     if (imageUploadResponse.status !== 200) {
       console.error(`imageUploadResponse: ${imageUploadResponse}`);
 
-      setSnackbarSeverity("warning");
-      setSnackbarMessage(`Image upload response error: ${imageUploadResponse}`);
-      setOpenSnackbar(true);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: `Image upload response error: ${imageUploadResponse}`,
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
 
       setLoadingImage(false);
 
@@ -595,6 +599,34 @@ export default function DrawImage() {
 
   async function postImage({ postImageUrl, inputPrompt, inputNegativePrompt }) {
     setPostingImage(true);
+
+    //* Check the duplicate prompt.
+    const postedResponse = await fetch(POSTED_API_URL, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt: inputPrompt,
+      }),
+    });
+
+    if (postedResponse.status === 200) {
+      console.error("postedResponse: ", postedResponse);
+
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: "Prompt is already posted.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+
+      setLoadingImage(false);
+      setIsImagePosted(false);
+
+      return;
+    }
 
     //* Upload image to S3.
     const uploadImageJsonData = {
@@ -613,9 +645,12 @@ export default function DrawImage() {
     } catch (error) {
       console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
 
-      setSnackbarSeverity("warning");
-      setSnackbarMessage(`Image url(${postImageUrl}) is invalid.`);
-      setOpenSnackbar(true);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: `Image url(${postImageUrl}) is invalid.`,
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
 
       setLoadingImage(false);
       return;
@@ -624,9 +659,12 @@ export default function DrawImage() {
     if (responseUploadImageToS3.status !== 200) {
       console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
 
-      setSnackbarSeverity("warning");
-      setSnackbarMessage("S3 upload failed.");
-      setOpenSnackbar(true);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: "S3 uploading is failed.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
 
       setLoadingImage(false);
       return;
@@ -653,9 +691,12 @@ export default function DrawImage() {
     if (imageUploadResponse.status !== 200) {
       console.error(`imageUploadResponse: ${imageUploadResponse}`);
 
-      setSnackbarSeverity("warning");
-      setSnackbarMessage(`Image upload response error: ${imageUploadResponse}`);
-      setOpenSnackbar(true);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: `Image upload response error: ${imageUploadResponse}`,
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
 
       setLoadingImage(false);
 
@@ -1044,14 +1085,6 @@ export default function DrawImage() {
       ) : (
         <ImagePage />
       )}
-
-      <MessageSnackbar
-        open={openSnackbar}
-        autoHideDuration={10000}
-        onClose={handleCloseSnackbar}
-        severity={snackbarSeverity}
-        message={snackbarMessage}
-      />
     </>
   );
 }

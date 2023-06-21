@@ -29,28 +29,26 @@ async function handler(req, res) {
   // console.log("prompt: ", prompt);
 
   //* Find prompt.
-  let resultPrismaPostCreate;
+  let resultPrismaPostFindUnique;
   try {
-    resultPrismaPostCreate = await prisma.post.create({
-      data: {
+    resultPrismaPostFindUnique = await prisma.post.findUnique({
+      where: {
         prompt: prompt,
-        negativePrompt: negativePrompt,
-        imageUrl: imageUrl,
       },
     });
-    // console.log("resultPrismaPostCreate: ", resultPrismaPostCreate);
+    // console.log("resultPrismaPostFindUnique: ", resultPrismaPostFindUnique);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "prisma.post.create failed." });
+    res.status(500).json({ error: "prisma.post.findUnique failed." });
     return;
   }
 
   //* Return database insert result.
-  if (resultPrismaPostCreate) {
+  if (resultPrismaPostFindUnique) {
     res.status(200).json({ data: "ok" });
   } else {
-    console.error("resultPrismaPostCreate: ", resultPrismaPostCreate);
-    res.status(500).json({ message: "data creation failed." });
+    console.error("resultPrismaPostFindUnique: ", resultPrismaPostFindUnique);
+    res.status(500).json({ message: "findUnique failed." });
   }
 }
 
