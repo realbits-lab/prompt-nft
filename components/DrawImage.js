@@ -535,7 +535,7 @@ export default function DrawImage() {
     setLoadingImage(false);
   }
 
-  function buildWalletConnectPage() {
+  function WalletConnectPage() {
     return (
       <>
         <Box
@@ -549,7 +549,7 @@ export default function DrawImage() {
     );
   }
 
-  function buildWalletLoginPage() {
+  function WalletLoginPage() {
     return (
       <>
         <Box
@@ -580,7 +580,7 @@ export default function DrawImage() {
     );
   }
 
-  function buildLoadingPage() {
+  function LoadingPage() {
     // console.log("call buildLoadingPage()");
 
     return (
@@ -590,7 +590,7 @@ export default function DrawImage() {
     );
   }
 
-  function buildPaymentPage() {
+  function PaymentPage() {
     return (
       <>
         <Box
@@ -647,7 +647,7 @@ export default function DrawImage() {
     );
   }
 
-  function buildDrawPage() {
+  function DrawPage() {
     // console.log("call buildDrawPage()");
 
     return (
@@ -791,20 +791,20 @@ export default function DrawImage() {
 
   function buildPage() {
     if (isConnected === false) {
-      return buildWalletConnectPage();
+      return <WalletConnectPage />;
     }
 
     if (!dataAllRentData) {
-      return buildLoadingPage();
+      return <LoadingPage />;
     }
 
     if (user === undefined || user.isLoggedIn === false) {
-      return buildWalletLoginPage();
+      return <WalletLoginPage />;
     }
     if (user !== undefined && user.rentPaymentNft === true) {
-      return buildDrawPage();
+      return <DrawPage />;
     } else {
-      return buildPaymentPage();
+      return <PaymentPage />;
     }
   }
 
