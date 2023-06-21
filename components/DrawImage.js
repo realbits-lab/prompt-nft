@@ -349,7 +349,7 @@ export default function DrawImage() {
 
   //* Initialize.
   React.useEffect(function () {
-    console.log("call useEffect()");
+    // console.log("call useEffect()");
 
     momentDurationFormatSetup(moment);
 
