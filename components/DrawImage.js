@@ -35,6 +35,8 @@ const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
 });
 
 export default function DrawImage() {
+  // console.log("call DrawImage()");
+
   const DEFAULT_MODEL_NAME = "runwayml/stable-diffusion-v1-5";
   const DRAW_API_URL = "/api/draw";
   const POST_API_URL = "/api/post";
@@ -68,6 +70,38 @@ export default function DrawImage() {
           snackbarTime: new Date(),
           snackbarOpen: true,
         };
+
+  //*---------------------------------------------------------------------------
+  //* Handle snackbar.
+  //*---------------------------------------------------------------------------
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
+  const [openSnackbar, setOpenSnackbar] = React.useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState("info");
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
+  //*---------------------------------------------------------------------------
+  //* Handle text input change.
+  //*---------------------------------------------------------------------------
+  const [formValue, setFormValue] = React.useState({
+    prompt: "",
+    negativePrompt: "",
+    modelName: DEFAULT_MODEL_NAME,
+  });
+  const { prompt, negativePrompt, modelName } = formValue;
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormValue((prevState) => {
+      return {
+        ...prevState,
+        [name]: value,
+      };
+    });
+  };
 
   //*---------------------------------------------------------------------------
   //* Wagmi hook.
@@ -313,37 +347,28 @@ export default function DrawImage() {
     }
   }
 
-  //*---------------------------------------------------------------------------
-  //* Handle snackbar.
-  //*---------------------------------------------------------------------------
-  const [snackbarMessage, setSnackbarMessage] = React.useState("");
-  const [openSnackbar, setOpenSnackbar] = React.useState(false);
-  const [snackbarSeverity, setSnackbarSeverity] = React.useState("info");
-  const handleCloseSnackbar = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setOpenSnackbar(false);
-  };
+  //* Initialize.
+  React.useEffect(function () {
+    console.log("call useEffect()");
 
-  //*---------------------------------------------------------------------------
-  //* Handle text input change.
-  //*---------------------------------------------------------------------------
-  const [formValue, setFormValue] = React.useState({
-    prompt: "",
-    negativePrompt: "",
-    modelName: DEFAULT_MODEL_NAME,
-  });
-  const { prompt, negativePrompt, modelName } = formValue;
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormValue((prevState) => {
-      return {
-        ...prevState,
-        [name]: value,
-      };
-    });
-  };
+    momentDurationFormatSetup(moment);
+
+    setImageHeight(window.innerHeight - IMAGE_PADDING);
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  //* TODO: No reload.
+  // useInterval(() => {
+  //   console.log("call useInterval()");
+
+  //   const timestamp = Math.floor(Date.now() / 1000);
+  //   // console.log("timestamp: ", timestamp);
+  //   setCurrentTimestamp((previousTimestamp) => timestamp);
+  // }, 1000);
 
   function useInterval(callback, delay) {
     const savedCallback = React.useRef();
@@ -362,23 +387,6 @@ export default function DrawImage() {
       }
     }, [delay]);
   }
-
-  useInterval(() => {
-    const timestamp = Math.floor(Date.now() / 1000);
-    // console.log("timestamp: ", timestamp);
-    setCurrentTimestamp((previousTimestamp) => timestamp);
-  }, 1000);
-
-  React.useEffect(function () {
-    momentDurationFormatSetup(moment);
-
-    setImageHeight(window.innerHeight - IMAGE_PADDING);
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
 
   function handleResize() {
     setImageHeight(window.innerHeight - IMAGE_PADDING);
@@ -507,6 +515,10 @@ export default function DrawImage() {
       inputModelName = meta.model;
     }
 
+    setImageUrl(imageUrlResponse);
+    setLoadingImage(false);
+    return;
+
     //* Upload image to S3.
     const uploadImageJsonData = {
       imageUrl: imageUrlResponse,
@@ -578,10 +590,10 @@ export default function DrawImage() {
     setLoadingImage(false);
   }
 
-  async function postImage() {
+  async function postImage({ postImageUrl, inputPrompt, inputNegativePrompt }) {
     //* Upload image to S3.
     const uploadImageJsonData = {
-      imageUrl: imageUrlResponse,
+      imageUrl: postImageUrl,
     };
     let responseUploadImageToS3;
     try {
@@ -880,7 +892,8 @@ export default function DrawImage() {
           flexDirection="column"
           alignItems="center"
         >
-          {imageFetchEndTime && (
+        	{/*//*TODO: Show image fetch time. */}
+          {/* {imageFetchEndTime && (
             <Typography color="black">
               {moment
                 .duration((imageFetchEndTime - currentTimestamp) * 1000)
@@ -898,7 +911,7 @@ export default function DrawImage() {
                 .duration((imageFetchEndTime - currentTimestamp) * 1000)
                 .humanize()}
             </Typography>
-          )}
+          )} */}
 
           <Grid container>
             <Button
@@ -933,7 +946,13 @@ export default function DrawImage() {
 
             <Button
               variant="contained"
-              onClick={postImage}
+              onClick={() =>
+                postImage({
+                  postImageUrl: imageUrl,
+                  inputPrompt: prompt,
+                  inputNegativePrompt: negativePrompt,
+                })
+              }
               sx={{
                 m: 1,
               }}
