@@ -57,6 +57,13 @@ async function handler(req, res) {
       .json({ error: "Invalid method. Support only POST." });
   }
 
+  //* Check if already logined.
+  if (req.session.user && req.session.user.isLoggedIn === true) {
+    // console.log("User is already logined.");
+    res.status(200).json(req.session.user);
+    return;
+  }
+
   const { publicAddress, signature } = await req.body;
   console.log("publicAddress: ", publicAddress);
   console.log("signature: ", signature);
@@ -68,20 +75,10 @@ async function handler(req, res) {
     return;
   }
 
-  //* Check if already logined.
-  if (
-    req.session.user &&
-    req.session.user.isLoggedIn === true &&
-    req.session.user.publicAddress.toLowerCase() === publicAddress.toLowerCase()
-  ) {
-    // console.log("User is already logined.");
-
-    //* Check whether or not user rented the payment nft.
-    const user = await getUserData({ publicAddress });
-    req.session.user = user;
-    await req.session.save();
-
-    res.status(200).json(user);
+  if (!signature) {
+    res.status(500).json({
+      error: `signature: ${signature} is invalid.`,
+    });
     return;
   }
 
