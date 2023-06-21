@@ -5,20 +5,57 @@ import { getChainId } from "@/lib/util";
 import rentmarketABI from "@/contracts/rentMarket.json";
 const sigUtil = require("@metamask/eth-sig-util");
 
+const RENT_MARKET_CONTRACT_ADDRES =
+  process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
+const PAYMENT_NFT_CONTRACT_ADDRESS =
+  process.env.NEXT_PUBLIC_PAYMENT_NFT_ADDRESS;
+const PAYMENT_NFT_TOKEN_ID = process.env.NEXT_PUBLIC_PAYMENT_NFT_TOKEN;
+const ALCHEMY_API_URL =
+  "https://polygon-mumbai.g.alchemy.com/v2/oRV4hG4cLckxr4KcIgiFbOIiaNmoCTf1";
+
+async function getUserData() {
+  const web3 = new Web3(ALCHEMY_API_URL);
+  const rentMarketContract = new web3.eth.Contract(
+    rentmarketABI.abi,
+    RENT_MARKET_CONTRACT_ADDRES
+  );
+  const result = await rentMarketContract.methods.getAllRentData().call();
+  let found = false;
+  result?.map(function (rentData) {
+    console.log("rentData: ", rentData);
+    console.log("publicAddress: ", publicAddress);
+    console.log("PAYMENT_NFT_CONTRACT_ADDRESS: ", PAYMENT_NFT_CONTRACT_ADDRESS);
+    console.log("PAYMENT_NFT_TOKEN_ID: ", PAYMENT_NFT_TOKEN_ID);
+    if (
+      rentData.renteeAddress.toLowerCase() === publicAddress?.toLowerCase() &&
+      rentData.nftAddress.toLowerCase() ===
+        PAYMENT_NFT_CONTRACT_ADDRESS.toLowerCase() &&
+      Number(rentData.tokenId) === Number(PAYMENT_NFT_TOKEN_ID)
+    ) {
+      found = true;
+    }
+  });
+  console.log("found: ", found);
+
+  const user = {
+    isLoggedIn: true,
+    publicAddress: publicAddress,
+    rentPaymentNft: found,
+  };
+
+  return user;
+}
+
 async function handler(req, res) {
   // console.log("call /api/login");
-
-  const RENT_MARKET_CONTRACT_ADDRES =
-    process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
-  const PAYMENT_NFT_CONTRACT_ADDRESS =
-    process.env.NEXT_PUBLIC_PAYMENT_NFT_ADDRESS;
-  const PAYMENT_NFT_TOKEN_ID = process.env.NEXT_PUBLIC_PAYMENT_NFT_TOKEN;
-  const ALCHEMY_API_URL =
-    "https://polygon-mumbai.g.alchemy.com/v2/oRV4hG4cLckxr4KcIgiFbOIiaNmoCTf1";
-  const { publicAddress, signature } = await req.body;
-  // console.log("publicAddress: ", publicAddress);
-  // console.log("signature: ", signature);
   // console.log("req.session.user: ", req.session.user);
+
+  //* Method should be POST.
+  if (req.method !== "POST") {
+    return res
+      .status(500)
+      .json({ error: "Invalid method. Support only POST." });
+  }
 
   //* Check if already logined.
   if (
@@ -26,7 +63,22 @@ async function handler(req, res) {
     req.session.user.isLoggedIn === true &&
     req.session.user.publicAddress.toLowerCase() === publicAddress.toLowerCase()
   ) {
-    return res.status(200).json(req.session.user);
+    //* Check whether or not user rented the payment nft.
+    const user = getUserData();
+    req.session.user = user;
+    await req.session.save();
+
+    return res.status(200).json(user);
+  }
+
+  const { publicAddress, signature } = await req.body;
+  // console.log("publicAddress: ", publicAddress);
+  // console.log("signature: ", signature);
+
+  if (!publicAddress || !signature) {
+    return res.status(500).json({
+      error: `publicAddress: ${publicAddress} or signature: ${signature} is invalid.`,
+    });
   }
 
   const chainId = getChainId({
@@ -73,44 +125,15 @@ async function handler(req, res) {
   // console.log("publicAddress: ", publicAddress);
 
   if (recovered.toLowerCase() === publicAddress.toLowerCase()) {
-    //* TODO: Check whether or not user rented the payment nft.
-    const web3 = new Web3(ALCHEMY_API_URL);
-    const rentMarketContract = new web3.eth.Contract(
-      rentmarketABI.abi,
-      RENT_MARKET_CONTRACT_ADDRES
-    );
-    const result = await rentMarketContract.methods.getAllRentData().call();
-    let found = false;
-    result?.map(function (rentData) {
-      console.log("rentData: ", rentData);
-      console.log("publicAddress: ", publicAddress);
-      console.log(
-        "PAYMENT_NFT_CONTRACT_ADDRESS: ",
-        PAYMENT_NFT_CONTRACT_ADDRESS
-      );
-      console.log("PAYMENT_NFT_TOKEN_ID: ", PAYMENT_NFT_TOKEN_ID);
-      if (
-        rentData.renteeAddress.toLowerCase() === publicAddress?.toLowerCase() &&
-        rentData.nftAddress.toLowerCase() ===
-          PAYMENT_NFT_CONTRACT_ADDRESS.toLowerCase() &&
-        Number(rentData.tokenId) === Number(PAYMENT_NFT_TOKEN_ID)
-      ) {
-        found = true;
-      }
-    });
-    console.log("found: ", found);
-
-    const user = {
-      isLoggedIn: true,
-      publicAddress: publicAddress,
-      rentPaymentNft: found,
-    };
+    //* Check whether or not user rented the payment nft.
+    const user = getUserData();
     req.session.user = user;
     await req.session.save();
 
     return res.status(200).json(user);
   } else {
     console.error("Recovered address is not the same as input address.");
+
     return res.status(401).json({ error: "Signature verification failed." });
   }
 }

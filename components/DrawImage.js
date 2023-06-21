@@ -230,6 +230,7 @@ export default function DrawImage() {
     onSuccess(data) {
       // console.log("call onSuccess()");
       // console.log("data: ", data);
+      
       setWriteToastMessage({
         snackbarSeverity: AlertSeverity.success,
         snackbarMessage: "Renting is finished successfully.",
@@ -258,6 +259,8 @@ export default function DrawImage() {
       // console.log("tx: ", tx);
     },
   });
+
+
 
   //*---------------------------------------------------------------------------
   //* Handle snackbar.
@@ -789,7 +792,7 @@ export default function DrawImage() {
     );
   }
 
-  function buildPage() {
+  function ContentPage() {
     if (isConnected === false) {
       return <WalletConnectPage />;
     }
@@ -825,8 +828,7 @@ export default function DrawImage() {
           <Web3NetworkSwitch />
         </Grid>
       </Grid>
-      {buildPage()}
-
+      <ContentPage />
       <MessageSnackbar
         open={openSnackbar}
         autoHideDuration={10000}
