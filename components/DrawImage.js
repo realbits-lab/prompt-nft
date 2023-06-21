@@ -2,6 +2,7 @@ import React from "react";
 import { useRouter } from "next/router";
 import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 import moment from "moment";
+import momentDurationFormatSetup from "moment-duration-format";
 import dynamic from "next/dynamic";
 import { useRecoilStateLoadable } from "recoil";
 import {
@@ -369,9 +370,11 @@ export default function DrawImage() {
   }, 1000);
 
   React.useEffect(function () {
-    setImageHeight(window.innerHeight - IMAGE_PADDING);
+    momentDurationFormatSetup(moment);
 
+    setImageHeight(window.innerHeight - IMAGE_PADDING);
     window.addEventListener("resize", handleResize);
+
     return () => {
       window.removeEventListener("resize", handleResize);
     };
@@ -753,27 +756,19 @@ export default function DrawImage() {
           display="flex"
           flexDirection="column"
         >
-          {paymentNftRentEndTime &&
+          {isLoadingRentData || !paymentNftRentEndTime || !currentTimestamp ? (
+            <Typography>Remaining time is ...</Typography>
+          ) : paymentNftRentEndTime &&
             currentTimestamp &&
-            currentTimestamp < paymentNftRentEndTime && (
-              <Typography color="black">
-                {moment
-                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                  .hours()}
-                :
-                {moment
-                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                  .minutes()}
-                :
-                {moment
-                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                  .seconds()}{" "}
-                /
-                {moment
-                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                  .humanize()}
-              </Typography>
-            )}
+            currentTimestamp < paymentNftRentEndTime ? (
+            <Typography color="black">
+              {moment
+                .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+                .format()}
+            </Typography>
+          ) : (
+            <Typography>Rent finished</Typography>
+          )}
           <TextField
             required
             id="outlined-required"
@@ -804,16 +799,6 @@ export default function DrawImage() {
             disabled={loadingImage}
             autoComplete="on"
           />
-          <Button
-            variant="contained"
-            onClick={fetchImage}
-            sx={{
-              m: 1,
-            }}
-            disabled={loadingImage}
-          >
-            Draw
-          </Button>
         </Box>
         <Box
           component="form"
@@ -842,25 +827,49 @@ export default function DrawImage() {
                 .humanize()}
             </Typography>
           )}
-          <Button
-            variant="contained"
-            onClick={() => {
-              //* Get URI encoded string.
-              const imageUrlEncodedString = encodeURIComponent(imageUrl);
-              const promptEncodedString = encodeURIComponent(prompt);
-              const negativePromptEncodedString =
-                encodeURIComponent(negativePrompt);
-              const link = `/mint/${promptEncodedString}/${imageUrlEncodedString}/${negativePromptEncodedString}`;
-              router.push(link);
-            }}
-            sx={{
-              width: "80vw",
-              marginTop: 1,
-            }}
-            disabled={loadingImage}
-          >
-            Mint
-          </Button>
+
+          <Grid container>
+            <Button
+              variant="contained"
+              onClick={fetchImage}
+              sx={{
+                m: 1,
+              }}
+              disabled={loadingImage}
+            >
+              Draw
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={() => {
+                //* Get URI encoded string.
+                const imageUrlEncodedString = encodeURIComponent(imageUrl);
+                const promptEncodedString = encodeURIComponent(prompt);
+                const negativePromptEncodedString =
+                  encodeURIComponent(negativePrompt);
+                const link = `/mint/${promptEncodedString}/${imageUrlEncodedString}/${negativePromptEncodedString}`;
+                router.push(link);
+              }}
+              sx={{
+                m: 1,
+              }}
+              disabled={!imageUrl || loadingImage}
+            >
+              Mint
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={fetchImage}
+              sx={{
+                m: 1,
+              }}
+              disabled={loadingImage}
+            >
+              Publish
+            </Button>
+          </Grid>
         </Box>
       </>
     );
@@ -879,11 +888,7 @@ export default function DrawImage() {
       return <WalletLoginPage />;
     }
     if (user !== undefined && user.rentPaymentNft === true) {
-      return (
-        <>
-          <DrawPage />
-        </>
-      );
+      return <DrawPage />;
     } else {
       return <PaymentPage />;
     }
@@ -906,6 +911,7 @@ export default function DrawImage() {
           <Web3NetworkSwitch />
         </Grid>
       </Grid>
+
       <ContentPage />
 
       {loadingImage ? (
