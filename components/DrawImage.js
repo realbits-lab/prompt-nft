@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 import moment from "moment";
 import dynamic from "next/dynamic";
+import { useRecoilStateLoadable } from "recoil";
 import {
   useAccount,
   useSigner,
@@ -28,10 +29,11 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import useUser from "@/lib/useUser";
-import { sleep } from "@/lib/util";
+import { sleep, writeToastMessageState, AlertSeverity } from "@/lib/util";
 const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
   ssr: false,
 });
+
 export default function DrawImage() {
   const DEFAULT_MODEL_NAME = "runwayml/stable-diffusion-v1-5";
   const DRAW_API_URL = "/api/draw";
@@ -51,6 +53,21 @@ export default function DrawImage() {
   const [imageHeight, setImageHeight] = React.useState(0);
   const router = useRouter();
   const MARGIN_TOP = "60px";
+
+  //*---------------------------------------------------------------------------
+  //* Snackbar variables.
+  //*---------------------------------------------------------------------------
+  const [writeToastMessageLoadable, setWriteToastMessage] =
+    useRecoilStateLoadable(writeToastMessageState);
+  const writeToastMessage =
+    writeToastMessageLoadable?.state === "hasValue"
+      ? writeToastMessageLoadable.contents
+      : {
+          snackbarSeverity: AlertSeverity.info,
+          snackbarMessage: "",
+          snackbarTime: new Date(),
+          snackbarOpen: true,
+        };
 
   //*---------------------------------------------------------------------------
   //* Wagmi hook.
@@ -177,6 +194,32 @@ export default function DrawImage() {
       PAYMENT_NFT_TOKEN_ID,
       SERVICE_ACCOUNT_ADDRESS,
     ],
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.success,
+        snackbarMessage:
+          "Rent transaction is just started and wait a moment...",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+    onError(error) {
+      // console.log("call onSuccess()");
+      // console.log("error: ", error);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.error,
+        snackbarMessage: `${error}`,
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+    onSettled(data, error) {
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
+    },
   });
   const {
     data: dataRentNFTTx,
@@ -187,10 +230,22 @@ export default function DrawImage() {
     onSuccess(data) {
       // console.log("call onSuccess()");
       // console.log("data: ", data);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.success,
+        snackbarMessage: "Renting is finished successfully.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
     },
     onError(error) {
       // console.log("call onError()");
       // console.log("error: ", error);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.error,
+        snackbarMessage: "Renting is failed.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
     },
     onSettled(data, error) {
       // console.log("call onSettled()");
@@ -562,9 +617,13 @@ export default function DrawImage() {
               }}
             >
               <Typography variant="h5">
-                You should rent nft for drawing.
+                You have to rent NFT for drawing.
               </Typography>
               <Button
+                disabled={isLoadingRentNFTTx}
+                fullWidth
+                sx={{ marginTop: "10px" }}
+                variant="contained"
                 onClick={function () {
                   if (writeRentNFT && dataRentData) {
                     writeRentNFT?.({
@@ -573,7 +632,13 @@ export default function DrawImage() {
                   }
                 }}
               >
-                Rent NFT ({paymentNftRentFee} matic)
+                {isLoadingRentNFTTx ? (
+                  <Typography>
+                    Renting NFT... ({paymentNftRentFee} matic)
+                  </Typography>
+                ) : (
+                  <Typography>Rent NFT ({paymentNftRentFee} matic)</Typography>
+                )}
               </Button>
             </CardContent>
           </Card>
