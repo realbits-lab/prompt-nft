@@ -102,18 +102,21 @@ export default function User() {
   };
 
   const handleAuthenticate = async ({ publicAddress, signature }) => {
+    // console.log("call handleAuthenticate()");
+
     const body = { publicAddress, signature };
+    const userData = await fetchJson(
+      { url: "/api/login" },
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }
+    );
+    // console.log("userData: ", userData);
+
     try {
-      mutateUser(
-        await fetchJson(
-          { url: "/api/login" },
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          }
-        )
-      );
+      mutateUser(userData);
     } catch (error) {
       if (error instanceof FetchError) {
         console.error(error.data.message);

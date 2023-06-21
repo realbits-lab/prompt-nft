@@ -22,10 +22,10 @@ async function getUserData({ publicAddress }) {
   const result = await rentMarketContract.methods.getAllRentData().call();
   let found = false;
   result?.map(function (rentData) {
-    console.log("rentData: ", rentData);
-    console.log("publicAddress: ", publicAddress);
-    console.log("PAYMENT_NFT_CONTRACT_ADDRESS: ", PAYMENT_NFT_CONTRACT_ADDRESS);
-    console.log("PAYMENT_NFT_TOKEN_ID: ", PAYMENT_NFT_TOKEN_ID);
+    // console.log("rentData: ", rentData);
+    // console.log("publicAddress: ", publicAddress);
+    // console.log("PAYMENT_NFT_CONTRACT_ADDRESS: ", PAYMENT_NFT_CONTRACT_ADDRESS);
+    // console.log("PAYMENT_NFT_TOKEN_ID: ", PAYMENT_NFT_TOKEN_ID);
     if (
       rentData.renteeAddress.toLowerCase() === publicAddress?.toLowerCase() &&
       rentData.nftAddress.toLowerCase() ===
@@ -62,9 +62,10 @@ async function handler(req, res) {
   console.log("signature: ", signature);
 
   if (!publicAddress) {
-    return res.status(500).json({
+    res.status(500).json({
       error: `publicAddress: ${publicAddress} is invalid.`,
     });
+    return;
   }
 
   //* Check if already logined.
@@ -73,14 +74,15 @@ async function handler(req, res) {
     req.session.user.isLoggedIn === true &&
     req.session.user.publicAddress.toLowerCase() === publicAddress.toLowerCase()
   ) {
-    console.log("User is already logined.");
+    // console.log("User is already logined.");
 
     //* Check whether or not user rented the payment nft.
-    const user = getUserData({ publicAddress });
+    const user = await getUserData({ publicAddress });
     req.session.user = user;
     await req.session.save();
 
-    return res.status(200).json(user);
+    res.status(200).json(user);
+    return;
   }
 
   const chainId = getChainId({
@@ -121,22 +123,27 @@ async function handler(req, res) {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message });
+    return;
   }
-  // console.log("recovered: ", recovered);
-  // console.log("publicAddress: ", publicAddress);
+  console.log("recovered: ", recovered);
+  console.log("publicAddress: ", publicAddress);
 
   if (recovered.toLowerCase() === publicAddress.toLowerCase()) {
     //* Check whether or not user rented the payment nft.
-    const user = getUserData({ publicAddress });
+    const user = await getUserData({ publicAddress });
     req.session.user = user;
     await req.session.save();
+    // console.log("save req.session.user data");
+    // console.log("req.session.user: ", req.session.user);
 
-    return res.status(200).json(user);
+    res.status(200).json(user);
+    return;
   } else {
     console.error("Recovered address is not the same as input address.");
 
-    return res.status(401).json({ error: "Signature verification failed." });
+    res.status(401).json({ error: "Signature verification failed." });
+    return;
   }
 }
 

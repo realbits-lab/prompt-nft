@@ -25,6 +25,6 @@
     "**/*.tsx",
     "next.config.js",
     "lib/fetchJson.js"
-, "pages/api/login.js"  ],
+, "pages/api/login.js", "pages/api/logout.js", "lib/useUser.js"  ],
   "exclude": ["node_modules"]
 }
