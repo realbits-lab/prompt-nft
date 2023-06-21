@@ -178,7 +178,11 @@ export default function DrawImage() {
       SERVICE_ACCOUNT_ADDRESS,
     ],
   });
-  const waitForTransactionRentNFT = useWaitForTransaction({
+  const {
+    data: dataRentNFTTx,
+    isError: isErrorRentNFTTx,
+    isLoading: isLoadingRentNFTTx,
+  } = useWaitForTransaction({
     hash: dataRentNFT?.hash,
     onSuccess(data) {
       // console.log("call onSuccess()");
@@ -535,24 +539,30 @@ export default function DrawImage() {
     return (
       <>
         <Box
-          sx={{
-            "& .MuiTextField-root": { m: 1, width: "25ch" },
-          }}
           display="flex"
           flexDirection="column"
           justifyContent="center"
           alignItems="center"
-          minHeight="100vh"
+          sx={{ marginTop: "50px" }}
         >
-          <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-            <CardMedia component="img" image={PLACEHOLDER_IMAGE_URL} />
+          <Card
+            sx={{
+              minWidth: CARD_MIN_WIDTH,
+              maxWidth: CARD_MAX_WIDTH,
+            }}
+          >
+            <CardMedia
+              component="img"
+              image={PLACEHOLDER_IMAGE_URL}
+              height={"200px"}
+            />
             <CardContent
               sx={{
                 padding: "10",
               }}
             >
-              <Typography variant="h7">
-                You should rent this nft for drawing image.
+              <Typography variant="h5">
+                You should rent nft for drawing.
               </Typography>
               <Button
                 onClick={function () {

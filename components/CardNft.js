@@ -245,7 +245,11 @@ export default function CardNft({
       setIsRenting(false);
     },
   });
-  const waitForTransaction = useWaitForTransaction({
+  const {
+    data: dataRentNFTTx,
+    isError: isErrorRentNFTTx,
+    isLoading: isLoadingRentNFTTx,
+  } = useWaitForTransaction({
     hash: dataRentNFT?.hash,
     onSuccess(data) {
       // console.log("call onSuccess()");
