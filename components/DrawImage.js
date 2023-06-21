@@ -8,6 +8,7 @@ import {
   useAccount,
   useSigner,
   useContract,
+  useNetwork,
   useContractRead,
   useSignTypedData,
   useContractEvent,
@@ -30,6 +31,7 @@ import Typography from "@mui/material/Typography";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
 import useUser from "@/lib/useUser";
+import { handleSignMessage, handleAuthenticate } from "@/components/User";
 import { sleep, writeToastMessageState, AlertSeverity } from "@/lib/util";
 const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
   ssr: false,
@@ -81,6 +83,7 @@ export default function DrawImage() {
   const SERVICE_ACCOUNT_ADDRESS =
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
   const { address, isConnected } = useAccount();
+  const { chains, chain: selectedChain } = useNetwork();
   const [paymentNftRentFee, setPaymentNftRentFee] = React.useState();
   const [currentTimestamp, setCurrentTimestamp] = React.useState();
   const [imageFetchEndTime, setImageFetchEndTime] = React.useState();
@@ -609,9 +612,41 @@ export default function DrawImage() {
                 padding: "10",
               }}
             >
-              <Typography variant="h7">
-                Click the upper-right "Login" button.
-              </Typography>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={async () => {
+                  if (!address) {
+                    setWriteToastMessage({
+                      snackbarSeverity: AlertSeverity.warning,
+                      snackbarMessage: "Wallet is not connected.",
+                      snackbarTime: new Date(),
+                      snackbarOpen: true,
+                    });
+                    return;
+                  }
+
+                  const publicAddress = address.toLowerCase();
+                  // console.log("publicAddress: ", publicAddress);
+
+                  // console.log("selectedChain.id: ", selectedChain.id);
+                  const signMessageResult = await handleSignMessage({
+                    accountAddress: publicAddress,
+                    chainId: selectedChain.id,
+                  });
+                  // console.log("signMessageResult: ", signMessageResult);
+                  // console.log("handleAuthenticate: ", handleAuthenticate);
+
+                  // Send signature to back-end on the /auth route.
+                  await handleAuthenticate({
+                    publicAddress: publicAddress,
+                    signature: signMessageResult,
+                    mutateUser,
+                  });
+                }}
+              >
+                LOGIN
+              </Button>
             </CardContent>
           </Card>
         </Box>

@@ -47,8 +47,8 @@ export async function handleSignMessage({ accountAddress, chainId }) {
   return requestResult;
 }
 
-async function handleAuthenticate({ publicAddress, signature, mutateUser }) {
-  // console.log("call handleAuthenticate()");
+export async function handleAuthenticate({ publicAddress, signature, mutateUser }) {
+  console.log("call handleAuthenticate()");
 
   const body = { publicAddress, signature };
   const userData = await fetchJson(
