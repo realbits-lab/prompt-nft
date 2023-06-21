@@ -403,12 +403,24 @@ export default function DrawImage() {
       negative_prompt: negativePrompt,
     };
 
-    const fetchResponse = await fetch(DRAW_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(jsonData),
-    });
-    // console.log("fetchResponse: ", fetchResponse);
+    let fetchResponse;
+    try {
+      fetchResponse = await fetch(DRAW_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(jsonData),
+      });
+      // console.log("fetchResponse: ", fetchResponse);
+    } catch (error) {
+      console.error(error);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: "Fetch draw api call is failed.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+      return;
+    }
 
     //* Check error response.
     if (fetchResponse.status !== 200) {
@@ -516,85 +528,6 @@ export default function DrawImage() {
     setLoadingImage(false);
     setIsImagePosted(false);
     return;
-
-    //* Upload image to S3.
-    const uploadImageJsonData = {
-      imageUrl: imageUrlResponse,
-    };
-    let responseUploadImageToS3;
-    try {
-      responseUploadImageToS3 = await fetch(UPLOAD_IMAGE_TO_S3_URL, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(uploadImageJsonData),
-      });
-    } catch (error) {
-      console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
-
-      setWriteToastMessage({
-        snackbarSeverity: AlertSeverity.warning,
-        snackbarMessage: `Image url(${imageUrlResponse}) is invalid.`,
-        snackbarTime: new Date(),
-        snackbarOpen: true,
-      });
-
-      setLoadingImage(false);
-      return;
-    }
-
-    if (responseUploadImageToS3.status !== 200) {
-      console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
-
-      setWriteToastMessage({
-        snackbarSeverity: AlertSeverity.warning,
-        snackbarMessage: "S3 uploading is failed.",
-        snackbarTime: new Date(),
-        snackbarOpen: true,
-      });
-
-      setLoadingImage(false);
-      return;
-    }
-    const imageUploadJsonResponse = await responseUploadImageToS3.json();
-    // console.log("imageUploadJsonResponse: ", imageUploadJsonResponse);
-
-    //* Post image and prompt to prompt server.
-    const imageUploadResponse = await fetch(POST_API_URL, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        prompt: inputPrompt,
-        negativePrompt: inputNegativePrompt,
-        imageUrl: imageUploadJsonResponse.url,
-        discordBotToken: DISCORD_BOT_TOKEN,
-      }),
-    });
-    // console.log("imageUploadResponse: ", imageUploadResponse);
-
-    if (imageUploadResponse.status !== 200) {
-      console.error(`imageUploadResponse: ${imageUploadResponse}`);
-
-      setWriteToastMessage({
-        snackbarSeverity: AlertSeverity.warning,
-        snackbarMessage: `Image upload response error: ${imageUploadResponse}`,
-        snackbarTime: new Date(),
-        snackbarOpen: true,
-      });
-
-      setLoadingImage(false);
-
-      return;
-    }
-
-    //* Set image url from image generation server.
-    setImageUrl(imageUploadJsonResponse.url);
-    setLoadingImage(false);
   }
 
   async function postImage({ postImageUrl, inputPrompt, inputNegativePrompt }) {
@@ -622,8 +555,8 @@ export default function DrawImage() {
         snackbarOpen: true,
       });
 
-      setLoadingImage(false);
       setIsImagePosted(false);
+      setPostingImage(false);
 
       return;
     }
@@ -652,7 +585,8 @@ export default function DrawImage() {
         snackbarOpen: true,
       });
 
-      setLoadingImage(false);
+      setIsImagePosted(false);
+      setPostingImage(false);
       return;
     }
 
@@ -666,7 +600,8 @@ export default function DrawImage() {
         snackbarOpen: true,
       });
 
-      setLoadingImage(false);
+      setIsImagePosted(false);
+      setPostingImage(false);
       return;
     }
     const imageUploadJsonResponse = await responseUploadImageToS3.json();
@@ -698,15 +633,16 @@ export default function DrawImage() {
         snackbarOpen: true,
       });
 
-      setLoadingImage(false);
+      setIsImagePosted(false);
+      setPostingImage(false);
 
       return;
     }
 
     //* Set image url from image generation server.
     setImageUrl(imageUploadJsonResponse.url);
-    setPostingImage(false);
     setIsImagePosted(true);
+    setPostingImage(false);
   }
 
   function WalletConnectPage() {
