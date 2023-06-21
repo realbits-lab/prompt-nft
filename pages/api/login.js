@@ -13,7 +13,7 @@ const PAYMENT_NFT_TOKEN_ID = process.env.NEXT_PUBLIC_PAYMENT_NFT_TOKEN;
 const ALCHEMY_API_URL =
   "https://polygon-mumbai.g.alchemy.com/v2/oRV4hG4cLckxr4KcIgiFbOIiaNmoCTf1";
 
-async function getUserData() {
+async function getUserData({ publicAddress }) {
   const web3 = new Web3(ALCHEMY_API_URL);
   const rentMarketContract = new web3.eth.Contract(
     rentmarketABI.abi,
@@ -47,8 +47,8 @@ async function getUserData() {
 }
 
 async function handler(req, res) {
-  // console.log("call /api/login");
-  // console.log("req.session.user: ", req.session.user);
+  console.log("call /api/login");
+  console.log("req.session.user: ", req.session.user);
 
   //* Method should be POST.
   if (req.method !== "POST") {
@@ -57,28 +57,30 @@ async function handler(req, res) {
       .json({ error: "Invalid method. Support only POST." });
   }
 
+  const { publicAddress, signature } = await req.body;
+  console.log("publicAddress: ", publicAddress);
+  console.log("signature: ", signature);
+
+  if (!publicAddress) {
+    return res.status(500).json({
+      error: `publicAddress: ${publicAddress} is invalid.`,
+    });
+  }
+
   //* Check if already logined.
   if (
     req.session.user &&
     req.session.user.isLoggedIn === true &&
     req.session.user.publicAddress.toLowerCase() === publicAddress.toLowerCase()
   ) {
+    console.log("User is already logined.");
+
     //* Check whether or not user rented the payment nft.
-    const user = getUserData();
+    const user = getUserData({ publicAddress });
     req.session.user = user;
     await req.session.save();
 
     return res.status(200).json(user);
-  }
-
-  const { publicAddress, signature } = await req.body;
-  // console.log("publicAddress: ", publicAddress);
-  // console.log("signature: ", signature);
-
-  if (!publicAddress || !signature) {
-    return res.status(500).json({
-      error: `publicAddress: ${publicAddress} or signature: ${signature} is invalid.`,
-    });
   }
 
   const chainId = getChainId({
@@ -126,7 +128,7 @@ async function handler(req, res) {
 
   if (recovered.toLowerCase() === publicAddress.toLowerCase()) {
     //* Check whether or not user rented the payment nft.
-    const user = getUserData();
+    const user = getUserData({ publicAddress });
     req.session.user = user;
     await req.session.save();
 

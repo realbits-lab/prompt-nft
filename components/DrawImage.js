@@ -28,6 +28,7 @@ import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import rentmarketABI from "@/contracts/rentMarket.json";
+import fetchJson, { FetchError } from "@/lib/fetchJson";
 import useUser from "@/lib/useUser";
 import { sleep, writeToastMessageState, AlertSeverity } from "@/lib/util";
 const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
@@ -230,13 +231,24 @@ export default function DrawImage() {
     onSuccess(data) {
       // console.log("call onSuccess()");
       // console.log("data: ", data);
-      
-      setWriteToastMessage({
-        snackbarSeverity: AlertSeverity.success,
-        snackbarMessage: "Renting is finished successfully.",
-        snackbarTime: new Date(),
-        snackbarOpen: true,
-      });
+
+      updateUserData()
+        .then(() => {
+          setWriteToastMessage({
+            snackbarSeverity: AlertSeverity.success,
+            snackbarMessage: "Renting is finished successfully.",
+            snackbarTime: new Date(),
+            snackbarOpen: true,
+          });
+        })
+        .catch((error) => {
+          setWriteToastMessage({
+            snackbarSeverity: AlertSeverity.error,
+            snackbarMessage: "Updating user data is falied.",
+            snackbarTime: new Date(),
+            snackbarOpen: true,
+          });
+        });
     },
     onError(error) {
       // console.log("call onError()");
@@ -260,7 +272,31 @@ export default function DrawImage() {
     },
   });
 
+  async function updateUserData() {
+    console.log("call updateUserData()");
 
+    const body = { publicAddress: address };
+    try {
+      mutateUser(
+        await fetchJson(
+          { url: "/api/login" },
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          }
+        )
+      );
+    } catch (error) {
+      if (error instanceof FetchError) {
+        console.error(error.data.message);
+      } else {
+        console.error("An unexpected error happened:", error);
+      }
+
+      throw error;
+    }
+  }
 
   //*---------------------------------------------------------------------------
   //* Handle snackbar.
