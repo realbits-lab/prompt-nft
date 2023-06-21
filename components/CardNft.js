@@ -414,7 +414,7 @@ export default function CardNft({
                 <StyledTableRow>
                   <StyledTableCell align="left">Token ID</StyledTableCell>
                   <StyledTableCell align="left">
-                    {nftData.tokenId.toString()}
+                    {nftData?.tokenId.toString()}
                   </StyledTableCell>
                 </StyledTableRow>
 
@@ -473,14 +473,14 @@ export default function CardNft({
                   </StyledTableCell>
                   <StyledTableCell align="left">
                     {(
-                      Number((nftData.rentFee * 1000000n) / 10n ** 18n) /
+                      Number((nftData?.rentFee * 1000000n) / 10n ** 18n) /
                       1000000
                     ).toString()}{" "}
                     matic
                   </StyledTableCell>
                 </StyledTableRow>
 
-                {nftData.rentFeeByToken ? (
+                {nftData?.rentFeeByToken ? (
                   <StyledTableRow>
                     <StyledTableCell align="left">
                       <Button
@@ -505,7 +505,7 @@ export default function CardNft({
                     <StyledTableCell align="left">
                       {(
                         Number(
-                          (nftData.rentFeeByToken * 1000000n) / 10n ** 18n
+                          (nftData?.rentFeeByToken * 1000000n) / 10n ** 18n
                         ) / 1000000
                       ).toString()}{" "}
                       token

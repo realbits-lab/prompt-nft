@@ -111,7 +111,7 @@ function CarouselImage({ data, isLoading }) {
             onChangeIndex={handleStepChange}
             enableMouseEvents
           >
-            {data.data.map(function (imageData, index) {
+            {data?.data?.map(function (imageData, index) {
               return (
                 <div key={index}>
                   {Math.abs(activeStep - index) <= 2 ? (

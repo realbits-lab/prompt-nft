@@ -56,7 +56,7 @@ function CardImage({ imageData }) {
         {imageData ? (
           <CardMedia
             component="img"
-            image={imageData ? imageData.imageUrl : ""}
+            image={imageData?.imageUrl || ""}
             onError={handleCardMediaImageError}
             sx={{
               height: cardImageHeight,
@@ -75,7 +75,7 @@ function CardImage({ imageData }) {
           }}
         >
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-            {imageData.prompt}
+            {imageData?.prompt}
           </Typography>
         </CardContent>
       </Card>

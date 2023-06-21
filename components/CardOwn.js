@@ -48,7 +48,7 @@ function CardOwn({
     command: "getMetadata",
     promptNftContract: promptNftContract,
     signer: dataWalletClient,
-    tokenId: nftData.tokenId,
+    tokenId: nftData?.tokenId,
   });
   // console.log("metadataData: ", metadataData);
 
@@ -118,7 +118,7 @@ function CardOwn({
         )}
         <CardContent>
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-            token id: {nftData.tokenId.toString()}
+            token id: {nftData?.tokenId.toString()}
           </Typography>
           <Typography
             sx={{ fontSize: 14 }}
@@ -142,7 +142,7 @@ function CardOwn({
             gutterBottom
             component="div"
           >
-            rent fee: {(nftData.rentFee / 10n ** 18n).toString()} matic
+            rent fee: {(nftData?.rentFee / 10n ** 18n).toString()} matic
           </Typography>
         </CardContent>
         <CardActions>
