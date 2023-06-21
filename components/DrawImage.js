@@ -6,12 +6,8 @@ import dynamic from "next/dynamic";
 import { useRecoilStateLoadable } from "recoil";
 import {
   useAccount,
-  useSigner,
-  useContract,
   useNetwork,
   useContractRead,
-  useSignTypedData,
-  useContractEvent,
   useContractWrite,
   usePrepareContractWrite,
   useWaitForTransaction,
@@ -106,6 +102,21 @@ export default function DrawImage() {
     onSuccess(data) {
       // console.log("call onSuccess()");
       // console.log("data: ", data);
+
+      data.map(function (rentData) {
+        // console.log("rentData: ", rentData);
+        if (
+          rentData.renteeAddress.toLowerCase() === address?.toLowerCase() &&
+          rentData.nftAddress.toLowerCase() ===
+            PAYMENT_NFT_CONTRACT_ADDRESS.toLowerCase() &&
+          Number(rentData.tokenId) === Number(PAYMENT_NFT_TOKEN_ID)
+        ) {
+          const rentEndTime =
+            Number(rentData.rentStartTimestamp) + Number(rentData.rentDuration);
+          // console.log("rentEndTime: ", rentEndTime);
+          setPaymentNftRentEndTime(rentEndTime);
+        }
+      });
     },
     onError(error) {
       // console.log("call onError()");
@@ -276,7 +287,7 @@ export default function DrawImage() {
   });
 
   async function updateUserData() {
-    console.log("call updateUserData()");
+    // console.log("call updateUserData()");
 
     const body = { publicAddress: address };
     try {
@@ -333,51 +344,38 @@ export default function DrawImage() {
     });
   };
 
-  const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
-  });
+  function useInterval(callback, delay) {
+    const savedCallback = React.useRef();
 
-  React.useEffect(() => {
-    // console.log("call useEffect()");
-    const countdown = setInterval(() => {
-      const timestamp = Math.floor(Date.now() / 1000);
-      // console.log("timestamp: ", timestamp);
-      setCurrentTimestamp(timestamp);
-    }, 1000);
-    return () => clearInterval(countdown);
-  }, [currentTimestamp]);
+    React.useEffect(() => {
+      savedCallback.current = callback;
+    }, [callback]);
 
-  React.useEffect(
-    function () {
-      // console.log("call useEffect()");
-
-      //* Check user has rented the payment nft.
-      if (dataAllRentData) {
-        dataAllRentData.map(function (rentData) {
-          // console.log("rentData: ", rentData);
-          if (
-            rentData.renteeAddress.toLowerCase() === address?.toLowerCase() &&
-            rentData.nftAddress.toLowerCase() ===
-              PAYMENT_NFT_CONTRACT_ADDRESS.toLowerCase() &&
-            Number(rentData.tokenId) === Number(PAYMENT_NFT_TOKEN_ID)
-          ) {
-            const rentEndTime =
-              Number(rentData.rentStartTimestamp) +
-              Number(rentData.rentDuration);
-            setPaymentNftRentEndTime(rentEndTime);
-          }
-        });
+    React.useEffect(() => {
+      function tick() {
+        savedCallback.current();
       }
+      if (delay !== null) {
+        let id = setInterval(tick, delay);
+        return () => clearInterval(id);
+      }
+    }, [delay]);
+  }
 
-      setImageHeight(window.innerHeight - IMAGE_PADDING);
+  useInterval(() => {
+    const timestamp = Math.floor(Date.now() / 1000);
+    // console.log("timestamp: ", timestamp);
+    setCurrentTimestamp((previousTimestamp) => timestamp);
+  }, 1000);
 
-      window.addEventListener("resize", handleResize);
-      return () => {
-        window.removeEventListener("resize", handleResize);
-      };
-    },
-    [dataAllRentData]
-  );
+  React.useEffect(function () {
+    setImageHeight(window.innerHeight - IMAGE_PADDING);
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   function handleResize() {
     setImageHeight(window.innerHeight - IMAGE_PADDING);
@@ -411,7 +409,7 @@ export default function DrawImage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(jsonData),
     });
-    console.log("fetchResponse: ", fetchResponse);
+    // console.log("fetchResponse: ", fetchResponse);
 
     //* Check error response.
     if (fetchResponse.status !== 200) {
@@ -427,7 +425,7 @@ export default function DrawImage() {
 
     //* Get the stable diffusion api result by json.
     const jsonResponse = await fetchResponse.json();
-    console.log("jsonResponse: ", jsonResponse);
+    // console.log("jsonResponse: ", jsonResponse);
 
     //* Check error response.
     if (
@@ -721,8 +719,30 @@ export default function DrawImage() {
     );
   }
 
+  const ImagePage = React.useCallback(
+    function ImagePage(promps) {
+      // console.log("call ImagePage()");
+      // console.log("imageUrl: ", imageUrl);
+      // console.log("imageHeight: ", imageHeight);
+
+      return (
+        <Image
+          src={imageUrl}
+          height={imageHeight}
+          fit="contain"
+          duration={10}
+          easing="ease"
+          shiftDuration={10}
+        />
+      );
+    },
+    [imageUrl, imageHeight]
+  );
+
   function DrawPage() {
-    // console.log("call buildDrawPage()");
+    // console.log("call DrawPage()");
+    // console.log("currentTimestamp: ", currentTimestamp);
+    // console.log("paymentNftRentEndTime: ", paymentNftRentEndTime);
 
     return (
       <>
@@ -735,7 +755,7 @@ export default function DrawImage() {
         >
           {paymentNftRentEndTime &&
             currentTimestamp &&
-            currentTimestamp > paymentNftRentEndTime && (
+            currentTimestamp < paymentNftRentEndTime && (
               <Typography color="black">
                 {moment
                   .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
@@ -822,25 +842,6 @@ export default function DrawImage() {
                 .humanize()}
             </Typography>
           )}
-          {loadingImage ? (
-            <Box
-              height={imageHeight}
-              display="flex"
-              flexDirection="row"
-              alignItems="center"
-            >
-              <CircularProgress size={imageHeight * 0.4} />
-            </Box>
-          ) : (
-            <Image
-              src={imageUrl}
-              height={imageHeight}
-              fit="contain"
-              duration={10}
-              easing="ease"
-              shiftDuration={10}
-            />
-          )}
           <Button
             variant="contained"
             onClick={() => {
@@ -878,7 +879,11 @@ export default function DrawImage() {
       return <WalletLoginPage />;
     }
     if (user !== undefined && user.rentPaymentNft === true) {
-      return <DrawPage />;
+      return (
+        <>
+          <DrawPage />
+        </>
+      );
     } else {
       return <PaymentPage />;
     }
@@ -902,6 +907,20 @@ export default function DrawImage() {
         </Grid>
       </Grid>
       <ContentPage />
+
+      {loadingImage ? (
+        <Box
+          height={imageHeight}
+          display="flex"
+          flexDirection="row"
+          alignItems="center"
+        >
+          <CircularProgress size={imageHeight * 0.4} />
+        </Box>
+      ) : (
+        <ImagePage />
+      )}
+
       <MessageSnackbar
         open={openSnackbar}
         autoHideDuration={10000}
