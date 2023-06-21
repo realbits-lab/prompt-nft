@@ -240,7 +240,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
     // watch: true,
   });
 
-	//* TODO: Use useContractRead hook.
+  //* TODO: Use useContractRead hook.
   //* Get all my own data array.
   const {
     data: dataOwn,
@@ -493,13 +493,10 @@ function List({ mode, updated, setNewImageCountFunc }) {
   return (
     <div>
       <Box
-        sx={{
-          "& .MuiTextField-root": { m: 1, width: "25ch" },
-        }}
         display="flex"
+        flexDirection="column"
         justifyContent="center"
         alignItems="center"
-        flexDirection="column"
       >
         {mode === "draw" ? (
           <div>

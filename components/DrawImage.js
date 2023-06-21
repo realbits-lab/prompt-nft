@@ -889,7 +889,7 @@ export default function DrawImage() {
         spacing={2}
         display="flex"
         flexDirection="row"
-        alignItems="flex-end"
+        justifyContent="flex-end"
         sx={{ marginTop: MARGIN_TOP }}
       >
         <Grid item>
