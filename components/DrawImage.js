@@ -14,6 +14,10 @@ import {
   useWatchPendingTransactions,
 } from "wagmi";
 import Image from "mui-image";
+import Stepper from "@mui/material/Stepper";
+import Step from "@mui/material/Step";
+import StepLabel from "@mui/material/StepLabel";
+import StepButton from "@mui/material/StepButton";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
@@ -28,19 +32,6 @@ import fetchJson, { FetchError } from "@/lib/fetchJson";
 import useUser from "@/lib/useUser";
 import { handleSignMessage, handleAuthenticate } from "@/components/User";
 import { sleep, writeToastMessageState, AlertSeverity } from "@/lib/util";
-
-function MyTextField(props) {
-  return (
-    <TextField
-      fullWidth
-      id={props.name}
-      label={props.label}
-      name={props.name}
-      value={props.value}
-      onChange={props.onChange}
-    />
-  );
-}
 
 export default function DrawImage() {
   // console.log("call DrawImage()");
@@ -62,6 +53,7 @@ export default function DrawImage() {
   const [imageUrl, setImageUrl] = React.useState("");
   const [loadingImage, setLoadingImage] = React.useState(false);
   const [postingImage, setPostingImage] = React.useState(false);
+  const [isImageDrawn, setIsImageDrawn] = React.useState(false);
   const [isImagePosted, setIsImagePosted] = React.useState(false);
   const [imageHeight, setImageHeight] = React.useState(0);
   const router = useRouter();
@@ -400,6 +392,7 @@ export default function DrawImage() {
   }
 
   async function fetchImage() {
+    setIsImageDrawn(false);
     setLoadingImage(true);
 
     let inputPrompt = prompt;
@@ -549,6 +542,8 @@ export default function DrawImage() {
     setImageUrl(imageUrlResponse);
     setLoadingImage(false);
     setIsImagePosted(false);
+    setIsImageDrawn(true);
+
     return;
   }
 
@@ -834,7 +829,7 @@ export default function DrawImage() {
     [imageUrl, imageHeight]
   );
 
-  //* Fix mui textfield problem.
+  //* Fix mui textfield problem about focus.
   //* https://github.com/mui/material-ui/issues/783
   return (
     <>
@@ -943,8 +938,89 @@ export default function DrawImage() {
                 .humanize()}
             </Typography>
           )} */}
+            <Box sx={{ width: "100%" }}>
+              <Stepper
+                activeStep={isImageDrawn ? 1 : isImagePosted ? 2 : -1}
+                alternativeLabel
+              >
+                <Step>
+                  <StepLabel>
+                    <Button
+                      variant="contained"
+                      onClick={fetchImage}
+                      sx={{
+                        m: 1,
+                      }}
+                      disabled={loadingImage}
+                    >
+                      {loadingImage ? (
+                        <Typography>Drawing...</Typography>
+                      ) : (
+                        <Typography>Draw</Typography>
+                      )}
+                    </Button>
+                  </StepLabel>
+                </Step>
+                <Step>
+                  <StepLabel>
+                    {" "}
+                    <Button
+                      variant="contained"
+                      onClick={() =>
+                        postImage({
+                          postImageUrl: imageUrl,
+                          inputPrompt: prompt,
+                          inputNegativePrompt: negativePrompt,
+                        })
+                      }
+                      sx={{
+                        m: 1,
+                      }}
+                      disabled={
+                        !imageUrl ||
+                        loadingImage ||
+                        postingImage ||
+                        isImagePosted
+                      }
+                    >
+                      {postingImage ? (
+                        <Typography>Posting...</Typography>
+                      ) : isImagePosted ? (
+                        <Typography>Posted</Typography>
+                      ) : (
+                        <Typography>Post</Typography>
+                      )}
+                    </Button>
+                  </StepLabel>
+                </Step>
+                <Step>
+                  <StepLabel>
+                    {" "}
+                    <Button
+                      variant="contained"
+                      onClick={() => {
+                        //* Get URI encoded string.
+                        const imageUrlEncodedString =
+                          encodeURIComponent(imageUrl);
+                        const promptEncodedString = encodeURIComponent(prompt);
+                        const negativePromptEncodedString =
+                          encodeURIComponent(negativePrompt);
+                        const link = `/mint/${promptEncodedString}/${imageUrlEncodedString}/${negativePromptEncodedString}`;
+                        router.push(link);
+                      }}
+                      sx={{
+                        m: 1,
+                      }}
+                      disabled={!imageUrl || loadingImage || !isImagePosted}
+                    >
+                      Mint
+                    </Button>
+                  </StepLabel>
+                </Step>
+              </Stepper>
+            </Box>
 
-            <Grid container spacing={5}>
+            {/* <Grid container spacing={5}>
               <Grid item xs={4}>
                 <Button
                   fullWidth
@@ -1012,7 +1088,7 @@ export default function DrawImage() {
                   Mint
                 </Button>
               </Grid>
-            </Grid>
+            </Grid> */}
 
             {loadingImage ? (
               <Box
