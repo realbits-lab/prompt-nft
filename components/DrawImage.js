@@ -29,6 +29,19 @@ import useUser from "@/lib/useUser";
 import { handleSignMessage, handleAuthenticate } from "@/components/User";
 import { sleep, writeToastMessageState, AlertSeverity } from "@/lib/util";
 
+function MyTextField(props) {
+  return (
+    <TextField
+      fullWidth
+      id={props.name}
+      label={props.label}
+      name={props.name}
+      value={props.value}
+      onChange={props.onChange}
+    />
+  );
+}
+
 export default function DrawImage() {
   // console.log("call DrawImage()");
 
@@ -79,6 +92,8 @@ export default function DrawImage() {
   });
   const { prompt, negativePrompt, modelName } = formValue;
   const handleChange = (event) => {
+    console.log("call handleChange()");
+
     const { name, value } = event.target;
     setFormValue((prevState) => {
       return {
@@ -819,74 +834,97 @@ export default function DrawImage() {
     [imageUrl, imageHeight]
   );
 
-  function DrawPage() {
-    // console.log("call DrawPage()");
-    // console.log("currentTimestamp: ", currentTimestamp);
-    // console.log("paymentNftRentEndTime: ", paymentNftRentEndTime);
+  //* Fix mui textfield problem.
+  //* https://github.com/mui/material-ui/issues/783
+  return (
+    <>
+      <Grid
+        container
+        spacing={2}
+        display="flex"
+        flexDirection="row"
+        justifyContent="flex-end"
+        sx={{ marginTop: MARGIN_TOP }}
+      >
+        <Grid item>
+          <Web3Button />
+        </Grid>
+        <Grid item>
+          <Web3NetworkSwitch />
+        </Grid>
+      </Grid>
 
-    return (
-      <>
-        <Box
-          component="form"
-          noValidate
-          autoComplete="off"
-          display="flex"
-          flexDirection="column"
-        >
-          {isLoadingRentData || !paymentNftRentEndTime || !currentTimestamp ? (
-            <Typography>Remaining time is ...</Typography>
-          ) : paymentNftRentEndTime &&
-            currentTimestamp &&
-            currentTimestamp < paymentNftRentEndTime ? (
-            <Typography color="black">
-              {moment
-                .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                .format()}
-            </Typography>
-          ) : (
-            <Typography>Rent finished</Typography>
-          )}
-          <TextField
-            required
-            id="outlined-required"
-            label="prompt"
-            error={prompt === "" ? true : false}
-            name="prompt"
-            value={prompt}
-            onChange={handleChange}
-            style={{
-              width: "80vw",
-            }}
-            sx={{ m: 2 }}
-            disabled={loadingImage}
-            autoComplete="on"
-          />
-          <TextField
-            required
-            id="outlined-required"
-            label="negative prompt"
-            error={negativePrompt === "" ? true : false}
-            name="negativePrompt"
-            value={negativePrompt}
-            onChange={handleChange}
-            style={{
-              width: "80vw",
-            }}
-            sx={{ m: 2 }}
-            disabled={loadingImage}
-            autoComplete="on"
-          />
-        </Box>
-        <Box
-          component="form"
-          noValidate
-          autoComplete="off"
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-        >
-          {/*//*TODO: Show image fetch time. */}
-          {/* {imageFetchEndTime && (
+      {isConnected === false ? (
+        <WalletConnectPage />
+      ) : !dataAllRentData ? (
+        <LoadingPage />
+      ) : user === undefined || user.isLoggedIn === false ? (
+        <WalletLoginPage />
+      ) : user !== undefined && user.rentPaymentNft === true ? (
+        <>
+          <Box
+            component="form"
+            noValidate
+            autoComplete="off"
+            display="flex"
+            flexDirection="column"
+          >
+            {isLoadingRentData ||
+            !paymentNftRentEndTime ||
+            !currentTimestamp ? (
+              <Typography>Remaining time is ...</Typography>
+            ) : paymentNftRentEndTime &&
+              currentTimestamp &&
+              currentTimestamp < paymentNftRentEndTime ? (
+              <Typography color="black">
+                {moment
+                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+                  .format()}
+              </Typography>
+            ) : (
+              <Typography>Rent finished</Typography>
+            )}
+            <TextField
+              required
+              id="outlined-required"
+              label="prompt"
+              error={prompt === "" ? true : false}
+              name="prompt"
+              value={prompt}
+              onChange={handleChange}
+              style={{
+                width: "80vw",
+              }}
+              sx={{ m: 2 }}
+              disabled={loadingImage}
+              autoComplete="on"
+            />
+            <TextField
+              required
+              id="outlined-required"
+              label="negative prompt"
+              error={negativePrompt === "" ? true : false}
+              name="negativePrompt"
+              value={negativePrompt}
+              onChange={handleChange}
+              style={{
+                width: "80vw",
+              }}
+              sx={{ m: 2 }}
+              disabled={loadingImage}
+              autoComplete="on"
+            />
+          </Box>
+          <Box
+            component="form"
+            noValidate
+            autoComplete="off"
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+          >
+            {/*//*TODO: Show image fetch time. */}
+            {/* {imageFetchEndTime && (
             <Typography color="black">
               {moment
                 .duration((imageFetchEndTime - currentTimestamp) * 1000)
@@ -906,128 +944,94 @@ export default function DrawImage() {
             </Typography>
           )} */}
 
-          <Grid container spacing={5}>
-            <Grid item xs={4}>
-              <Button
-                fullWidth
-                variant="contained"
-                onClick={fetchImage}
-                sx={{
-                  m: 1,
-                }}
-                disabled={loadingImage}
-              >
-                {loadingImage ? (
-                  <Typography>Drawing...</Typography>
-                ) : (
-                  <Typography>Draw</Typography>
-                )}
-              </Button>
+            <Grid container spacing={5}>
+              <Grid item xs={4}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={fetchImage}
+                  sx={{
+                    m: 1,
+                  }}
+                  disabled={loadingImage}
+                >
+                  {loadingImage ? (
+                    <Typography>Drawing...</Typography>
+                  ) : (
+                    <Typography>Draw</Typography>
+                  )}
+                </Button>
+              </Grid>
+
+              <Grid item xs={4}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={() =>
+                    postImage({
+                      postImageUrl: imageUrl,
+                      inputPrompt: prompt,
+                      inputNegativePrompt: negativePrompt,
+                    })
+                  }
+                  sx={{
+                    m: 1,
+                  }}
+                  disabled={
+                    !imageUrl || loadingImage || postingImage || isImagePosted
+                  }
+                >
+                  {postingImage ? (
+                    <Typography>Posting...</Typography>
+                  ) : isImagePosted ? (
+                    <Typography>Posted</Typography>
+                  ) : (
+                    <Typography>Post</Typography>
+                  )}
+                </Button>
+              </Grid>
+
+              <Grid item xs={4}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={() => {
+                    //* Get URI encoded string.
+                    const imageUrlEncodedString = encodeURIComponent(imageUrl);
+                    const promptEncodedString = encodeURIComponent(prompt);
+                    const negativePromptEncodedString =
+                      encodeURIComponent(negativePrompt);
+                    const link = `/mint/${promptEncodedString}/${imageUrlEncodedString}/${negativePromptEncodedString}`;
+                    router.push(link);
+                  }}
+                  sx={{
+                    m: 1,
+                  }}
+                  disabled={!imageUrl || loadingImage || !isImagePosted}
+                >
+                  Mint
+                </Button>
+              </Grid>
             </Grid>
 
-						
-            <Grid item xs={4}>
-              <Button
-                fullWidth
-                variant="contained"
-                onClick={() =>
-                  postImage({
-                    postImageUrl: imageUrl,
-                    inputPrompt: prompt,
-                    inputNegativePrompt: negativePrompt,
-                  })
-                }
-                sx={{
-                  m: 1,
-                }}
-                disabled={
-                  !imageUrl || loadingImage || postingImage || isImagePosted
-                }
+            {loadingImage ? (
+              <Box
+                height={imageHeight}
+                display="flex"
+                flexDirection="row"
+                justifyContent="center"
+                alignItems="center"
               >
-                {postingImage ? (
-                  <Typography>Posting...</Typography>
-                ) : isImagePosted ? (
-                  <Typography>Posted</Typography>
-                ) : (
-                  <Typography>Post</Typography>
-                )}
-              </Button>
-            </Grid>
-
-            <Grid item xs={4}>
-              <Button
-                fullWidth
-                variant="contained"
-                onClick={() => {
-                  //* Get URI encoded string.
-                  const imageUrlEncodedString = encodeURIComponent(imageUrl);
-                  const promptEncodedString = encodeURIComponent(prompt);
-                  const negativePromptEncodedString =
-                    encodeURIComponent(negativePrompt);
-                  const link = `/mint/${promptEncodedString}/${imageUrlEncodedString}/${negativePromptEncodedString}`;
-                  router.push(link);
-                }}
-                sx={{
-                  m: 1,
-                }}
-                disabled={!imageUrl || loadingImage || !isImagePosted}
-              >
-                Mint
-              </Button>
-            </Grid>
-          </Grid>
-
-          {loadingImage ? (
-            <Box
-              height={imageHeight}
-              display="flex"
-              flexDirection="row"
-              justifyContent="center"
-              alignItems="center"
-            >
-              <CircularProgress size={imageHeight * 0.4} />
-            </Box>
-          ) : (
-            <ImagePage />
-          )}
-        </Box>
-      </>
-    );
-  }
-
-  function ContentPage() {
-    if (isConnected === false) {
-      return <WalletConnectPage />;
-    } else if (!dataAllRentData) {
-      return <LoadingPage />;
-    } else if (user === undefined || user.isLoggedIn === false) {
-      return <WalletLoginPage />;
-    } else if (user !== undefined && user.rentPaymentNft === true) {
-      return <DrawPage />;
-    } else {
-      return <PaymentPage />;
-    }
-  }
-
-  return (
-    <>
-      <Grid
-        container
-        spacing={2}
-        display="flex"
-        flexDirection="row"
-        justifyContent="flex-end"
-        sx={{ marginTop: MARGIN_TOP }}
-      >
-        <Grid item>
-          <Web3Button />
-        </Grid>
-        <Grid item>
-          <Web3NetworkSwitch />
-        </Grid>
-      </Grid>
-
-      <ContentPage />
+                <CircularProgress size={imageHeight * 0.4} />
+              </Box>
+            ) : (
+              <ImagePage />
+            )}
+          </Box>
+        </>
+      ) : (
+        <PaymentPage />
+      )}
     </>
   );
 }
