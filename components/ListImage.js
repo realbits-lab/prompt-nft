@@ -46,9 +46,9 @@ function ListImage() {
           marginTop: CARD_MARGIN_TOP,
         }}
       >
-        {dataLatestImage?.data.map((e) => {
+        {dataLatestImage?.data.map((e, idx) => {
           return (
-            <Card sx={{ display: "flex", margin: "10px" }}>
+            <Card sx={{ display: "flex", margin: "10px" }} key={idx}>
               <CardMedia
                 component="img"
                 sx={{ width: 80 }}

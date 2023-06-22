@@ -22,6 +22,7 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
+import CardActions from "@mui/material/CardActions";
 import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -808,26 +809,31 @@ export default function DrawImage() {
     );
   }
 
-  const ImagePage = React.useCallback(
-    function ImagePage(promps) {
-      // console.log("call ImagePage()");
-      // console.log("imageUrl: ", imageUrl);
-      // console.log("imageHeight: ", imageHeight);
+  function ImagePage() {
+    console.log("call ImagePage()");
+    console.log("imageUrl: ", imageUrl);
+    console.log("imageHeight: ", imageHeight);
 
-      return (
-        <Image
-          src={imageUrl}
-          height={imageHeight}
-          fit="contain"
-          duration={10}
-          easing="ease"
-          shiftDuration={10}
-          sx={{ marginTop: "50px" }}
+    return (
+      <Card sx={{ maxWidth: 345 }}>
+        <CardMedia
+          image={imageUrl}
+          // height={imageHeight}
+          // fit="contain"
+          // sx={{ marginTop: "50px" }}
         />
-      );
-    },
-    [imageUrl, imageHeight]
-  );
+      </Card>
+      // <Image
+      //   src={imageUrl}
+      //   height={imageHeight}
+      //   fit="contain"
+      //   duration={10}
+      //   easing="ease"
+      //   shiftDuration={10}
+      //   sx={{ marginTop: "50px" }}
+      // />
+    );
+  }
 
   //* Fix mui textfield problem about focus.
   //* https://github.com/mui/material-ui/issues/783
@@ -1020,76 +1026,6 @@ export default function DrawImage() {
               </Stepper>
             </Box>
 
-            {/* <Grid container spacing={5}>
-              <Grid item xs={4}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  onClick={fetchImage}
-                  sx={{
-                    m: 1,
-                  }}
-                  disabled={loadingImage}
-                >
-                  {loadingImage ? (
-                    <Typography>Drawing...</Typography>
-                  ) : (
-                    <Typography>Draw</Typography>
-                  )}
-                </Button>
-              </Grid>
-
-              <Grid item xs={4}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  onClick={() =>
-                    postImage({
-                      postImageUrl: imageUrl,
-                      inputPrompt: prompt,
-                      inputNegativePrompt: negativePrompt,
-                    })
-                  }
-                  sx={{
-                    m: 1,
-                  }}
-                  disabled={
-                    !imageUrl || loadingImage || postingImage || isImagePosted
-                  }
-                >
-                  {postingImage ? (
-                    <Typography>Posting...</Typography>
-                  ) : isImagePosted ? (
-                    <Typography>Posted</Typography>
-                  ) : (
-                    <Typography>Post</Typography>
-                  )}
-                </Button>
-              </Grid>
-
-              <Grid item xs={4}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  onClick={() => {
-                    //* Get URI encoded string.
-                    const imageUrlEncodedString = encodeURIComponent(imageUrl);
-                    const promptEncodedString = encodeURIComponent(prompt);
-                    const negativePromptEncodedString =
-                      encodeURIComponent(negativePrompt);
-                    const link = `/mint/${promptEncodedString}/${imageUrlEncodedString}/${negativePromptEncodedString}`;
-                    router.push(link);
-                  }}
-                  sx={{
-                    m: 1,
-                  }}
-                  disabled={!imageUrl || loadingImage || !isImagePosted}
-                >
-                  Mint
-                </Button>
-              </Grid>
-            </Grid> */}
-
             {loadingImage ? (
               <Box
                 height={imageHeight}
@@ -1101,7 +1037,35 @@ export default function DrawImage() {
                 <CircularProgress size={imageHeight * 0.4} />
               </Box>
             ) : (
-              <ImagePage />
+              <Card
+                sx={{
+                  minWidth: 200,
+                  maxWidth: 600,
+                  minHeight: 200,
+                  maxHeight: 600,
+                  marginTop: "20px",
+                }}
+              >
+                <CardMedia
+                  sx={{ height: imageHeight, width: 600 }}
+                  image={imageUrl}
+                  title={prompt}
+                  onError={(e) => {
+                    e.target.src = "/no-image.png";
+                  }}
+                />
+                <CardContent>
+                  <Typography
+                    gutterBottom
+                    variant="h5"
+                    component="div"
+                  ></Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {prompt}
+                  </Typography>
+                </CardContent>
+                <CardActions></CardActions>
+              </Card>
             )}
           </Box>
         </>
