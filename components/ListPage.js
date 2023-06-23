@@ -35,6 +35,7 @@ const User = dynamic(() => import("./User"), {
   ssr: false,
 });
 
+//* This function should be out of ListPage component.
 function HideOnScroll(props) {
   const { children, window } = props;
 
@@ -58,8 +59,24 @@ HideOnScroll.propTypes = {
 
 export default function ListPage(props) {
   // console.log("call ListPage()");
+  const MENU_ENUM = {
+    draw: "draw",
+    image: "image",
+    nft: "nft",
+    own: "own",
+    rent: "rent",
+    theme: "theme",
+  };
 
-  const DEFAULT_MENU = "draw";
+  function getMode({ mode }) {
+    const result = Object.entries(MENU_ENUM).find(
+      ([key, value]) => value === mode
+    );
+    if (result) return MENU_ENUM[mode];
+    return;
+  }
+
+  const DEFAULT_MENU = MENU_ENUM.own;
   const BOARD_URL = "https://muve.moim.co/forums/QEUREBYLO";
   let MARKET_URL;
   if (process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK === "maticmum") {
@@ -68,14 +85,14 @@ export default function ListPage(props) {
     MARKET_URL = "https://market.realbits.co";
   }
   const router = useRouter();
-  const queryMode = router.query.mode;
+  const queryMode = router.query.index;
   const queryUpdated = router.query.updated;
   // console.log("router.query: ", router.query);
   // console.log("queryUpdated: ", queryUpdated);
   // console.log("queryMode: ", queryMode);
 
   const { user, mutateUser } = useUser();
-  const [mode, setMode] = React.useState(DEFAULT_MENU);
+  const [currentMode, setCurrentMode] = React.useState(DEFAULT_MENU);
   const [newImageCount, setNewImageCount] = React.useState(0);
   const BUTTON_BORDER_RADIUS = 25;
   const SELECTED_BUTTON_BACKGROUND_COLOR = "#21b6ae";
@@ -151,17 +168,9 @@ export default function ListPage(props) {
       // console.log("readDialogMessage: ", readDialogMessage);
       // console.log("queryMode: ", queryMode);
 
-      if (
-        queryMode &&
-        Array.isArray(queryMode) === true &&
-        queryMode.length > 0
-      ) {
-        // console.log("setMode(queryMode[0])");
-        setMode(queryMode[0]);
-      } else {
-        // console.log("setMode(image)");
-        setMode(DEFAULT_MENU);
-      }
+      const mode = getMode({ mode: queryMode[0] });
+      // console.log("mode: ", mode);
+      setCurrentMode(mode || DEFAULT_MENU);
     },
     [queryMode]
   );
@@ -173,7 +182,9 @@ export default function ListPage(props) {
         style={{
           borderRadius: BUTTON_BORDER_RADIUS,
           backgroundColor:
-            buttonMode === mode ? SELECTED_BUTTON_BACKGROUND_COLOR : null,
+            buttonMode === currentMode
+              ? SELECTED_BUTTON_BACKGROUND_COLOR
+              : null,
           padding: SELECTED_BUTTON_PADDING,
         }}
         sx={{ my: 2, color: "white" }}
@@ -182,12 +193,12 @@ export default function ListPage(props) {
           // console.log("buttonMode: ", buttonMode);
           // console.log("newImageCount: ", newImageCount);
 
-          if (buttonMode === "image" && newImageCount > 0) {
+          if (buttonMode === MENU_ENUM.image && newImageCount > 0) {
             // console.log("route to /list/image?updated=true");
             Router.reload("/list/image?updated=true");
           }
 
-          setMode(buttonMode);
+          setCurrentMode(buttonMode);
         }}
       >
         {buttonMode.toUpperCase()}
@@ -297,7 +308,7 @@ export default function ListPage(props) {
                 {!isMobile && (
                   <MenuItem
                     onClick={() => {
-                      setMode("own");
+                      setCurrentMode(MENU_ENUM.own);
                       handleSettingMenuClose();
                     }}
                   >
@@ -307,7 +318,7 @@ export default function ListPage(props) {
                 {!isMobile && (
                   <MenuItem
                     onClick={() => {
-                      setMode("rent");
+                      setCurrentMode(MENU_ENUM.rent);
                       handleSettingMenuClose();
                     }}
                   >
@@ -346,7 +357,7 @@ export default function ListPage(props) {
                 )}
                 <MenuItem
                   onClick={() => {
-                    setMode("theme");
+                    setCurrentMode(MENU_ENUM.theme);
                     handleSettingMenuClose();
                   }}
                 >
@@ -355,7 +366,7 @@ export default function ListPage(props) {
                 {!isMobile && (
                   <MenuItem
                     onClick={async () => {
-                      setMode("image");
+                      setCurrentMode(MENU_ENUM.image);
                       handleSettingMenuClose();
 
                       try {
@@ -387,7 +398,7 @@ export default function ListPage(props) {
       {/*//*Image content part. */}
       <Box sx={{ my: 2 }}>
         <List
-          mode={mode}
+          mode={currentMode}
           updated={queryUpdated}
           setNewImageCountFunc={setNewBadgeOnImageAppBarButton}
         />
