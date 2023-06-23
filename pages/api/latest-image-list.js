@@ -25,6 +25,7 @@ async function handler(req, res) {
     },
     take: IMAGE_TAKE_COUNT,
   });
+  console.log("findManyResult: ", findManyResult);
 
   if (!findManyResult) {
     return res.status(500).json({ error: "No image data" });

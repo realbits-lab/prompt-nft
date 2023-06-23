@@ -817,6 +817,7 @@ export default function DrawImage() {
     return (
       <Card sx={{ maxWidth: 345 }}>
         <CardMedia
+          component="img"
           image={imageUrl}
           // height={imageHeight}
           // fit="contain"
@@ -1047,6 +1048,7 @@ export default function DrawImage() {
                 }}
               >
                 <CardMedia
+                  component="img"
                   sx={{ height: imageHeight, width: 600 }}
                   image={imageUrl}
                   title={prompt}
