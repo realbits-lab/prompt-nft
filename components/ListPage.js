@@ -76,7 +76,7 @@ export default function ListPage(props) {
     return;
   }
 
-  const DEFAULT_MENU = MENU_ENUM.own;
+  const DEFAULT_MENU = MENU_ENUM.image;
   const BOARD_URL = "https://muve.moim.co/forums/QEUREBYLO";
   let MARKET_URL;
   if (process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK === "maticmum") {
