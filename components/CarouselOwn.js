@@ -119,19 +119,7 @@ export default function CarouselOwn({
                 idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
                 idx < pageIndex * NUMBER_PER_PAGE
               ) {
-                return (
-                  <CardOwn
-                    nftData={nftData}
-                    key={idx}
-                    dataWalletClient={dataWalletClient}
-                    address={address}
-                    isConnected={isConnected}
-                    rentMarketContract={rentMarketContract}
-                    selectedChain={selectedChain}
-                    promptNftContract={promptNftContract}
-                    signTypedDataAsync={signTypedDataAsync}
-                  />
-                );
+                return <CardOwn nftData={nftData} />;
               }
             })}
             <Pagination

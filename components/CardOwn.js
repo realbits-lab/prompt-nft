@@ -1,6 +1,14 @@
 import React from "react";
+import {
+  useAccount,
+  useNetwork,
+  useWalletClient,
+  useContractRead,
+  useSignTypedData,
+  useContractEvent,
+} from "wagmi";
+import { getContract } from "wagmi/actions";
 import { isMobile } from "react-device-detect";
-import useSWR from "swr";
 import { useRecoilStateLoadable } from "recoil";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -15,24 +23,104 @@ import {
   writeToastMessageState,
   writeDialogMessageState,
   handleCheckPrompt,
-} from "../lib/util";
-import useUser from "../lib/useUser";
+  getChainId,
+} from "@/lib/util";
+import useUser from "@/lib/useUser";
+import promptNFTABI from "@/contracts/promptNFT.json";
 
-function CardOwn({
-  nftData,
-  dataWalletClient,
-  selectedChain,
-  address,
-  isConnected,
-  rentMarketContract,
-  promptNftContract,
-  signTypedDataAsync,
-}) {
+function CardOwn({ nftData }) {
   // console.log("call CardOwn()");
   // console.log("nftData: ", nftData);
 
   //*---------------------------------------------------------------------------
-  //* Define constant variables.
+  //* Wagmi hook.
+  //*---------------------------------------------------------------------------
+  const PROMPT_NFT_CONTRACT_ADDRESS =
+    process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS;
+  const [metadata, setMetadata] = React.useState();
+
+  const promptNftContract = getContract({
+    address: PROMPT_NFT_CONTRACT_ADDRESS,
+    abi: promptNFTABI["abi"],
+  });
+
+  const domain = {
+    chainId: getChainId({
+      chainName: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
+    }),
+    name: "Realbits",
+  };
+  const types = {
+    EIP712Domain: [
+      { name: "name", type: "string" },
+      { name: "chainId", type: "uint256" },
+    ],
+    Login: [{ name: "contents", type: "string" }],
+  };
+  const value = {
+    contents: process.env.NEXT_PUBLIC_LOGIN_SIGN_MESSAGE,
+  };
+  const {
+    data: dataSignTypedData,
+    isError: isErrorSignTypedData,
+    isLoading: isLoadingSignTypedData,
+    isSuccess: isSuccessSignTypedData,
+    signTypedData,
+    signTypedDataAsync,
+  } = useSignTypedData({
+    domain: domain,
+    types: types,
+    value: value,
+  });
+
+  const { chains, chain: selectedChain } = useNetwork();
+  const { address, isConnected } = useAccount();
+  const {
+    data: dataWalletClient,
+    isError: isErrorWalletClient,
+    isLoading: isLoadingWalletClient,
+  } = useWalletClient();
+
+  const {
+    data: dataTokenURI,
+    isError: isErrorTokenURI,
+    isLoading: isLoadingTokenURI,
+    isValidating: isValidatingTokenURI,
+    status: statusTokenURI,
+  } = useContractRead({
+    address: PROMPT_NFT_CONTRACT_ADDRESS,
+    abi: promptNFTABI.abi,
+    functionName: "tokenURI",
+    args: [nftData?.tokenId],
+    watch: true,
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+
+      fetch(data).then((fetchResult) =>
+        fetchResult.blob().then((tokenMetadata) =>
+          tokenMetadata.text().then((metadataJsonTextData) => {
+            // console.log("metadataJsonTextData: ", metadataJsonTextData);
+            const metadata = JSON.parse(metadataJsonTextData);
+            // console.log("metadata: ", metadata);
+            setMetadata(metadata);
+          })
+        )
+      );
+    },
+    onError(error) {
+      // console.log("call onError()");
+      // console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
+    },
+  });
+
+  //*---------------------------------------------------------------------------
+  //* Constant variables.
   //*---------------------------------------------------------------------------
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const CARD_MARGIN_TOP = "50px";
@@ -40,31 +128,7 @@ function CardOwn({
   const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;
 
-  const {
-    data: metadataData,
-    error: metadataError,
-    isValidating: metadataIsValidating,
-  } = useSWR({
-    command: "getMetadata",
-    promptNftContract: promptNftContract,
-    signer: dataWalletClient,
-    tokenId: nftData?.tokenId,
-  });
-  // console.log("metadataData: ", metadataData);
-
   const { user, mutateUser } = useUser();
-  // const {
-  //   data: dataSignTypedData,
-  //   isError: isErrorSignTypedData,
-  //   isLoading: isLoadingSignTypedData,
-  //   isSuccess: isSuccessSignTypedData,
-  //   signTypedData,
-  //   signTypedDataAsync,
-  // } = useSignTypedData({
-  //   domain: domain,
-  //   types: types,
-  //   value: value,
-  // });
 
   function handleCardMediaImageError(e) {
     // console.log("call handleCardMediaImageError()");
@@ -72,9 +136,9 @@ function CardOwn({
     e.target.src = PLACEHOLDER_IMAGE_URL;
   }
 
-  //* --------------------------------------------------------------------------
-  //* Snackbar variables.
-  //* --------------------------------------------------------------------------
+  //*---------------------------------------------------------------------------
+  //* Toast message.
+  //*---------------------------------------------------------------------------
   const [writeToastMessageLoadable, setWriteToastMessage] =
     useRecoilStateLoadable(writeToastMessageState);
   const writeToastMessage =
@@ -87,9 +151,9 @@ function CardOwn({
           snackbarOpen: true,
         };
 
-  //* --------------------------------------------------------------------------
-  //* Prompt dialog variables.
-  //* --------------------------------------------------------------------------
+  //*---------------------------------------------------------------------------
+  //* Prompt dialog.
+  //*---------------------------------------------------------------------------
   const [writeDialogMessageLoadable, setWriteDialogMessage] =
     useRecoilStateLoadable(writeDialogMessageState);
   const writeDialogMessage =
@@ -103,10 +167,10 @@ function CardOwn({
   return (
     <Box sx={{ m: CARD_PADDING, marginTop: CARD_MARGIN_TOP }}>
       <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-        {metadataData ? (
+        {metadata ? (
           <CardMedia
             component="img"
-            image={metadataData ? metadataData.image : ""}
+            image={metadata ? metadata.image : ""}
             onError={handleCardMediaImageError}
           />
         ) : (
@@ -126,7 +190,7 @@ function CardOwn({
             gutterBottom
             component="div"
           >
-            name: {metadataData ? metadataData.name : ""}
+            name: {metadata ? metadata.name : ""}
           </Typography>
           <Typography
             sx={{ fontSize: 14 }}
@@ -134,7 +198,7 @@ function CardOwn({
             gutterBottom
             component="div"
           >
-            description: {metadataData ? metadataData.description : ""}
+            description: {metadata ? metadata.description : ""}
           </Typography>
           <Typography
             sx={{ fontSize: 14 }}
