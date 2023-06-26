@@ -1,5 +1,5 @@
 import React from "react";
-import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
+import { Web3Button, Web3NetworkSwitch, useWeb3Modal } from "@web3modal/react";
 import {
   useAccount,
   useNetwork,
@@ -14,6 +14,7 @@ import dynamic from "next/dynamic";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
+import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
@@ -61,6 +62,13 @@ function List({ mode, updated, setNewImageCountFunc }) {
   //*---------------------------------------------------------------------------
   //* Wagmi and Web3Modal hook.
   //*---------------------------------------------------------------------------
+  const {
+    isOpen: isOpenWeb3Modal,
+    open: openWeb3Modal,
+    close: closeWeb3Modal,
+    setDefaultChain: setDefaultChainWeb3Modal,
+  } = useWeb3Modal();
+
   //* Handle a new useNetwork instead of useWeb3ModalNetwork hook.
   const { chains, chain: selectedChain } = useNetwork();
   // console.log("selectedChain: ", selectedChain);
@@ -462,7 +470,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
         minHeight="100vh"
       >
         <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-          <CardMedia component="img" image={PLACEHOLDER_IMAGE_URL} />
           <Grid
             container
             justifyContent="space-around"
@@ -481,9 +488,9 @@ function List({ mode, updated, setNewImageCountFunc }) {
               padding: "10",
             }}
           >
-            <Typography variant="h7" color={theme.palette.text.primary}>
-              Click Connect Wallet button above.
-            </Typography>
+            <Button fullWidth variant="contained" onClick={openWeb3Modal}>
+              Connect Wallet
+            </Button>
           </CardContent>
         </Card>
       </Box>
@@ -509,16 +516,19 @@ function List({ mode, updated, setNewImageCountFunc }) {
           </div>
         ) : mode === "nft" ? (
           <div>
-            {isWalletConnected({ isConnected, selectedChain }) === false ? (
-              <NoLoginPage />
-            ) : (
-              <CarouselNft
-                dataWalletClient={dataWalletClient}
-                promptNftContract={promptNftContract}
-                rentMarketContract={rentMarketContract}
-                signTypedDataAsync={signTypedDataAsync}
-              />
-            )}
+            {
+              //* TODO: Handle the wrong network case also.
+              isWalletConnected({ isConnected, selectedChain }) === false ? (
+                <NoLoginPage />
+              ) : (
+                <CarouselNft
+                  dataWalletClient={dataWalletClient}
+                  promptNftContract={promptNftContract}
+                  rentMarketContract={rentMarketContract}
+                  signTypedDataAsync={signTypedDataAsync}
+                />
+              )
+            }
           </div>
         ) : mode === "own" ? (
           <div>
