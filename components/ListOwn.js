@@ -8,7 +8,7 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
-import CardOwn from "./CardOwn";
+import CardNft from "@/components/CardNft";
 
 export default function ListOwn({
   selectedChain,
@@ -119,7 +119,7 @@ export default function ListOwn({
                 idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
                 idx < pageIndex * NUMBER_PER_PAGE
               ) {
-                return <CardOwn nftData={nftData} />;
+                return <CardNft nftData={nftData} />;
               }
             })}
             <Pagination

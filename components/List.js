@@ -536,18 +536,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
             {isWalletConnected({ isConnected, selectedChain }) === false ? (
               <NoLoginPage />
             ) : (
-              <CarouselOwn
-                selectedChain={selectedChain}
-                address={address}
-                isConnected={isConnected}
-                dataWalletClient={dataWalletClient}
-                promptNftContract={promptNftContract}
-                rentMarketContract={rentMarketContract}
-                signTypedDataAsync={signTypedDataAsync}
-                data={allOwnDataArray}
-                isLoading={isLoadingOwn}
-              />
-              // <ListOwn
+              // <CarouselOwn
               //   selectedChain={selectedChain}
               //   address={address}
               //   isConnected={isConnected}
@@ -558,6 +547,17 @@ function List({ mode, updated, setNewImageCountFunc }) {
               //   data={allOwnDataArray}
               //   isLoading={isLoadingOwn}
               // />
+              <ListOwn
+                selectedChain={selectedChain}
+                address={address}
+                isConnected={isConnected}
+                dataWalletClient={dataWalletClient}
+                promptNftContract={promptNftContract}
+                rentMarketContract={rentMarketContract}
+                signTypedDataAsync={signTypedDataAsync}
+                data={allOwnDataArray}
+                isLoading={isLoadingOwn}
+              />
             )}
           </div>
         ) : mode === "rent" ? (

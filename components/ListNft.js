@@ -8,7 +8,7 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
-import CardNft from "./CardNft";
+import CardNft from "@/components/CardNft";
 
 function ListNft({
   dataSigner,
@@ -128,18 +128,7 @@ function ListNft({
               idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
               idx < pageIndex * NUMBER_PER_PAGE
             ) {
-              return (
-                <CardNft
-                  nftData={nftData}
-                  key={idx}
-                  dataSigner={dataSigner}
-                  address={address}
-                  isConnected={isConnected}
-                  rentMarketContract={rentMarketContract}
-                  selectedChain={selectedChain}
-                  promptNftContract={promptNftContract}
-                />
-              );
+              return <CardNft nftData={nftData} />;
             }
           })}
         </div>
