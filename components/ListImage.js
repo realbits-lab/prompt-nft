@@ -35,7 +35,7 @@ function ListImage() {
       refreshInterval: IMAGE_REFRESH_INTERVAL_TIME,
     }
   );
-  console.log("dataLatestImage: ", dataLatestImage);
+  // console.log("dataLatestImage: ", dataLatestImage);
 
   return (
     <>
