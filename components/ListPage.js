@@ -168,7 +168,7 @@ export default function ListPage(props) {
       // console.log("readDialogMessage: ", readDialogMessage);
       // console.log("queryMode: ", queryMode);
 
-      const mode = getMode({ mode: queryMode[0] });
+      const mode = getMode({ mode: queryMode?.[0] || DEFAULT_MENU });
       // console.log("mode: ", mode);
       setCurrentMode(mode || DEFAULT_MENU);
     },
@@ -221,7 +221,7 @@ export default function ListPage(props) {
           <Toolbar>
             <Box sx={{ flexGrow: 1, display: "block" }}></Box>
             <Box sx={{ flexGrow: 1, flexDirection: "row" }}>
-              {!isMobile && <AppBarButton buttonMode="draw" />}
+              {isMobile && <AppBarButton buttonMode="draw" />}
               <Badge
                 badgeContent={newImageCount}
                 color="secondary"
@@ -230,7 +230,7 @@ export default function ListPage(props) {
                 <AppBarButton buttonMode="image" />
               </Badge>
               {!isMobile && <AppBarButton buttonMode="nft" />}
-              {isMobile && (
+              {!isMobile && (
                 <Link
                   href={MARKET_URL}
                   target="_blank"
@@ -248,7 +248,7 @@ export default function ListPage(props) {
                   </Button>
                 </Link>
               )}
-              {isMobile && (
+              {!isMobile && (
                 <Link
                   href={BOARD_URL}
                   target="_blank"

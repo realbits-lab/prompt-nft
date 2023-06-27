@@ -48,7 +48,7 @@ function ListImage() {
         }}
       >
         {dataLatestImage?.data.map((e, idx) => {
-          console.log("e: ", e);
+          // console.log("e: ", e);
           return (
             <Card sx={{ display: "flex", margin: "10px" }} key={idx}>
               <CardMedia
