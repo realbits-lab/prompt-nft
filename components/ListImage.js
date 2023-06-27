@@ -1,4 +1,5 @@
 import React from "react";
+import moment from "moment";
 import useSWR from "swr";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -47,26 +48,34 @@ function ListImage() {
         }}
       >
         {dataLatestImage?.data.map((e, idx) => {
+          console.log("e: ", e);
           return (
             <Card sx={{ display: "flex", margin: "10px" }} key={idx}>
               <CardMedia
                 component="img"
-                sx={{ width: 80 }}
+                sx={{ width: "12vw" }}
                 image={e.imageUrl}
                 alt="prompt image"
               />
               <Box sx={{ display: "flex", flexDirection: "column" }}>
                 <CardContent>
                   <Typography
-                    variant="subtitle1"
+                    variant="body2"
                     color="text.secondary"
                     component="div"
                     noWrap
                   >
                     {e.prompt}
                   </Typography>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    component="div"
+                    noWrap
+                  >
+                    {moment(e.createdAt).fromNow()}
+                  </Typography>
                 </CardContent>
-                <Box></Box>
               </Box>
             </Card>
           );
