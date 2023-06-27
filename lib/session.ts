@@ -1,5 +1,5 @@
 import type { IronSessionOptions } from "iron-session";
-import type { User } from "../pages/api/user";
+import type { User } from "@/pages/api/user";
 
 export const sessionOptions: IronSessionOptions = {
   password: process.env.NEXT_PUBLIC_SECRET_COOKIE_PASSWORD as string,

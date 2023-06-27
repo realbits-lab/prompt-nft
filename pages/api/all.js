@@ -1,6 +1,6 @@
 import { withIronSessionApiRoute } from "iron-session/next";
-import { sessionOptions } from "../../lib/session";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/client";
+import { sessionOptions } from "@/lib/session";
 
 async function handler(req, res) {
   const IMAGE_TAKE_COUNT = 100;
@@ -10,10 +10,6 @@ async function handler(req, res) {
     res.status(500).json({ error: "Unavailable method. Support only GET." });
     return;
   }
-
-  //* Connect database.
-  const prisma = new PrismaClient();
-  await prisma.$connect();
 
   //* Check query.
   const params = req.query.updated;
@@ -72,7 +68,6 @@ async function handler(req, res) {
     // );
 
     if (findManyResult === null) {
-      await prisma.$disconnect();
       return res.status(500).json({ data: "nok" });
     }
 
@@ -88,14 +83,12 @@ async function handler(req, res) {
     // console.log("fineManyUpdateResult: ", fineManyUpdateResult);
 
     //* Send 200 OK response.
-    await prisma.$disconnect();
     return res.status(200).json({
       data: findManyResult,
       newlyUpdatedData: fineManyUpdateResult,
     });
   } catch (error) {
     console.error(error);
-    await prisma.$disconnect();
     return res.status(500).json({ data: "nok" });
   }
 }

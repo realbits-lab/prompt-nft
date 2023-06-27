@@ -1,4 +1,5 @@
 import React from "react";
+import { isMobile } from "react-device-detect";
 import dynamic from "next/dynamic";
 import Router, { useRouter } from "next/router";
 import PropTypes from "prop-types";
@@ -30,10 +31,11 @@ import {
   readDialogMessageState,
 } from "@/lib/util";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
-const User = dynamic(() => import("../../components/User"), {
+const User = dynamic(() => import("./User"), {
   ssr: false,
 });
 
+//* This function should be out of ListPage component.
 function HideOnScroll(props) {
   const { children, window } = props;
 
@@ -57,24 +59,40 @@ HideOnScroll.propTypes = {
 
 export default function ListPage(props) {
   // console.log("call ListPage()");
+  const MENU_ENUM = {
+    draw: "draw",
+    image: "image",
+    nft: "nft",
+    own: "own",
+    rent: "rent",
+    theme: "theme",
+  };
 
-  const DEFAULT_MENU = "draw";
+  function getMode({ mode }) {
+    const result = Object.entries(MENU_ENUM).find(
+      ([key, value]) => value === mode
+    );
+    if (result) return MENU_ENUM[mode];
+    return;
+  }
+
+  const DEFAULT_MENU = MENU_ENUM.image;
   const BOARD_URL = "https://muve.moim.co/forums/QEUREBYLO";
   let MARKET_URL;
-  if (process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK === "matic") {
-    MARKET_URL = "https://rent-market-production.vercel.app/";
+  if (process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK === "maticmum") {
+    MARKET_URL = "https://test-market.realbits.co";
   } else {
-    MARKET_URL = "https://rent-market-development.vercel.app/";
+    MARKET_URL = "https://market.realbits.co";
   }
   const router = useRouter();
-  const queryMode = router.query.mode;
+  const queryMode = router.query.index;
   const queryUpdated = router.query.updated;
   // console.log("router.query: ", router.query);
   // console.log("queryUpdated: ", queryUpdated);
   // console.log("queryMode: ", queryMode);
 
   const { user, mutateUser } = useUser();
-  const [mode, setMode] = React.useState(DEFAULT_MENU);
+  const [currentMode, setCurrentMode] = React.useState(DEFAULT_MENU);
   const [newImageCount, setNewImageCount] = React.useState(0);
   const BUTTON_BORDER_RADIUS = 25;
   const SELECTED_BUTTON_BACKGROUND_COLOR = "#21b6ae";
@@ -150,17 +168,9 @@ export default function ListPage(props) {
       // console.log("readDialogMessage: ", readDialogMessage);
       // console.log("queryMode: ", queryMode);
 
-      if (
-        queryMode &&
-        Array.isArray(queryMode) === true &&
-        queryMode.length > 0
-      ) {
-        // console.log("setMode(queryMode[0])");
-        setMode(queryMode[0]);
-      } else {
-        // console.log("setMode(image)");
-        setMode(DEFAULT_MENU);
-      }
+      const mode = getMode({ mode: queryMode[0] });
+      // console.log("mode: ", mode);
+      setCurrentMode(mode || DEFAULT_MENU);
     },
     [queryMode]
   );
@@ -172,7 +182,9 @@ export default function ListPage(props) {
         style={{
           borderRadius: BUTTON_BORDER_RADIUS,
           backgroundColor:
-            buttonMode === mode ? SELECTED_BUTTON_BACKGROUND_COLOR : null,
+            buttonMode === currentMode
+              ? SELECTED_BUTTON_BACKGROUND_COLOR
+              : null,
           padding: SELECTED_BUTTON_PADDING,
         }}
         sx={{ my: 2, color: "white" }}
@@ -181,12 +193,12 @@ export default function ListPage(props) {
           // console.log("buttonMode: ", buttonMode);
           // console.log("newImageCount: ", newImageCount);
 
-          if (buttonMode === "image" && newImageCount > 0) {
+          if (buttonMode === MENU_ENUM.image && newImageCount > 0) {
             // console.log("route to /list/image?updated=true");
             Router.reload("/list/image?updated=true");
           }
 
-          setMode(buttonMode);
+          setCurrentMode(buttonMode);
         }}
       >
         {buttonMode.toUpperCase()}
@@ -209,7 +221,7 @@ export default function ListPage(props) {
           <Toolbar>
             <Box sx={{ flexGrow: 1, display: "block" }}></Box>
             <Box sx={{ flexGrow: 1, flexDirection: "row" }}>
-              <AppBarButton buttonMode="draw" />
+              {!isMobile && <AppBarButton buttonMode="draw" />}
               <Badge
                 badgeContent={newImageCount}
                 color="secondary"
@@ -217,21 +229,60 @@ export default function ListPage(props) {
               >
                 <AppBarButton buttonMode="image" />
               </Badge>
-              <AppBarButton buttonMode="nft" />
-              {/* <AppBarButton buttonMode="own" />
-              <AppBarButton buttonMode="rent" /> */}
+              {!isMobile && <AppBarButton buttonMode="nft" />}
+              {isMobile && (
+                <Link
+                  href={MARKET_URL}
+                  target="_blank"
+                  style={{ color: "inherit", textDecoration: "inherit" }}
+                >
+                  <Button
+                    style={{
+                      borderRadius: BUTTON_BORDER_RADIUS,
+                      padding: SELECTED_BUTTON_PADDING,
+                    }}
+                    sx={{ my: 2, color: "white" }}
+                    onClick={(e) => {}}
+                  >
+                    MARKET
+                  </Button>
+                </Link>
+              )}
+              {isMobile && (
+                <Link
+                  href={BOARD_URL}
+                  target="_blank"
+                  style={{ color: "inherit", textDecoration: "inherit" }}
+                >
+                  <Button
+                    style={{
+                      borderRadius: BUTTON_BORDER_RADIUS,
+                      padding: SELECTED_BUTTON_PADDING,
+                    }}
+                    sx={{ my: 2, color: "white" }}
+                    onClick={(e) => {}}
+                  >
+                    BOARD
+                  </Button>
+                </Link>
+              )}
             </Box>
 
             <Box>
-              {(user === undefined || user.isLoggedIn === false) && <User />}
-              {user !== undefined && user.isLoggedIn === true && (
+              {(user === undefined || user.isLoggedIn === false) &&
+                !isMobile && <User />}
+              {((user !== undefined && user.isLoggedIn === true) ||
+                isMobile) && (
                 <Button
                   id="basic-button"
                   aria-controls={openSettingMenu ? "basic-menu" : undefined}
                   aria-haspopup="true"
                   aria-expanded={openSettingMenu ? "true" : undefined}
                   onClick={(event) => {
-                    if (user !== undefined && user.isLoggedIn === true) {
+                    if (
+                      (user !== undefined && user.isLoggedIn === true) ||
+                      isMobile
+                    ) {
                       handleSettingMenuOpen(event);
                     }
                   }}
@@ -254,79 +305,90 @@ export default function ListPage(props) {
                   "aria-labelledby": "basic-button",
                 }}
               >
-                <MenuItem
-                  onClick={() => {
-                    setMode("own");
-                    handleSettingMenuClose();
-                  }}
-                >
-                  OWN
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    setMode("rent");
-                    handleSettingMenuClose();
-                  }}
-                >
-                  RENT
-                </MenuItem>
-                <Link
-                  href={MARKET_URL}
-                  target="_blank"
-                  style={{ color: "inherit", textDecoration: "inherit" }}
-                >
+                {!isMobile && (
                   <MenuItem
                     onClick={() => {
+                      setCurrentMode(MENU_ENUM.own);
                       handleSettingMenuClose();
                     }}
                   >
-                    MARKET
+                    OWN
                   </MenuItem>
-                </Link>
-                <Link
-                  href={BOARD_URL}
-                  target="_blank"
-                  style={{ color: "inherit", textDecoration: "inherit" }}
-                >
+                )}
+                {!isMobile && (
                   <MenuItem
                     onClick={() => {
+                      setCurrentMode(MENU_ENUM.rent);
                       handleSettingMenuClose();
                     }}
                   >
-                    BOARD
+                    RENT
                   </MenuItem>
-                </Link>
+                )}
+                {!isMobile && (
+                  <Link
+                    href={MARKET_URL}
+                    target="_blank"
+                    style={{ color: "inherit", textDecoration: "inherit" }}
+                  >
+                    <MenuItem
+                      onClick={() => {
+                        handleSettingMenuClose();
+                      }}
+                    >
+                      MARKET
+                    </MenuItem>
+                  </Link>
+                )}
+                {!isMobile && (
+                  <Link
+                    href={BOARD_URL}
+                    target="_blank"
+                    style={{ color: "inherit", textDecoration: "inherit" }}
+                  >
+                    <MenuItem
+                      onClick={() => {
+                        handleSettingMenuClose();
+                      }}
+                    >
+                      BOARD
+                    </MenuItem>
+                  </Link>
+                )}
                 <MenuItem
                   onClick={() => {
-                    setMode("theme");
+                    setCurrentMode(MENU_ENUM.theme);
                     handleSettingMenuClose();
                   }}
                 >
                   THEME
                 </MenuItem>
-                <MenuItem
-                  onClick={async () => {
-                    try {
-                      mutateUser(
-                        await fetchJson(
-                          { url: "/api/logout" },
-                          { method: "POST" }
-                        ),
-                        false
-                      );
-                    } catch (error) {
-                      if (error instanceof FetchError) {
-                        console.error(error.data.message);
-                      } else {
-                        console.error("An unexpected error happened:", error);
+                {!isMobile && (
+                  <MenuItem
+                    onClick={async () => {
+                      setCurrentMode(MENU_ENUM.image);
+                      handleSettingMenuClose();
+
+                      try {
+                        mutateUser(
+                          await fetchJson(
+                            { url: "/api/logout" },
+                            { method: "POST" }
+                          ),
+                          false
+                        );
+                      } catch (error) {
+                        if (error instanceof FetchError) {
+                          console.error(error.data.message);
+                        } else {
+                          console.error("An unexpected error happened:", error);
+                        }
                       }
-                    }
-                    setMode("image");
-                    handleSettingMenuClose();
-                  }}
-                >
-                  LOGOUT
-                </MenuItem>
+                    }}
+                  >
+                    LOGOUT
+                  </MenuItem>
+                )}
               </Menu>
             </Box>
           </Toolbar>
@@ -336,7 +398,7 @@ export default function ListPage(props) {
       {/*//*Image content part. */}
       <Box sx={{ my: 2 }}>
         <List
-          mode={mode}
+          mode={currentMode}
           updated={queryUpdated}
           setNewImageCountFunc={setNewBadgeOnImageAppBarButton}
         />

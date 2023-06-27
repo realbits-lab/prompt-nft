@@ -8,7 +8,7 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
-import CardRent from "./CardRent";
+import CardNft from "@/components/CardNft";
 
 export default function ListRent({
   selectedChain,
@@ -117,19 +117,7 @@ export default function ListRent({
                 idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
                 idx < pageIndex * NUMBER_PER_PAGE
               ) {
-                return (
-                  <CardRent
-                    nftData={nftData}
-                    key={idx}
-                    dataWalletClient={dataWalletClient}
-                    address={address}
-                    isConnected={isConnected}
-                    rentMarketContract={rentMarketContract}
-                    selectedChain={selectedChain}
-                    promptNftContract={promptNftContract}
-                    signTypedDataAsync={signTypedDataAsync}
-                  />
-                );
+                return <CardNft nftData={nftData} />;
               }
             })}
             <Pagination

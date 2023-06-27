@@ -12,6 +12,7 @@ import {
   useWaitForTransaction,
   useWatchPendingTransactions,
 } from "wagmi";
+import { getContract } from "wagmi/actions";
 import { useRecoilStateLoadable } from "recoil";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -35,17 +36,13 @@ import {
   writeDialogMessageState,
   handleCheckPrompt,
   shortenAddress,
+  getChainId,
 } from "@/lib/util";
 import useUser from "@/lib/useUser";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import promptNFTABI from "@/contracts/promptNFT.json";
 
-export default function CardNft({
-  nftData,
-  dataWalletClient,
-  promptNftContract,
-  signTypedDataAsync,
-}) {
+export default function CardNft({ nftData }) {
   // console.log("call CardNft()");
   // console.log("nftData: ", nftData);
 
@@ -92,8 +89,46 @@ export default function CardNft({
   //*---------------------------------------------------------------------------
   //* Wagmi hook
   //*---------------------------------------------------------------------------
+  const promptNftContract = getContract({
+    address: PROMPT_NFT_CONTRACT_ADDRESS,
+    abi: promptNFTABI["abi"],
+  });
   const { chains, chain: selectedChain } = useNetwork();
   const { address, isConnected } = useAccount();
+  const {
+    data: dataWalletClient,
+    isError: isErrorWalletClient,
+    isLoading: isLoadingWalletClient,
+  } = useWalletClient();
+
+  const domain = {
+    chainId: getChainId({
+      chainName: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
+    }),
+    name: "Realbits",
+  };
+  const types = {
+    EIP712Domain: [
+      { name: "name", type: "string" },
+      { name: "chainId", type: "uint256" },
+    ],
+    Login: [{ name: "contents", type: "string" }],
+  };
+  const value = {
+    contents: process.env.NEXT_PUBLIC_LOGIN_SIGN_MESSAGE,
+  };
+  const {
+    data: dataSignTypedData,
+    isError: isErrorSignTypedData,
+    isLoading: isLoadingSignTypedData,
+    isSuccess: isSuccessSignTypedData,
+    signTypedData,
+    signTypedDataAsync,
+  } = useSignTypedData({
+    domain: domain,
+    types: types,
+    value: value,
+  });
 
   const {
     data: dataTokenURI,
@@ -245,7 +280,11 @@ export default function CardNft({
       setIsRenting(false);
     },
   });
-  const waitForTransaction = useWaitForTransaction({
+  const {
+    data: dataRentNFTTx,
+    isError: isErrorRentNFTTx,
+    isLoading: isLoadingRentNFTTx,
+  } = useWaitForTransaction({
     hash: dataRentNFT?.hash,
     onSuccess(data) {
       // console.log("call onSuccess()");
@@ -410,7 +449,7 @@ export default function CardNft({
                 <StyledTableRow>
                   <StyledTableCell align="left">Token ID</StyledTableCell>
                   <StyledTableCell align="left">
-                    {nftData.tokenId.toString()}
+                    {nftData?.tokenId.toString()}
                   </StyledTableCell>
                 </StyledTableRow>
 
@@ -469,14 +508,14 @@ export default function CardNft({
                   </StyledTableCell>
                   <StyledTableCell align="left">
                     {(
-                      Number((nftData.rentFee * 1000000n) / 10n ** 18n) /
+                      Number((nftData?.rentFee * 1000000n) / 10n ** 18n) /
                       1000000
                     ).toString()}{" "}
                     matic
                   </StyledTableCell>
                 </StyledTableRow>
 
-                {nftData.rentFeeByToken ? (
+                {nftData?.rentFeeByToken ? (
                   <StyledTableRow>
                     <StyledTableCell align="left">
                       <Button
@@ -501,7 +540,7 @@ export default function CardNft({
                     <StyledTableCell align="left">
                       {(
                         Number(
-                          (nftData.rentFeeByToken * 1000000n) / 10n ** 18n
+                          (nftData?.rentFeeByToken * 1000000n) / 10n ** 18n
                         ) / 1000000
                       ).toString()}{" "}
                       token

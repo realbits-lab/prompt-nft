@@ -10,7 +10,7 @@ import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
 import CardNft from "@/components/CardNft";
 
-export default function ListOwn({
+export default function CarouselOwn({
   selectedChain,
   address,
   isConnected,

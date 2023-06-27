@@ -12,6 +12,81 @@ import {
   readDialogMessageState,
 } from "@/lib/util";
 
+export async function handleSignMessage({ accountAddress, chainId }) {
+  const msgParams = JSON.stringify({
+    domain: {
+      chainId: chainId,
+      name: "Realbits",
+    },
+
+    // Defining the message signing data content.
+    message: {
+      contents: process.env.NEXT_PUBLIC_LOGIN_SIGN_MESSAGE,
+    },
+    // Refers to the keys of the *types* object below.
+    primaryType: "Login",
+
+    types: {
+      EIP712Domain: [
+        { name: "name", type: "string" },
+        { name: "chainId", type: "uint256" },
+      ],
+      // Refer to PrimaryType
+      Login: [{ name: "contents", type: "string" }],
+    },
+  });
+
+  const params = [accountAddress, msgParams];
+  const method = "eth_signTypedData_v4";
+
+  const requestResult = await ethereum.request({
+    method,
+    params,
+  });
+  // console.log("requestResult: ", requestResult);
+  return requestResult;
+}
+
+export async function handleAuthenticate({ publicAddress, signature, mutateUser }) {
+  console.log("call handleAuthenticate()");
+
+  const body = { publicAddress, signature };
+  const userData = await fetchJson(
+    { url: "/api/login" },
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }
+  );
+  // console.log("userData: ", userData);
+
+  try {
+    mutateUser(userData);
+  } catch (error) {
+    if (error instanceof FetchError) {
+      console.error(error.data.message);
+    } else {
+      console.error("An unexpected error happened:", error);
+    }
+  }
+}
+
+export async function handleLogout({ mutateUser }) {
+  try {
+    mutateUser(
+      await fetchJson({ url: "/api/logout" }, { method: "POST" }),
+      false
+    );
+  } catch (error) {
+    if (error instanceof FetchError) {
+      console.error(error.data.message);
+    } else {
+      console.error("An unexpected error happened:", error);
+    }
+  }
+}
+
 export default function User() {
   //*----------------------------------------------------------------------------
   //* Define constance variables.
@@ -41,7 +116,7 @@ export default function User() {
           snackbarOpen: false,
         };
 
-  const handleLoginClick = async () => {
+  async function handleLoginClick() {
     if (!address) {
       setWriteToastMessage({
         snackbarSeverity: AlertSeverity.warning,
@@ -56,87 +131,23 @@ export default function User() {
     // console.log("publicAddress: ", publicAddress);
 
     // Popup MetaMask confirmation modal to sign message with nonce data.
-    const signMessageResult = await handleSignMessage();
+    const signMessageResult = await handleSignMessage({
+      accountAddress: publicAddress,
+      chainId: selectedChain.id,
+    });
     // console.log("signMessageResult: ", signMessageResult);
 
     // Send signature to back-end on the /auth route.
     await handleAuthenticate({
       publicAddress: publicAddress,
       signature: signMessageResult,
+      mutateUser,
     });
-  };
+  }
 
-  const handleSignMessage = async () => {
-    const msgParams = JSON.stringify({
-      domain: {
-        chainId: selectedChain.id,
-        name: "Realbits",
-      },
-
-      // Defining the message signing data content.
-      message: {
-        contents: process.env.NEXT_PUBLIC_LOGIN_SIGN_MESSAGE,
-      },
-      // Refers to the keys of the *types* object below.
-      primaryType: "Login",
-
-      types: {
-        EIP712Domain: [
-          { name: "name", type: "string" },
-          { name: "chainId", type: "uint256" },
-        ],
-        // Refer to PrimaryType
-        Login: [{ name: "contents", type: "string" }],
-      },
-    });
-
-    const params = [address, msgParams];
-    const method = "eth_signTypedData_v4";
-
-    const requestResult = await ethereum.request({
-      method,
-      params,
-    });
-    // console.log("requestResult: ", requestResult);
-    return requestResult;
-  };
-
-  const handleAuthenticate = async ({ publicAddress, signature }) => {
-    const body = { publicAddress, signature };
-    try {
-      mutateUser(
-        await fetchJson(
-          { url: "/api/login" },
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          }
-        )
-      );
-    } catch (error) {
-      if (error instanceof FetchError) {
-        console.error(error.data.message);
-      } else {
-        console.error("An unexpected error happened:", error);
-      }
-    }
-  };
-
-  const handleLogoutClick = async () => {
-    try {
-      mutateUser(
-        await fetchJson({ url: "/api/logout" }, { method: "POST" }),
-        false
-      );
-    } catch (error) {
-      if (error instanceof FetchError) {
-        console.error(error.data.message);
-      } else {
-        console.error("An unexpected error happened:", error);
-      }
-    }
-  };
+  async function handleLogoutClick() {
+    await handleLogout({ mutateUser });
+  }
 
   return (
     <>

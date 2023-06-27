@@ -198,12 +198,7 @@ function CarouselNft({
               return (
                 <div key={index}>
                   {Math.abs(activeStep - index) <= 2 ? (
-                    <CardNft
-                      nftData={nftData}
-                      dataWalletClient={dataWalletClient}
-                      promptNftContract={promptNftContract}
-                      signTypedDataAsync={signTypedDataAsync}
-                    />
+                    <CardNft nftData={nftData} />
                   ) : null}
                 </div>
               );

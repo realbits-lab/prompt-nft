@@ -1,41 +1,46 @@
-import * as React from "react";
+import React from "react";
 import { useRouter } from "next/router";
-import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
+import { Web3Button, Web3NetworkSwitch, useWeb3Modal } from "@web3modal/react";
 import moment from "moment";
-import dynamic from "next/dynamic";
+import momentDurationFormatSetup from "moment-duration-format";
+import { useRecoilStateLoadable } from "recoil";
 import {
   useAccount,
-  useSigner,
-  useContract,
+  useNetwork,
   useContractRead,
-  useSignTypedData,
-  useContractEvent,
   useContractWrite,
   usePrepareContractWrite,
   useWaitForTransaction,
   useWatchPendingTransactions,
 } from "wagmi";
 import Image from "mui-image";
+import Stepper from "@mui/material/Stepper";
+import Step from "@mui/material/Step";
+import StepLabel from "@mui/material/StepLabel";
+import StepButton from "@mui/material/StepButton";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
+import CardActions from "@mui/material/CardActions";
 import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
-import Slide from "@mui/material/Slide";
 import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import rentmarketABI from "@/contracts/rentMarket.json";
+import fetchJson, { FetchError } from "@/lib/fetchJson";
 import useUser from "@/lib/useUser";
-import { sleep } from "@/lib/util";
-const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
-  ssr: false,
-});
+import { handleSignMessage, handleAuthenticate } from "@/components/User";
+import { sleep, writeToastMessageState, AlertSeverity } from "@/lib/util";
+
 export default function DrawImage() {
+  // console.log("call DrawImage()");
+
   const DEFAULT_MODEL_NAME = "runwayml/stable-diffusion-v1-5";
   const DRAW_API_URL = "/api/draw";
   const POST_API_URL = "/api/post";
+  const POSTED_API_URL = "/api/posted";
   const UPLOAD_IMAGE_TO_S3_URL = "/api/upload-image-to-s3";
   const FETCH_RESULT_API_URL = "/api/fetch-result";
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
@@ -44,13 +49,52 @@ export default function DrawImage() {
   const CARD_MIN_WIDTH = 375;
   const CARD_MAX_WIDTH = 420;
   const CARD_PADDING = 1;
-  const IMAGE_PADDING = 400;
+  const IMAGE_PADDING = 450;
   const { user, mutateUser } = useUser();
   const [imageUrl, setImageUrl] = React.useState("");
   const [loadingImage, setLoadingImage] = React.useState(false);
+  const [postingImage, setPostingImage] = React.useState(false);
+  const [isImageDrawn, setIsImageDrawn] = React.useState(false);
+  const [isImagePosted, setIsImagePosted] = React.useState(false);
   const [imageHeight, setImageHeight] = React.useState(0);
   const router = useRouter();
   const MARGIN_TOP = "60px";
+
+  //*---------------------------------------------------------------------------
+  //* Snackbar variables.
+  //*---------------------------------------------------------------------------
+  const [writeToastMessageLoadable, setWriteToastMessage] =
+    useRecoilStateLoadable(writeToastMessageState);
+  const writeToastMessage =
+    writeToastMessageLoadable?.state === "hasValue"
+      ? writeToastMessageLoadable.contents
+      : {
+          snackbarSeverity: AlertSeverity.info,
+          snackbarMessage: "",
+          snackbarTime: new Date(),
+          snackbarOpen: true,
+        };
+
+  //*---------------------------------------------------------------------------
+  //* Handle text input change.
+  //*---------------------------------------------------------------------------
+  const [formValue, setFormValue] = React.useState({
+    prompt: "",
+    negativePrompt: "",
+    modelName: DEFAULT_MODEL_NAME,
+  });
+  const { prompt, negativePrompt, modelName } = formValue;
+  const handleChange = (event) => {
+    console.log("call handleChange()");
+
+    const { name, value } = event.target;
+    setFormValue((prevState) => {
+      return {
+        ...prevState,
+        [name]: value,
+      };
+    });
+  };
 
   //*---------------------------------------------------------------------------
   //* Wagmi hook.
@@ -63,10 +107,18 @@ export default function DrawImage() {
   const SERVICE_ACCOUNT_ADDRESS =
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
   const { address, isConnected } = useAccount();
+  const { chains, chain: selectedChain } = useNetwork();
   const [paymentNftRentFee, setPaymentNftRentFee] = React.useState();
   const [currentTimestamp, setCurrentTimestamp] = React.useState();
   const [imageFetchEndTime, setImageFetchEndTime] = React.useState();
   const [paymentNftRentEndTime, setPaymentNftRentEndTime] = React.useState();
+
+  const {
+    isOpen: isOpenWeb3Modal,
+    open: openWeb3Modal,
+    close: closeWeb3Modal,
+    setDefaultChain: setDefaultChainWeb3Modal,
+  } = useWeb3Modal();
 
   const {
     data: dataAllRentData,
@@ -85,6 +137,21 @@ export default function DrawImage() {
     onSuccess(data) {
       // console.log("call onSuccess()");
       // console.log("data: ", data);
+
+      data.map(function (rentData) {
+        // console.log("rentData: ", rentData);
+        if (
+          rentData.renteeAddress.toLowerCase() === address?.toLowerCase() &&
+          rentData.nftAddress.toLowerCase() ===
+            PAYMENT_NFT_CONTRACT_ADDRESS.toLowerCase() &&
+          Number(rentData.tokenId) === Number(PAYMENT_NFT_TOKEN_ID)
+        ) {
+          const rentEndTime =
+            Number(rentData.rentStartTimestamp) + Number(rentData.rentDuration);
+          // console.log("rentEndTime: ", rentEndTime);
+          setPaymentNftRentEndTime(rentEndTime);
+        }
+      });
     },
     onError(error) {
       // console.log("call onError()");
@@ -177,16 +244,70 @@ export default function DrawImage() {
       PAYMENT_NFT_TOKEN_ID,
       SERVICE_ACCOUNT_ADDRESS,
     ],
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.success,
+        snackbarMessage:
+          "Rent transaction is just started and wait a moment...",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+    onError(error) {
+      // console.log("call onSuccess()");
+      // console.log("error: ", error);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.error,
+        snackbarMessage: `${error}`,
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+    onSettled(data, error) {
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
+    },
   });
-  const waitForTransactionRentNFT = useWaitForTransaction({
+  const {
+    data: dataRentNFTTx,
+    isError: isErrorRentNFTTx,
+    isLoading: isLoadingRentNFTTx,
+  } = useWaitForTransaction({
     hash: dataRentNFT?.hash,
     onSuccess(data) {
       // console.log("call onSuccess()");
       // console.log("data: ", data);
+
+      updateUserData()
+        .then(() => {
+          setWriteToastMessage({
+            snackbarSeverity: AlertSeverity.success,
+            snackbarMessage: "Renting is finished successfully.",
+            snackbarTime: new Date(),
+            snackbarOpen: true,
+          });
+        })
+        .catch((error) => {
+          setWriteToastMessage({
+            snackbarSeverity: AlertSeverity.error,
+            snackbarMessage: "Updating user data is falied.",
+            snackbarTime: new Date(),
+            snackbarOpen: true,
+          });
+        });
     },
     onError(error) {
       // console.log("call onError()");
       // console.log("error: ", error);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.error,
+        snackbarMessage: "Renting is failed.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
     },
     onSettled(data, error) {
       // console.log("call onSettled()");
@@ -200,99 +321,92 @@ export default function DrawImage() {
     },
   });
 
-  //*---------------------------------------------------------------------------
-  //* Handle snackbar.
-  //*---------------------------------------------------------------------------
-  const [snackbarMessage, setSnackbarMessage] = React.useState("");
-  const [openSnackbar, setOpenSnackbar] = React.useState(false);
-  const [snackbarSeverity, setSnackbarSeverity] = React.useState("info");
-  const handleCloseSnackbar = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setOpenSnackbar(false);
-  };
+  async function updateUserData() {
+    // console.log("call updateUserData()");
 
-  //*---------------------------------------------------------------------------
-  //* Handle text input change.
-  //*---------------------------------------------------------------------------
-  const [formValue, setFormValue] = React.useState({
-    prompt: "",
-    negativePrompt: "",
-    modelName: DEFAULT_MODEL_NAME,
-  });
-  const { prompt, negativePrompt, modelName } = formValue;
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormValue((prevState) => {
-      return {
-        ...prevState,
-        [name]: value,
-      };
-    });
-  };
-
-  const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
-  });
-
-  React.useEffect(() => {
-    // console.log("call useEffect()");
-    const countdown = setInterval(() => {
-      const timestamp = Math.floor(Date.now() / 1000);
-      // console.log("timestamp: ", timestamp);
-      setCurrentTimestamp(timestamp);
-    }, 1000);
-    return () => clearInterval(countdown);
-  }, [currentTimestamp]);
-
-  React.useEffect(
-    function () {
-      // console.log("call useEffect()");
-
-      //* Check user has rented the payment nft.
-      if (dataAllRentData) {
-        dataAllRentData.map(function (rentData) {
-          // console.log("rentData: ", rentData);
-          if (
-            rentData.renteeAddress.toLowerCase() === address?.toLowerCase() &&
-            rentData.nftAddress.toLowerCase() ===
-              PAYMENT_NFT_CONTRACT_ADDRESS.toLowerCase() &&
-            Number(rentData.tokenId) === Number(PAYMENT_NFT_TOKEN_ID)
-          ) {
-            const rentEndTime =
-              Number(rentData.rentStartTimestamp) +
-              Number(rentData.rentDuration);
-            setPaymentNftRentEndTime(rentEndTime);
+    const body = { publicAddress: address };
+    try {
+      mutateUser(
+        await fetchJson(
+          { url: "/api/login" },
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
           }
-        });
+        )
+      );
+    } catch (error) {
+      if (error instanceof FetchError) {
+        console.error(error.data.message);
+      } else {
+        console.error("An unexpected error happened:", error);
       }
 
-      setImageHeight(window.innerHeight - IMAGE_PADDING);
+      throw error;
+    }
+  }
 
-      window.addEventListener("resize", handleResize);
-      return () => {
-        window.removeEventListener("resize", handleResize);
-      };
-    },
-    [dataAllRentData]
-  );
+  //* Initialize.
+  React.useEffect(function () {
+    // console.log("call useEffect()");
+
+    momentDurationFormatSetup(moment);
+
+    setImageHeight(window.innerHeight - IMAGE_PADDING);
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  //* TODO: No reload.
+  // useInterval(() => {
+  //   console.log("call useInterval()");
+
+  //   const timestamp = Math.floor(Date.now() / 1000);
+  //   // console.log("timestamp: ", timestamp);
+  //   setCurrentTimestamp((previousTimestamp) => timestamp);
+  // }, 1000);
+
+  function useInterval(callback, delay) {
+    const savedCallback = React.useRef();
+
+    React.useEffect(() => {
+      savedCallback.current = callback;
+    }, [callback]);
+
+    React.useEffect(() => {
+      function tick() {
+        savedCallback.current();
+      }
+      if (delay !== null) {
+        let id = setInterval(tick, delay);
+        return () => clearInterval(id);
+      }
+    }, [delay]);
+  }
 
   function handleResize() {
     setImageHeight(window.innerHeight - IMAGE_PADDING);
   }
 
   async function fetchImage() {
+    setIsImageDrawn(false);
+    setLoadingImage(true);
+
     let inputPrompt = prompt;
     let inputNegativePrompt = negativePrompt;
     let inputModelName = modelName;
 
-    setLoadingImage(true);
-
     if (!prompt || prompt === "") {
-      setSnackbarSeverity("warning");
-      setSnackbarMessage("Prompt is empty.");
-      setOpenSnackbar(true);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: "Prompt is empty.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
 
       setLoadingImage(false);
 
@@ -305,19 +419,34 @@ export default function DrawImage() {
       negative_prompt: negativePrompt,
     };
 
-    const fetchResponse = await fetch(DRAW_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(jsonData),
-    });
-    console.log("fetchResponse: ", fetchResponse);
+    let fetchResponse;
+    try {
+      fetchResponse = await fetch(DRAW_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(jsonData),
+      });
+      // console.log("fetchResponse: ", fetchResponse);
+    } catch (error) {
+      console.error(error);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: "Fetch draw api call is failed.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+      return;
+    }
 
     //* Check error response.
     if (fetchResponse.status !== 200) {
       console.error("fetchResponse.status is not 200.");
-      setSnackbarSeverity("warning");
-      setSnackbarMessage("Drawing image failed.");
-      setOpenSnackbar(true);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: "Drawing image is failed..",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
 
       setLoadingImage(false);
 
@@ -326,7 +455,6 @@ export default function DrawImage() {
 
     //* Get the stable diffusion api result by json.
     const jsonResponse = await fetchResponse.json();
-    console.log("jsonResponse: ", jsonResponse);
 
     //* Check error response.
     if (
@@ -335,9 +463,12 @@ export default function DrawImage() {
     ) {
       console.error("jsonResponse.status is not processing or success.");
 
-      setSnackbarSeverity("warning");
-      setSnackbarMessage("Drawing image failed.");
-      setOpenSnackbar(true);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: "Drawing image is failed.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
 
       setLoadingImage(false);
 
@@ -347,6 +478,7 @@ export default function DrawImage() {
     //* Handle fetch result.
     let imageUrlResponse;
     if (jsonResponse.status === "processing") {
+      console.log("jsonResponse: ", jsonResponse);
       const eta = jsonResponse.eta;
       const timestamp = Math.floor(Date.now() / 1000);
       setImageFetchEndTime(timestamp + eta);
@@ -367,9 +499,12 @@ export default function DrawImage() {
       if (fetchResultResponse.status !== 200) {
         console.error("jsonResponse.status is not success.");
 
-        setSnackbarSeverity("warning");
-        setSnackbarMessage("Fetching image failed.");
-        setOpenSnackbar(true);
+        setWriteToastMessage({
+          snackbarSeverity: AlertSeverity.warning,
+          snackbarMessage: "Fetching image is failed.",
+          snackbarTime: new Date(),
+          snackbarOpen: true,
+        });
 
         setLoadingImage(false);
         return;
@@ -405,9 +540,48 @@ export default function DrawImage() {
       inputModelName = meta.model;
     }
 
+    setImageUrl(imageUrlResponse);
+    setLoadingImage(false);
+    setIsImagePosted(false);
+    setIsImageDrawn(true);
+
+    return;
+  }
+
+  async function postImage({ postImageUrl, inputPrompt, inputNegativePrompt }) {
+    setPostingImage(true);
+
+    //* Check the duplicate prompt.
+    const postedResponse = await fetch(POSTED_API_URL, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt: inputPrompt,
+      }),
+    });
+
+    if (postedResponse.status === 200) {
+      console.error("postedResponse: ", postedResponse);
+
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: "Prompt is already posted.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+
+      setIsImagePosted(false);
+      setPostingImage(false);
+
+      return;
+    }
+
     //* Upload image to S3.
     const uploadImageJsonData = {
-      imageUrl: imageUrlResponse,
+      imageUrl: postImageUrl,
     };
     let responseUploadImageToS3;
     try {
@@ -422,22 +596,30 @@ export default function DrawImage() {
     } catch (error) {
       console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
 
-      setSnackbarSeverity("warning");
-      setSnackbarMessage(`Image url(${imageUrlResponse}) is invalid.`);
-      setOpenSnackbar(true);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: `Image url(${postImageUrl}) is invalid.`,
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
 
-      setLoadingImage(false);
+      setIsImagePosted(false);
+      setPostingImage(false);
       return;
     }
 
     if (responseUploadImageToS3.status !== 200) {
       console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
 
-      setSnackbarSeverity("warning");
-      setSnackbarMessage("S3 upload failed.");
-      setOpenSnackbar(true);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: "S3 uploading is failed.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
 
-      setLoadingImage(false);
+      setIsImagePosted(false);
+      setPostingImage(false);
       return;
     }
     const imageUploadJsonResponse = await responseUploadImageToS3.json();
@@ -462,21 +644,26 @@ export default function DrawImage() {
     if (imageUploadResponse.status !== 200) {
       console.error(`imageUploadResponse: ${imageUploadResponse}`);
 
-      setSnackbarSeverity("warning");
-      setSnackbarMessage(`Image upload response error: ${imageUploadResponse}`);
-      setOpenSnackbar(true);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: `Image upload response error: ${imageUploadResponse}`,
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
 
-      setLoadingImage(false);
+      setIsImagePosted(false);
+      setPostingImage(false);
 
       return;
     }
 
     //* Set image url from image generation server.
     setImageUrl(imageUploadJsonResponse.url);
-    setLoadingImage(false);
+    setIsImagePosted(true);
+    setPostingImage(false);
   }
 
-  function buildWalletConnectPage() {
+  function WalletConnectPage() {
     return (
       <>
         <Box
@@ -484,36 +671,70 @@ export default function DrawImage() {
             marginTop: "200px",
           }}
         >
-          <Typography variant="h3">Connect Wallet</Typography>
+          <Button fullWidth variant="contained" onClick={openWeb3Modal}>
+            Connect Wallet
+          </Button>
         </Box>
       </>
     );
   }
 
-  function buildWalletLoginPage() {
+  function WalletLoginPage() {
     return (
       <>
         <Box
-          sx={{
-            "& .MuiTextField-root": { m: 1, width: "25ch" },
-          }}
           display="flex"
           flexDirection="column"
           justifyContent="center"
           alignItems="center"
-          minHeight="100vh"
+          sx={{ marginTop: "50px" }}
         >
           <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-            <CardMedia component="img" image={PLACEHOLDER_IMAGE_URL} />
+            <CardMedia
+              component="img"
+              image={PLACEHOLDER_IMAGE_URL}
+              height={"200px"}
+            />
             <CardContent
               sx={{
                 padding: "10",
               }}
             >
-              <Typography variant="h7">
-                You should login with your wallet such as metamask. Click the
-                upper-right "Login" button.
-              </Typography>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={async () => {
+                  if (!address) {
+                    setWriteToastMessage({
+                      snackbarSeverity: AlertSeverity.warning,
+                      snackbarMessage: "Wallet is not connected.",
+                      snackbarTime: new Date(),
+                      snackbarOpen: true,
+                    });
+                    return;
+                  }
+
+                  const publicAddress = address.toLowerCase();
+                  // console.log("publicAddress: ", publicAddress);
+
+                  // console.log("selectedChain.id: ", selectedChain.id);
+                  const signMessageResult = await handleSignMessage({
+                    accountAddress: publicAddress,
+                    chainId: selectedChain.id,
+                  });
+                  // console.log("signMessageResult: ", signMessageResult);
+                  // console.log("handleAuthenticate: ", handleAuthenticate);
+
+                  // Send signature to back-end on the /auth route.
+                  await handleAuthenticate({
+                    publicAddress: publicAddress,
+                    signature: signMessageResult,
+                    mutateUser,
+                  });
+                }}
+              >
+                LOGIN
+              </Button>
             </CardContent>
           </Card>
         </Box>
@@ -521,7 +742,7 @@ export default function DrawImage() {
     );
   }
 
-  function buildLoadingPage() {
+  function LoadingPage() {
     // console.log("call buildLoadingPage()");
 
     return (
@@ -531,30 +752,40 @@ export default function DrawImage() {
     );
   }
 
-  function buildPaymentPage() {
+  function PaymentPage() {
     return (
       <>
         <Box
-          sx={{
-            "& .MuiTextField-root": { m: 1, width: "25ch" },
-          }}
           display="flex"
           flexDirection="column"
           justifyContent="center"
           alignItems="center"
-          minHeight="100vh"
+          sx={{ marginTop: "50px" }}
         >
-          <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-            <CardMedia component="img" image={PLACEHOLDER_IMAGE_URL} />
+          <Card
+            sx={{
+              minWidth: CARD_MIN_WIDTH,
+              maxWidth: CARD_MAX_WIDTH,
+            }}
+          >
+            <CardMedia
+              component="img"
+              image={PLACEHOLDER_IMAGE_URL}
+              height={"200px"}
+            />
             <CardContent
               sx={{
                 padding: "10",
               }}
             >
-              <Typography variant="h7">
-                You should rent this nft for drawing image.
+              <Typography variant="h5">
+                You have to rent NFT for drawing.
               </Typography>
               <Button
+                disabled={isLoadingRentNFT || isLoadingRentNFTTx}
+                fullWidth
+                sx={{ marginTop: "10px" }}
+                variant="contained"
                 onClick={function () {
                   if (writeRentNFT && dataRentData) {
                     writeRentNFT?.({
@@ -563,7 +794,13 @@ export default function DrawImage() {
                   }
                 }}
               >
-                Rent NFT ({paymentNftRentFee} matic)
+                {isLoadingRentNFT || isLoadingRentNFTTx ? (
+                  <Typography>
+                    Renting NFT... ({paymentNftRentFee} matic)
+                  </Typography>
+                ) : (
+                  <Typography>Rent NFT ({paymentNftRentFee} matic)</Typography>
+                )}
               </Button>
             </CardContent>
           </Card>
@@ -572,87 +809,124 @@ export default function DrawImage() {
     );
   }
 
-  function buildDrawPage() {
-    // console.log("call buildDrawPage()");
+  function ImagePage() {
+    console.log("call ImagePage()");
+    console.log("imageUrl: ", imageUrl);
+    console.log("imageHeight: ", imageHeight);
 
     return (
-      <>
-        <Box
-          component="form"
-          noValidate
-          autoComplete="off"
-          display="flex"
-          flexDirection="column"
-        >
-          {paymentNftRentEndTime &&
-            currentTimestamp &&
-            currentTimestamp > paymentNftRentEndTime && (
+      <Card sx={{ maxWidth: 345 }}>
+        <CardMedia
+          component="img"
+          image={imageUrl}
+          // height={imageHeight}
+          // fit="contain"
+          // sx={{ marginTop: "50px" }}
+        />
+      </Card>
+      // <Image
+      //   src={imageUrl}
+      //   height={imageHeight}
+      //   fit="contain"
+      //   duration={10}
+      //   easing="ease"
+      //   shiftDuration={10}
+      //   sx={{ marginTop: "50px" }}
+      // />
+    );
+  }
+
+  //* Fix mui textfield problem about focus.
+  //* https://github.com/mui/material-ui/issues/783
+  return (
+    <>
+      <Grid
+        container
+        spacing={2}
+        display="flex"
+        flexDirection="row"
+        justifyContent="flex-end"
+        sx={{ marginTop: MARGIN_TOP }}
+      >
+        <Grid item>
+          <Web3Button />
+        </Grid>
+        <Grid item>
+          <Web3NetworkSwitch />
+        </Grid>
+      </Grid>
+
+      {isConnected === false ? (
+        <WalletConnectPage />
+      ) : !dataAllRentData ? (
+        <LoadingPage />
+      ) : user === undefined || user.isLoggedIn === false ? (
+        <WalletLoginPage />
+      ) : user !== undefined && user.rentPaymentNft === true ? (
+        <>
+          <Box
+            component="form"
+            noValidate
+            autoComplete="off"
+            display="flex"
+            flexDirection="column"
+          >
+            {isLoadingRentData ||
+            !paymentNftRentEndTime ||
+            !currentTimestamp ? (
+              <Typography>Remaining time is ...</Typography>
+            ) : paymentNftRentEndTime &&
+              currentTimestamp &&
+              currentTimestamp < paymentNftRentEndTime ? (
               <Typography color="black">
                 {moment
                   .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                  .hours()}
-                :
-                {moment
-                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                  .minutes()}
-                :
-                {moment
-                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                  .seconds()}{" "}
-                /
-                {moment
-                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                  .humanize()}
+                  .format()}
               </Typography>
+            ) : (
+              <Typography>Rent finished</Typography>
             )}
-          <TextField
-            required
-            id="outlined-required"
-            label="prompt"
-            error={prompt === "" ? true : false}
-            name="prompt"
-            value={prompt}
-            onChange={handleChange}
-            style={{
-              width: "80vw",
-            }}
-            disabled={loadingImage}
-            autoComplete="on"
-          />
-          <TextField
-            required
-            id="outlined-required"
-            label="negative prompt"
-            error={negativePrompt === "" ? true : false}
-            name="negativePrompt"
-            value={negativePrompt}
-            onChange={handleChange}
-            style={{
-              width: "80vw",
-            }}
-            disabled={loadingImage}
-            autoComplete="on"
-          />
-          <Button
-            variant="contained"
-            onClick={fetchImage}
-            sx={{
-              m: 1,
-            }}
-            disabled={loadingImage}
+            <TextField
+              required
+              id="outlined-required"
+              label="prompt"
+              error={prompt === "" ? true : false}
+              name="prompt"
+              value={prompt}
+              onChange={handleChange}
+              style={{
+                width: "80vw",
+              }}
+              sx={{ m: 2 }}
+              disabled={loadingImage}
+              autoComplete="on"
+            />
+            <TextField
+              required
+              id="outlined-required"
+              label="negative prompt"
+              error={negativePrompt === "" ? true : false}
+              name="negativePrompt"
+              value={negativePrompt}
+              onChange={handleChange}
+              style={{
+                width: "80vw",
+              }}
+              sx={{ m: 2 }}
+              disabled={loadingImage}
+              autoComplete="on"
+            />
+          </Box>
+          <Box
+            component="form"
+            noValidate
+            autoComplete="off"
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
           >
-            Draw
-          </Button>
-        </Box>
-        <Box
-          component="form"
-          noValidate
-          autoComplete="off"
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-        >
-          {imageFetchEndTime && (
+            {/*//*TODO: Show image fetch time. */}
+            {/* {imageFetchEndTime && (
             <Typography color="black">
               {moment
                 .duration((imageFetchEndTime - currentTimestamp) * 1000)
@@ -670,95 +944,136 @@ export default function DrawImage() {
                 .duration((imageFetchEndTime - currentTimestamp) * 1000)
                 .humanize()}
             </Typography>
-          )}
-          {loadingImage ? (
-            <Box
-              height={imageHeight}
-              display="flex"
-              flexDirection="row"
-              alignItems="center"
-            >
-              <CircularProgress size={imageHeight * 0.4} />
+          )} */}
+            <Box sx={{ width: "100%" }}>
+              <Stepper
+                activeStep={isImageDrawn ? 1 : isImagePosted ? 2 : -1}
+                alternativeLabel
+              >
+                <Step>
+                  <StepLabel>
+                    <Button
+                      variant="contained"
+                      onClick={fetchImage}
+                      sx={{
+                        m: 1,
+                      }}
+                      disabled={loadingImage}
+                    >
+                      {loadingImage ? (
+                        <Typography>Drawing...</Typography>
+                      ) : (
+                        <Typography>Draw</Typography>
+                      )}
+                    </Button>
+                  </StepLabel>
+                </Step>
+                <Step>
+                  <StepLabel>
+                    {" "}
+                    <Button
+                      variant="contained"
+                      onClick={() =>
+                        postImage({
+                          postImageUrl: imageUrl,
+                          inputPrompt: prompt,
+                          inputNegativePrompt: negativePrompt,
+                        })
+                      }
+                      sx={{
+                        m: 1,
+                      }}
+                      disabled={
+                        !imageUrl ||
+                        loadingImage ||
+                        postingImage ||
+                        isImagePosted
+                      }
+                    >
+                      {postingImage ? (
+                        <Typography>Posting...</Typography>
+                      ) : isImagePosted ? (
+                        <Typography>Posted</Typography>
+                      ) : (
+                        <Typography>Post</Typography>
+                      )}
+                    </Button>
+                  </StepLabel>
+                </Step>
+                <Step>
+                  <StepLabel>
+                    {" "}
+                    <Button
+                      variant="contained"
+                      onClick={() => {
+                        //* Get URI encoded string.
+                        const imageUrlEncodedString =
+                          encodeURIComponent(imageUrl);
+                        const promptEncodedString = encodeURIComponent(prompt);
+                        const negativePromptEncodedString =
+                          encodeURIComponent(negativePrompt);
+                        const link = `/mint/${promptEncodedString}/${imageUrlEncodedString}/${negativePromptEncodedString}`;
+                        router.push(link);
+                      }}
+                      sx={{
+                        m: 1,
+                      }}
+                      disabled={!imageUrl || loadingImage || !isImagePosted}
+                    >
+                      Mint
+                    </Button>
+                  </StepLabel>
+                </Step>
+              </Stepper>
             </Box>
-          ) : (
-            <Image
-              src={imageUrl}
-              height={imageHeight}
-              fit="contain"
-              duration={10}
-              easing="ease"
-              shiftDuration={10}
-            />
-          )}
-          <Button
-            variant="contained"
-            onClick={() => {
-              //* Get URI encoded string.
-              const imageUrlEncodedString = encodeURIComponent(imageUrl);
-              const promptEncodedString = encodeURIComponent(prompt);
-              const negativePromptEncodedString =
-                encodeURIComponent(negativePrompt);
-              const link = `/mint/${promptEncodedString}/${imageUrlEncodedString}/${negativePromptEncodedString}`;
-              router.push(link);
-            }}
-            sx={{
-              width: "80vw",
-              marginTop: 1,
-            }}
-            disabled={loadingImage}
-          >
-            Mint
-          </Button>
-        </Box>
-      </>
-    );
-  }
 
-  function buildPage() {
-    if (isConnected === false) {
-      return buildWalletConnectPage();
-    }
-
-    if (!dataAllRentData) {
-      return buildLoadingPage();
-    }
-
-    if (user === undefined || user.isLoggedIn === false) {
-      return buildWalletLoginPage();
-    }
-    if (user !== undefined && user.rentPaymentNft === true) {
-      return buildDrawPage();
-    } else {
-      return buildPaymentPage();
-    }
-  }
-
-  return (
-    <>
-      <Grid
-        container
-        spacing={2}
-        display="flex"
-        flexDirection="row"
-        alignItems="flex-end"
-        sx={{ marginTop: MARGIN_TOP }}
-      >
-        <Grid item>
-          <Web3Button />
-        </Grid>
-        <Grid item>
-          <Web3NetworkSwitch />
-        </Grid>
-      </Grid>
-      {buildPage()}
-
-      <MessageSnackbar
-        open={openSnackbar}
-        autoHideDuration={10000}
-        onClose={handleCloseSnackbar}
-        severity={snackbarSeverity}
-        message={snackbarMessage}
-      />
+            {loadingImage ? (
+              <Box
+                height={imageHeight}
+                display="flex"
+                flexDirection="row"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <CircularProgress size={imageHeight * 0.4} />
+              </Box>
+            ) : (
+              <Card
+                sx={{
+                  minWidth: 200,
+                  maxWidth: 600,
+                  minHeight: 200,
+                  maxHeight: 600,
+                  marginTop: "20px",
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  sx={{ height: imageHeight, width: 600 }}
+                  image={imageUrl}
+                  title={prompt}
+                  onError={(e) => {
+                    e.target.src = "/no-image.png";
+                  }}
+                />
+                <CardContent>
+                  <Typography
+                    gutterBottom
+                    variant="h5"
+                    component="div"
+                  ></Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {prompt}
+                  </Typography>
+                </CardContent>
+                <CardActions></CardActions>
+              </Card>
+            )}
+          </Box>
+        </>
+      ) : (
+        <PaymentPage />
+      )}
     </>
   );
 }

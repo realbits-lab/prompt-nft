@@ -76,7 +76,11 @@ function Mint({
     abi: promptNFTABI.abi,
     functionName: "safeMint",
   });
-  const waitForTransactionSafeMint = useWaitForTransaction({
+  const {
+    data: dataSafeMintTx,
+    isError: isErrorSafeMintTx,
+    isLoading: isLoadingSafeMintTx,
+  } = useWaitForTransaction({
     hash: dataSafeMint?.hash,
     onSuccess(data) {
       // console.log("call onSuccess()");

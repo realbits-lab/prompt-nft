@@ -4,7 +4,7 @@ const nextConfig = {
     return [
       {
         source: "/",
-        destination: "/list/draw",
+        destination: "/list/image",
         permanent: false,
       },
     ];

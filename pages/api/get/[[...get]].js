@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/client";
 
 export default async function handler(req, res) {
   console.log("call /api/get");
@@ -8,8 +8,6 @@ export default async function handler(req, res) {
     res.status(500).json({ error: "Unavailable method. Support only GET." });
     return;
   }
-
-  const prisma = new PrismaClient();
 
   // GET /api/get/{prompt}/{imageUrl}
   // Required fields in body: prompt, imageUrl
