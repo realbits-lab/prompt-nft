@@ -12,42 +12,39 @@ import {
   readDialogMessageState,
 } from "@/lib/util";
 
-export async function handleSignMessage({ accountAddress, chainId }) {
-  const msgParams = JSON.stringify({
-    domain: {
-      chainId: chainId,
-      name: "Realbits",
-    },
+export async function handleSignMessage({ account, chainId, walletClient }) {
+  const domain = {
+    chainId: chainId,
+    name: "Realbits",
+  };
+  const types = {
+    EIP712Domain: [
+      { name: "name", type: "string" },
+      { name: "chainId", type: "uint256" },
+    ],
+    Login: [{ name: "contents", type: "string" }],
+  };
+  const primaryType = "Login";
+  const message = {
+    contents: process.env.NEXT_PUBLIC_LOGIN_SIGN_MESSAGE,
+  };
 
-    // Defining the message signing data content.
-    message: {
-      contents: process.env.NEXT_PUBLIC_LOGIN_SIGN_MESSAGE,
-    },
-    // Refers to the keys of the *types* object below.
-    primaryType: "Login",
-
-    types: {
-      EIP712Domain: [
-        { name: "name", type: "string" },
-        { name: "chainId", type: "uint256" },
-      ],
-      // Refer to PrimaryType
-      Login: [{ name: "contents", type: "string" }],
-    },
+  const signature = await walletClient.signTypedData({
+    account,
+    domain,
+    types,
+    primaryType,
+    message,
   });
 
-  const params = [accountAddress, msgParams];
-  const method = "eth_signTypedData_v4";
-
-  const requestResult = await ethereum.request({
-    method,
-    params,
-  });
-  // console.log("requestResult: ", requestResult);
-  return requestResult;
+  return signature;
 }
 
-export async function handleAuthenticate({ publicAddress, signature, mutateUser }) {
+export async function handleAuthenticate({
+  publicAddress,
+  signature,
+  mutateUser,
+}) {
   console.log("call handleAuthenticate()");
 
   const body = { publicAddress, signature };
@@ -128,14 +125,16 @@ export default function User() {
     }
 
     const publicAddress = address.toLowerCase();
-    // console.log("publicAddress: ", publicAddress);
+    console.log("publicAddress: ", publicAddress);
 
     // Popup MetaMask confirmation modal to sign message with nonce data.
+    //* TODO: Should check the chain id.
     const signMessageResult = await handleSignMessage({
-      accountAddress: publicAddress,
+      account: publicAddress,
       chainId: selectedChain.id,
+      walletClient: walletClient,
     });
-    // console.log("signMessageResult: ", signMessageResult);
+    console.log("signMessageResult: ", signMessageResult);
 
     // Send signature to back-end on the /auth route.
     await handleAuthenticate({

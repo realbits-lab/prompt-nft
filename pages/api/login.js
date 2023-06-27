@@ -47,8 +47,8 @@ async function getUserData({ publicAddress }) {
 }
 
 async function handler(req, res) {
-  // console.log("call /api/login");
-  // console.log("req.session.user: ", req.session.user);
+  console.log("call /api/login");
+  console.log("req.session.user: ", req.session.user);
 
   //* Method should be POST.
   if (req.method !== "POST") {
@@ -65,8 +65,8 @@ async function handler(req, res) {
   }
 
   const { publicAddress, signature } = await req.body;
-  // console.log("publicAddress: ", publicAddress);
-  // console.log("signature: ", signature);
+  console.log("publicAddress: ", publicAddress);
+  console.log("signature: ", signature);
 
   if (!publicAddress) {
     res.status(500).json({
@@ -123,8 +123,8 @@ async function handler(req, res) {
     res.status(500).json({ message: error.message });
     return;
   }
-  // console.log("recovered: ", recovered);
-  // console.log("publicAddress: ", publicAddress);
+  console.log("recovered: ", recovered);
+  console.log("publicAddress: ", publicAddress);
 
   if (recovered.toLowerCase() === publicAddress.toLowerCase()) {
     //* Check whether or not user rented the payment nft.

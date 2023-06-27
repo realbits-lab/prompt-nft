@@ -3,7 +3,7 @@ import { prisma } from "@/lib/client";
 import { sessionOptions } from "@/lib/session";
 
 async function handler(req, res) {
-  console.log("call /api/latest-image-list");
+  // console.log("call /api/latest-image-list");
 
   const IMAGE_TAKE_COUNT = 100;
 
@@ -23,7 +23,7 @@ async function handler(req, res) {
     },
     take: IMAGE_TAKE_COUNT,
   });
-  console.log("findManyResult: ", findManyResult);
+  // console.log("findManyResult: ", findManyResult);
 
   if (!findManyResult) {
     return res.status(500).json({ error: "No image data" });
