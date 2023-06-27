@@ -12,12 +12,12 @@ import {
   usePrepareContractWrite,
   useWaitForTransaction,
   useWatchPendingTransactions,
+  useWalletClient,
 } from "wagmi";
-import Image from "mui-image";
+import { polygon, polygonMumbai } from "viem/chains";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
-import StepButton from "@mui/material/StepButton";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
@@ -107,7 +107,38 @@ export default function DrawImage() {
   const SERVICE_ACCOUNT_ADDRESS =
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
   const { address, isConnected } = useAccount();
-  const { chains, chain: selectedChain } = useNetwork();
+  const { chains, chain: selectedChain } = useNetwork({
+    onSuccess(data) {
+      console.log("call onSuccess()");
+      console.log("data: ", data);
+    },
+    onError(error) {
+      console.log("call onError()");
+      console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      console.log("call onSettled()");
+      console.log("data: ", data);
+      console.log("error: ", error);
+    },
+  });
+  const { data: walletClient } = useWalletClient({
+    onSuccess(data) {
+      console.log("call onSuccess()");
+      console.log("data: ", data);
+
+      data.addChain({ chain: polygonMumbai });
+    },
+    onError(error) {
+      console.log("call onError()");
+      console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      console.log("call onSettled()");
+      console.log("data: ", data);
+      console.log("error: ", error);
+    },
+  });
   const [paymentNftRentFee, setPaymentNftRentFee] = React.useState();
   const [currentTimestamp, setCurrentTimestamp] = React.useState();
   const [imageFetchEndTime, setImageFetchEndTime] = React.useState();
@@ -349,7 +380,8 @@ export default function DrawImage() {
 
   //* Initialize.
   React.useEffect(function () {
-    // console.log("call useEffect()");
+    console.log("call useEffect()");
+    console.log("window.ethereum: ", window.ethereum);
 
     momentDurationFormatSetup(moment);
 
@@ -717,12 +749,13 @@ export default function DrawImage() {
                   const publicAddress = address.toLowerCase();
                   // console.log("publicAddress: ", publicAddress);
 
-                  // console.log("selectedChain.id: ", selectedChain.id);
+                  //* TODO: Should check the chain id.
                   const signMessageResult = await handleSignMessage({
-                    accountAddress: publicAddress,
+                    account: publicAddress,
                     chainId: selectedChain.id,
+                    walletClient: walletClient,
                   });
-                  // console.log("signMessageResult: ", signMessageResult);
+                  console.log("signMessageResult: ", signMessageResult);
                   // console.log("handleAuthenticate: ", handleAuthenticate);
 
                   // Send signature to back-end on the /auth route.

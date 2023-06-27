@@ -168,7 +168,7 @@ export default function ListPage(props) {
       // console.log("readDialogMessage: ", readDialogMessage);
       // console.log("queryMode: ", queryMode);
 
-      const mode = getMode({ mode: queryMode[0] });
+      const mode = getMode({ mode: queryMode?.[0] || DEFAULT_MENU });
       // console.log("mode: ", mode);
       setCurrentMode(mode || DEFAULT_MENU);
     },
@@ -221,7 +221,7 @@ export default function ListPage(props) {
           <Toolbar>
             <Box sx={{ flexGrow: 1, display: "block" }}></Box>
             <Box sx={{ flexGrow: 1, flexDirection: "row" }}>
-              {!isMobile && <AppBarButton buttonMode="draw" />}
+              <AppBarButton buttonMode="draw" />
               <Badge
                 badgeContent={newImageCount}
                 color="secondary"
@@ -229,50 +229,12 @@ export default function ListPage(props) {
               >
                 <AppBarButton buttonMode="image" />
               </Badge>
-              {!isMobile && <AppBarButton buttonMode="nft" />}
-              {isMobile && (
-                <Link
-                  href={MARKET_URL}
-                  target="_blank"
-                  style={{ color: "inherit", textDecoration: "inherit" }}
-                >
-                  <Button
-                    style={{
-                      borderRadius: BUTTON_BORDER_RADIUS,
-                      padding: SELECTED_BUTTON_PADDING,
-                    }}
-                    sx={{ my: 2, color: "white" }}
-                    onClick={(e) => {}}
-                  >
-                    MARKET
-                  </Button>
-                </Link>
-              )}
-              {isMobile && (
-                <Link
-                  href={BOARD_URL}
-                  target="_blank"
-                  style={{ color: "inherit", textDecoration: "inherit" }}
-                >
-                  <Button
-                    style={{
-                      borderRadius: BUTTON_BORDER_RADIUS,
-                      padding: SELECTED_BUTTON_PADDING,
-                    }}
-                    sx={{ my: 2, color: "white" }}
-                    onClick={(e) => {}}
-                  >
-                    BOARD
-                  </Button>
-                </Link>
-              )}
+              <AppBarButton buttonMode="nft" />
             </Box>
 
             <Box>
-              {(user === undefined || user.isLoggedIn === false) &&
-                !isMobile && <User />}
-              {((user !== undefined && user.isLoggedIn === true) ||
-                isMobile) && (
+              {(user === undefined || user.isLoggedIn === false) && <User />}
+              {user !== undefined && user.isLoggedIn === true && (
                 <Button
                   id="basic-button"
                   aria-controls={openSettingMenu ? "basic-menu" : undefined}
@@ -305,56 +267,48 @@ export default function ListPage(props) {
                   "aria-labelledby": "basic-button",
                 }}
               >
-                {!isMobile && (
+                <MenuItem
+                  onClick={() => {
+                    setCurrentMode(MENU_ENUM.own);
+                    handleSettingMenuClose();
+                  }}
+                >
+                  OWN
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setCurrentMode(MENU_ENUM.rent);
+                    handleSettingMenuClose();
+                  }}
+                >
+                  RENT
+                </MenuItem>
+                <Link
+                  href={MARKET_URL}
+                  target="_blank"
+                  style={{ color: "inherit", textDecoration: "inherit" }}
+                >
                   <MenuItem
                     onClick={() => {
-                      setCurrentMode(MENU_ENUM.own);
                       handleSettingMenuClose();
                     }}
                   >
-                    OWN
+                    MARKET
                   </MenuItem>
-                )}
-                {!isMobile && (
+                </Link>
+                <Link
+                  href={BOARD_URL}
+                  target="_blank"
+                  style={{ color: "inherit", textDecoration: "inherit" }}
+                >
                   <MenuItem
                     onClick={() => {
-                      setCurrentMode(MENU_ENUM.rent);
                       handleSettingMenuClose();
                     }}
                   >
-                    RENT
+                    BOARD
                   </MenuItem>
-                )}
-                {!isMobile && (
-                  <Link
-                    href={MARKET_URL}
-                    target="_blank"
-                    style={{ color: "inherit", textDecoration: "inherit" }}
-                  >
-                    <MenuItem
-                      onClick={() => {
-                        handleSettingMenuClose();
-                      }}
-                    >
-                      MARKET
-                    </MenuItem>
-                  </Link>
-                )}
-                {!isMobile && (
-                  <Link
-                    href={BOARD_URL}
-                    target="_blank"
-                    style={{ color: "inherit", textDecoration: "inherit" }}
-                  >
-                    <MenuItem
-                      onClick={() => {
-                        handleSettingMenuClose();
-                      }}
-                    >
-                      BOARD
-                    </MenuItem>
-                  </Link>
-                )}
+                </Link>
                 <MenuItem
                   onClick={() => {
                     setCurrentMode(MENU_ENUM.theme);
@@ -363,32 +317,30 @@ export default function ListPage(props) {
                 >
                   THEME
                 </MenuItem>
-                {!isMobile && (
-                  <MenuItem
-                    onClick={async () => {
-                      setCurrentMode(MENU_ENUM.image);
-                      handleSettingMenuClose();
+                <MenuItem
+                  onClick={async () => {
+                    setCurrentMode(MENU_ENUM.image);
+                    handleSettingMenuClose();
 
-                      try {
-                        mutateUser(
-                          await fetchJson(
-                            { url: "/api/logout" },
-                            { method: "POST" }
-                          ),
-                          false
-                        );
-                      } catch (error) {
-                        if (error instanceof FetchError) {
-                          console.error(error.data.message);
-                        } else {
-                          console.error("An unexpected error happened:", error);
-                        }
+                    try {
+                      mutateUser(
+                        await fetchJson(
+                          { url: "/api/logout" },
+                          { method: "POST" }
+                        ),
+                        false
+                      );
+                    } catch (error) {
+                      if (error instanceof FetchError) {
+                        console.error(error.data.message);
+                      } else {
+                        console.error("An unexpected error happened:", error);
                       }
-                    }}
-                  >
-                    LOGOUT
-                  </MenuItem>
-                )}
+                    }
+                  }}
+                >
+                  LOGOUT
+                </MenuItem>
               </Menu>
             </Box>
           </Toolbar>

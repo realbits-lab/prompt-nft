@@ -17,7 +17,6 @@
     "@emotion/server": "^11.10.0",
     "@emotion/styled": "^11.11.0",
     "@fontsource/public-sans": "^4.5.12",
-    "@metamask/detect-provider": "^2.0.0",
     "@metamask/eth-sig-util": "^5.0.2",
     "@motionone/utils": "^10.15.1",
     "@mui/icons-material": "^5.11.0",

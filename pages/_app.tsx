@@ -84,13 +84,13 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
     autoConnect: true,
     connectors: [
       ...w3mConnectors({
-        version: 2,
         chains,
+        version: 1,
         projectId: WALLET_CONNECT_PROJECT_ID,
       }),
-      new MetaMaskConnector({
-        chains,
-      }),
+      // new MetaMaskConnector({
+      //   chains,
+      // }),
     ],
     publicClient: wagmiPublicClient,
     webSocketPublicClient: wagmiWebSocketPublicClient,
