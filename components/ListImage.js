@@ -67,6 +67,7 @@ function ListImage() {
                   >
                     {e.prompt}
                   </Typography>
+                  <p />
                   <Typography
                     variant="caption"
                     color="text.secondary"
