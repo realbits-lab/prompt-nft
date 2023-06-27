@@ -1,5 +1,7 @@
 import React from "react";
 import { useRouter } from "next/router";
+import detectEthereumProvider from "@metamask/detect-provider";
+import { MetaMaskSDK } from "@metamask/sdk";
 import { Web3Button, Web3NetworkSwitch, useWeb3Modal } from "@web3modal/react";
 import moment from "moment";
 import momentDurationFormatSetup from "moment-duration-format";
@@ -13,11 +15,9 @@ import {
   useWaitForTransaction,
   useWatchPendingTransactions,
 } from "wagmi";
-import Image from "mui-image";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
-import StepButton from "@mui/material/StepButton";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
@@ -349,7 +349,20 @@ export default function DrawImage() {
 
   //* Initialize.
   React.useEffect(function () {
-    // console.log("call useEffect()");
+    console.log("call useEffect()");
+    detectEthereumProvider().then((provider) => {
+      console.log("provider: ", provider);
+      console.log("window.ethereum: ", window.ethereum);
+    });
+    const options = {
+      injectProvider: true,
+      // checkInstallationImmediately: true,
+      // communicationLayerPreference: "webrtc",
+    };
+    const MMSDK = new MetaMaskSDK(options);
+    console.log("MMSDK: ", MMSDK);
+    const ethereum = MMSDK.getProvider(); // You can also access via window.ethereum
+    console.log("ethereum: ", ethereum);
 
     momentDurationFormatSetup(moment);
 
