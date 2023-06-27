@@ -350,7 +350,10 @@ function List({ mode, updated, setNewImageCountFunc }) {
     if (swrDataRegisterData && swrDataCollection) {
       registerData = swrDataRegisterData.filter(function (registerData) {
         return swrDataCollection.some(function (collection) {
-          return collection.collectionAddress === registerData.nftAddress;
+          return (
+            collection.collectionAddress.toLowerCase() ===
+            registerData.nftAddress.toLowerCase()
+          );
         });
       });
     }
@@ -523,13 +526,8 @@ function List({ mode, updated, setNewImageCountFunc }) {
               isWalletConnected({ isConnected, selectedChain }) === false ? (
                 <NoLoginPage />
               ) : (
-                <CarouselNft />
-                // <ListNft
-                //   dataWalletClient={dataWalletClient}
-                //   promptNftContract={promptNftContract}
-                //   rentMarketContract={rentMarketContract}
-                //   signTypedDataAsync={signTypedDataAsync}
-                // />
+                // <CarouselNft />
+                <ListNft />
               )
             }
           </div>
