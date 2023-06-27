@@ -25,17 +25,8 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import CardNft from "@/components/CardNft";
 import rentmarketABI from "@/contracts/rentMarket.json";
 
-function CarouselNft({
-  dataWalletClient,
-  rentMarketContract,
-  promptNftContract,
-  signTypedDataAsync,
-}) {
+function CarouselNft() {
   // console.log("call CarouselNft()");
-  // console.log("data: ", data);
-  // console.log("isConnected: ", isConnected);
-  // console.log("isLoading: ", isLoading);
-  // console.log("signTypedDataAsync: ", signTypedDataAsync);
 
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
 

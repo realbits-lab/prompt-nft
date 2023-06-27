@@ -22,6 +22,7 @@ import Typography from "@mui/material/Typography";
 import CarouselImage from "@/components/CarouselImage";
 import ListImage from "@/components/ListImage";
 import CarouselNft from "@/components/CarouselNft";
+import ListNft from "@/components/ListNft";
 import ListOwn from "@/components/ListOwn";
 import CarouselOwn from "@/components/CarouselOwn";
 import ListRent from "@/components/ListRent";
@@ -522,12 +523,13 @@ function List({ mode, updated, setNewImageCountFunc }) {
               isWalletConnected({ isConnected, selectedChain }) === false ? (
                 <NoLoginPage />
               ) : (
-                <CarouselNft
-                  dataWalletClient={dataWalletClient}
-                  promptNftContract={promptNftContract}
-                  rentMarketContract={rentMarketContract}
-                  signTypedDataAsync={signTypedDataAsync}
-                />
+                <CarouselNft />
+                // <ListNft
+                //   dataWalletClient={dataWalletClient}
+                //   promptNftContract={promptNftContract}
+                //   rentMarketContract={rentMarketContract}
+                //   signTypedDataAsync={signTypedDataAsync}
+                // />
               )
             }
           </div>

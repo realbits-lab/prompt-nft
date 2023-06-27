@@ -10,16 +10,7 @@ import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
 import CardNft from "@/components/CardNft";
 
-function ListNft({
-  dataSigner,
-  rentMarketContract,
-  promptNftContract,
-  selectedChain,
-  address,
-  isConnected,
-  data,
-  isLoading,
-}) {
+function ListNft({ data, isLoading }) {
   // console.log("call ListNft()");
   // console.log("data: ", data);
 
