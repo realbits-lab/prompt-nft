@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/client";
 
 export default async function handler(req, res) {
   //* Check method error.
@@ -10,8 +10,6 @@ export default async function handler(req, res) {
 
   const inputImageUrl = req.body.inputImageUrl;
   console.log("inputImageUrl: ", inputImageUrl);
-
-  const prisma = new PrismaClient();
 
   //* Check imageUrl with isEncrypted was saved in sqlite already.
   const findManyResult = await prisma.post.findMany({

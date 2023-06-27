@@ -1,8 +1,6 @@
 import { encrypt, getEncryptionPublicKey } from "@metamask/eth-sig-util";
 import { Base64 } from "js-base64";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/client";
 
 //* TODO: Wrap iron session.
 export default async function handler(req, res) {

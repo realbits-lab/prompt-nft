@@ -1,8 +1,6 @@
 import { withIronSessionApiRoute } from "iron-session/next";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/client";
 import { sessionOptions } from "@/lib/session";
-
-const prisma = new PrismaClient();
 
 async function handler(req, res) {
   console.log("call /api/latest-image-list");
