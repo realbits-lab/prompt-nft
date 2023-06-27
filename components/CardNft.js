@@ -83,12 +83,12 @@ export default function CardNft({ nftData }) {
   const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;
   const [cardImageHeight, setCardImageHeight] = React.useState(0);
-  const [metadata, setMetadata] = React.useState();
   const { user, mutateUser } = useUser();
 
   //*---------------------------------------------------------------------------
   //* Wagmi hook
   //*---------------------------------------------------------------------------
+  const [metadata, setMetadata] = React.useState();
   const promptNftContract = getContract({
     address: PROMPT_NFT_CONTRACT_ADDRESS,
     abi: promptNFTABI["abi"],
