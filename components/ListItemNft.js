@@ -1,4 +1,5 @@
 import React from "react";
+import { ethers } from "ethers";
 import { isMobile } from "react-device-detect";
 import {
   useAccount,
@@ -26,6 +27,7 @@ import Typography from "@mui/material/Typography";
 import promptNFTABI from "@/contracts/promptNFT.json";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import {
+  isWalletConnected,
   AlertSeverity,
   writeToastMessageState,
   writeDialogMessageState,
@@ -37,7 +39,7 @@ import useUser from "@/lib/useUser";
 
 export default function ListItemNft({ registerData }) {
   // console.log("call ListItemNft()");
-  // console.log("registerData: ", registerData);
+  console.log("registerData: ", registerData);
 
   const CARD_MARGIN_TOP = "80px";
   const CARD_MAX_WIDTH = 420;
@@ -378,24 +380,55 @@ export default function ListItemNft({ registerData }) {
           </Typography>
         </CardContent>
         <CardActions>
-          <Button size="small">Share</Button>
           <Button
             size="small"
             disabled={isRenting}
-            variant="contained"
+            variant="outlined"
             onClick={handleRentPayment}
           >
             {isOwnerOrRentee === undefined ? (
-              <Typography>Loading...</Typography>
+              <>Loading...</>
             ) : isRenting ? (
-              <Typography>Renting...</Typography>
+              <>Renting...</>
             ) : isOwnerOrRentee ? (
-              <Typography>Prompt</Typography>
+              <>Prompt</>
             ) : (
-              <Typography>Rent</Typography>
+              <>
+                Rent{" "}
+                {(
+                  Number((registerData?.rentFee * 1000000n) / 10n ** 18n) /
+                  1000000
+                ).toString()}{" "}
+                matic
+              </>
             )}
           </Button>
-          <Button size="small">Learn More</Button>
+          {registerData?.feeTokenAddress !== ethers.constants.AddressZero && (
+            <Button
+              size="small"
+              variant="outlined"
+              disabled={isRenting || isLoadingRentData || isLoadingOwnerOf}
+              onClick={handleRentPayment}
+            >
+              {isOwnerOrRentee === undefined ? (
+                <>Loading...</>
+              ) : isRenting ? (
+                <>Renting...</>
+              ) : isOwnerOrRentee ? (
+                <></>
+              ) : (
+                <>
+                  Rent{" "}
+                  {(
+                    Number(
+                      (registerData?.rentFeeByToken * 1000000n) / 10n ** 18n
+                    ) / 1000000
+                  ).toString()}{" "}
+                  token
+                </>
+              )}
+            </Button>
+          )}
         </CardActions>
       </Card>
     </Box>
