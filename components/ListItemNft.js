@@ -4,6 +4,7 @@ import moment from "moment";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import CardHeader from "@mui/material/CardHeader";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import promptNFTABI from "@/contracts/promptNFT.json";
@@ -74,33 +75,22 @@ export default function ListItemNft({ registerData }) {
         maxWidth: CARD_MAX_WIDTH,
       }}
     >
-      <Card sx={{ display: "flex", margin: "10px" }}>
-        <CardMedia
-          component="img"
-          sx={{ width: "12vw" }}
-          image={metadata?.image}
-          alt="prompt image"
+      <Card sx={{ maxWidth: 345, my: 2 }}>
+        <CardHeader
+          title={metadata?.name}
+          subheader={shortenAddress({
+            address: registerData.nftAddress,
+            token: Number(registerData.tokenId),
+            number: 5,
+            withLink: "opensea",
+          })}
         />
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <CardContent>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              component="div"
-              noWrap
-            >
-              {metadata?.name}
-            </Typography>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              component="div"
-              noWrap
-            >
-              {metadata?.description}
-            </Typography>
-          </CardContent>
-        </Box>
+        <CardMedia component="img" image={metadata?.image} alt="prompt image" />
+        <CardContent>
+          <Typography variant="body2" color="text.secondary">
+            {metadata?.description}
+          </Typography>
+        </CardContent>
       </Card>
     </Box>
   );
