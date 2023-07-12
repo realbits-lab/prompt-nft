@@ -9,7 +9,7 @@ const program = new Command();
 const HEROKU_CONFIG_JSON_COMMAND = "/opt/homebrew/bin/heroku config --json";
 const HEROKU_CONFIG_UNSET_COMMAND = "/opt/homebrew/bin/heroku config:unset ";
 const HEROKU_CONFIG_SET_COMMAND = "/opt/homebrew/bin/heroku config:set ";
-const WAIT_TIME = 1000;
+const WAIT_TIME = 2000;
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
@@ -42,7 +42,7 @@ async function setConfig() {
       }
     }
   );
-  Promise.all(promies);
+  await Promise.all(promies);
 
   //* Set heroku config variables with .env HEROKU_CONFIG_UNSET_COMMAND.
   let dotenvConfig = dotenv.config();
@@ -63,7 +63,7 @@ async function setConfig() {
       }
     }
   );
-  Promise.all(promies);
+  await Promise.all(promies);
 }
 
 async function compare() {
