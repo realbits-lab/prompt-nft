@@ -38,7 +38,7 @@ export async function handleAuthenticate({
   signature,
   mutateUser,
 }) {
-  console.log("call handleAuthenticate()");
+  // console.log("call handleAuthenticate()");
 
   const body = { publicAddress, signature };
   const userData = await fetchJson(
@@ -118,7 +118,7 @@ export default function User() {
     }
 
     const publicAddress = address.toLowerCase();
-    console.log("publicAddress: ", publicAddress);
+    // console.log("publicAddress: ", publicAddress);
 
     // Popup MetaMask confirmation modal to sign message with nonce data.
     //* TODO: Should check the chain id.
@@ -127,7 +127,7 @@ export default function User() {
       chainId: selectedChain.id,
       walletClient: walletClient,
     });
-    console.log("signMessageResult: ", signMessageResult);
+    // console.log("signMessageResult: ", signMessageResult);
 
     // Send signature to back-end on the /auth route.
     await handleAuthenticate({

@@ -35,7 +35,7 @@ import { handleSignMessage, handleAuthenticate } from "@/components/User";
 import { sleep, writeToastMessageState, AlertSeverity } from "@/lib/util";
 
 export default function DrawImage() {
-  // console.log("call DrawImage()");
+  console.log("call DrawImage()");
 
   const DEFAULT_MODEL_NAME = "runwayml/stable-diffusion-v1-5";
   const DRAW_API_URL = "/api/draw";
@@ -51,6 +51,7 @@ export default function DrawImage() {
   const CARD_PADDING = 1;
   const IMAGE_PADDING = 450;
   const { user, mutateUser } = useUser();
+  console.log("user: ", user);
   const [imageUrl, setImageUrl] = React.useState("");
   const [loadingImage, setLoadingImage] = React.useState(false);
   const [postingImage, setPostingImage] = React.useState(false);
@@ -379,19 +380,22 @@ export default function DrawImage() {
   }
 
   //* Initialize.
-  React.useEffect(function () {
-    console.log("call useEffect()");
-    console.log("window.ethereum: ", window.ethereum);
+  React.useEffect(
+    function () {
+      console.log("call useEffect()");
+      console.log("window.ethereum: ", window.ethereum);
 
-    momentDurationFormatSetup(moment);
+      momentDurationFormatSetup(moment);
 
-    setImageHeight(window.innerHeight - IMAGE_PADDING);
-    window.addEventListener("resize", handleResize);
+      setImageHeight(window.innerHeight - IMAGE_PADDING);
+      window.addEventListener("resize", handleResize);
 
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
+    },
+    [user]
+  );
 
   //* TODO: No reload.
   // useInterval(() => {
