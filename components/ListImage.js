@@ -1,24 +1,27 @@
 import React from "react";
 import moment from "moment";
 import useSWR from "swr";
-import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
+import CardHeader from "@mui/material/CardHeader";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import fetchJson from "../lib/fetchJson";
+import fetchJson from "@/lib/fetchJson";
+import { truncate } from "@/lib/util";
 
 function ListImage() {
   // console.log("call ListImage()");
+
   const LATEST_IMAGE_ALL_API_URL = "/api/latest-image-list";
+
   //* Image refresh interval time by milli-second unit.
   const IMAGE_REFRESH_INTERVAL_TIME = 60000;
+
   const CARD_MARGIN_TOP = "80px";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
-  const theme = useTheme();
+  const TRUNCATE_COUNT = 8;
 
   //* Get the latest image list.
   const {
@@ -47,37 +50,23 @@ function ListImage() {
           marginTop: CARD_MARGIN_TOP,
         }}
       >
-        {dataLatestImage?.data.map((e, idx) => {
-          // console.log("e: ", e);
+        {dataLatestImage?.data.map((imageData, idx) => {
           return (
-            <Card sx={{ display: "flex", margin: "10px" }} key={idx}>
+            <Card sx={{ maxWidth: 345, my: 2 }} key={idx}>
+              <CardHeader
+                title={truncate(imageData.prompt, TRUNCATE_COUNT)}
+                subheader={moment(imageData.createdAt).fromNow()}
+              />
               <CardMedia
                 component="img"
-                sx={{ width: "12vw" }}
-                image={e.imageUrl}
+                image={imageData.imageUrl}
                 alt="prompt image"
               />
-              <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <CardContent>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    component="div"
-                    noWrap
-                  >
-                    {e.prompt}
-                  </Typography>
-                  <p />
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    component="div"
-                    noWrap
-                  >
-                    {moment(e.createdAt).fromNow()}
-                  </Typography>
-                </CardContent>
-              </Box>
+              <CardContent>
+                <Typography variant="body2" color="text.secondary">
+                  {imageData.prompt}
+                </Typography>
+              </CardContent>
             </Card>
           );
         })}

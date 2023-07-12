@@ -1,11 +1,6 @@
-import axios from "axios";
 import { withIronSessionApiRoute } from "iron-session/next";
 import { prisma } from "@/lib/client";
 import { sessionOptions } from "@/lib/session";
-
-function truncate(str, n) {
-  return str.length > n ? str.slice(0, n - 1) + "..." : str;
-}
 
 async function handler(req, res) {
   // console.log("call /api/posted");

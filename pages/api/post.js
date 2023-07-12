@@ -2,10 +2,7 @@ import axios from "axios";
 import { withIronSessionApiRoute } from "iron-session/next";
 import { prisma } from "@/lib/client";
 import { sessionOptions } from "@/lib/session";
-
-function truncate(str, n) {
-  return str.length > n ? str.slice(0, n - 1) + "..." : str;
-}
+import { truncate } from "@/lib/util";
 
 async function uploadMoimPost({ title, imageUrl }) {
   const MOIM_BOT_TOKEN = process.env.MOIM_BOT_TOKEN;
