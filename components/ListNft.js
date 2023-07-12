@@ -99,8 +99,7 @@ function ListNft() {
               PROMPT_NFT_CONTRACT_ADDRESS.toLowerCase() ===
               registerData.nftAddress.toLowerCase()
             ) {
-              // console.log("e.nftAddress: ", e.nftAddress);
-              return <ListItemNft nft={registerData} key={idx} />;
+              return <ListItemNft registerData={registerData} key={idx} />;
             }
           })}
         </List>

@@ -1,28 +1,10 @@
 import React from "react";
-import {
-  useAccount,
-  useNetwork,
-  useWalletClient,
-  useContractRead,
-  useSignTypedData,
-  useContractEvent,
-  useContractWrite,
-  usePrepareContractWrite,
-  useWaitForTransaction,
-  useWatchPendingTransactions,
-} from "wagmi";
+import { useAccount, useNetwork, useContractRead } from "wagmi";
 import moment from "moment";
 import Box from "@mui/material/Box";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import Divider from "@mui/material/Divider";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import Avatar from "@mui/material/Avatar";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import promptNFTABI from "@/contracts/promptNFT.json";
 import rentmarketABI from "@/contracts/rentMarket.json";
