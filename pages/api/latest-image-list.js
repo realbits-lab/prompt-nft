@@ -1,8 +1,6 @@
-import { withIronSessionApiRoute } from "iron-session/next";
 import { prisma } from "@/lib/client";
-import { sessionOptions } from "@/lib/session";
 
-async function handler(req, res) {
+export default async function handler(req, res) {
   // console.log("call /api/latest-image-list");
 
   const IMAGE_TAKE_COUNT = 100;
@@ -13,6 +11,7 @@ async function handler(req, res) {
     return;
   }
 
+  //* Find image by take limit.
   const findManyResult = await prisma.post.findMany({
     take: IMAGE_TAKE_COUNT,
     where: {
@@ -25,6 +24,7 @@ async function handler(req, res) {
   });
   // console.log("findManyResult: ", findManyResult);
 
+  //* Check the result error.
   if (!findManyResult) {
     return res.status(500).json({ error: "No image data" });
   }
@@ -33,5 +33,3 @@ async function handler(req, res) {
     data: findManyResult,
   });
 }
-
-export default withIronSessionApiRoute(handler, sessionOptions);
