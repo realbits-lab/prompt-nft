@@ -477,6 +477,7 @@ export default function CardNft({ nftData }) {
                     {shortenAddress({
                       address: nftData?.nftAddress,
                       withLink: "opensea",
+                      token: nftData?.tokenId,
                     })}
                   </StyledTableCell>
                 </StyledTableRow>
@@ -496,17 +497,17 @@ export default function CardNft({ nftData }) {
                     <Button
                       size="small"
                       disabled={isRenting}
-                      variant="contained"
+                      variant="outlined"
                       onClick={handleRentPayment}
                     >
                       {isOwnerOrRentee === undefined ? (
-                        <Typography>Loading...</Typography>
+                        <>Loading...</>
                       ) : isRenting ? (
-                        <Typography>Renting...</Typography>
+                        <>Renting...</>
                       ) : isOwnerOrRentee ? (
-                        <Typography>Prompt</Typography>
+                        <>Prompt</>
                       ) : (
-                        <Typography>Rent</Typography>
+                        <>Rent</>
                       )}
                     </Button>
                   </StyledTableCell>
@@ -527,17 +528,17 @@ export default function CardNft({ nftData }) {
                         disabled={
                           isRenting || isLoadingRentData || isLoadingOwnerOf
                         }
-                        variant="contained"
+                        variant="outlined"
                         onClick={handleRentPayment}
                       >
                         {isOwnerOrRentee === undefined ? (
-                          <Typography>Loading...</Typography>
+                          <>Loading...</>
                         ) : isRenting ? (
-                          <Typography>Renting...</Typography>
+                          <>Renting...</>
                         ) : isOwnerOrRentee ? (
-                          <Typography>Prompt</Typography>
+                          <>Prompt</>
                         ) : (
-                          <Typography>Rent</Typography>
+                          <>Rent</>
                         )}
                       </Button>
                     </StyledTableCell>
