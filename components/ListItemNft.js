@@ -39,7 +39,7 @@ import useUser from "@/lib/useUser";
 
 export default function ListItemNft({ registerData }) {
   // console.log("call ListItemNft()");
-  console.log("registerData: ", registerData);
+  // console.log("registerData: ", registerData);
 
   const CARD_MARGIN_TOP = "80px";
   const CARD_MAX_WIDTH = 420;

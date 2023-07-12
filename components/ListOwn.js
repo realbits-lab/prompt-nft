@@ -119,7 +119,7 @@ export default function ListOwn({
                 idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
                 idx < pageIndex * NUMBER_PER_PAGE
               ) {
-                return <CardNft nftData={nftData} />;
+                return <CardNft nftData={nftData} key={idx} />;
               }
             })}
             <Pagination
