@@ -40,10 +40,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<User>) {
   const result = await rentMarketContract.methods.getAllRentData().call();
   let rentPaymentNft = false;
   result?.map(function (rentData: any) {
-    // console.log("rentData: ", rentData);
-    // console.log("publicAddress: ", publicAddress);
-    // console.log("PAYMENT_NFT_CONTRACT_ADDRESS: ", PAYMENT_NFT_CONTRACT_ADDRESS);
-    // console.log("PAYMENT_NFT_TOKEN_ID: ", PAYMENT_NFT_TOKEN_ID);
+    console.log("rentData: ", rentData);
+    console.log("publicAddress: ", publicAddress);
+    console.log("PAYMENT_NFT_CONTRACT_ADDRESS: ", PAYMENT_NFT_CONTRACT_ADDRESS);
+    console.log("PAYMENT_NFT_TOKEN_ID: ", PAYMENT_NFT_TOKEN_ID);
     if (
       rentData.renteeAddress.toLowerCase() === publicAddress?.toLowerCase() &&
       rentData.nftAddress.toLowerCase() ===
@@ -53,7 +53,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<User>) {
       rentPaymentNft = true;
     }
   });
-  // console.log("rentPaymentNft: ", rentPaymentNft);
+  console.log("rentPaymentNft: ", rentPaymentNft);
 
   res.json({
     ...req.session.user,
