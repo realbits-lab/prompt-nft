@@ -35,7 +35,7 @@ import { handleSignMessage, handleAuthenticate } from "@/components/User";
 import { sleep, writeToastMessageState, AlertSeverity } from "@/lib/util";
 
 export default function DrawImage() {
-  console.log("call DrawImage()");
+  // console.log("call DrawImage()");
 
   const DEFAULT_MODEL_NAME = "runwayml/stable-diffusion-v1-5";
   const DRAW_API_URL = "/api/draw";
@@ -51,7 +51,7 @@ export default function DrawImage() {
   const CARD_PADDING = 1;
   const IMAGE_PADDING = 450;
   const { user, mutateUser } = useUser();
-  console.log("user: ", user);
+  // console.log("user: ", user);
   const [imageUrl, setImageUrl] = React.useState("");
   const [loadingImage, setLoadingImage] = React.useState(false);
   const [postingImage, setPostingImage] = React.useState(false);
@@ -86,7 +86,7 @@ export default function DrawImage() {
   });
   const { prompt, negativePrompt, modelName } = formValue;
   const handleChange = (event) => {
-    console.log("call handleChange()");
+    // console.log("call handleChange()");
 
     const { name, value } = event.target;
     setFormValue((prevState) => {
@@ -110,34 +110,34 @@ export default function DrawImage() {
   const { address, isConnected } = useAccount();
   const { chains, chain: selectedChain } = useNetwork({
     onSuccess(data) {
-      console.log("call onSuccess()");
-      console.log("data: ", data);
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
     },
     onError(error) {
-      console.log("call onError()");
-      console.log("error: ", error);
+      // console.log("call onError()");
+      // console.log("error: ", error);
     },
     onSettled(data, error) {
-      console.log("call onSettled()");
-      console.log("data: ", data);
-      console.log("error: ", error);
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
     },
   });
   const { data: walletClient } = useWalletClient({
     onSuccess(data) {
-      console.log("call onSuccess()");
-      console.log("data: ", data);
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
 
       data.addChain({ chain: polygonMumbai });
     },
     onError(error) {
-      console.log("call onError()");
-      console.log("error: ", error);
+      // console.log("call onError()");
+      // console.log("error: ", error);
     },
     onSettled(data, error) {
-      console.log("call onSettled()");
-      console.log("data: ", data);
-      console.log("error: ", error);
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
     },
   });
   const [paymentNftRentFee, setPaymentNftRentFee] = React.useState();
@@ -382,8 +382,8 @@ export default function DrawImage() {
   //* Initialize.
   React.useEffect(
     function () {
-      console.log("call useEffect()");
-      console.log("window.ethereum: ", window.ethereum);
+      // console.log("call useEffect()");
+      // console.log("window.ethereum: ", window.ethereum);
 
       momentDurationFormatSetup(moment);
 
@@ -514,7 +514,7 @@ export default function DrawImage() {
     //* Handle fetch result.
     let imageUrlResponse;
     if (jsonResponse.status === "processing") {
-      console.log("jsonResponse: ", jsonResponse);
+      // console.log("jsonResponse: ", jsonResponse);
       const eta = jsonResponse.eta;
       const timestamp = Math.floor(Date.now() / 1000);
       setImageFetchEndTime(timestamp + eta);
@@ -759,7 +759,7 @@ export default function DrawImage() {
                     chainId: selectedChain.id,
                     walletClient: walletClient,
                   });
-                  console.log("signMessageResult: ", signMessageResult);
+                  // console.log("signMessageResult: ", signMessageResult);
                   // console.log("handleAuthenticate: ", handleAuthenticate);
 
                   // Send signature to back-end on the /auth route.
@@ -847,9 +847,9 @@ export default function DrawImage() {
   }
 
   function ImagePage() {
-    console.log("call ImagePage()");
-    console.log("imageUrl: ", imageUrl);
-    console.log("imageHeight: ", imageHeight);
+    // console.log("call ImagePage()");
+    // console.log("imageUrl: ", imageUrl);
+    // console.log("imageHeight: ", imageHeight);
 
     return (
       <Card sx={{ maxWidth: 345 }}>
