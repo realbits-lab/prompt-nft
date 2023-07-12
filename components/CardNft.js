@@ -186,6 +186,8 @@ export default function CardNft({ nftData }) {
       // console.log("address: ", address);
       if (data.renteeAddress.toLowerCase() === address.toLowerCase()) {
         setIsOwnerOrRentee(true);
+      } else {
+        setIsOwnerOrRentee(false);
       }
     },
     onError(error) {
@@ -220,6 +222,8 @@ export default function CardNft({ nftData }) {
       // console.log("address: ", address);
       if (data.toLowerCase() === address.toLowerCase()) {
         setIsOwnerOrRentee(true);
+      } else {
+        setIsOwnerOrRentee(false);
       }
     },
     onError(error) {
