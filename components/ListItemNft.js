@@ -23,6 +23,7 @@ import CardContent from "@mui/material/CardContent";
 import CardHeader from "@mui/material/CardHeader";
 import CardMedia from "@mui/material/CardMedia";
 import CardActions from "@mui/material/CardActions";
+import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
 import promptNFTABI from "@/contracts/promptNFT.json";
 import rentmarketABI from "@/contracts/rentMarket.json";
@@ -354,6 +355,22 @@ export default function ListItemNft({ registerData }) {
       setIsRenting(true);
       writeRentNFT?.();
     }
+  }
+
+  if (!metadata) {
+    return (
+      <Box
+        sx={{
+          minWidth: CARD_MIN_WIDTH,
+          maxWidth: CARD_MAX_WIDTH,
+          my: 1,
+        }}
+      >
+        <Skeleton variant="text" sx={{ fontSize: "4rem" }} />
+        <Skeleton variant="rounded" sx={{ my: 1 }} height={150} />
+        <Skeleton variant="rectangular" height={30} />
+      </Box>
+    );
   }
 
   return (
