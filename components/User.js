@@ -1,16 +1,9 @@
 import { useAccount, useWalletClient, useNetwork } from "wagmi";
-import { Typography } from "@mui/material";
+import Button from "@mui/material/Button";
 import { useRecoilStateLoadable } from "recoil";
 import useUser from "@/lib/useUser";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
-import {
-  RBSnackbar,
-  AlertSeverity,
-  writeToastMessageState,
-  readToastMessageState,
-  writeDialogMessageState,
-  readDialogMessageState,
-} from "@/lib/util";
+import { AlertSeverity, writeToastMessageState } from "@/lib/util";
 
 export async function handleSignMessage({ account, chainId, walletClient }) {
   const domain = {
@@ -151,24 +144,24 @@ export default function User() {
   return (
     <>
       {(user === undefined || user.isLoggedIn === false) && (
-        <Typography
+        <Button
           sx={{ my: 2, color: "white", display: "block" }}
           onClick={async () => {
             await handleLoginClick();
           }}
         >
           Login
-        </Typography>
+        </Button>
       )}
       {user !== undefined && user.isLoggedIn === true && (
-        <Typography
+        <Button
           sx={{ my: 2, color: "white", display: "block" }}
           onClick={async () => {
             await handleLogoutClick();
           }}
         >
           Logout
-        </Typography>
+        </Button>
       )}
     </>
   );
