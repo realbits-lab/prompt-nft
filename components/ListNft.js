@@ -93,13 +93,14 @@ function ListNft() {
         <List
           sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
         >
-          {dataAllRegisterData.map((e) => {
+          {dataAllRegisterData.map((registerData, idx) => {
+            //* Filter the current prompt NFT contract address.
             if (
               PROMPT_NFT_CONTRACT_ADDRESS.toLowerCase() ===
-              e.nftAddress.toLowerCase()
+              registerData.nftAddress.toLowerCase()
             ) {
-              console.log("e.nftAddress: ", e.nftAddress);
-              return <ListItemNft nft={e} />;
+              // console.log("e.nftAddress: ", e.nftAddress);
+              return <ListItemNft nft={registerData} key={idx} />;
             }
           })}
         </List>

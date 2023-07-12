@@ -28,9 +28,9 @@ import promptNFTABI from "@/contracts/promptNFT.json";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import { shortenAddress } from "@/lib/util";
 
-export default function ListItemNft({ nft }) {
+export default function ListItemNft({ registerData }) {
   // console.log("call ListItemNft()");
-  // console.log("nft: ", nft);
+  // console.log("registerData: ", registerData);
 
   const CARD_MARGIN_TOP = "80px";
   const CARD_MAX_WIDTH = 420;
@@ -57,7 +57,7 @@ export default function ListItemNft({ nft }) {
     address: PROMPT_NFT_CONTRACT_ADDRESS,
     abi: promptNFTABI.abi,
     functionName: "tokenURI",
-    args: [nft?.tokenId],
+    args: [registerData?.tokenId],
     watch: true,
     onSuccess(data) {
       // console.log("call onSuccess()");
@@ -86,34 +86,6 @@ export default function ListItemNft({ nft }) {
   });
 
   return (
-    // <>
-    //   <ListItem alignItems="flex-start">
-    //     <ListItemAvatar>
-    //       <Avatar alt="nft image" src={metadata?.image} />
-    //     </ListItemAvatar>
-    //     <ListItemText
-    //       primary={metadata?.name}
-    //       secondary={
-    //         <React.Fragment>
-    //           <Typography
-    //             sx={{ display: "inline" }}
-    //             component="span"
-    //             variant="body2"
-    //             color="text.primary"
-    //           >
-    //             {metadata?.description}
-    //           </Typography>
-    //           {" — "}{" "}
-    //           {shortenAddress({
-    //             address: nft?.nftAddress,
-    //             withLink: "opensea",
-    //           })}
-    //         </React.Fragment>
-    //       }
-    //     />
-    //   </ListItem>
-    //   <Divider variant="inset" component="li" />
-    // </>
     <Box
       sx={{
         minWidth: CARD_MIN_WIDTH,
