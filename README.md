@@ -1,12 +1,14 @@
 # Fictures
 
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
+
 Generative image NFT service platform.
 
 ## About
 
 Generative image consists of image and prompt data. This platform transform image and prompt data to NFT. After publishing NFT, prompt will be stored with the form of encryption.
 
-<details close>
+<details open>
    <summary>
       <h3>
          💻 Installation
