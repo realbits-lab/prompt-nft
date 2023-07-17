@@ -1,9 +1,18 @@
 import * as React from "react";
-import { ethers } from "ethers";
-import { useWeb3ModalNetwork } from "@web3modal/react";
-import { useAccount, useSigner, useContract } from "wagmi";
-import WalletConnectProvider from "@walletconnect/web3-provider";
-import { isMobile } from "react-device-detect";
+import {
+  useAccount,
+  useSigner,
+  useContract,
+  useWalletClient,
+  useNetwork,
+  useContractRead,
+  useSignTypedData,
+  useContractEvent,
+  useContractWrite,
+  usePrepareContractWrite,
+  useWaitForTransaction,
+  useWatchPendingTransactions,
+} from "wagmi";
 import { encrypt } from "@metamask/eth-sig-util";
 import { Buffer } from "buffer";
 import { Base64 } from "js-base64";
@@ -19,32 +28,103 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
-import { isWalletConnected } from "../lib/util";
-import fetchJson from "../lib/fetchJson";
-
+import { isWalletConnected } from "@/lib/util";
+import fetchJson from "@/lib/fetchJson";
+import promptNFTABI from "@/contracts/promptNFT.json";
 const MessageSnackbar = dynamic(() => import("./MessageSnackbar"), {
   ssr: false,
 });
-import promptNFTABI from "../contracts/promptNFT.json";
 
-function Mint({ inputImageUrl, inputPrompt }) {
+function Mint({
+  inputImageUrl,
+  inputPrompt,
+  inputNegativePrompt,
+  inputModelName,
+}) {
   //*----------------------------------------------------------------------------
   //* Define constance variables.
   //*----------------------------------------------------------------------------
-  const { selectedChain, setSelectedChain } = useWeb3ModalNetwork();
+  const PROMPT_NFT_CONTRACT_ADDRESS =
+    process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS;
+  const CARD_MARGIN_BOTTOM = 500;
+  const { chains, chain: selectedChain } = useNetwork();
   // console.log("selectedChain: ", selectedChain);
   const { address, isConnected } = useAccount();
   // console.log("address: ", address);
   // console.log("isConnected: ", isConnected);
-  const { data: signer, isError, isLoading } = useSigner();
+  const { data: signer, isError, isLoading } = useWalletClient();
   // console.log("signer: ", signer);
   // console.log("isError: ", isError);
   // console.log("isLoading: ", isLoading);
-  const promptNftContract = useContract({
-    address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-    abi: promptNFTABI["abi"],
+  const [isMinting, setIsMinting] = React.useState(false);
+
+  // const promptNftContract = useContract({
+  //   address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
+  //   abi: promptNFTABI.abi,
+  // });
+  const {
+    data: dataSafeMint,
+    error: errorSafeMint,
+    isError: isErrorSafeMint,
+    isIdle: isIdleSafeMint,
+    isLoading: isLoadingSafeMint,
+    isSuccess: isSuccessSafeMint,
+    write: writeSafeMint,
+    status: statusSafeMint,
+  } = useContractWrite({
+    address: PROMPT_NFT_CONTRACT_ADDRESS,
+    abi: promptNFTABI.abi,
+    functionName: "safeMint",
   });
-  // console.log("promptNftContract: ", promptNftContract);
+  const {
+    data: dataSafeMintTx,
+    isError: isErrorSafeMintTx,
+    isLoading: isLoadingSafeMintTx,
+  } = useWaitForTransaction({
+    hash: dataSafeMint?.hash,
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+
+      //* TODO: Remove moim post.
+
+      //* Go to thanks page.
+      const imageUrlEncodedString = encodeURIComponent(imageUrl);
+      router.push(`${THANKS_PAGE}${imageUrlEncodedString}`);
+    },
+    onError(error) {
+      // console.log("call onError()");
+      // console.log("error: ", error);
+
+      console.error(error);
+
+      //* If mint failed, revert encrypted prompt to plain prompt(use flag).
+      //* Sync cypto flag and event logs later.
+      fetchJson(
+        { url: "/api/uncrypt" },
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            imageUrl: imageUrl,
+          }),
+        }
+      ).then((fetchResponse) => {
+        setSnackbarSeverity("error");
+        setSnackbarMessage(error.toString());
+        setOpenSnackbar(true);
+      });
+    },
+    onSettled(data, error) {
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
+      setIsMinting(false);
+    },
+  });
 
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const THANKS_PAGE = "/thanks/";
@@ -88,28 +168,29 @@ function Mint({ inputImageUrl, inputPrompt }) {
   //*---------------------------------------------------------------------------
   //* Other variables.
   //*---------------------------------------------------------------------------
-  const [imageUrl, setImageUrl] = React.useState();
+  const [imageUrl, setImageUrl] = React.useState("");
   const [promptText, setPromptText] = React.useState("");
-  const [buttonMessage, setButtonMessage] = React.useState(
-    <Typography>MINT</Typography>
-  );
-  const [buttonDisabled, setButtonDisabled] = React.useState(false);
+  const [modelName, setModelName] = React.useState("");
+  const [negativePromptText, setNegativePromptText] = React.useState("");
+  const [cardImageHeight, setCardImageHeight] = React.useState(0);
 
   React.useEffect(() => {
-    // console.log("call useEffect()");
-    // console.log("inputImageUrl: ", inputImageUrl);
-    // console.log("inputPrompt: ", inputPrompt);
+    console.log("call useEffect()");
+    console.log("inputImageUrl: ", inputImageUrl);
+    console.log("inputPrompt: ", inputPrompt);
+    console.log("inputNegativePrompt: ", inputNegativePrompt);
+    console.log("isConnected: ", isConnected);
+    console.log("selectedChain: ", selectedChain);
+    console.log(
+      "isWalletConnected(): ",
+      isWalletConnected({ isConnected, selectedChain })
+    );
 
     const initialize = async () => {
-      if (inputImageUrl !== undefined) {
-        setImageUrl(inputImageUrl);
-      }
-
-      if (inputPrompt !== undefined) {
-        setPromptText(inputPrompt);
-      } else {
-        setPromptText("");
-      }
+      setImageUrl(inputImageUrl || "");
+      setPromptText(inputPrompt || "");
+      setNegativePromptText(inputNegativePrompt || "");
+      setModelName(inputModelName || "");
 
       try {
         if (isWalletConnected({ isConnected, selectedChain }) === false) {
@@ -121,19 +202,28 @@ function Mint({ inputImageUrl, inputPrompt }) {
     };
 
     initialize();
-  }, [inputImageUrl, inputPrompt]);
+
+    setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
+
+    //* Register window resize event.
+    window.addEventListener("resize", function () {
+      // console.log("call resize()");
+      // console.log("window.innerHeight: ", window.innerHeight);
+      setCardImageHeight(window.innerHeight - CARD_MARGIN_BOTTOM);
+    });
+  }, [inputImageUrl, inputPrompt, inputNegativePrompt, inputModelName]);
 
   async function uploadMetadata({ name, description, inputImageUrl }) {
-    // console.log("call uploadMetadata()");
-    // console.log("inputImageUrl: ", inputImageUrl);
-    // console.log("imageUrl: ", imageUrl);
+    console.log("call uploadMetadata()");
+    console.log("inputImageUrl: ", inputImageUrl);
+    console.log("imageUrl: ", imageUrl);
 
-    const response = await axios.post("/api/upload-to-s3", {
+    const response = await axios.post("/api/upload-nft-to-s3", {
       name: name,
       description: description,
       inputImageUrl: inputImageUrl,
     });
-    // console.log("response: ", response);
+    console.log("response: ", response);
     if (response.data.url) {
       return response.data.url;
     } else {
@@ -141,7 +231,7 @@ function Mint({ inputImageUrl, inputPrompt }) {
     }
   }
 
-  async function encryptData({ prompt }) {
+  async function encryptData({ prompt, negativePrompt }) {
     // console.log("call encryptData()");
     // console.log("prompt: ", prompt);
 
@@ -159,71 +249,77 @@ function Mint({ inputImageUrl, inputPrompt }) {
     );
     // console.log("base64EncryptionPublicKey: ", base64EncryptionPublicKey);
 
-    const enc = encrypt({
+    const encryptPrompt = encrypt({
       publicKey: base64EncryptionPublicKey.toString("base64"),
       data: Base64.encode(prompt).toString(),
       version: "x25519-xsalsa20-poly1305",
     });
     // console.log("enc: ", enc);
+    const encryptNegativePrompt = encrypt({
+      publicKey: base64EncryptionPublicKey.toString("base64"),
+      data: Base64.encode(negativePrompt).toString(),
+      version: "x25519-xsalsa20-poly1305",
+    });
 
-    return enc;
+    return { encryptPrompt, encryptNegativePrompt };
   }
 
-  async function mintPromptNft({ prompt, tokenURI, contractOwnerEncryptData }) {
+  async function mintPromptNft({
+    prompt,
+    negativePrompt,
+    modelName,
+    tokenURI,
+    contractOwnerEncryptPromptData,
+    contractOwnerEncryptNegativePromptData,
+  }) {
     // console.log("call mintPromptNft()");
+    // console.log("prompt: ", prompt);
+    // console.log("negativePrompt: ", negativePrompt);
 
     //* Check undefined error.
-    if (!prompt || !tokenURI || !contractOwnerEncryptData) {
+    if (
+      !tokenURI ||
+      !contractOwnerEncryptPromptData ||
+      !contractOwnerEncryptNegativePromptData
+    ) {
+      // console.log("tokenURI: ", tokenURI);
+      // console.log(
+      //   "contractOwnerEncryptPromptData: ",
+      //   contractOwnerEncryptPromptData
+      // );
+      // console.log(
+      //   "contractOwnerEncryptNegativePromptData: ",
+      //   contractOwnerEncryptNegativePromptData
+      // );
       return;
     }
 
-    const tokenOwnerEncryptData = await encryptData({
+    setIsMinting(true);
+
+    const {
+      encryptPrompt: tokenOwnerEncryptPromptData,
+      encryptNegativePrompt: tokenOwnerEncryptNegativePromptData,
+    } = await encryptData({
       prompt: prompt,
+      negativePrompt: negativePrompt,
     });
-    // console.log("tokenOwnerEncryptData: ", tokenOwnerEncryptData);
+    // console.log("tokenOwnerEncryptPromptData: ", tokenOwnerEncryptPromptData);
+    // console.log(
+    //   "tokenOwnerEncryptNegativePromptData: ",
+    //   tokenOwnerEncryptNegativePromptData
+    // );
 
-    //* Mint nft with encrypted data.
-    // console.log("signerRef.current: ", signerRef.current);
-    // console.log("address: ", address);
-    let contractSigner;
-    if (isMobile) {
-      const provider = new WalletConnectProvider({
-        rpc: {
-          137: "https://rpc-mainnet.maticvigil.com",
-          80001: "https://rpc-mumbai.maticvigil.com/",
-        },
-        infuraId: process.env.NEXT_PUBLIC_INFURA_KEY,
-      });
-
-      // * Enable session (triggers QR Code modal).
-      await provider.enable();
-      const web3Provider = new ethers.providers.Web3Provider(provider);
-      // console.log("web3Provider: ", web3Provider);
-      contractSigner = web3Provider.getSigner();
-      // console.log("signer: ", signer);
-    } else {
-      contractSigner = signer;
-    }
-    // console.log("promptNftContract: ", promptNftContract);
-    // console.log("contractSigner: ", contractSigner);
-    // console.log("address: ", address);
-    // console.log("tokenURI: ", tokenURI);
-    // console.log("tokenOwnerEncryptData: ", tokenOwnerEncryptData);
-    // console.log("contractOwnerEncryptData: ", contractOwnerEncryptData);
-
-    const tx = await promptNftContract
-      .connect(contractSigner)
-      .safeMint(
+    writeSafeMint?.({
+      args: [
         address,
         tokenURI,
-        tokenOwnerEncryptData,
-        contractOwnerEncryptData
-      );
-    const response = await tx.wait();
-    // console.log("response: ", response);
-
-    //* Return token id.
-    return response;
+        modelName,
+        tokenOwnerEncryptPromptData,
+        tokenOwnerEncryptNegativePromptData,
+        contractOwnerEncryptPromptData,
+        contractOwnerEncryptNegativePromptData,
+      ],
+    });
   }
 
   function handleCardMediaImageError(e) {
@@ -252,7 +348,8 @@ function Mint({ inputImageUrl, inputPrompt }) {
               image={imageUrl}
               onError={handleCardMediaImageError}
               sx={{
-                objectFit: "cover",
+                objectFit: "contain",
+                height: cardImageHeight,
               }}
             />
           ) : (
@@ -313,16 +410,29 @@ function Mint({ inputImageUrl, inputPrompt }) {
                 paddingRight: "15px",
               }}
             />
+            <TextField
+              required
+              id="outlined-required"
+              label="Negative Prompt"
+              name="negative-prompt"
+              value={negativePromptText}
+              inputProps={{ readOnly: true, style: { fontSize: 12 } }}
+              style={{
+                width: "100%",
+                paddingRight: "15px",
+              }}
+            />
           </CardContent>
           <CardActions>
             <Button
               variant="contained"
-              disabled={
-                isWalletConnected({ isConnected, selectedChain }) === true &&
-                buttonDisabled === false
-                  ? false
-                  : true
-              }
+              disabled={isMinting}
+              // disabled={
+              //   isWalletConnected({ isConnected, selectedChain }) === true &&
+              //   buttonDisabled === false
+              //     ? false
+              //     : true
+              // }
               style={{
                 width: "100%",
                 paddingRight: "15px",
@@ -382,7 +492,6 @@ function Mint({ inputImageUrl, inputPrompt }) {
                   );
                   // console.log("checkCryptResponse: ", checkCryptResponse);
                   if (checkCryptResponse.data === "ok") {
-                    setButtonDisabled(true);
                     setSnackbarSeverity("warning");
                     setSnackbarMessage("This image prompt is already minted.");
                     setOpenSnackbar(true);
@@ -390,34 +499,29 @@ function Mint({ inputImageUrl, inputPrompt }) {
                   }
                 } catch (error) {
                   console.error(error);
-                  setButtonDisabled(true);
                   setSnackbarSeverity("warning");
                   setSnackbarMessage("This image prompt is already minted.");
                   setOpenSnackbar(true);
                   return;
                 }
 
-                //* Upload image to s3.
+                setSnackbarSeverity("info");
+                setSnackbarMessage(
+                  "Uploading image data to metadata repository..."
+                );
+                setOpenSnackbar(true);
+
+                const tokenURI = await uploadMetadata({
+                  name: inputName,
+                  description: inputDescription,
+                  inputImageUrl: imageUrl,
+                });
+                console.log("tokenURI: ", tokenURI);
+
+                let fetchResponse;
                 try {
-                  //* Add waiting message to snackbar.
-                  //* Upload metadata and image to s3.
-                  setButtonDisabled(true);
-
-                  setSnackbarSeverity("info");
-                  setSnackbarMessage(
-                    "Uploading image data to metadata repository..."
-                  );
-                  setOpenSnackbar(true);
-
-                  const tokenURI = await uploadMetadata({
-                    name: inputName,
-                    description: inputDescription,
-                    inputImageUrl: imageUrl,
-                  });
-                  // console.log("tokenURI: ", tokenURI);
-
                   //* Get contract owner encrypted prompt.
-                  const fetchResponse = await fetchJson(
+                  fetchResponse = await fetchJson(
                     { url: "/api/crypt" },
                     {
                       method: "POST",
@@ -426,44 +530,41 @@ function Mint({ inputImageUrl, inputPrompt }) {
                         "Content-Type": "application/json",
                       },
                       body: JSON.stringify({
-                        prompt: promptText,
                         imageUrl: imageUrl,
+                        prompt: promptText,
+                        negativePrompt: negativePromptText,
                       }),
                     }
                   );
                   // console.log("fetchResponse: ", fetchResponse);
-
-                  //* Mint prompt NFT.
-                  setSnackbarSeverity("info");
-                  setSnackbarMessage(
-                    "Minting a prompt nft is just started. Please wait about 30 seconds for transaction. Even if you close this window, transaction will be going on."
-                  );
-                  setOpenSnackbar(true);
-
-                  mintPromptNft({
-                    prompt: promptText,
-                    tokenURI: tokenURI,
-                    contractOwnerEncryptData:
-                      fetchResponse.contractOwnerEncryptData,
-                  }).then(function (tx) {
-                    // console.log("tx: ", tx);
-                    // console.log("tx.transactionHash: ", tx.transactionHash);
-
-                    //* Go to thanks page.
-                    const imageUrlEncodedString = encodeURIComponent(imageUrl);
-                    router.push(`${THANKS_PAGE}${imageUrlEncodedString}`);
-                  });
-
-                  setButtonMessage(<CircularProgress />);
-
-                  //* TODO: If mint failed, revert encrypted prompt to plain prompt(use flag).
-                  //* TODO: Sync cypto flag and event logs later.
                 } catch (error) {
                   console.error(error);
                 }
+
+                //* Mint prompt NFT.
+                setSnackbarSeverity("info");
+                setSnackbarMessage(
+                  "Minting a prompt nft is just started. Please wait about 30 seconds for transaction. Even if you close this window, transaction will be going on."
+                );
+                setOpenSnackbar(true);
+
+                mintPromptNft({
+                  prompt: promptText,
+                  negativePrompt: negativePromptText,
+                  modelName: modelName,
+                  tokenURI: tokenURI,
+                  contractOwnerEncryptPromptData:
+                    fetchResponse.contractOwnerEncryptPromptData,
+                  contractOwnerEncryptNegativePromptData:
+                    fetchResponse.contractOwnerEncryptNegativePromptData,
+                });
               }}
             >
-              {buttonMessage}
+              {isMinting ? (
+                <Typography>Minting...</Typography>
+              ) : (
+                <Typography>Mint</Typography>
+              )}
             </Button>
           </CardActions>
         </Card>

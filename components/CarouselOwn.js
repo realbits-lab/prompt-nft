@@ -10,7 +10,7 @@ import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
 import CardNft from "@/components/CardNft";
 
-export default function ListRent({
+export default function CarouselOwn({
   selectedChain,
   address,
   isConnected,
@@ -21,6 +21,10 @@ export default function ListRent({
   data,
   isLoading,
 }) {
+  // console.log("call ListOwn()");
+  // console.log("isLoading: ", isLoading);
+  // console.log("data: ", data);
+  // console.log("allMyOwnDataCount: ", allMyOwnDataCount);
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const NUMBER_PER_PAGE = 1;
 
@@ -83,17 +87,15 @@ export default function ListRent({
     );
   }
 
-  const RentCardList = React.useCallback(
-    function RentCardList(props) {
+  const OwnCardList = React.useCallback(
+    function OwnCardList() {
       if (isLoading === true) {
         return <LoadingPage />;
       }
 
       if (!data || data.length === 0) {
         return (
-          <NoContentPage
-            message={"You have not yet rented any image prompt NFT."}
-          />
+          <NoContentPage message={"You do not have any image prompt NFT."} />
         );
       }
 
@@ -111,7 +113,7 @@ export default function ListRent({
               // console.log("idx: ", idx);
               // console.log("pageIndex: ", pageIndex);
               // Check idx is in pagination.
-              // pageIndex.rent starts from 1.
+              // pageIndex.own starts from 1.
               // idx starts from 0.
               if (
                 idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
@@ -142,8 +144,8 @@ export default function ListRent({
         </div>
       );
     },
-    [data, pageIndex]
+    [data, pageIndex, isLoading]
   );
 
-  return <RentCardList />;
+  return <OwnCardList />;
 }

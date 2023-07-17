@@ -1,130 +1,78 @@
 import React from "react";
+import moment from "moment";
+import useSWR from "swr";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
+import CardHeader from "@mui/material/CardHeader";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
-import Pagination from "@mui/material/Pagination";
-import CircularProgress from "@mui/material/CircularProgress";
-import CardImage from "./CardImage";
+import fetchJson from "@/lib/fetchJson";
+import { truncate } from "@/lib/util";
 
-function ListImage({ data, isLoading }) {
+function ListImage() {
   // console.log("call ListImage()");
-  // console.log("data: ", data);
 
-  const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
-  const NUMBER_PER_PAGE = 5;
+  const LATEST_IMAGE_ALL_API_URL = "/api/latest-image-list";
 
+  //* Image refresh interval time by milli-second unit.
+  const IMAGE_REFRESH_INTERVAL_TIME = 60000;
+
+  const CARD_MARGIN_TOP = "80px";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
+  const TRUNCATE_COUNT = 8;
 
-  const [pageIndex, setPageIndex] = React.useState(1);
-  const handlePageIndexChange = (event, value) => {
-    setPageIndex(value);
-  };
-
-  function LoadingPage() {
-    return (
-      <Box
-        sx={{
-          "& .MuiTextField-root": { m: 1, width: "25ch" },
-        }}
-        display="flex"
-        flexDirection="column"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
-      >
-        <CircularProgress sx={{ width: "50vw" }} />
-      </Box>
-    );
-  }
-
-  function NoContentPage({ message }) {
-    return (
-      <Box
-        sx={{
-          "& .MuiTextField-root": { m: 1, width: "25ch" },
-        }}
-        display="flex"
-        flexDirection="column"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
-      >
-        <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-          <CardMedia component="img" image={PLACEHOLDER_IMAGE_URL} />
-          <CardContent
-            sx={{
-              padding: "10",
-            }}
-          >
-            <Typography variant="h7">{message}</Typography>
-          </CardContent>
-        </Card>
-      </Box>
-    );
-  }
-
-  const ImageCardList = React.useCallback(
-    function ImageCardList() {
-      if (isLoading === true) {
-        return <LoadingPage />;
-      }
-
-      if (!data) {
-        return (
-          <NoContentPage
-            message={
-              "This service is just started. Soon, image list with prompt will be updated."
-            }
-          />
-        );
-      }
-
-      return (
-        <div>
-          <Box sx={{ marginTop: 10 }} display="flex" justifyContent="center">
-            <Pagination
-              count={Math.ceil(data.data.length / NUMBER_PER_PAGE)}
-              page={pageIndex}
-              onChange={handlePageIndexChange}
-              variant="outlined"
-              sx={{
-                padding: "10",
-                ul: {
-                  "& .MuiPaginationItem-root": {
-                    color: "darkgrey",
-                    "&.Mui-selected": {
-                      background: "lightcyan",
-                      color: "darkgrey",
-                    },
-                  },
-                },
-              }}
-            />
-          </Box>
-          {data.data.map((imageData, idx) => {
-            // console.log("idx: ", idx);
-            // console.log("pageIndex.image: ", pageIndex.image);
-            // console.log("imageData: ", imageData);
-            // Check idx is in pagination.
-            // pageIndex.image starts from 1.
-            // idx starts from 0.
-            if (
-              idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
-              idx < pageIndex * NUMBER_PER_PAGE
-            ) {
-              return <CardImage imageData={imageData} key={idx} />;
-            }
-          })}
-        </div>
-      );
+  //* Get the latest image list.
+  const {
+    data: dataLatestImage,
+    error: errorLatestImage,
+    isLoading: isLoadingLatestImage,
+    isValidating: isValidatingLatestImage,
+    mutate: mutateLatestImage,
+  } = useSWR(
+    {
+      url: LATEST_IMAGE_ALL_API_URL,
     },
-    [data, pageIndex, isLoading]
+    fetchJson,
+    {
+      refreshInterval: IMAGE_REFRESH_INTERVAL_TIME,
+    }
   );
+  // console.log("dataLatestImage: ", dataLatestImage);
 
-  return <ImageCardList />;
+  return (
+    <>
+      <Box
+        sx={{
+          minWidth: CARD_MIN_WIDTH,
+          maxWidth: CARD_MAX_WIDTH,
+          marginTop: CARD_MARGIN_TOP,
+        }}
+      >
+        {dataLatestImage?.data.map((imageData, idx) => {
+          return (
+            <Card sx={{ maxWidth: 345, my: 2 }} key={idx}>
+              <CardHeader
+                title={truncate(imageData.prompt, TRUNCATE_COUNT)}
+                subheader={moment(imageData.createdAt).fromNow()}
+              />
+              <CardMedia
+                component="img"
+                image={imageData.imageUrl}
+                alt="prompt image"
+              />
+              <CardContent>
+                <Typography variant="body2" color="text.secondary">
+                  {imageData.prompt}
+                </Typography>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </Box>
+    </>
+  );
 }
 
 export default ListImage;

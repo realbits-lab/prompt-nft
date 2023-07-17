@@ -1,8 +1,6 @@
 import { encrypt, getEncryptionPublicKey } from "@metamask/eth-sig-util";
 import { Base64 } from "js-base64";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/client";
 
 //* TODO: Wrap iron session.
 export default async function handler(req, res) {
@@ -15,8 +13,9 @@ export default async function handler(req, res) {
 
   // POST /api/crypt
   // Required fields in body: prompt, imageUrl
-  const prompt = req.body.prompt;
   const imageUrl = req.body.imageUrl;
+  const prompt = req.body.prompt;
+  const negativePrompt = req.body.negativePrompt;
   // console.log("prompt: ", prompt);
   // console.log("imageUrl: ", imageUrl);
 
@@ -29,23 +28,36 @@ export default async function handler(req, res) {
   );
   // console.log("encryptionPublicKey: ", encryptionPublicKey);
 
-  const contractOwnerEncryptData = encrypt({
+  const contractOwnerEncryptPromptData = encrypt({
     publicKey: encryptionPublicKey,
     data: Base64.encode(prompt).toString(),
     version: "x25519-xsalsa20-poly1305",
   });
+  const contractOwnerEncryptNegativePromptData = encrypt({
+    publicKey: encryptionPublicKey,
+    data: Base64.encode(negativePrompt).toString(),
+    version: "x25519-xsalsa20-poly1305",
+  });
   // console.log("contractOwnerEncryptData: ", contractOwnerEncryptData);
 
-  const updatePostResult = await prisma.post.update({
+  const updatePostResult = await prisma.post.upsert({
     where: {
       imageUrl: imageUrl,
     },
-    data: {
+    update: {
+      isEncrypted: true,
+    },
+    create: {
+      imageUrl: imageUrl,
       isEncrypted: true,
     },
   });
   // console.log("updatePostResult: ", updatePostResult);
 
   //* Send 200 OK response.
-  res.status(200).json({ contractOwnerEncryptData: contractOwnerEncryptData });
+  res.status(200).json({
+    contractOwnerEncryptPromptData: contractOwnerEncryptPromptData,
+    contractOwnerEncryptNegativePromptData:
+      contractOwnerEncryptNegativePromptData,
+  });
 }

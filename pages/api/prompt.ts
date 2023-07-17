@@ -1,18 +1,20 @@
 import { ethers } from "ethers";
 import { withIronSessionApiRoute } from "iron-session/next";
 import { NextApiRequest, NextApiResponse } from "next";
-import { sessionOptions } from "../../lib/session";
-import promptNFTABI from "../../contracts/promptNFT.json";
-import { getProvider } from "lib/util";
+
+import { sessionOptions } from "@/lib/session";
+import { getProvider } from "@/lib/util";
+import promptNFTABI from "@/contracts/promptNFT.json";
+
 const { decrypt } = require("@metamask/eth-sig-util");
 
 export type PromptResult = {
-  isLoggedIn: boolean;
-  prompt: string;
+  isLoggedIn: boolean | undefined;
+  prompt: string | undefined;
+  error: any;
 };
 
-//* TODO: Check caller address is owner or renter from contract.
-async function promptRoute(
+async function handler(
   req: NextApiRequest,
   res: NextApiResponse<PromptResult>
 ) {
@@ -23,6 +25,8 @@ async function promptRoute(
     const user = req.session.user;
     const publicAddress = user.publicAddress;
     const { tokenId } = await req.body;
+
+    //* TODO: Should check user rented this nft.
 
     //* Get the contract owner encrypted prompt from nft contract with token id.
     //* Get prompt nft contract.
@@ -40,13 +44,17 @@ async function promptRoute(
       provider
     );
     // console.log("signer: ", signer);
-    const contractOwnerEncryptDataResult = await promptNftContract
-      .connect(signer)
-      .getContractOwnerPrompt(tokenId);
-    // console.log(
-    //   "contractOwnerEncryptDataResult:",
-    //   contractOwnerEncryptDataResult
-    // );
+    //* TODO: Handle the negative prompt.
+    const [contractOwnerEncryptDataResult, negativePrompt] =
+      await promptNftContract.connect(signer).getContractOwnerPrompt(tokenId);
+    console.log(
+      "contractOwnerEncryptDataResult:",
+      contractOwnerEncryptDataResult
+    );
+    console.log(
+      "contractOwnerEncryptDataResult[version]:",
+      contractOwnerEncryptDataResult["version"]
+    );
     const contractOwnerEncryptData = {
       ciphertext: contractOwnerEncryptDataResult["ciphertext"],
       ephemPublicKey: contractOwnerEncryptDataResult["ephemPublicKey"],
@@ -55,19 +63,34 @@ async function promptRoute(
     };
 
     //* Decrypt the contract owner encrypted prompt.
-    const contractOwnerDecryptResult = decrypt({
-      encryptedData: contractOwnerEncryptData,
-      privateKey: process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY,
-    });
-    // console.log("contractOwnerDecryptResult:", contractOwnerDecryptResult);
+    //* TODO: Handle error.
+    try {
+      const contractOwnerDecryptResult = decrypt({
+        encryptedData: contractOwnerEncryptData,
+        privateKey: process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY,
+      });
+      console.log("contractOwnerDecryptResult:", contractOwnerDecryptResult);
 
-    res.json({
-      isLoggedIn: true,
-      prompt: contractOwnerDecryptResult,
-    });
+      res.json({
+        isLoggedIn: true,
+        prompt: contractOwnerDecryptResult,
+        error: undefined,
+      });
+    } catch (error) {
+      console.error(error);
+      res.json({
+        isLoggedIn: undefined,
+        prompt: undefined,
+        error: error,
+      });
+    }
   } else {
-    res.json({ isLoggedIn: false, prompt: "User is not logged in." });
+    res.json({
+      isLoggedIn: false,
+      prompt: "User is not logged in.",
+      error: undefined,
+    });
   }
 }
 
-export default withIronSessionApiRoute(promptRoute, sessionOptions);
+export default withIronSessionApiRoute(handler, sessionOptions);

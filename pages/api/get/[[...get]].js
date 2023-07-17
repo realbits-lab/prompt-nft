@@ -1,13 +1,13 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/client";
 
 export default async function handler(req, res) {
+  console.log("call /api/get");
+
   // Check method error.
   if (req.method !== "GET") {
     res.status(500).json({ error: "Unavailable method. Support only GET." });
     return;
   }
-
-  const prisma = new PrismaClient();
 
   // GET /api/get/{prompt}/{imageUrl}
   // Required fields in body: prompt, imageUrl
@@ -18,17 +18,15 @@ export default async function handler(req, res) {
   if (
     params === undefined ||
     Array.isArray(params) === false ||
-    params.length !== 2
+    params.length !== 1
   ) {
     res.status(500).json({ data: "nok" });
     return;
   }
 
-  // Get prompt and imageUrl.
-  const inputPrompt = params[0];
-  const inputImageUrl = params[1];
-  // console.log("inputPrompt: ", inputPrompt);
-  // console.log("inputImageUrl: ", inputImageUrl);
+  // Get imageUrl.
+  const inputImageUrl = params[0];
+  console.log("inputImageUrl: ", inputImageUrl);
 
   // Check imageUrl and prompt was saved in sqlite already.
   const findUniqueResult = await prisma.post.findUnique({
@@ -36,11 +34,11 @@ export default async function handler(req, res) {
       imageUrl: inputImageUrl,
     },
   });
-  // console.log("findUniqueResult: ", findUniqueResult);
+  console.log("findUniqueResult: ", findUniqueResult);
   if (findUniqueResult === null) {
     res.status(500).json({ data: "nok" });
   }
 
   // Send 200 OK response.
-  res.status(200).json({ data: "ok" });
+  res.status(200).json({ data: findUniqueResult });
 }

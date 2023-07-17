@@ -1,30 +1,35 @@
-### Use prisma
+# Fictures
 
-- npx prisma migrate dev --name init
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 
-### metamask auth
+Generative image NFT service platform.
 
-- [One-click Login with Blockchain: A MetaMask Tutorial](https://www.toptal.com/ethereum/one-click-login-flows-a-metamask-tutorial)
+## About
 
-### nextjs and mui
+Generative image consists of image and prompt data. This platform transform image and prompt data to NFT. After publishing NFT, prompt will be stored with the form of encryption.
 
-- [Getting started with MUI and Next.js](https://blog.logrocket.com/getting-started-with-mui-and-next-js/)
-- [Next.js + MUI v5 + Typescript tutorial and starter](https://dev.to/hajhosein/nextjs-mui-v5-typescript-tutorial-and-starter-3pab)
+## Getting Started
 
-### Get PostgreSql info
+#### Clone git repository
 
-- heroku pg:info
+```bash
+git clone https://github.com/realbits-lab/prompt-nft.git
+```
 
-### Remove postgresql pool
+## Contributing
 
-- select \* from pg_stat_activity where usename='[username]';
-- select pg_cancel_backend(pid) from pg_stat_activity where usename='[username]';
-- select pg_terminate_backend(pid) from pg_stat_activity where usename='[username]';
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
-### PostgreSql connection pool on heroku
+## License
 
-- https://devcenter.heroku.com/articles/postgres-connection-pooling
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
-### Custom domain in heroku
+## Acknowledgments
 
-- https://devcenter.heroku.com/articles/custom-domains
+#### Migrate prisma
+
+In case of heroku cloud, heroku would not support shadow database, so you should install and run local postgres database for shadow.
+
+```bash
+npx prisma migrate dev --name init
+```

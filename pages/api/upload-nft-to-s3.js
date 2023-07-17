@@ -1,16 +1,23 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { withIronSessionApiRoute } from "iron-session/next";
 import { v4 as uuidv4 } from "uuid";
+import { sessionOptions } from "@/lib/session";
 
-//* TODO: Wrap iron session.
-export default async function handler(req, res) {
-  // const BUCKET_NAME = processs.env.NEXT_PUBLIC_BUCKET_NAME;
+async function handler(req, res) {
+  // console.log("call /api/upload-to-s3");
+
   const BUCKET_NAME = "prompt-nft";
 
-  // Check method error.
+  //* Check method error.
   if (req.method !== "POST") {
     return res
       .status(500)
       .json({ error: "Invalid method. Support only POST." });
+  }
+
+  //* Check if already logined.
+  if (!req.session.user || req.session.user.isLoggedIn !== true) {
+    return res.status(500).json({ error: "User is not logined." });
   }
 
   //* POST /api/upload-to-s3
@@ -23,7 +30,7 @@ export default async function handler(req, res) {
   // console.log("inputImageUrl: ", inputImageUrl);
 
   try {
-    //* Get image data from cdn.discordapp.com server.
+    //* Get image data from url.
     const fetchResult = await fetch(inputImageUrl, { mode: "no-cors" });
     // console.log("fetchResult: ", fetchResult);
     if (!fetchResult.ok) {
@@ -106,3 +113,5 @@ export default async function handler(req, res) {
     });
   }
 }
+
+export default withIronSessionApiRoute(handler, sessionOptions);

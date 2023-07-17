@@ -1,5 +1,13 @@
 import React from "react";
 import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
+import {
+  useAccount,
+  useNetwork,
+  useWalletClient,
+  useContractRead,
+  useSignTypedData,
+  useContractEvent,
+} from "wagmi";
 import SwipeableViews from "react-swipeable-views";
 import { bindKeyboard } from "react-swipeable-views-utils";
 import { useTheme } from "@mui/material/styles";
@@ -12,35 +20,57 @@ import Typography from "@mui/material/Typography";
 import MobileStepper from "@mui/material/MobileStepper";
 import CircularProgress from "@mui/material/CircularProgress";
 import Grid from "@mui/material/Grid";
-import Pagination from "@mui/material/Pagination";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
-import CardNft from "./CardNft";
+import CardNft from "@/components/CardNft";
+import rentmarketABI from "@/contracts/rentMarket.json";
 
-function CarouselNft({
-  dataSigner,
-  rentMarketContract,
-  promptNftContract,
-  selectedChain,
-  address,
-  isConnected,
-  data,
-  isLoading,
-}) {
+function CarouselNft() {
   // console.log("call CarouselNft()");
-  // console.log("data: ", data);
 
   const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
 
-  const CARD_MARGIN_TOP = "60px";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
-  const CARD_PADDING = 10;
 
+  //*---------------------------------------------------------------------------
+  //* Wagmi hook
+  //*---------------------------------------------------------------------------
+  const RENT_MARKET_CONTRACT_ADDRES =
+    process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
+  const { chains, chain } = useNetwork();
+  const { address, isConnected } = useAccount();
+  const {
+    data: dataAllRegisterData,
+    isError: errorAllRegisterData,
+    isLoading: isLoadingAllRegisterData,
+    isValidating: isValidatingAllRegisterData,
+    status: statusAllRegisterData,
+  } = useContractRead({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI.abi,
+    functionName: "getAllRegisterData",
+    watch: true,
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+    },
+    onError(error) {
+      // console.log("call onError()");
+      // console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      // console.log("call onSettled()");
+      // console.log("data: ", data);
+      // console.log("error: ", error);
+    },
+  });
+
+  //* Pagination.
   const BindKeyboardSwipeableViews = bindKeyboard(SwipeableViews);
   const theme = useTheme();
   const [activeStep, setActiveStep] = React.useState(0);
-  const maxSteps = data?.length || 0;
+  const maxSteps = dataAllRegisterData?.length || 0;
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -83,14 +113,14 @@ function CarouselNft({
         alignItems="center"
         minHeight="100vh"
       >
-        <Grid container spacing={2} justifyContent="space-around" padding={2}>
+        {/* <Grid container spacing={2} justifyContent="space-around" padding={2}>
           <Grid item>
             <Web3Button />
           </Grid>
           <Grid item>
             <Web3NetworkSwitch />
           </Grid>
-        </Grid>
+        </Grid> */}
         <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
           <CardMedia component="img" image={PLACEHOLDER_IMAGE_URL} />
           <CardContent
@@ -107,20 +137,19 @@ function CarouselNft({
 
   const NftCardList = React.useCallback(
     function NftCardList() {
-      if (isLoading === true) {
-        return <LoadingPage />;
-      }
-
-      if (!data) {
+      if (!isConnected) {
         return (
           <NoContentPage
-            message={
-              "This service is just started. Soon, image list with prompt will be updated."
-            }
+            message={`You are not connected to blockchain. Connect to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK} network.`}
           />
         );
       }
 
+      if (isLoadingAllRegisterData === true) {
+        return <LoadingPage />;
+      }
+
+      // console.log("activeStep: ", activeStep);
       return (
         <>
           <BindKeyboardSwipeableViews
@@ -129,20 +158,11 @@ function CarouselNft({
             onChangeIndex={handleStepChange}
             enableMouseEvents
           >
-            {data.map(function (nftData, index) {
+            {dataAllRegisterData.toReversed().map(function (nftData, index) {
               return (
                 <div key={index}>
                   {Math.abs(activeStep - index) <= 2 ? (
-                    <CardNft
-                      nftData={nftData}
-                      key={index}
-                      dataSigner={dataSigner}
-                      address={address}
-                      isConnected={isConnected}
-                      rentMarketContract={rentMarketContract}
-                      selectedChain={selectedChain}
-                      promptNftContract={promptNftContract}
-                    />
+                    <CardNft nftData={nftData} />
                   ) : null}
                 </div>
               );
@@ -185,7 +205,7 @@ function CarouselNft({
         </>
       );
     },
-    [activeStep, maxSteps, data, isLoading]
+    [activeStep, maxSteps, dataAllRegisterData, isLoadingAllRegisterData]
   );
 
   return <NftCardList />;

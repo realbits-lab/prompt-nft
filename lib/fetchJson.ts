@@ -1,3 +1,6 @@
+import { getPublicClient } from "@wagmi/core";
+import promptNFTABI from "@/contracts/promptNFT.json";
+
 export class FetchError extends Error {
   response: Response;
   data: {
@@ -50,15 +53,14 @@ async function getMetadata({
   }
 
   try {
-    const tokenURI = await promptNftContract
-      .connect(signer)
-      .tokenURI(tokenId.toNumber());
+    const tokenURI = await promptNftContract.read.tokenURI([tokenId]);
     // console.log("tokenURI: ", tokenURI);
 
     //* Get token metadata from token uri.
     const fetchResult = await fetch(tokenURI);
     const tokenMetadata = await fetchResult.blob();
     const metadataJsonTextData = await tokenMetadata.text();
+    // console.log("metadataJsonTextData: ", metadataJsonTextData);
     const metadataJsonData = JSON.parse(metadataJsonTextData);
 
     return metadataJsonData;
@@ -67,41 +69,35 @@ async function getMetadata({
   }
 }
 
-async function getAllOwnData({
+async function getAllMyOwnData({
   promptNftContract,
-  rentMarketContract,
-  signer,
   ownerAddress,
 }: {
   promptNftContract: any;
-  rentMarketContract: any;
-  signer: any;
   ownerAddress: any;
 }) {
   // console.log("call getAllMyOwnData()");
+  // console.log("promptNftContract: ", promptNftContract);
   // console.log("signer: ", signer);
+  // console.log("ownerAddress: ", ownerAddress);
 
-  //* If no signer, return zero data.
-  if (!promptNftContract || !signer) {
-    //* Return error.
-    return [];
+  //* Check error case.
+  if (!promptNftContract) {
+    throw new Error("Prompt nft contract is undefined.");
   }
 
   //* Get total supply of prompt nft.
-  // console.log("contract: ", contract);
-  const totalSupplyBigNumber = await promptNftContract
-    .connect(signer)
-    .balanceOf(ownerAddress);
+  const totalSupply = await promptNftContract.read.balanceOf([ownerAddress]);
   // console.log("totalSupply: ", totalSupply);
-  const totalSupply = totalSupplyBigNumber.toNumber();
 
   //* Get all metadata per each token as to token uri.
   let tokenDataArray: Array<any> = [];
   for (let i = 0; i < totalSupply; i++) {
     //* Get token id and uri.
-    const tokenId = await promptNftContract
-      .connect(signer)
-      .tokenOfOwnerByIndex(ownerAddress, i);
+    const tokenId = await promptNftContract.read.tokenOfOwnerByIndex([
+      ownerAddress,
+      i,
+    ]);
 
     //* Add token metadata.
     tokenDataArray.push({
@@ -238,10 +234,8 @@ export default async function fetchJson<JSON = unknown>(
         return getAllRegisterDataResult;
 
       case "getAllMyOwnData":
-        const getAllMyOwnDataResult = await getAllOwnData({
+        const getAllMyOwnDataResult = await getAllMyOwnData({
           promptNftContract: promptNftContract,
-          rentMarketContract: rentMarketContract,
-          signer: signer,
           ownerAddress: ownerAddress,
         });
         // console.log("getAllMyOwnDataResult: ", getAllMyOwnDataResult);

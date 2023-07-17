@@ -14,8 +14,17 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "next.config.js", "lib/fetchJson.js"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "next.config.js",
+    "lib/fetchJson.js"
+, "pages/api/login.js", "pages/api/logout.js", "lib/useUser.js"  ],
   "exclude": ["node_modules"]
 }

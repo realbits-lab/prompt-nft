@@ -3,25 +3,16 @@ generator client {
 }
 
 datasource db {
-  //* For sqlite.
-  // provider = "sqlite"
-  // url      = "file:./dev.db"
-  //* For postgresql.
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-model User {
-  id            Int      @id @default(autoincrement())
-  createdAt     DateTime @default(now())
-  publicAddress String   @unique @default("")
-  nonce         Int      @default(0)
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model Post {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  prompt      String   @default("")
-  imageUrl    String   @unique @default("")
-  isEncrypted Boolean  @default(false)
+  id             Int      @id @default(autoincrement())
+  createdAt      DateTime @default(now())
+  prompt         String   @unique @default("")
+  negativePrompt String   @default("")
+  imageUrl       String   @unique @default("")
+  isEncrypted    Boolean  @default(false)
 }
