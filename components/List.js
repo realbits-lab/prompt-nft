@@ -250,13 +250,12 @@ function List({ mode, updated, setNewImageCountFunc }) {
     // watch: true,
   });
 
-  //* TODO: Use useContractRead hook.
   //* Get all my own data array.
   const {
-    data: dataOwn,
-    error: errorOwn,
-    isLoading: isLoadingOwn,
-    isValidating: isValidatingOwn,
+    data: dataAllMyOwnData,
+    error: errorAllMyOwnData,
+    isLoading: isLoadingAllMyOwnData,
+    isValidating: isValidatingAllMyOwnData,
   } = useSWR(
     {
       command: "getAllMyOwnData",
@@ -268,7 +267,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
       refreshInterval: IMAGE_REFRESH_INTERVAL_TIME,
     }
   );
-  // console.log("dataOwn: ", dataOwn);
+  // console.log("dataAllMyOwnData: ", dataAllMyOwnData);
 
   //*---------------------------------------------------------------------------
   //* Define state data.
@@ -330,7 +329,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
 
       initialize();
     },
-    [dataOwn]
+    [dataAllMyOwnData]
   );
 
   function initialize() {
@@ -341,7 +340,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
     // console.log("swrIsValidatingRegisterData: ", swrIsValidatingRegisterData);
     // console.log("swrStatusRegisterData: ", swrStatusRegisterData);
     // console.log("swrDataCollection: ", swrDataCollection);
-    // console.log("dataOwn: ", dataOwn);
+    // console.log("dataAllMyOwnData: ", dataAllMyOwnData);
     // console.log("dataRent: ", dataRent);
 
     //* Find the register data in registered collection.
@@ -362,11 +361,11 @@ function List({ mode, updated, setNewImageCountFunc }) {
     //* Find the own nft from registered nft data.
     // console.log("PROMPT_NFT_CONTRACT_ADDRESS: ", PROMPT_NFT_CONTRACT_ADDRESS);
     let ownDataArray;
-    if (registerData && dataOwn) {
+    if (registerData && dataAllMyOwnData) {
       ownDataArray = registerData.filter(function (nft) {
         // console.log("nft: ", nft);
         // console.log("nft.tokenId: ", nft.tokenId);
-        return dataOwn.some(function (element) {
+        return dataAllMyOwnData.some(function (element) {
           // console.log("element: ", element);
           return (
             nft.tokenId === element.tokenId &&
@@ -545,7 +544,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
               //   rentMarketContract={rentMarketContract}
               //   signTypedDataAsync={signTypedDataAsync}
               //   data={allOwnDataArray}
-              //   isLoading={isLoadingOwn}
+              //   isLoading={isLoadingAllMyOwnData}
               // />
               <ListOwn
                 selectedChain={selectedChain}
@@ -556,7 +555,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
                 rentMarketContract={rentMarketContract}
                 signTypedDataAsync={signTypedDataAsync}
                 data={allOwnDataArray}
-                isLoading={isLoadingOwn}
+                isLoading={isLoadingAllMyOwnData}
               />
             )}
           </div>
