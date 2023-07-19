@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
+import { getContract } from "viem";
 import { withIronSessionApiRoute } from "iron-session/next";
-import { NextApiRequest, NextApiResponse } from "next";
 
 import { sessionOptions } from "@/lib/session";
 import { getProvider } from "@/lib/util";
@@ -8,16 +8,7 @@ import promptNFTABI from "@/contracts/promptNFT.json";
 
 const { decrypt } = require("@metamask/eth-sig-util");
 
-export type PromptResult = {
-  isLoggedIn: boolean | undefined;
-  prompt: string | undefined;
-  error: any;
-};
-
-async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<PromptResult>
-) {
+async function handler(req, res) {
   // console.log("call /api/prompt");
   // console.log("req.session.user: ", req.session.user);
 
@@ -34,7 +25,7 @@ async function handler(
       chainName: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
     });
     const promptNftContract = new ethers.Contract(
-      process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS!,
+      process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
       promptNFTABI["abi"],
       provider
     );
@@ -55,6 +46,12 @@ async function handler(
     //   "contractOwnerEncryptDataResult[version]:",
     //   contractOwnerEncryptDataResult["version"]
     // );
+
+    const contract = getContract({
+      address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
+      abi: promptNFTABI["abi"],
+      publicClient,
+    });
 
     const contractOwnerEncryptData = {
       ciphertext: contractOwnerEncryptDataResult["ciphertext"],
