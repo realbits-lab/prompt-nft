@@ -229,7 +229,7 @@ export default function ListItemNft({ registerData }) {
       registerData?.tokenId,
       SERVICE_ACCOUNT_ADDRESS,
     ],
-    // value: registerData?.rentFee,
+    value: registerData?.rentFee,
 
     onSuccess(data) {
       console.log("call onSuccess()");
@@ -378,16 +378,7 @@ export default function ListItemNft({ registerData }) {
 
     setIsRenting(true);
 
-    writeRentNFT?.({
-      address: RENT_MARKET_CONTRACT_ADDRES,
-      abi: rentmarketABI.abi,
-      functionName: "rentNFT",
-      args: [
-        PROMPT_NFT_CONTRACT_ADDRESS,
-        registerData?.tokenId,
-        SERVICE_ACCOUNT_ADDRESS,
-      ],
-    });
+    writeRentNFT?.();
   }
 
   if (!metadata) {
