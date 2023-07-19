@@ -1,57 +1,86 @@
-import { ethers } from "ethers";
-import { getContract } from "viem";
+import {
+  createWalletClient,
+  http,
+  publicActions,
+  encodeFunctionData,
+  decodeAbiParameters,
+} from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { polygon, localhost, polygonMumbai } from "viem/chains";
 import { withIronSessionApiRoute } from "iron-session/next";
-
 import { sessionOptions } from "@/lib/session";
-import { getProvider } from "@/lib/util";
 import promptNFTABI from "@/contracts/promptNFT.json";
 
 const { decrypt } = require("@metamask/eth-sig-util");
 
 async function handler(req, res) {
-  // console.log("call /api/prompt");
+  console.log("call /api/prompt");
   // console.log("req.session.user: ", req.session.user);
+
+  const PROMPTER_PRIVATE_KEY = process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY;
+  const PROMPT_NFT_CONTRACT_ADDRESS =
+    process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS;
 
   if (req.session.user) {
     const user = req.session.user;
-    const publicAddress = user.publicAddress;
     const { tokenId } = await req.body;
 
-    //* TODO: Should check user rented this nft.
+    //* Use viem.
+    const account = privateKeyToAccount(`0x${PROMPTER_PRIVATE_KEY}`);
+    // console.log("account: ", account);
 
-    //* Get the contract owner encrypted prompt from nft contract with token id.
-    //* Get prompt nft contract.
-    const provider = getProvider({
-      chainName: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
+    let blockchainNetwork;
+    let transportUrl;
+    switch (process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK) {
+      case "localhost":
+      default:
+        blockchainNetwork = localhost;
+        transportUrl = "http://localhost:8545";
+        break;
+
+      case "matic":
+        blockchainNetwork = polygon;
+        transportUrl = "https://rpc-mainnet.maticvigil.com";
+        break;
+
+      case "maticmum":
+        blockchainNetwork = polygonMumbai;
+        transportUrl = "https://rpc-mumbai.maticvigil.com/";
+        break;
+    }
+
+    const publicClient = createWalletClient({
+      account: account,
+      chain: blockchainNetwork,
+      transport: http(transportUrl),
+    }).extend(publicActions);
+    // console.log("publicClient: ", publicClient);
+
+    const data = encodeFunctionData({
+      abi: promptNFTABI["abi"],
+      functionName: "getContractOwnerPrompt",
+      args: [BigInt(tokenId)],
     });
-    const promptNftContract = new ethers.Contract(
-      process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-      promptNFTABI["abi"],
-      provider
-    );
 
-    const signer = new ethers.Wallet(
-      process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY ?? "",
-      provider
-    );
-    // console.log("signer: ", signer);
-    //* TODO: Handle the negative prompt.
-    const [contractOwnerEncryptDataResult, negativePrompt] =
-      await promptNftContract.connect(signer).getContractOwnerPrompt(tokenId);
+    const callResponse = await publicClient.call({
+      account: account.address,
+      data: data,
+      to: PROMPT_NFT_CONTRACT_ADDRESS,
+    });
+    // console.log("callResponse: ", callResponse);
+
+    const outputs = promptNFTABI["abi"].find(
+      (abi) => abi?.name === "getContractOwnerPrompt"
+    ).outputs;
+    // console.log("outputs: ", outputs);
+
+    const [contractOwnerEncryptDataResult, negativePrompt1] =
+      decodeAbiParameters(outputs, callResponse?.data);
+
     // console.log(
     //   "contractOwnerEncryptDataResult:",
     //   contractOwnerEncryptDataResult
     // );
-    // console.log(
-    //   "contractOwnerEncryptDataResult[version]:",
-    //   contractOwnerEncryptDataResult["version"]
-    // );
-
-    const contract = getContract({
-      address: process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS,
-      abi: promptNFTABI["abi"],
-      publicClient,
-    });
 
     const contractOwnerEncryptData = {
       ciphertext: contractOwnerEncryptDataResult["ciphertext"],
@@ -61,13 +90,12 @@ async function handler(req, res) {
     };
 
     //* Decrypt the contract owner encrypted prompt.
-    //* TODO: Handle error.
     try {
       const contractOwnerDecryptResult = decrypt({
         encryptedData: contractOwnerEncryptData,
         privateKey: process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY,
       });
-      console.log("contractOwnerDecryptResult:", contractOwnerDecryptResult);
+      // console.log("contractOwnerDecryptResult:", contractOwnerDecryptResult);
 
       res.json({
         isLoggedIn: true,
