@@ -47,14 +47,15 @@ async function handler(
     //* TODO: Handle the negative prompt.
     const [contractOwnerEncryptDataResult, negativePrompt] =
       await promptNftContract.connect(signer).getContractOwnerPrompt(tokenId);
-    console.log(
-      "contractOwnerEncryptDataResult:",
-      contractOwnerEncryptDataResult
-    );
-    console.log(
-      "contractOwnerEncryptDataResult[version]:",
-      contractOwnerEncryptDataResult["version"]
-    );
+    // console.log(
+    //   "contractOwnerEncryptDataResult:",
+    //   contractOwnerEncryptDataResult
+    // );
+    // console.log(
+    //   "contractOwnerEncryptDataResult[version]:",
+    //   contractOwnerEncryptDataResult["version"]
+    // );
+
     const contractOwnerEncryptData = {
       ciphertext: contractOwnerEncryptDataResult["ciphertext"],
       ephemPublicKey: contractOwnerEncryptDataResult["ephemPublicKey"],

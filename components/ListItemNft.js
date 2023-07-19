@@ -1,5 +1,5 @@
 import React from "react";
-import { ethers } from "ethers";
+import { isAddressEqual } from "viem";
 import { isMobile } from "react-device-detect";
 import {
   useAccount,
@@ -44,6 +44,7 @@ export default function ListItemNft({ registerData }) {
   const CARD_MARGIN_TOP = "80px";
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
+  const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
   const [isRenting, setIsRenting] = React.useState(false);
   const [isOwnerOrRentee, setIsOwnerOrRentee] = React.useState();
@@ -443,7 +444,8 @@ export default function ListItemNft({ registerData }) {
               </>
             )}
           </Button>
-          {registerData?.feeTokenAddress !== ethers.constants.AddressZero && (
+          {isAddressEqual(registerData?.feeTokenAddress, ZERO_ADDRESS) ===
+            false && (
             <Button
               size="small"
               variant="outlined"
