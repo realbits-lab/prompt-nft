@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   useAccount,
   useWalletClient,
@@ -6,6 +7,18 @@ import {
   useDisconnect,
 } from "wagmi";
 import Button from "@mui/material/Button";
+import Avatar from "@mui/material/Avatar";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import DialogTitle from "@mui/material/DialogTitle";
+import Dialog from "@mui/material/Dialog";
+import PersonIcon from "@mui/icons-material/Person";
+import AddIcon from "@mui/icons-material/Add";
+import Typography from "@mui/material/Typography";
+import { blue } from "@mui/material/colors";
 import { useRecoilStateLoadable } from "recoil";
 import useUser from "@/lib/useUser";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
@@ -28,7 +41,7 @@ export async function handleSignMessage({ account, chainId, walletClient }) {
     contents: process.env.NEXT_PUBLIC_LOGIN_SIGN_MESSAGE,
   };
 
-  const signature = await walletClient.signTypedData({
+  const signature = await walletClient?.signTypedData({
     account,
     domain,
     types,
@@ -115,25 +128,38 @@ export default function User() {
   const [writeToastMessageLoadable, setWriteToastMessage] =
     useRecoilStateLoadable(writeToastMessageState);
 
+  //*---------------------------------------------------------------------------
+  //* Connectors select dialog.
+  //*---------------------------------------------------------------------------
+  const [openConnectorsDialog, setOpenConnectorsDialog] = useState(false);
+
+  //* Handle login click.
   async function handleLoginClick() {
-    if (!address) {
-      setWriteToastMessage({
-        snackbarSeverity: AlertSeverity.warning,
-        snackbarMessage: "Wallet is not connected.",
-        snackbarTime: new Date(),
-        snackbarOpen: true,
-      });
+    console.log("call handleLoginClick()");
+    console.log("isConnected: ", isConnected);
+
+    if (isConnected === false) {
+      setOpenConnectorsDialog(true);
       return;
     }
+    // if (!address) {
+    //   setWriteToastMessage({
+    //     snackbarSeverity: AlertSeverity.warning,
+    //     snackbarMessage: "Wallet is not connected.",
+    //     snackbarTime: new Date(),
+    //     snackbarOpen: true,
+    //   });
+    //   return;
+    // }
 
-    const publicAddress = address.toLowerCase();
+    const publicAddress = address?.toLowerCase();
     // console.log("publicAddress: ", publicAddress);
 
     // Popup MetaMask confirmation modal to sign message with nonce data.
     //* TODO: Should check the chain id.
     const signMessageResult = await handleSignMessage({
       account: publicAddress,
-      chainId: selectedChain.id,
+      chainId: selectedChain?.id,
       walletClient: walletClient,
     });
     // console.log("signMessageResult: ", signMessageResult);
@@ -146,10 +172,43 @@ export default function User() {
     });
   }
 
+  //* Handle logout click.
   async function handleLogoutClick() {
     await handleLogout({ mutateUser });
   }
 
+  function renderConnectorsDialog() {
+    return (
+      <Dialog
+        onClose={() => setOpenConnectorsDialog(false)}
+        open={openConnectorsDialog}
+      >
+        <DialogTitle>Select connectors</DialogTitle>
+        <List sx={{ pt: 0 }}>
+          {connectors.map((connector, idx) => (
+            <ListItem disableGutters key={connector.id}>
+              <ListItemButton
+                disabled={!connector.ready}
+                key={connector.id}
+                onClick={() => {
+                  connect({ connector });
+                  setOpenConnectorsDialog(false);
+                }}
+              >
+                {connector.name}
+                {!connector.ready && " (unsupported)"}
+                {isLoadingConnect &&
+                  connector.id === pendingConnector?.id &&
+                  " (connecting)"}
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      </Dialog>
+    );
+  }
+
+  //* Render.
   return (
     <>
       {(user === undefined || user.isLoggedIn === false) && (
@@ -168,6 +227,8 @@ export default function User() {
           Logout
         </Button>
       )}
+
+      {renderConnectorsDialog()}
     </>
   );
 }
