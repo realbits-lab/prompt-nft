@@ -25,6 +25,11 @@ import fetchJson, { FetchError } from "@/lib/fetchJson";
 import { AlertSeverity, writeToastMessageState } from "@/lib/util";
 
 export async function handleSignMessage({ account, chainId, walletClient }) {
+  console.log("call handleSignMessage()");
+  console.log("account: ", account);
+  console.log("chainId: ", chainId);
+  console.log("walletClient: ", walletClient);
+
   const domain = {
     chainId: chainId,
     name: "Realbits",
@@ -105,15 +110,39 @@ export default function User() {
   const { address, isConnected } = useAccount();
   // console.log("address: ", address);
   // console.log("isConnected: ", isConnected);
-  const { data: walletClient } = useWalletClient();
-  // console.log("walletClient: ", walletClient);
+  const { data: walletClient } = useWalletClient({
+    onSuccess(data) {
+      console.log("call onSuccess()");
+      console.log("data: ", data);
+
+      handleLoginClick({
+        chainId: selectedChain?.id,
+        walletClient: data,
+        mutateUser,
+      });
+    },
+    onError(error) {
+      // console.log("error: ", error);
+    },
+    onSettled(data, error) {},
+  });
+  console.log("walletClient: ", walletClient);
   const {
     connect,
     connectors,
     error: errorConnect,
     isLoading: isLoadingConnect,
     pendingConnector,
-  } = useConnect();
+  } = useConnect({
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+    },
+    onError(error) {
+      // console.log("error: ", error);
+    },
+    onSettled(data, error) {},
+  });
   const { disconnect } = useDisconnect();
 
   //*----------------------------------------------------------------------------
@@ -134,7 +163,7 @@ export default function User() {
   const [openConnectorsDialog, setOpenConnectorsDialog] = useState(false);
 
   //* Handle login click.
-  async function handleLoginClick() {
+  async function handleLoginClick({ chainId, walletClient, mutateUser }) {
     console.log("call handleLoginClick()");
     console.log("isConnected: ", isConnected);
 
@@ -153,16 +182,16 @@ export default function User() {
     // }
 
     const publicAddress = address?.toLowerCase();
-    // console.log("publicAddress: ", publicAddress);
+    console.log("publicAddress: ", publicAddress);
 
     // Popup MetaMask confirmation modal to sign message with nonce data.
     //* TODO: Should check the chain id.
     const signMessageResult = await handleSignMessage({
       account: publicAddress,
       chainId: selectedChain?.id,
-      walletClient: walletClient,
+      walletClient,
     });
-    // console.log("signMessageResult: ", signMessageResult);
+    console.log("signMessageResult: ", signMessageResult);
 
     // Send signature to back-end on the /auth route.
     await handleAuthenticate({
@@ -214,7 +243,13 @@ export default function User() {
       {(user === undefined || user.isLoggedIn === false) && (
         <Button
           sx={{ my: 2, color: "white", display: "block" }}
-          onClick={handleLoginClick}
+          onClick={() =>
+            handleLoginClick({
+              chainId: selectedChain?.id,
+              walletClient,
+              mutateUser,
+            })
+          }
         >
           Login
         </Button>
