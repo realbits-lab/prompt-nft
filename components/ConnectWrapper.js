@@ -5,7 +5,7 @@ import {
   useEnsAvatar,
   useEnsName,
 } from "wagmi";
-import Card from "@mui/material/Card";
+import Box from "@mui/material/Box";
 
 export default function ConnectWrapper({ children }) {
   //*---------------------------------------------------------------------------
@@ -27,18 +27,24 @@ export default function ConnectWrapper({ children }) {
 
   if (isConnected) {
     return (
-      <div>
-        <img src={ensAvatar} alt="ENS Avatar" />
+      <Box
+        sx={{
+          minWidth: CARD_MIN_WIDTH,
+          maxWidth: CARD_MAX_WIDTH,
+          marginTop: CARD_MARGIN_TOP,
+        }}
+      >
+        {/* <img src={ensAvatar} alt="ENS Avatar" /> */}
         <div>{ensName ? `${ensName} (${address})` : address}</div>
-        <div>Connected to {connector.name}</div>
+        <div>Connected to {connector?.name}</div>
         <button onClick={disconnect}>Disconnect</button>
         {children}
-      </div>
+      </Box>
     );
   }
 
   return (
-    <Card
+    <Box
       sx={{
         minWidth: CARD_MIN_WIDTH,
         maxWidth: CARD_MAX_WIDTH,
@@ -60,6 +66,6 @@ export default function ConnectWrapper({ children }) {
       ))}
 
       {error && <div>{error.message}</div>}
-    </Card>
+    </Box>
   );
 }
