@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  useAccount,
-  useWalletClient,
-  useNetwork,
-  useConnect,
-  useDisconnect,
-} from "wagmi";
+import { useAccount, useWalletClient, useNetwork, useConnect } from "wagmi";
 import Button from "@mui/material/Button";
 import Avatar from "@mui/material/Avatar";
 import List from "@mui/material/List";
@@ -115,11 +109,13 @@ export default function User() {
       console.log("call onSuccess()");
       console.log("data: ", data);
 
-      handleLoginClick({
-        chainId: selectedChain?.id,
-        walletClient: data,
-        mutateUser,
-      });
+      if (clickLogin === true) {
+        handleLoginClick({
+          chainId: selectedChain?.id,
+          walletClient: data,
+          mutateUser,
+        });
+      }
     },
     onError(error) {
       // console.log("error: ", error);
@@ -143,13 +139,13 @@ export default function User() {
     },
     onSettled(data, error) {},
   });
-  const { disconnect } = useDisconnect();
 
   //*----------------------------------------------------------------------------
   //* User hook.
   //*----------------------------------------------------------------------------
   const { user, mutateUser } = useUser();
   // console.log("user: ", user);
+  const [clickLogin, setClickLogin] = useState(false);
 
   //*---------------------------------------------------------------------------
   //* Snackbar.
@@ -199,10 +195,12 @@ export default function User() {
       signature: signMessageResult,
       mutateUser,
     });
+
+    setClickLogin(false);
   }
 
   //* Handle logout click.
-  async function handleLogoutClick() {
+  async function handleLogoutClick({ mutateUser }) {
     await handleLogout({ mutateUser });
   }
 
@@ -243,13 +241,15 @@ export default function User() {
       {(user === undefined || user.isLoggedIn === false) && (
         <Button
           sx={{ my: 2, color: "white", display: "block" }}
-          onClick={() =>
+          onClick={() => {
+            setClickLogin(true);
+
             handleLoginClick({
               chainId: selectedChain?.id,
               walletClient,
               mutateUser,
-            })
-          }
+            });
+          }}
         >
           Login
         </Button>
@@ -257,7 +257,9 @@ export default function User() {
       {user !== undefined && user.isLoggedIn === true && (
         <Button
           sx={{ my: 2, color: "white", display: "block" }}
-          onClick={handleLogoutClick}
+          onClick={() => {
+            handleLogoutClick({ mutateUser });
+          }}
         >
           Logout
         </Button>

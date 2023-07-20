@@ -28,6 +28,7 @@ import CarouselOwn from "@/components/CarouselOwn";
 import ListRent from "@/components/ListRent";
 import ThemePage from "@/components/ThemePage";
 import ConnectWrapper from "@/components/ConnectWrapper";
+import LoginWrapper from "@/components/LoginWrapper";
 import fetchJson from "@/lib/fetchJson";
 import { getChainId, isWalletConnected } from "@/lib/util";
 import promptNFTABI from "@/contracts/promptNFT.json";
@@ -547,9 +548,11 @@ function List({ mode, updated, setNewImageCountFunc }) {
                 <ListNft />
               )
             } */}
-            <ConnectWrapper>
+            {/* <ConnectWrapper> */}
+            <LoginWrapper>
               <ListNft />
-            </ConnectWrapper>
+            </LoginWrapper>
+            {/* </ConnectWrapper> */}
           </div>
         ) : mode === "own" ? (
           <div>
