@@ -1,9 +1,17 @@
 import React from "react";
-import { isAddressEqual } from "viem";
+import {
+  isAddressEqual,
+  createWalletClient,
+  custom,
+  encodeFunctionData,
+  parseEther,
+} from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 import { isMobile } from "react-device-detect";
 import {
   useAccount,
   useNetwork,
+  usePublicClient,
   useWalletClient,
   useContractRead,
   useSignTypedData,
@@ -14,6 +22,7 @@ import {
   useWatchPendingTransactions,
 } from "wagmi";
 import { getContract } from "wagmi/actions";
+import { polygonMumbai, polygon } from "wagmi/chains";
 import { useRecoilStateLoadable } from "recoil";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -55,18 +64,21 @@ export default function ListItemNft({ registerData }) {
   //*---------------------------------------------------------------------------
   const PROMPT_NFT_CONTRACT_ADDRESS =
     process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS;
-  const RENT_MARKET_CONTRACT_ADDRES =
+  const RENT_MARKET_CONTRACT_ADDRESS =
     process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
   const SERVICE_ACCOUNT_ADDRESS =
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
   const [metadata, setMetadata] = React.useState();
   const { chains, chain: selectedChain } = useNetwork();
   const { address, isConnected } = useAccount();
+  const publicClient = usePublicClient();
 
   const {
     data: dataWalletClient,
+    error: errorWalletClient,
     isError: isErrorWalletClient,
     isLoading: isLoadingWalletClient,
+    status: statusWalletClient,
   } = useWalletClient();
 
   const {
@@ -148,7 +160,7 @@ export default function ListItemNft({ registerData }) {
     isValidating: isValidatingRentData,
     status: statusRentData,
   } = useContractRead({
-    address: RENT_MARKET_CONTRACT_ADDRES,
+    address: RENT_MARKET_CONTRACT_ADDRESS,
     abi: rentmarketABI.abi,
     functionName: "getRentData",
     args: [registerData?.nftAddress, registerData?.tokenId],
@@ -161,8 +173,6 @@ export default function ListItemNft({ registerData }) {
       //* Check renter.
       if (data.renteeAddress.toLowerCase() === address.toLowerCase()) {
         setIsOwnerOrRentee(true);
-      } else {
-        setIsOwnerOrRentee(false);
       }
     },
     onError(error) {
@@ -222,7 +232,7 @@ export default function ListItemNft({ registerData }) {
     write: writeRentNFT,
     status: statusRentNFT,
   } = useContractWrite({
-    address: RENT_MARKET_CONTRACT_ADDRES,
+    address: RENT_MARKET_CONTRACT_ADDRESS,
     abi: rentmarketABI.abi,
     functionName: "rentNFT",
     args: [
@@ -327,6 +337,20 @@ export default function ListItemNft({ registerData }) {
           decyprtedPrompt: undefined,
           openDialog: false,
         };
+
+  React.useEffect(() => {
+    // console.log("address: ", address);
+    // console.log("publicClient: ", publicClient);
+    console.log("dataWalletClient: ", dataWalletClient);
+    console.log("isErrorWalletClient: ", isErrorWalletClient);
+    console.log("isLoadingWalletClient: ", isLoadingWalletClient);
+    console.log("statusWalletClient: ", statusWalletClient);
+  }, [
+    dataWalletClient,
+    isErrorWalletClient,
+    isLoadingWalletClient,
+    statusWalletClient,
+  ]);
 
   async function handleRentPayment() {
     //* Network is invalid.

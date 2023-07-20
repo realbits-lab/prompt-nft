@@ -6,6 +6,7 @@ import {
 } from "@web3modal/ethereum";
 import { Web3Modal } from "@web3modal/react";
 import { configureChains, WagmiConfig, createConfig } from "wagmi";
+import { createPublicClient, http } from "viem";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { polygon, polygonMumbai, localhost } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
@@ -22,15 +23,11 @@ import createEmotionCache from "@/utils/createEmotionCache";
 import fetchJson from "@/lib/fetchJson";
 import { getChainName } from "@/lib/util";
 
-interface MyAppProps extends AppProps {
-  emotionCache?: EmotionCache;
-}
-
 // Add emotion cache.
 const clientSideEmotionCache = createEmotionCache();
 
 // Add more properties.
-const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
+function MyApp(props) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
   const theme = createTheme(themeOptions);
   const WALLET_CONNECT_PROJECT_ID =
@@ -39,34 +36,27 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
   // const METAMASK_DEEP_LINK = "test.fictures.xyz";
   // const METAMASK_DEEP_LINK = "7096-218-238-111-214.ngrok-free.app";
   const UNIVERSAL_LINK = "https://7096-218-238-111-214.ngrok-free.app";
+  const BLOCKCHAIN_NETWORK = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
 
-  let chains: any[] = [];
-  if (
-    getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK }) ===
-    "matic"
-  ) {
-    chains = [polygon];
-  } else if (
-    getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK }) ===
-    "maticmum"
-  ) {
-    chains = [polygonMumbai];
-  } else if (
-    getChainName({ chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK }) ===
-    "localhost"
-  ) {
-    chains = [localhost];
-  } else {
-    chains = [];
+  let chains;
+  let transport;
+  switch (BLOCKCHAIN_NETWORK) {
+    case "localhost":
+    default:
+      chains = [localhost];
+      transport = http("http://localhost:8545");
+      break;
+
+    case "matic":
+      chains = [polygon];
+      transport = http("https://rpc-mainnet.maticvigil.com");
+      break;
+
+    case "maticmum":
+      chains = [polygonMumbai];
+      transport = http("https://rpc-mumbai.maticvigil.com/");
+      break;
   }
-  // console.log(
-  //   "process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK: ",
-  //   process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK
-  // );
-  // console.log(
-  //   "process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ",
-  //   process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID
-  // );
 
   //* Wagmi client
   const {
@@ -78,7 +68,6 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
     }),
     alchemyProvider({ apiKey: ALCHEMY_API_KEY }),
   ]);
-  // console.log("chains: ", chains);
 
   const wagmiConfig = createConfig({
     autoConnect: true,
@@ -88,11 +77,12 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
         version: 1,
         projectId: WALLET_CONNECT_PROJECT_ID,
       }),
-      // new MetaMaskConnector({
-      //   chains,
-      // }),
     ],
     publicClient: wagmiPublicClient,
+    // publicClient: createPublicClient({
+    //   chain: chains,
+    //   transport: transport,
+    // }),
     webSocketPublicClient: wagmiWebSocketPublicClient,
   });
 
@@ -122,22 +112,11 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
           <Web3Modal
             projectId={WALLET_CONNECT_PROJECT_ID}
             ethereumClient={ethereumClient}
-            // mobileWallets={[
-            //   {
-            //     id: "metaMask",
-            //     name: "Metamask",
-            //     links: {
-            //       native: "metamask://",
-            //       universal: UNIVERSAL_LINK,
-            //     },
-            //   },
-            // ]}
-            // walletImages={{ metaMask: "/metamask-logo.png" }}
           />
         </ThemeProvider>
       </CacheProvider>
     </SWRConfig>
   );
-};
+}
 
 export default MyApp;

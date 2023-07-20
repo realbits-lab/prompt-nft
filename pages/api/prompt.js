@@ -14,7 +14,7 @@ import promptNFTABI from "@/contracts/promptNFT.json";
 const { decrypt } = require("@metamask/eth-sig-util");
 
 async function handler(req, res) {
-  console.log("call /api/prompt");
+  // console.log("call /api/prompt");
   // console.log("req.session.user: ", req.session.user);
 
   const PROMPTER_PRIVATE_KEY = process.env.NEXT_PUBLIC_PROMPTER_PRIVATE_KEY;
