@@ -1,4 +1,10 @@
-import { useAccount, useWalletClient, useNetwork } from "wagmi";
+import {
+  useAccount,
+  useWalletClient,
+  useNetwork,
+  useConnect,
+  useDisconnect,
+} from "wagmi";
 import Button from "@mui/material/Button";
 import { useRecoilStateLoadable } from "recoil";
 import useUser from "@/lib/useUser";
@@ -79,7 +85,7 @@ export async function handleLogout({ mutateUser }) {
 
 export default function User() {
   //*----------------------------------------------------------------------------
-  //* Define constance variables.
+  //* Wagmi.
   //*----------------------------------------------------------------------------
   const { chains, chain: selectedChain } = useNetwork();
   // console.log("selectedChain: ", selectedChain);
@@ -88,23 +94,26 @@ export default function User() {
   // console.log("isConnected: ", isConnected);
   const { data: walletClient } = useWalletClient();
   // console.log("walletClient: ", walletClient);
+  const {
+    connect,
+    connectors,
+    error: errorConnect,
+    isLoading: isLoadingConnect,
+    pendingConnector,
+  } = useConnect();
+  const { disconnect } = useDisconnect();
+
+  //*----------------------------------------------------------------------------
+  //* User hook.
+  //*----------------------------------------------------------------------------
   const { user, mutateUser } = useUser();
   // console.log("user: ", user);
 
   //*---------------------------------------------------------------------------
-  //* Snackbar variables.
+  //* Snackbar.
   //*---------------------------------------------------------------------------
   const [writeToastMessageLoadable, setWriteToastMessage] =
     useRecoilStateLoadable(writeToastMessageState);
-  const writeToastMessage =
-    writeToastMessageLoadable?.state === "hasValue"
-      ? writeToastMessageLoadable.contents
-      : {
-          snackbarSeverity: AlertSeverity.info,
-          snackbarMessage: undefined,
-          snackbarTime: new Date(),
-          snackbarOpen: false,
-        };
 
   async function handleLoginClick() {
     if (!address) {
@@ -146,9 +155,7 @@ export default function User() {
       {(user === undefined || user.isLoggedIn === false) && (
         <Button
           sx={{ my: 2, color: "white", display: "block" }}
-          onClick={async () => {
-            await handleLoginClick();
-          }}
+          onClick={handleLoginClick}
         >
           Login
         </Button>
@@ -156,9 +163,7 @@ export default function User() {
       {user !== undefined && user.isLoggedIn === true && (
         <Button
           sx={{ my: 2, color: "white", display: "block" }}
-          onClick={async () => {
-            await handleLogoutClick();
-          }}
+          onClick={handleLogoutClick}
         >
           Logout
         </Button>
