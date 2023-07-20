@@ -63,20 +63,21 @@ function MyApp(props) {
     publicClient: wagmiPublicClient,
     webSocketPublicClient: wagmiWebSocketPublicClient,
   } = configureChains(chains, [
-    w3mProvider({
-      projectId: WALLET_CONNECT_PROJECT_ID,
-    }),
+    // w3mProvider({
+    //   projectId: WALLET_CONNECT_PROJECT_ID,
+    // }),
     alchemyProvider({ apiKey: ALCHEMY_API_KEY }),
   ]);
 
   const wagmiConfig = createConfig({
     autoConnect: true,
     connectors: [
-      ...w3mConnectors({
-        chains,
-        version: 1,
-        projectId: WALLET_CONNECT_PROJECT_ID,
-      }),
+      new MetaMaskConnector({ chains }),
+      // ...w3mConnectors({
+      //   chains,
+      //   version: 1,
+      //   projectId: WALLET_CONNECT_PROJECT_ID,
+      // }),
     ],
     publicClient: wagmiPublicClient,
     // publicClient: createPublicClient({
@@ -109,10 +110,10 @@ function MyApp(props) {
             </RecoilRoot>
           </WagmiConfig>
 
-          <Web3Modal
+          {/* <Web3Modal
             projectId={WALLET_CONNECT_PROJECT_ID}
             ethereumClient={ethereumClient}
-          />
+          /> */}
         </ThemeProvider>
       </CacheProvider>
     </SWRConfig>

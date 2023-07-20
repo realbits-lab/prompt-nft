@@ -27,6 +27,7 @@ import ListOwn from "@/components/ListOwn";
 import CarouselOwn from "@/components/CarouselOwn";
 import ListRent from "@/components/ListRent";
 import ThemePage from "@/components/ThemePage";
+import ConnectWrapper from "@/components/ConnectWrapper";
 import fetchJson from "@/lib/fetchJson";
 import { getChainId, isWalletConnected } from "@/lib/util";
 import promptNFTABI from "@/contracts/promptNFT.json";
@@ -62,7 +63,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
   const imageFetchFinished = React.useRef(false);
 
   //*---------------------------------------------------------------------------
-  //* Wagmi and Web3Modal hook.
+  //* Wagmi.
   //*---------------------------------------------------------------------------
   const {
     isOpen: isOpenWeb3Modal,
@@ -474,7 +475,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
         minHeight="100vh"
       >
         <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-          <Grid
+          {/* <Grid
             container
             justifyContent="space-around"
             marginTop={3}
@@ -486,7 +487,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
             <Grid item>
               <Web3NetworkSwitch />
             </Grid>
-          </Grid>
+          </Grid> */}
           <CardContent
             sx={{
               padding: "10",
@@ -495,6 +496,23 @@ function List({ mode, updated, setNewImageCountFunc }) {
             <Button fullWidth variant="contained" onClick={openWeb3Modal}>
               Connect Wallet
             </Button>
+            <div>
+              {connectors.map((connector) => (
+                <button
+                  disabled={!connector.ready}
+                  key={connector.id}
+                  onClick={() => connect({ connector })}
+                >
+                  {connector.name}
+                  {!connector.ready && " (unsupported)"}
+                  {isLoadingConnect &&
+                    connector.id === pendingConnector?.id &&
+                    " (connecting)"}
+                </button>
+              ))}
+
+              {errorConnect && <div>{errorConnect.message}</div>}
+            </div>
           </CardContent>
         </Card>
       </Box>
@@ -520,7 +538,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
           </div>
         ) : mode === "nft" ? (
           <div>
-            {
+            {/* {
               //* TODO: Handle the wrong network case also.
               isWalletConnected({ isConnected, selectedChain }) === false ? (
                 <NoLoginPage />
@@ -528,7 +546,10 @@ function List({ mode, updated, setNewImageCountFunc }) {
                 // <CarouselNft />
                 <ListNft />
               )
-            }
+            } */}
+            <ConnectWrapper>
+              <ListNft />
+            </ConnectWrapper>
           </div>
         ) : mode === "own" ? (
           <div>

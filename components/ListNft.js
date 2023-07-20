@@ -31,7 +31,7 @@ function ListNft() {
   // console.log("call ListNft()");
 
   //*---------------------------------------------------------------------------
-  //* Wagmi hook
+  //* Wagmi.
   //*---------------------------------------------------------------------------
   const RENT_MARKET_CONTRACT_ADDRES =
     process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
