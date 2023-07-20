@@ -27,6 +27,8 @@ import ListOwn from "@/components/ListOwn";
 import CarouselOwn from "@/components/CarouselOwn";
 import ListRent from "@/components/ListRent";
 import ThemePage from "@/components/ThemePage";
+import ConnectWrapper from "@/components/ConnectWrapper";
+import LoginWrapper from "@/components/LoginWrapper";
 import fetchJson from "@/lib/fetchJson";
 import { getChainId, isWalletConnected } from "@/lib/util";
 import promptNFTABI from "@/contracts/promptNFT.json";
@@ -62,7 +64,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
   const imageFetchFinished = React.useRef(false);
 
   //*---------------------------------------------------------------------------
-  //* Wagmi and Web3Modal hook.
+  //* Wagmi.
   //*---------------------------------------------------------------------------
   const {
     isOpen: isOpenWeb3Modal,
@@ -250,13 +252,12 @@ function List({ mode, updated, setNewImageCountFunc }) {
     // watch: true,
   });
 
-  //* TODO: Use useContractRead hook.
   //* Get all my own data array.
   const {
-    data: dataOwn,
-    error: errorOwn,
-    isLoading: isLoadingOwn,
-    isValidating: isValidatingOwn,
+    data: dataAllMyOwnData,
+    error: errorAllMyOwnData,
+    isLoading: isLoadingAllMyOwnData,
+    isValidating: isValidatingAllMyOwnData,
   } = useSWR(
     {
       command: "getAllMyOwnData",
@@ -268,7 +269,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
       refreshInterval: IMAGE_REFRESH_INTERVAL_TIME,
     }
   );
-  // console.log("dataOwn: ", dataOwn);
+  // console.log("dataAllMyOwnData: ", dataAllMyOwnData);
 
   //*---------------------------------------------------------------------------
   //* Define state data.
@@ -330,7 +331,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
 
       initialize();
     },
-    [dataOwn]
+    [dataAllMyOwnData]
   );
 
   function initialize() {
@@ -341,7 +342,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
     // console.log("swrIsValidatingRegisterData: ", swrIsValidatingRegisterData);
     // console.log("swrStatusRegisterData: ", swrStatusRegisterData);
     // console.log("swrDataCollection: ", swrDataCollection);
-    // console.log("dataOwn: ", dataOwn);
+    // console.log("dataAllMyOwnData: ", dataAllMyOwnData);
     // console.log("dataRent: ", dataRent);
 
     //* Find the register data in registered collection.
@@ -362,11 +363,11 @@ function List({ mode, updated, setNewImageCountFunc }) {
     //* Find the own nft from registered nft data.
     // console.log("PROMPT_NFT_CONTRACT_ADDRESS: ", PROMPT_NFT_CONTRACT_ADDRESS);
     let ownDataArray;
-    if (registerData && dataOwn) {
+    if (registerData && dataAllMyOwnData) {
       ownDataArray = registerData.filter(function (nft) {
         // console.log("nft: ", nft);
         // console.log("nft.tokenId: ", nft.tokenId);
-        return dataOwn.some(function (element) {
+        return dataAllMyOwnData.some(function (element) {
           // console.log("element: ", element);
           return (
             nft.tokenId === element.tokenId &&
@@ -475,7 +476,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
         minHeight="100vh"
       >
         <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-          <Grid
+          {/* <Grid
             container
             justifyContent="space-around"
             marginTop={3}
@@ -487,7 +488,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
             <Grid item>
               <Web3NetworkSwitch />
             </Grid>
-          </Grid>
+          </Grid> */}
           <CardContent
             sx={{
               padding: "10",
@@ -496,6 +497,23 @@ function List({ mode, updated, setNewImageCountFunc }) {
             <Button fullWidth variant="contained" onClick={openWeb3Modal}>
               Connect Wallet
             </Button>
+            <div>
+              {connectors.map((connector) => (
+                <button
+                  disabled={!connector.ready}
+                  key={connector.id}
+                  onClick={() => connect({ connector })}
+                >
+                  {connector.name}
+                  {!connector.ready && " (unsupported)"}
+                  {isLoadingConnect &&
+                    connector.id === pendingConnector?.id &&
+                    " (connecting)"}
+                </button>
+              ))}
+
+              {errorConnect && <div>{errorConnect.message}</div>}
+            </div>
           </CardContent>
         </Card>
       </Box>
@@ -521,7 +539,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
           </div>
         ) : mode === "nft" ? (
           <div>
-            {
+            {/* {
               //* TODO: Handle the wrong network case also.
               isWalletConnected({ isConnected, selectedChain }) === false ? (
                 <NoLoginPage />
@@ -529,7 +547,12 @@ function List({ mode, updated, setNewImageCountFunc }) {
                 // <CarouselNft />
                 <ListNft />
               )
-            }
+            } */}
+            {/* <ConnectWrapper> */}
+            <LoginWrapper>
+              <ListNft />
+            </LoginWrapper>
+            {/* </ConnectWrapper> */}
           </div>
         ) : mode === "own" ? (
           <div>
@@ -545,7 +568,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
               //   rentMarketContract={rentMarketContract}
               //   signTypedDataAsync={signTypedDataAsync}
               //   data={allOwnDataArray}
-              //   isLoading={isLoadingOwn}
+              //   isLoading={isLoadingAllMyOwnData}
               // />
               <ListOwn
                 selectedChain={selectedChain}
@@ -556,7 +579,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
                 rentMarketContract={rentMarketContract}
                 signTypedDataAsync={signTypedDataAsync}
                 data={allOwnDataArray}
-                isLoading={isLoadingOwn}
+                isLoading={isLoadingAllMyOwnData}
               />
             )}
           </div>
