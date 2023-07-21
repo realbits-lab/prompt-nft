@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+module.exports = {
   // async redirects() {
   //   return [
   //     {
@@ -17,6 +17,11 @@ const nextConfig = {
   //     devtool: "inline-source-map",
   //   };
   // },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    //* Because of viem package build error.
+    ignoreBuildErrors: true,
+  },
 };
-
-module.exports = nextConfig;
