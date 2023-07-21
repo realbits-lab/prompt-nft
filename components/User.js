@@ -1,18 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAccount, useWalletClient, useNetwork, useConnect } from "wagmi";
 import Button from "@mui/material/Button";
-import Avatar from "@mui/material/Avatar";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Dialog from "@mui/material/Dialog";
-import PersonIcon from "@mui/icons-material/Person";
-import AddIcon from "@mui/icons-material/Add";
-import Typography from "@mui/material/Typography";
-import { blue } from "@mui/material/colors";
+import Link from "@mui/material/Link";
 import { useRecoilStateLoadable } from "recoil";
 import useUser from "@/lib/useUser";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
@@ -95,15 +89,16 @@ export async function handleLogout({ mutateUser }) {
   }
 }
 
-export default function User() {
+export default function User({ hidden = false }) {
   //*----------------------------------------------------------------------------
   //* Wagmi.
   //*----------------------------------------------------------------------------
   const { chains, chain: selectedChain } = useNetwork();
   // console.log("selectedChain: ", selectedChain);
-  const { address, isConnected } = useAccount();
+  const { connector: activeConnector, address, isConnected } = useAccount();
   // console.log("address: ", address);
   // console.log("isConnected: ", isConnected);
+
   const { data: walletClient } = useWalletClient({
     onSuccess(data) {
       // console.log("call onSuccess()");
@@ -123,6 +118,7 @@ export default function User() {
     onSettled(data, error) {},
   });
   // console.log("walletClient: ", walletClient);
+
   const {
     connect,
     connectors,
@@ -141,7 +137,7 @@ export default function User() {
   });
 
   //*----------------------------------------------------------------------------
-  //* User hook.
+  //* Hook.
   //*----------------------------------------------------------------------------
   const { user, mutateUser } = useUser();
   // console.log("user: ", user);
@@ -158,9 +154,52 @@ export default function User() {
   //*---------------------------------------------------------------------------
   const [openConnectorsDialog, setOpenConnectorsDialog] = useState(false);
 
+  //* Listen account change.
+  useEffect(() => {
+    // console.log("call useEffect()");
+    // console.log("activeConnector: ", activeConnector);
+    // console.log("user: ", user);
+
+    async function handleConnectorUpdate({ account, chain }) {
+      // console.log("call handleConnectorUpdate()");
+      // console.log("account: ", account);
+      // console.log("chain: ", chain);
+      // console.log("user: ", user);
+      // console.log("selectedChain?.id: ", selectedChain?.id);
+
+      if (user?.isLoggedIn === true) {
+        try {
+          mutateUser(
+            await fetchJson({ url: "/api/logout" }, { method: "POST" }),
+            false
+          );
+        } catch (error) {
+          if (error instanceof FetchError) {
+            console.error(error.data.message);
+          } else {
+            console.error("An unexpected error happened:", error);
+          }
+        }
+      }
+    }
+
+    if (activeConnector) {
+      activeConnector.on("change", handleConnectorUpdate);
+    }
+
+    return () => {
+      // console.log("call activeConnector?.off()");
+
+      activeConnector?.off("change", handleConnectorUpdate);
+    };
+  }, []);
+
   //* Handle login click.
   async function handleLoginClick({ chainId, walletClient, mutateUser }) {
     // console.log("call handleLoginClick()");
+    // console.log("chainId: ", chainId);
+    // console.log("walletClient: ", walletClient);
+    // console.log("mutateUser: ", mutateUser);
     // console.log("isConnected: ", isConnected);
 
     if (isConnected === false) {
@@ -184,7 +223,7 @@ export default function User() {
     //* TODO: Should check the chain id.
     const signMessageResult = await handleSignMessage({
       account: publicAddress,
-      chainId: selectedChain?.id,
+      chainId,
       walletClient,
     });
     // console.log("signMessageResult: ", signMessageResult);
@@ -235,10 +274,14 @@ export default function User() {
     );
   }
 
+  if (hidden === true) {
+    return null;
+  }
+
   //* Render.
   return (
     <>
-      {(user === undefined || user.isLoggedIn === false) && (
+      {user?.isLoggedIn !== true && (
         <Button
           sx={{ my: 2, color: "white", display: "block" }}
           onClick={() => {
@@ -254,7 +297,8 @@ export default function User() {
           Login
         </Button>
       )}
-      {user !== undefined && user.isLoggedIn === true && (
+
+      {user?.isLoggedIn === true && (
         <Button
           sx={{ my: 2, color: "white", display: "block" }}
           onClick={() => {
