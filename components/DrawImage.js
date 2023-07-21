@@ -305,6 +305,7 @@ export default function DrawImage() {
       // console.log("error: ", error);
     },
   });
+
   const {
     data: dataRentNFTTx,
     isError: isErrorRentNFTTx,
@@ -766,6 +767,7 @@ export default function DrawImage() {
             autoComplete="off"
             display="flex"
             flexDirection="column"
+            sx={{ mt: CARD_MARGIN_TOP }}
           >
             {/*//* Show rent status.                                         */}
             {isLoadingRentData ||
