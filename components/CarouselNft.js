@@ -1,5 +1,4 @@
 import React from "react";
-import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 import {
   useAccount,
   useNetwork,

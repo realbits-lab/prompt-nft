@@ -1,10 +1,3 @@
-import { AppProps } from "next/app";
-import {
-  EthereumClient,
-  w3mConnectors,
-  w3mProvider,
-} from "@web3modal/ethereum";
-import { Web3Modal } from "@web3modal/react";
 import { configureChains, WagmiConfig, createConfig } from "wagmi";
 import { createPublicClient, http } from "viem";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
@@ -87,9 +80,6 @@ function MyApp(props) {
     webSocketPublicClient: wagmiWebSocketPublicClient,
   });
 
-  //* Web3Modal Ethereum Client
-  const ethereumClient = new EthereumClient(wagmiConfig, chains);
-
   return (
     <SWRConfig
       value={{
@@ -109,11 +99,6 @@ function MyApp(props) {
               <Component {...pageProps} />
             </RecoilRoot>
           </WagmiConfig>
-
-          {/* <Web3Modal
-            projectId={WALLET_CONNECT_PROJECT_ID}
-            ethereumClient={ethereumClient}
-          /> */}
         </ThemeProvider>
       </CacheProvider>
     </SWRConfig>

@@ -1,6 +1,5 @@
 import React from "react";
 import { useRouter } from "next/router";
-import { Web3Button, Web3NetworkSwitch, useWeb3Modal } from "@web3modal/react";
 import moment from "moment";
 import momentDurationFormatSetup from "moment-duration-format";
 import { useRecoilStateLoadable } from "recoil";
@@ -62,7 +61,7 @@ export default function DrawImage() {
   const MARGIN_TOP = "60px";
 
   //*---------------------------------------------------------------------------
-  //* Snackbar variables.
+  //* Snackbar.
   //*---------------------------------------------------------------------------
   const [writeToastMessageLoadable, setWriteToastMessage] =
     useRecoilStateLoadable(writeToastMessageState);
@@ -77,7 +76,7 @@ export default function DrawImage() {
         };
 
   //*---------------------------------------------------------------------------
-  //* Handle text input change.
+  //* Prompt input.
   //*---------------------------------------------------------------------------
   const [formValue, setFormValue] = React.useState({
     prompt: "",
@@ -98,7 +97,7 @@ export default function DrawImage() {
   };
 
   //*---------------------------------------------------------------------------
-  //* Wagmi hook.
+  //* Wagmi.
   //*---------------------------------------------------------------------------
   const RENT_MARKET_CONTRACT_ADDRES =
     process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
@@ -123,6 +122,7 @@ export default function DrawImage() {
       // console.log("error: ", error);
     },
   });
+
   const { data: walletClient } = useWalletClient({
     onSuccess(data) {
       // console.log("call onSuccess()");
@@ -140,17 +140,11 @@ export default function DrawImage() {
       // console.log("error: ", error);
     },
   });
+
   const [paymentNftRentFee, setPaymentNftRentFee] = React.useState();
   const [currentTimestamp, setCurrentTimestamp] = React.useState();
   const [imageFetchEndTime, setImageFetchEndTime] = React.useState();
   const [paymentNftRentEndTime, setPaymentNftRentEndTime] = React.useState();
-
-  const {
-    isOpen: isOpenWeb3Modal,
-    open: openWeb3Modal,
-    close: closeWeb3Modal,
-    setDefaultChain: setDefaultChainWeb3Modal,
-  } = useWeb3Modal();
 
   const {
     data: dataAllRentData,
@@ -303,6 +297,7 @@ export default function DrawImage() {
       // console.log("error: ", error);
     },
   });
+
   const {
     data: dataRentNFTTx,
     isError: isErrorRentNFTTx,
@@ -347,11 +342,38 @@ export default function DrawImage() {
       // console.log("error: ", error);
     },
   });
+
   useWatchPendingTransactions({
     listener: function (tx) {
       // console.log("tx: ", tx);
     },
   });
+
+  React.useEffect(
+    function () {
+      // console.log("call useEffect()");
+      // console.log("window.ethereum: ", window.ethereum);
+
+      momentDurationFormatSetup(moment);
+
+      setImageHeight(window.innerHeight - IMAGE_PADDING);
+      window.addEventListener("resize", handleResize);
+
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
+    },
+    [user]
+  );
+
+  //* TODO: No reload.
+  // useInterval(() => {
+  //   console.log("call useInterval()");
+
+  //   const timestamp = Math.floor(Date.now() / 1000);
+  //   // console.log("timestamp: ", timestamp);
+  //   setCurrentTimestamp((previousTimestamp) => timestamp);
+  // }, 1000);
 
   async function updateUserData() {
     // console.log("call updateUserData()");
@@ -378,33 +400,6 @@ export default function DrawImage() {
       throw error;
     }
   }
-
-  //* Initialize.
-  React.useEffect(
-    function () {
-      // console.log("call useEffect()");
-      // console.log("window.ethereum: ", window.ethereum);
-
-      momentDurationFormatSetup(moment);
-
-      setImageHeight(window.innerHeight - IMAGE_PADDING);
-      window.addEventListener("resize", handleResize);
-
-      return () => {
-        window.removeEventListener("resize", handleResize);
-      };
-    },
-    [user]
-  );
-
-  //* TODO: No reload.
-  // useInterval(() => {
-  //   console.log("call useInterval()");
-
-  //   const timestamp = Math.floor(Date.now() / 1000);
-  //   // console.log("timestamp: ", timestamp);
-  //   setCurrentTimestamp((previousTimestamp) => timestamp);
-  // }, 1000);
 
   function useInterval(callback, delay) {
     const savedCallback = React.useRef();
@@ -699,177 +694,54 @@ export default function DrawImage() {
     setPostingImage(false);
   }
 
-  function WalletConnectPage() {
-    return (
-      <>
-        <Box
-          sx={{
-            marginTop: "200px",
-          }}
-        >
-          <Button fullWidth variant="contained" onClick={openWeb3Modal}>
-            Connect Wallet
-          </Button>
-        </Box>
-      </>
-    );
-  }
-
-  function WalletLoginPage() {
-    return (
-      <>
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="center"
-          sx={{ marginTop: "50px" }}
-        >
-          <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-            <CardMedia
-              component="img"
-              image={PLACEHOLDER_IMAGE_URL}
-              height={"200px"}
-            />
-            <CardContent
-              sx={{
-                padding: "10",
-              }}
-            >
-              <Button
-                fullWidth
-                variant="contained"
-                onClick={async () => {
-                  if (!address) {
-                    setWriteToastMessage({
-                      snackbarSeverity: AlertSeverity.warning,
-                      snackbarMessage: "Wallet is not connected.",
-                      snackbarTime: new Date(),
-                      snackbarOpen: true,
-                    });
-                    return;
-                  }
-
-                  const publicAddress = address.toLowerCase();
-                  // console.log("publicAddress: ", publicAddress);
-
-                  //* TODO: Should check the chain id.
-                  const signMessageResult = await handleSignMessage({
-                    account: publicAddress,
-                    chainId: selectedChain.id,
-                    walletClient: walletClient,
-                  });
-                  // console.log("signMessageResult: ", signMessageResult);
-                  // console.log("handleAuthenticate: ", handleAuthenticate);
-
-                  // Send signature to back-end on the /auth route.
-                  await handleAuthenticate({
-                    publicAddress: publicAddress,
-                    signature: signMessageResult,
-                    mutateUser,
-                  });
-                }}
-              >
-                LOGIN
-              </Button>
-            </CardContent>
-          </Card>
-        </Box>
-      </>
-    );
-  }
-
-  function LoadingPage() {
-    // console.log("call buildLoadingPage()");
-
-    return (
-      <>
-        <Typography>Loading ...</Typography>
-      </>
-    );
-  }
-
   function PaymentPage() {
     return (
-      <>
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="center"
-          sx={{ marginTop: "50px" }}
+      <Box
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        sx={{ marginTop: "50px" }}
+      >
+        <Card
+          sx={{
+            minWidth: CARD_MIN_WIDTH,
+            maxWidth: CARD_MAX_WIDTH,
+            mt: CARD_MARGIN_TOP,
+          }}
         >
-          <Card
+          <CardContent
             sx={{
-              minWidth: CARD_MIN_WIDTH,
-              maxWidth: CARD_MAX_WIDTH,
+              padding: "10",
             }}
           >
-            <CardMedia
-              component="img"
-              image={PLACEHOLDER_IMAGE_URL}
-              height={"200px"}
-            />
-            <CardContent
-              sx={{
-                padding: "10",
+            <Typography variant="h6">
+              You have to rent NFT for 1-day drawing.
+            </Typography>
+            <Button
+              disabled={isLoadingRentNFT || isLoadingRentNFTTx}
+              fullWidth
+              sx={{ marginTop: "10px" }}
+              variant="contained"
+              onClick={function () {
+                if (writeRentNFT && dataRentData) {
+                  writeRentNFT?.({
+                    value: dataRentData.rentFee,
+                  });
+                }
               }}
             >
-              <Typography variant="h5">
-                You have to rent NFT for drawing.
-              </Typography>
-              <Button
-                disabled={isLoadingRentNFT || isLoadingRentNFTTx}
-                fullWidth
-                sx={{ marginTop: "10px" }}
-                variant="contained"
-                onClick={function () {
-                  if (writeRentNFT && dataRentData) {
-                    writeRentNFT?.({
-                      value: dataRentData.rentFee,
-                    });
-                  }
-                }}
-              >
-                {isLoadingRentNFT || isLoadingRentNFTTx ? (
-                  <Typography>
-                    Renting NFT... ({paymentNftRentFee} matic)
-                  </Typography>
-                ) : (
-                  <Typography>Rent NFT ({paymentNftRentFee} matic)</Typography>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        </Box>
-      </>
-    );
-  }
-
-  function ImagePage() {
-    // console.log("call ImagePage()");
-    // console.log("imageUrl: ", imageUrl);
-    // console.log("imageHeight: ", imageHeight);
-
-    return (
-      <Card sx={{ maxWidth: 345 }}>
-        <CardMedia
-          component="img"
-          image={imageUrl}
-          // height={imageHeight}
-          // fit="contain"
-          // sx={{ marginTop: "50px" }}
-        />
-      </Card>
-      // <Image
-      //   src={imageUrl}
-      //   height={imageHeight}
-      //   fit="contain"
-      //   duration={10}
-      //   easing="ease"
-      //   shiftDuration={10}
-      //   sx={{ marginTop: "50px" }}
-      // />
+              {isLoadingRentNFT || isLoadingRentNFTTx ? (
+                <Typography>
+                  Renting NFT... ({paymentNftRentFee} matic)
+                </Typography>
+              ) : (
+                <Typography>Rent NFT ({paymentNftRentFee} matic)</Typography>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      </Box>
     );
   }
 
@@ -877,29 +749,9 @@ export default function DrawImage() {
   //* https://github.com/mui/material-ui/issues/783
   return (
     <>
-      <Grid
-        container
-        spacing={2}
-        display="flex"
-        flexDirection="row"
-        justifyContent="flex-end"
-        sx={{ marginTop: MARGIN_TOP }}
-      >
-        <Grid item>
-          <Web3Button />
-        </Grid>
-        <Grid item>
-          <Web3NetworkSwitch />
-        </Grid>
-      </Grid>
-
-      {isConnected === false ? (
-        <WalletConnectPage />
-      ) : !dataAllRentData ? (
-        <LoadingPage />
-      ) : user === undefined || user.isLoggedIn === false ? (
-        <WalletLoginPage />
-      ) : user !== undefined && user.rentPaymentNft === true ? (
+      {user?.rentPaymentNft === false ? (
+        <PaymentPage />
+      ) : (
         <>
           <Box
             component="form"
@@ -907,7 +759,9 @@ export default function DrawImage() {
             autoComplete="off"
             display="flex"
             flexDirection="column"
+            sx={{ mt: CARD_MARGIN_TOP }}
           >
+            {/*//* Show rent status.                                         */}
             {isLoadingRentData ||
             !paymentNftRentEndTime ||
             !currentTimestamp ? (
@@ -923,6 +777,8 @@ export default function DrawImage() {
             ) : (
               <Typography>Rent finished</Typography>
             )}
+
+            {/*//* Prompt input.                                             */}
             <TextField
               required
               id="outlined-required"
@@ -982,6 +838,8 @@ export default function DrawImage() {
                 .humanize()}
             </Typography>
           )} */}
+
+            {/*//* Show action step for draw, post, and mint.                */}
             <Box sx={{ width: "100%" }}>
               <Stepper
                 activeStep={isImageDrawn ? 1 : isImagePosted ? 2 : -1}
@@ -1064,6 +922,7 @@ export default function DrawImage() {
               </Stepper>
             </Box>
 
+            {/*//* Show image.                                               */}
             {loadingImage ? (
               <Box
                 height={imageHeight}
@@ -1108,8 +967,6 @@ export default function DrawImage() {
             )}
           </Box>
         </>
-      ) : (
-        <PaymentPage />
       )}
     </>
   );

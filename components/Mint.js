@@ -76,6 +76,7 @@ function Mint({
     abi: promptNFTABI.abi,
     functionName: "safeMint",
   });
+
   const {
     data: dataSafeMintTx,
     isError: isErrorSafeMintTx,

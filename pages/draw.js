@@ -1,5 +1,10 @@
-import DrawImage from "../components/DrawImage";
+import DrawImage from "@/components/DrawImage";
+import LoginWrapper from "@/components/LoginWrapper";
 
 export default function draw() {
-  return <DrawImage />;
+  return (
+    <LoginWrapper>
+      <DrawImage />
+    </LoginWrapper>
+  );
 }

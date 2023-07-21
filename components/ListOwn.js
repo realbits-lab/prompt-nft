@@ -1,7 +1,5 @@
 import React from "react";
-import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
@@ -65,14 +63,6 @@ export default function ListOwn({
         alignItems="center"
         minHeight="100vh"
       >
-        {/* <Grid container spacing={2} justifyContent="space-around" padding={2}>
-          <Grid item>
-            <Web3Button />
-          </Grid>
-          <Grid item>
-            <Web3NetworkSwitch />
-          </Grid>
-        </Grid> */}
         <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
           <CardMedia component="img" image={PLACEHOLDER_IMAGE_URL} />
           <CardContent

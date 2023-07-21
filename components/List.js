@@ -1,5 +1,4 @@
 import React from "react";
-import { Web3Button, Web3NetworkSwitch, useWeb3Modal } from "@web3modal/react";
 import {
   useAccount,
   useNetwork,
@@ -66,13 +65,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
   //*---------------------------------------------------------------------------
   //* Wagmi.
   //*---------------------------------------------------------------------------
-  const {
-    isOpen: isOpenWeb3Modal,
-    open: openWeb3Modal,
-    close: closeWeb3Modal,
-    setDefaultChain: setDefaultChainWeb3Modal,
-  } = useWeb3Modal();
-
   //* Handle a new useNetwork instead of useWeb3ModalNetwork hook.
   const { chains, chain: selectedChain } = useNetwork();
   // console.log("selectedChain: ", selectedChain);
@@ -312,8 +304,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
   // console.log("isSuccessSignTypedData: ", isSuccessSignTypedData);
   // console.log("signTypedDataAsync: ", signTypedDataAsync);
 
-  const theme = useTheme();
-
   React.useEffect(
     function () {
       // console.log("call useEffect()");
@@ -463,63 +453,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
     }
   }
 
-  function NoLoginPage() {
-    // console.log("theme: ", theme);
-    return (
-      <Box
-        sx={{
-          "& .MuiTextField-root": { m: 1, width: "25ch" },
-        }}
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
-      >
-        <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-          {/* <Grid
-            container
-            justifyContent="space-around"
-            marginTop={3}
-            marginBottom={1}
-          >
-            <Grid item>
-              <Web3Button />
-            </Grid>
-            <Grid item>
-              <Web3NetworkSwitch />
-            </Grid>
-          </Grid> */}
-          <CardContent
-            sx={{
-              padding: "10",
-            }}
-          >
-            <Button fullWidth variant="contained" onClick={openWeb3Modal}>
-              Connect Wallet
-            </Button>
-            <div>
-              {connectors.map((connector) => (
-                <button
-                  disabled={!connector.ready}
-                  key={connector.id}
-                  onClick={() => connect({ connector })}
-                >
-                  {connector.name}
-                  {!connector.ready && " (unsupported)"}
-                  {isLoadingConnect &&
-                    connector.id === pendingConnector?.id &&
-                    " (connecting)"}
-                </button>
-              ))}
-
-              {errorConnect && <div>{errorConnect.message}</div>}
-            </div>
-          </CardContent>
-        </Card>
-      </Box>
-    );
-  }
-
   return (
     <div>
       <Box
@@ -529,78 +462,43 @@ function List({ mode, updated, setNewImageCountFunc }) {
         alignItems="center"
       >
         {mode === "draw" ? (
-          <div>
+          <LoginWrapper>
             <DrawImage />
-          </div>
+          </LoginWrapper>
         ) : mode === "image" ? (
-          <div>
-            {/* <CarouselImage data={dataImage} isLoading={isLoadingImage} /> */}
-            <ListImage />
-          </div>
+          <ListImage />
         ) : mode === "nft" ? (
-          <div>
-            {/* {
-              //* TODO: Handle the wrong network case also.
-              isWalletConnected({ isConnected, selectedChain }) === false ? (
-                <NoLoginPage />
-              ) : (
-                // <CarouselNft />
-                <ListNft />
-              )
-            } */}
-            {/* <ConnectWrapper> */}
-            <LoginWrapper>
-              <ListNft />
-            </LoginWrapper>
-            {/* </ConnectWrapper> */}
-          </div>
+          <LoginWrapper>
+            <ListNft />
+          </LoginWrapper>
         ) : mode === "own" ? (
-          <div>
-            {isWalletConnected({ isConnected, selectedChain }) === false ? (
-              <NoLoginPage />
-            ) : (
-              // <CarouselOwn
-              //   selectedChain={selectedChain}
-              //   address={address}
-              //   isConnected={isConnected}
-              //   dataWalletClient={dataWalletClient}
-              //   promptNftContract={promptNftContract}
-              //   rentMarketContract={rentMarketContract}
-              //   signTypedDataAsync={signTypedDataAsync}
-              //   data={allOwnDataArray}
-              //   isLoading={isLoadingAllMyOwnData}
-              // />
-              <ListOwn
-                selectedChain={selectedChain}
-                address={address}
-                isConnected={isConnected}
-                dataWalletClient={dataWalletClient}
-                promptNftContract={promptNftContract}
-                rentMarketContract={rentMarketContract}
-                signTypedDataAsync={signTypedDataAsync}
-                data={allOwnDataArray}
-                isLoading={isLoadingAllMyOwnData}
-              />
-            )}
-          </div>
+          <LoginWrapper>
+            <ListOwn
+              selectedChain={selectedChain}
+              address={address}
+              isConnected={isConnected}
+              dataWalletClient={dataWalletClient}
+              promptNftContract={promptNftContract}
+              rentMarketContract={rentMarketContract}
+              signTypedDataAsync={signTypedDataAsync}
+              data={allOwnDataArray}
+              isLoading={isLoadingAllMyOwnData}
+            />
+          </LoginWrapper>
         ) : mode === "rent" ? (
-          <div>
-            {isWalletConnected({ isConnected, selectedChain }) === false ? (
-              <NoLoginPage />
-            ) : (
-              <ListRent
-                selectedChain={selectedChain}
-                address={address}
-                isConnected={isConnected}
-                dataWalletClient={dataWalletClient}
-                promptNftContract={promptNftContract}
-                rentMarketContract={rentMarketContract}
-                signTypedDataAsync={signTypedDataAsync}
-                data={allMyRentDataArray}
-                isLoading={swrIsLoadingRentData}
-              />
-            )}
-          </div>
+          <LoginWrapper>
+            <ListRent
+              selectedChain={selectedChain}
+              address={address}
+              isConnected={isConnected}
+              dataWalletClient={dataWalletClient}
+              promptNftContract={promptNftContract}
+              rentMarketContract={rentMarketContract}
+              signTypedDataAsync={signTypedDataAsync}
+              data={allMyRentDataArray}
+              isLoading={swrIsLoadingRentData}
+            />
+          </LoginWrapper>
         ) : mode === "theme" ? (
           <div>
             <ThemePage />
