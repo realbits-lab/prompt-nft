@@ -701,96 +701,6 @@ export default function DrawImage() {
     setPostingImage(false);
   }
 
-  function WalletConnectPage() {
-    return (
-      <>
-        <Box
-          sx={{
-            marginTop: "200px",
-          }}
-        >
-          <Button fullWidth variant="contained" onClick={openWeb3Modal}>
-            Connect Wallet
-          </Button>
-        </Box>
-      </>
-    );
-  }
-
-  function WalletLoginPage() {
-    return (
-      <>
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="center"
-          sx={{ marginTop: "50px" }}
-        >
-          <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-            <CardMedia
-              component="img"
-              image={PLACEHOLDER_IMAGE_URL}
-              height={"200px"}
-            />
-            <CardContent
-              sx={{
-                padding: "10",
-              }}
-            >
-              <Button
-                fullWidth
-                variant="contained"
-                onClick={async () => {
-                  if (!address) {
-                    setWriteToastMessage({
-                      snackbarSeverity: AlertSeverity.warning,
-                      snackbarMessage: "Wallet is not connected.",
-                      snackbarTime: new Date(),
-                      snackbarOpen: true,
-                    });
-                    return;
-                  }
-
-                  const publicAddress = address.toLowerCase();
-                  // console.log("publicAddress: ", publicAddress);
-
-                  //* TODO: Should check the chain id.
-                  const signMessageResult = await handleSignMessage({
-                    account: publicAddress,
-                    chainId: selectedChain.id,
-                    walletClient: walletClient,
-                  });
-                  // console.log("signMessageResult: ", signMessageResult);
-                  // console.log("handleAuthenticate: ", handleAuthenticate);
-
-                  // Send signature to back-end on the /auth route.
-                  await handleAuthenticate({
-                    publicAddress: publicAddress,
-                    signature: signMessageResult,
-                    mutateUser,
-                  });
-                }}
-              >
-                LOGIN
-              </Button>
-            </CardContent>
-          </Card>
-        </Box>
-      </>
-    );
-  }
-
-  function LoadingPage() {
-    // console.log("call buildLoadingPage()");
-
-    return (
-      <>
-        <Typography>Loading ...</Typography>
-      </>
-    );
-  }
-
   function PaymentPage() {
     return (
       <Box
@@ -812,8 +722,8 @@ export default function DrawImage() {
               padding: "10",
             }}
           >
-            <Typography variant="h5">
-              You have to rent NFT for drawing.
+            <Typography variant="h6">
+              You have to rent NFT for 1-day drawing.
             </Typography>
             <Button
               disabled={isLoadingRentNFT || isLoadingRentNFTTx}
@@ -857,6 +767,7 @@ export default function DrawImage() {
             display="flex"
             flexDirection="column"
           >
+            {/*//* Show rent status.                                         */}
             {isLoadingRentData ||
             !paymentNftRentEndTime ||
             !currentTimestamp ? (
@@ -872,6 +783,8 @@ export default function DrawImage() {
             ) : (
               <Typography>Rent finished</Typography>
             )}
+
+            {/*//* Prompt input.                                             */}
             <TextField
               required
               id="outlined-required"
@@ -931,6 +844,8 @@ export default function DrawImage() {
                 .humanize()}
             </Typography>
           )} */}
+
+            {/*//* Show action step for draw, post, and mint.                */}
             <Box sx={{ width: "100%" }}>
               <Stepper
                 activeStep={isImageDrawn ? 1 : isImagePosted ? 2 : -1}
@@ -1013,6 +928,7 @@ export default function DrawImage() {
               </Stepper>
             </Box>
 
+            {/*//* Show image.                                               */}
             {loadingImage ? (
               <Box
                 height={imageHeight}
