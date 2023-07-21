@@ -171,7 +171,7 @@ export default function ListItemNft({ registerData }) {
       // console.log("registerData?.tokenId: ", registerData?.tokenId);
       // console.log("address: ", address);
       //* Check renter.
-      if (data.renteeAddress.toLowerCase() === address.toLowerCase()) {
+      if (data.renteeAddress.toLowerCase() === address?.toLowerCase()) {
         setIsRentee(true);
       } else {
         setIsRentee(false);
@@ -209,7 +209,7 @@ export default function ListItemNft({ registerData }) {
       // console.log("address: ", address);
 
       //* Check owner.
-      if (data.toLowerCase() === address.toLowerCase()) {
+      if (data.toLowerCase() === address?.toLowerCase()) {
         setIsOwner(true);
       } else {
         setIsOwner(false);

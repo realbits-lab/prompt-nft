@@ -309,14 +309,14 @@ export default function ListPage(props) {
                     BOARD
                   </MenuItem>
                 </Link>
-                <MenuItem
+                {/* <MenuItem
                   onClick={() => {
                     setCurrentMode(MENU_ENUM.theme);
                     handleSettingMenuClose();
                   }}
                 >
                   THEME
-                </MenuItem>
+                </MenuItem> */}
                 <MenuItem
                   onClick={async () => {
                     setCurrentMode(MENU_ENUM.image);

@@ -1,5 +1,4 @@
 import React from "react";
-import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
