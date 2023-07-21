@@ -93,6 +93,12 @@ function ListNft() {
           sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
         >
           {dataAllRegisterData.map((registerData, idx) => {
+            console.log("registerData.nftAddress: ", registerData.nftAddress);
+            console.log(
+              "PROMPT_NFT_CONTRACT_ADDRESS: ",
+              PROMPT_NFT_CONTRACT_ADDRESS
+            );
+
             //* Filter the current prompt NFT contract address.
             if (
               PROMPT_NFT_CONTRACT_ADDRESS.toLowerCase() ===
