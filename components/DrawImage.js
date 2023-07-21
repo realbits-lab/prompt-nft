@@ -62,7 +62,7 @@ export default function DrawImage() {
   const MARGIN_TOP = "60px";
 
   //*---------------------------------------------------------------------------
-  //* Snackbar variables.
+  //* Snackbar.
   //*---------------------------------------------------------------------------
   const [writeToastMessageLoadable, setWriteToastMessage] =
     useRecoilStateLoadable(writeToastMessageState);
@@ -77,7 +77,7 @@ export default function DrawImage() {
         };
 
   //*---------------------------------------------------------------------------
-  //* Handle text input change.
+  //* Prompt input.
   //*---------------------------------------------------------------------------
   const [formValue, setFormValue] = React.useState({
     prompt: "",
@@ -98,7 +98,7 @@ export default function DrawImage() {
   };
 
   //*---------------------------------------------------------------------------
-  //* Wagmi hook.
+  //* Wagmi.
   //*---------------------------------------------------------------------------
   const RENT_MARKET_CONTRACT_ADDRES =
     process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
@@ -123,6 +123,7 @@ export default function DrawImage() {
       // console.log("error: ", error);
     },
   });
+
   const { data: walletClient } = useWalletClient({
     onSuccess(data) {
       // console.log("call onSuccess()");
@@ -140,6 +141,7 @@ export default function DrawImage() {
       // console.log("error: ", error);
     },
   });
+
   const [paymentNftRentFee, setPaymentNftRentFee] = React.useState();
   const [currentTimestamp, setCurrentTimestamp] = React.useState();
   const [imageFetchEndTime, setImageFetchEndTime] = React.useState();
@@ -347,11 +349,38 @@ export default function DrawImage() {
       // console.log("error: ", error);
     },
   });
+
   useWatchPendingTransactions({
     listener: function (tx) {
       // console.log("tx: ", tx);
     },
   });
+
+  React.useEffect(
+    function () {
+      // console.log("call useEffect()");
+      // console.log("window.ethereum: ", window.ethereum);
+
+      momentDurationFormatSetup(moment);
+
+      setImageHeight(window.innerHeight - IMAGE_PADDING);
+      window.addEventListener("resize", handleResize);
+
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
+    },
+    [user]
+  );
+
+  //* TODO: No reload.
+  // useInterval(() => {
+  //   console.log("call useInterval()");
+
+  //   const timestamp = Math.floor(Date.now() / 1000);
+  //   // console.log("timestamp: ", timestamp);
+  //   setCurrentTimestamp((previousTimestamp) => timestamp);
+  // }, 1000);
 
   async function updateUserData() {
     // console.log("call updateUserData()");
@@ -378,33 +407,6 @@ export default function DrawImage() {
       throw error;
     }
   }
-
-  //* Initialize.
-  React.useEffect(
-    function () {
-      // console.log("call useEffect()");
-      // console.log("window.ethereum: ", window.ethereum);
-
-      momentDurationFormatSetup(moment);
-
-      setImageHeight(window.innerHeight - IMAGE_PADDING);
-      window.addEventListener("resize", handleResize);
-
-      return () => {
-        window.removeEventListener("resize", handleResize);
-      };
-    },
-    [user]
-  );
-
-  //* TODO: No reload.
-  // useInterval(() => {
-  //   console.log("call useInterval()");
-
-  //   const timestamp = Math.floor(Date.now() / 1000);
-  //   // console.log("timestamp: ", timestamp);
-  //   setCurrentTimestamp((previousTimestamp) => timestamp);
-  // }, 1000);
 
   function useInterval(callback, delay) {
     const savedCallback = React.useRef();
@@ -877,29 +879,7 @@ export default function DrawImage() {
   //* https://github.com/mui/material-ui/issues/783
   return (
     <>
-      <Grid
-        container
-        spacing={2}
-        display="flex"
-        flexDirection="row"
-        justifyContent="flex-end"
-        sx={{ marginTop: MARGIN_TOP }}
-      >
-        <Grid item>
-          <Web3Button />
-        </Grid>
-        <Grid item>
-          <Web3NetworkSwitch />
-        </Grid>
-      </Grid>
-
-      {isConnected === false ? (
-        <WalletConnectPage />
-      ) : !dataAllRentData ? (
-        <LoadingPage />
-      ) : user === undefined || user.isLoggedIn === false ? (
-        <WalletLoginPage />
-      ) : user !== undefined && user.rentPaymentNft === true ? (
+      {user?.rentPaymentNft === true ? (
         <>
           <Box
             component="form"

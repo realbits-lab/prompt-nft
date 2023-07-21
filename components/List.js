@@ -462,7 +462,9 @@ function List({ mode, updated, setNewImageCountFunc }) {
         alignItems="center"
       >
         {mode === "draw" ? (
-          <DrawImage />
+          <LoginWrapper>
+            <DrawImage />
+          </LoginWrapper>
         ) : mode === "image" ? (
           <ListImage />
         ) : mode === "nft" ? (
