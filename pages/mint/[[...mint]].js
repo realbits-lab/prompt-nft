@@ -1,9 +1,7 @@
 import React from "react";
 import { useRouter } from "next/router";
-import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 import { useAccount, useNetwork } from "wagmi";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
@@ -12,8 +10,6 @@ import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import Mint from "../../components/Mint";
-import { isWalletConnected } from "../../lib/util";
-import { CircularProgress } from "@mui/material";
 
 const MintPage = () => {
   //*---------------------------------------------------------------------------
@@ -167,48 +163,6 @@ const MintPage = () => {
     );
   }
 
-  function buildMintPage() {
-    // console.log("call buildMintPage()");
-
-    if (isWalletConnected({ isConnected, selectedChain }) === false) {
-      return (
-        <Box
-          sx={{
-            marginTop: "20px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
-        >
-          <Button variant="text">
-            Click the connect wallet button or change network.
-          </Button>
-          {buildContentPage()}
-        </Box>
-      );
-    }
-
-    return buildContentPage();
-  }
-
-  function buildContentPage() {
-    // console.log("call buildContentPage()");
-    // console.log("errorStatus: ", errorStatus);
-
-    if (errorStatus === undefined) {
-      return (
-        <Mint
-          inputImageUrl={imageUrl}
-          inputPrompt={prompt}
-          inputNegativePrompt={negativePrompt}
-          inputModelName={modelName}
-        />
-      );
-    } else {
-      return <ErrorPage errorStatus={errorStatus} />;
-    }
-  }
-
   return (
     <Box
       display="flex"
@@ -216,26 +170,16 @@ const MintPage = () => {
       justifyContent="center"
       alignItems="center"
     >
-      <Grid
-        container
-        display="flex"
-        flexDirection="column"
-        justifyContent="center"
-        alignItems="center"
-        spacing={2}
-      >
-        <Grid item>
-          <Grid container marginTop={2}>
-            <Grid item xs={6}>
-              <Web3Button />
-            </Grid>
-            <Grid item xs={6}>
-              <Web3NetworkSwitch />
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid item>{buildMintPage()}</Grid>
-      </Grid>
+      {errorStatus ? (
+        <ErrorPage errorStatus={errorStatus} />
+      ) : (
+        <Mint
+          inputImageUrl={imageUrl}
+          inputPrompt={prompt}
+          inputNegativePrompt={negativePrompt}
+          inputModelName={modelName}
+        />
+      )}
     </Box>
   );
 };

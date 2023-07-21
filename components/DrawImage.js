@@ -1,6 +1,5 @@
 import React from "react";
 import { useRouter } from "next/router";
-import { Web3Button, Web3NetworkSwitch, useWeb3Modal } from "@web3modal/react";
 import moment from "moment";
 import momentDurationFormatSetup from "moment-duration-format";
 import { useRecoilStateLoadable } from "recoil";
@@ -146,13 +145,6 @@ export default function DrawImage() {
   const [currentTimestamp, setCurrentTimestamp] = React.useState();
   const [imageFetchEndTime, setImageFetchEndTime] = React.useState();
   const [paymentNftRentEndTime, setPaymentNftRentEndTime] = React.useState();
-
-  const {
-    isOpen: isOpenWeb3Modal,
-    open: openWeb3Modal,
-    close: closeWeb3Modal,
-    setDefaultChain: setDefaultChainWeb3Modal,
-  } = useWeb3Modal();
 
   const {
     data: dataAllRentData,
