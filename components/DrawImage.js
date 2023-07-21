@@ -793,85 +793,52 @@ export default function DrawImage() {
 
   function PaymentPage() {
     return (
-      <>
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="center"
-          sx={{ marginTop: "50px" }}
+      <Box
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        sx={{ marginTop: "50px" }}
+      >
+        <Card
+          sx={{
+            minWidth: CARD_MIN_WIDTH,
+            maxWidth: CARD_MAX_WIDTH,
+            mt: CARD_MARGIN_TOP,
+          }}
         >
-          <Card
+          <CardContent
             sx={{
-              minWidth: CARD_MIN_WIDTH,
-              maxWidth: CARD_MAX_WIDTH,
+              padding: "10",
             }}
           >
-            <CardMedia
-              component="img"
-              image={PLACEHOLDER_IMAGE_URL}
-              height={"200px"}
-            />
-            <CardContent
-              sx={{
-                padding: "10",
+            <Typography variant="h5">
+              You have to rent NFT for drawing.
+            </Typography>
+            <Button
+              disabled={isLoadingRentNFT || isLoadingRentNFTTx}
+              fullWidth
+              sx={{ marginTop: "10px" }}
+              variant="contained"
+              onClick={function () {
+                if (writeRentNFT && dataRentData) {
+                  writeRentNFT?.({
+                    value: dataRentData.rentFee,
+                  });
+                }
               }}
             >
-              <Typography variant="h5">
-                You have to rent NFT for drawing.
-              </Typography>
-              <Button
-                disabled={isLoadingRentNFT || isLoadingRentNFTTx}
-                fullWidth
-                sx={{ marginTop: "10px" }}
-                variant="contained"
-                onClick={function () {
-                  if (writeRentNFT && dataRentData) {
-                    writeRentNFT?.({
-                      value: dataRentData.rentFee,
-                    });
-                  }
-                }}
-              >
-                {isLoadingRentNFT || isLoadingRentNFTTx ? (
-                  <Typography>
-                    Renting NFT... ({paymentNftRentFee} matic)
-                  </Typography>
-                ) : (
-                  <Typography>Rent NFT ({paymentNftRentFee} matic)</Typography>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        </Box>
-      </>
-    );
-  }
-
-  function ImagePage() {
-    // console.log("call ImagePage()");
-    // console.log("imageUrl: ", imageUrl);
-    // console.log("imageHeight: ", imageHeight);
-
-    return (
-      <Card sx={{ maxWidth: 345 }}>
-        <CardMedia
-          component="img"
-          image={imageUrl}
-          // height={imageHeight}
-          // fit="contain"
-          // sx={{ marginTop: "50px" }}
-        />
-      </Card>
-      // <Image
-      //   src={imageUrl}
-      //   height={imageHeight}
-      //   fit="contain"
-      //   duration={10}
-      //   easing="ease"
-      //   shiftDuration={10}
-      //   sx={{ marginTop: "50px" }}
-      // />
+              {isLoadingRentNFT || isLoadingRentNFTTx ? (
+                <Typography>
+                  Renting NFT... ({paymentNftRentFee} matic)
+                </Typography>
+              ) : (
+                <Typography>Rent NFT ({paymentNftRentFee} matic)</Typography>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      </Box>
     );
   }
 
@@ -879,7 +846,9 @@ export default function DrawImage() {
   //* https://github.com/mui/material-ui/issues/783
   return (
     <>
-      {user?.rentPaymentNft === true ? (
+      {user?.rentPaymentNft === false ? (
+        <PaymentPage />
+      ) : (
         <>
           <Box
             component="form"
@@ -1088,8 +1057,6 @@ export default function DrawImage() {
             )}
           </Box>
         </>
-      ) : (
-        <PaymentPage />
       )}
     </>
   );
