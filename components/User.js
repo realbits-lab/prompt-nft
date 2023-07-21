@@ -19,10 +19,10 @@ import fetchJson, { FetchError } from "@/lib/fetchJson";
 import { AlertSeverity, writeToastMessageState } from "@/lib/util";
 
 export async function handleSignMessage({ account, chainId, walletClient }) {
-  console.log("call handleSignMessage()");
-  console.log("account: ", account);
-  console.log("chainId: ", chainId);
-  console.log("walletClient: ", walletClient);
+  // console.log("call handleSignMessage()");
+  // console.log("account: ", account);
+  // console.log("chainId: ", chainId);
+  // console.log("walletClient: ", walletClient);
 
   const domain = {
     chainId: chainId,
@@ -106,8 +106,8 @@ export default function User() {
   // console.log("isConnected: ", isConnected);
   const { data: walletClient } = useWalletClient({
     onSuccess(data) {
-      console.log("call onSuccess()");
-      console.log("data: ", data);
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
 
       if (clickLogin === true) {
         handleLoginClick({
@@ -122,7 +122,7 @@ export default function User() {
     },
     onSettled(data, error) {},
   });
-  console.log("walletClient: ", walletClient);
+  // console.log("walletClient: ", walletClient);
   const {
     connect,
     connectors,
@@ -160,8 +160,8 @@ export default function User() {
 
   //* Handle login click.
   async function handleLoginClick({ chainId, walletClient, mutateUser }) {
-    console.log("call handleLoginClick()");
-    console.log("isConnected: ", isConnected);
+    // console.log("call handleLoginClick()");
+    // console.log("isConnected: ", isConnected);
 
     if (isConnected === false) {
       setOpenConnectorsDialog(true);
@@ -178,7 +178,7 @@ export default function User() {
     // }
 
     const publicAddress = address?.toLowerCase();
-    console.log("publicAddress: ", publicAddress);
+    // console.log("publicAddress: ", publicAddress);
 
     // Popup MetaMask confirmation modal to sign message with nonce data.
     //* TODO: Should check the chain id.
@@ -187,7 +187,7 @@ export default function User() {
       chainId: selectedChain?.id,
       walletClient,
     });
-    console.log("signMessageResult: ", signMessageResult);
+    // console.log("signMessageResult: ", signMessageResult);
 
     // Send signature to back-end on the /auth route.
     await handleAuthenticate({
