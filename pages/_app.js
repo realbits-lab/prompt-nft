@@ -1,5 +1,4 @@
 import { configureChains, WagmiConfig, createConfig } from "wagmi";
-import { createPublicClient, http } from "viem";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { polygon, polygonMumbai, localhost } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
@@ -9,12 +8,11 @@ import { RecoilRoot } from "recoil";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
-import { CacheProvider, EmotionCache } from "@emotion/react";
+import { CacheProvider } from "@emotion/react";
 import "@/styles/globals.css";
 import { themeOptions } from "@/utils/themeOptions";
 import createEmotionCache from "@/utils/createEmotionCache";
 import fetchJson from "@/lib/fetchJson";
-import { getChainName } from "@/lib/util";
 
 // Add emotion cache.
 const clientSideEmotionCache = createEmotionCache();
@@ -23,31 +21,22 @@ const clientSideEmotionCache = createEmotionCache();
 function MyApp(props) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
   const theme = createTheme(themeOptions);
-  const WALLET_CONNECT_PROJECT_ID =
-    process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "";
   const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || "";
-  // const METAMASK_DEEP_LINK = "test.fictures.xyz";
-  // const METAMASK_DEEP_LINK = "7096-218-238-111-214.ngrok-free.app";
-  const UNIVERSAL_LINK = "https://7096-218-238-111-214.ngrok-free.app";
   const BLOCKCHAIN_NETWORK = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
 
   let chains;
-  let transport;
   switch (BLOCKCHAIN_NETWORK) {
     case "localhost":
     default:
       chains = [localhost];
-      transport = http("http://localhost:8545");
       break;
 
     case "matic":
       chains = [polygon];
-      transport = http("https://rpc-mainnet.maticvigil.com");
       break;
 
     case "maticmum":
       chains = [polygonMumbai];
-      transport = http("https://rpc-mumbai.maticvigil.com/");
       break;
   }
 
@@ -56,27 +45,14 @@ function MyApp(props) {
     publicClient: wagmiPublicClient,
     webSocketPublicClient: wagmiWebSocketPublicClient,
   } = configureChains(chains, [
-    // w3mProvider({
-    //   projectId: WALLET_CONNECT_PROJECT_ID,
-    // }),
     alchemyProvider({ apiKey: ALCHEMY_API_KEY }),
+    publicProvider(),
   ]);
 
   const wagmiConfig = createConfig({
     autoConnect: true,
-    connectors: [
-      new MetaMaskConnector({ chains }),
-      // ...w3mConnectors({
-      //   chains,
-      //   version: 1,
-      //   projectId: WALLET_CONNECT_PROJECT_ID,
-      // }),
-    ],
+    connectors: [new MetaMaskConnector({ chains })],
     publicClient: wagmiPublicClient,
-    // publicClient: createPublicClient({
-    //   chain: chains,
-    //   transport: transport,
-    // }),
     webSocketPublicClient: wagmiWebSocketPublicClient,
   });
 
