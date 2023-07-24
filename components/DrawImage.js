@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import moment from "moment";
 import momentDurationFormatSetup from "moment-duration-format";
@@ -13,7 +13,7 @@ import {
   useWatchPendingTransactions,
   useWalletClient,
 } from "wagmi";
-import { polygon, polygonMumbai } from "viem/chains";
+import { polygon, polygonMumbai, localhost } from "wagmi/chains";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
@@ -22,7 +22,6 @@ import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
-import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -30,7 +29,6 @@ import Typography from "@mui/material/Typography";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
 import useUser from "@/lib/useUser";
-import { handleSignMessage, handleAuthenticate } from "@/components/User";
 import { sleep, writeToastMessageState, AlertSeverity } from "@/lib/util";
 
 export default function DrawImage() {
@@ -65,15 +63,6 @@ export default function DrawImage() {
   //*---------------------------------------------------------------------------
   const [writeToastMessageLoadable, setWriteToastMessage] =
     useRecoilStateLoadable(writeToastMessageState);
-  const writeToastMessage =
-    writeToastMessageLoadable?.state === "hasValue"
-      ? writeToastMessageLoadable.contents
-      : {
-          snackbarSeverity: AlertSeverity.info,
-          snackbarMessage: "",
-          snackbarTime: new Date(),
-          snackbarOpen: true,
-        };
 
   //*---------------------------------------------------------------------------
   //* Prompt input.
@@ -106,38 +95,29 @@ export default function DrawImage() {
   const PAYMENT_NFT_TOKEN_ID = process.env.NEXT_PUBLIC_PAYMENT_NFT_TOKEN;
   const SERVICE_ACCOUNT_ADDRESS =
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
+  const BLOCKCHAIN_NETWORK = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
   const { address, isConnected } = useAccount();
-  const { chains, chain: selectedChain } = useNetwork({
-    onSuccess(data) {
-      // console.log("call onSuccess()");
-      // console.log("data: ", data);
-    },
-    onError(error) {
-      // console.log("call onError()");
-      // console.log("error: ", error);
-    },
-    onSettled(data, error) {
-      // console.log("call onSettled()");
-      // console.log("data: ", data);
-      // console.log("error: ", error);
-    },
-  });
+  const { chains, chain: selectedChain } = useNetwork();
 
   const { data: walletClient } = useWalletClient({
     onSuccess(data) {
       // console.log("call onSuccess()");
       // console.log("data: ", data);
 
-      data.addChain({ chain: polygonMumbai });
-    },
-    onError(error) {
-      // console.log("call onError()");
-      // console.log("error: ", error);
-    },
-    onSettled(data, error) {
-      // console.log("call onSettled()");
-      // console.log("data: ", data);
-      // console.log("error: ", error);
+      switch (BLOCKCHAIN_NETWORK) {
+        case "localhost":
+        default:
+          data.addChain({ chain: localhost });
+          break;
+
+        case "matic":
+          data.addChain({ chain: polygon });
+          break;
+
+        case "maticmum":
+          data.addChain({ chain: polygonMumbai });
+          break;
+      }
     },
   });
 
@@ -179,15 +159,6 @@ export default function DrawImage() {
         }
       });
     },
-    onError(error) {
-      // console.log("call onError()");
-      // console.log("error: ", error);
-    },
-    onSettled(data, error) {
-      // console.log("call onSettled()");
-      // console.log("data: ", data);
-      // console.log("error: ", error);
-    },
   });
 
   const {
@@ -211,15 +182,6 @@ export default function DrawImage() {
       // console.log("rentFee: ", Number(data.rentFee) / Math.pow(10, 18));
       setPaymentNftRentFee(Number(data.rentFee) / Math.pow(10, 18));
     },
-    onError(error) {
-      // console.log("call onError()");
-      // console.log("error: ", error);
-    },
-    onSettled(data, error) {
-      // console.log("call onSettled()");
-      // console.log("data: ", data);
-      // console.log("error: ", error);
-    },
   });
 
   const { config: configPrepareRentNFT, error: errorPrepareRentNFT } =
@@ -233,24 +195,6 @@ export default function DrawImage() {
         SERVICE_ACCOUNT_ADDRESS,
       ],
       enabled: false,
-      onError(error) {
-        // console.log("call onError()");
-        // console.log("error: ", error);
-      },
-      onMutate(args, overrides) {
-        // console.log("call onMutate()");
-        // console.log("args: ", args);
-        // console.log("overrides: ", overrides);
-      },
-      onSettled(data, error) {
-        // console.log("call onSettled()");
-        // console.log("data: ", data);
-        // console.log("error: ", error);
-      },
-      onSuccess(data) {
-        // console.log("call onSuccess()");
-        // console.log("data: ", data);
-      },
     });
   const {
     data: dataRentNFT,
@@ -290,11 +234,6 @@ export default function DrawImage() {
         snackbarTime: new Date(),
         snackbarOpen: true,
       });
-    },
-    onSettled(data, error) {
-      // console.log("call onSettled()");
-      // console.log("data: ", data);
-      // console.log("error: ", error);
     },
   });
 
@@ -336,11 +275,6 @@ export default function DrawImage() {
         snackbarOpen: true,
       });
     },
-    onSettled(data, error) {
-      // console.log("call onSettled()");
-      // console.log("data: ", data);
-      // console.log("error: ", error);
-    },
   });
 
   useWatchPendingTransactions({
@@ -349,7 +283,7 @@ export default function DrawImage() {
     },
   });
 
-  React.useEffect(
+  useEffect(
     function () {
       // console.log("call useEffect()");
       // console.log("window.ethereum: ", window.ethereum);
