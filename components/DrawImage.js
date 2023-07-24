@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
+import { formatEther } from "viem";
 import moment from "moment";
 import momentDurationFormatSetup from "moment-duration-format";
 import { useRecoilStateLoadable } from "recoil";
@@ -13,6 +14,7 @@ import {
   useWatchPendingTransactions,
   useWalletClient,
 } from "wagmi";
+import { getContract } from "@wagmi/core";
 import { polygon, polygonMumbai, localhost } from "wagmi/chains";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
@@ -30,22 +32,23 @@ import rentmarketABI from "@/contracts/rentMarket.json";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
 import useUser from "@/lib/useUser";
 import { sleep, writeToastMessageState, AlertSeverity } from "@/lib/util";
+import faucetTokenABI from "@/contracts/faucetToken.json";
 
 export default function DrawImage() {
   // console.log("call DrawImage()");
 
+  const RENT_MARKET_CONTRACT_ADDRESS =
+    process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
   const DEFAULT_MODEL_NAME = "runwayml/stable-diffusion-v1-5";
   const DRAW_API_URL = "/api/draw";
   const POST_API_URL = "/api/post";
   const POSTED_API_URL = "/api/posted";
   const UPLOAD_IMAGE_TO_S3_URL = "/api/upload-image-to-s3";
   const FETCH_RESULT_API_URL = "/api/fetch-result";
-  const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const DISCORD_BOT_TOKEN = process.env.NEXT_PUBLIC_DISCORD_BOT_TOKEN;
   const CARD_MARGIN_TOP = "60px";
   const CARD_MIN_WIDTH = 375;
   const CARD_MAX_WIDTH = 420;
-  const CARD_PADDING = 1;
   const IMAGE_PADDING = 450;
   const { user, mutateUser } = useUser();
   // console.log("user: ", user);
@@ -56,7 +59,6 @@ export default function DrawImage() {
   const [isImagePosted, setIsImagePosted] = React.useState(false);
   const [imageHeight, setImageHeight] = React.useState(0);
   const router = useRouter();
-  const MARGIN_TOP = "60px";
 
   //*---------------------------------------------------------------------------
   //* Snackbar.
@@ -97,7 +99,7 @@ export default function DrawImage() {
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
   const BLOCKCHAIN_NETWORK = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
   const { address, isConnected } = useAccount();
-  const { chains, chain: selectedChain } = useNetwork();
+  const { chains, chain } = useNetwork();
 
   const { data: walletClient } = useWalletClient({
     onSuccess(data) {
@@ -121,7 +123,6 @@ export default function DrawImage() {
     },
   });
 
-  const [paymentNftRentFee, setPaymentNftRentFee] = React.useState();
   const [currentTimestamp, setCurrentTimestamp] = React.useState();
   const [imageFetchEndTime, setImageFetchEndTime] = React.useState();
   const [paymentNftRentEndTime, setPaymentNftRentEndTime] = React.useState();
@@ -161,27 +162,11 @@ export default function DrawImage() {
     },
   });
 
-  const {
-    data: dataRentData,
-    isError: errorRentData,
-    isLoading: isLoadingRentData,
-    isValidating: isValidatingRentData,
-    status: statusRentData,
-    refetch: refetchRentData,
-  } = useContractRead({
+  const { data: dataRentData, isLoading: isLoadingRentData } = useContractRead({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
     functionName: "getRegisterData",
     args: [PAYMENT_NFT_CONTRACT_ADDRESS, PAYMENT_NFT_TOKEN_ID],
-    // cacheOnBlock: true,
-    // cacheTime: 60_000,
-    // watch: false,
-    onSuccess(data) {
-      // console.log("call onSuccess()");
-      // console.log("data: ", data);
-      // console.log("rentFee: ", Number(data.rentFee) / Math.pow(10, 18));
-      setPaymentNftRentFee(Number(data.rentFee) / Math.pow(10, 18));
-    },
   });
 
   const { config: configPrepareRentNFT, error: errorPrepareRentNFT } =
@@ -196,6 +181,48 @@ export default function DrawImage() {
       ],
       enabled: false,
     });
+
+  const {
+    data: dataRentNFTByToken,
+    error: errorRentNFTByToken,
+    isError: isErrorRentNFTByToken,
+    isIdle: isIdleRentNFTByToken,
+    isLoading: isLoadingRentNFTByToken,
+    isSuccess: isSuccessRentNFTByToken,
+    write: writeRentNFTByToken,
+    status: statusRentNFTByToken,
+  } = useContractWrite({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI?.abi,
+    functionName: "rentNFTByToken",
+    args: [
+      PAYMENT_NFT_CONTRACT_ADDRESS,
+      PAYMENT_NFT_TOKEN_ID,
+      SERVICE_ACCOUNT_ADDRESS,
+    ],
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.success,
+        snackbarMessage:
+          "Rent transaction is just started and wait a moment...",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+    onError(error) {
+      // console.log("call onSuccess()");
+      // console.log("error: ", error);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.error,
+        snackbarMessage: `${error}`,
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+  });
+
   const {
     data: dataRentNFT,
     error: errorRentNFT,
@@ -628,6 +655,73 @@ export default function DrawImage() {
     setPostingImage(false);
   }
 
+  function PaymentByTokenPage() {
+    return (
+      <Box
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        sx={{ marginTop: "50px" }}
+      >
+        <Card
+          sx={{
+            minWidth: CARD_MIN_WIDTH,
+            maxWidth: CARD_MAX_WIDTH,
+            mt: CARD_MARGIN_TOP,
+          }}
+        >
+          <CardContent
+            sx={{
+              padding: "10",
+            }}
+          >
+            <Typography variant="h6">
+              You have to rent NFT for 1-day drawing.
+            </Typography>
+            <Button
+              disabled={isLoadingRentNFT || isLoadingRentNFTTx}
+              fullWidth
+              sx={{ marginTop: "10px" }}
+              variant="contained"
+              onClick={async function () {
+                if (writeRentNFT && dataRentData) {
+                  const contract = getContract({
+                    address: dataRentData.feeTokenAddress,
+                    abi: faucetTokenABI.abi,
+                  });
+                  // console.log("contract: ", contract);
+
+                  await erc20PermitSignature({
+                    owner: address,
+                    spender: RENT_MARKET_CONTRACT_ADDRESS,
+                    amount: dataRentData.rentFeeByToken,
+                    contract: contract,
+                  });
+
+                  writeRentNFTByToken?.({
+                    value: dataRentData.rentFeeByToken,
+                  });
+                }
+              }}
+            >
+              {isLoadingRentNFT || isLoadingRentNFTTx ? (
+                <Typography>
+                  Renting NFT... ({formatEther(dataRentData?.rentFeeByToken)}{" "}
+                  token)
+                </Typography>
+              ) : (
+                <Typography>
+                  Rent NFT ({formatEther(dataRentData?.rentFeeByToken)} token)
+                </Typography>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      </Box>
+    );
+  }
+
   function PaymentPage() {
     return (
       <Box
@@ -667,10 +761,12 @@ export default function DrawImage() {
             >
               {isLoadingRentNFT || isLoadingRentNFTTx ? (
                 <Typography>
-                  Renting NFT... ({paymentNftRentFee} matic)
+                  Renting NFT... ({formatEther(dataRentData?.rentFee)} matic)
                 </Typography>
               ) : (
-                <Typography>Rent NFT ({paymentNftRentFee} matic)</Typography>
+                <Typography>
+                  Rent NFT ({formatEther(dataRentData?.rentFee)} matic)
+                </Typography>
               )}
             </Button>
           </CardContent>
@@ -679,12 +775,89 @@ export default function DrawImage() {
     );
   }
 
+  async function erc20PermitSignature({ owner, spender, amount, contract }) {
+    // console.log("call erc20PermitSignature()");
+    // console.log("owner: ", owner);
+    // console.log("spender: ", spender);
+    // console.log("amount: ", amount);
+
+    try {
+      //* Deadline is 20 minutes later from current timestamp.
+      const transactionDeadline = Date.now() + 20 * 60;
+      // console.log("transactionDeadline: ", transactionDeadline);
+      const nonce = await contract.read.nonces({ args: [owner] });
+      // console.log("nonce: ", nonce);
+      const contractName = await contract.read.name();
+      // console.log("contractName: ", contractName);
+      const EIP712Domain = [
+        { name: "name", type: "string" },
+        { name: "version", type: "string" },
+        { name: "chainId", type: "uint256" },
+        { name: "verifyingContract", type: "address" },
+      ];
+      // console.log("chain: ", chain);
+      const domain = {
+        name: contractName,
+        version: "1",
+        chainId: chain.id,
+        verifyingContract: contract.address,
+      };
+      const Permit = [
+        { name: "owner", type: "address" },
+        { name: "spender", type: "address" },
+        { name: "value", type: "uint256" },
+        { name: "nonce", type: "uint256" },
+        { name: "deadline", type: "uint256" },
+      ];
+      const message = {
+        owner,
+        spender,
+        value: amount.toString(),
+        nonce: nonce.toString(16),
+        deadline: transactionDeadline,
+      };
+      const msgParams = JSON.stringify({
+        types: {
+          EIP712Domain,
+          Permit,
+        },
+        domain,
+        primaryType: "Permit",
+        message,
+      });
+
+      const params = [address, msgParams];
+      const method = "eth_signTypedData_v4";
+      // console.log("params: ", params);
+      // console.log("method: ", method);
+      const signature = await ethereum.request({
+        method,
+        params,
+      });
+      // console.log("signature: ", signature);
+      const signData = utils.splitSignature(signature);
+      const { r, s, v } = signData;
+      return {
+        r,
+        s,
+        v,
+        deadline: transactionDeadline,
+      };
+    } catch (error) {
+      console.error("error: ", error);
+      return error;
+    }
+  }
+
   //* Fix mui textfield problem about focus.
   //* https://github.com/mui/material-ui/issues/783
   return (
     <>
       {user?.rentPaymentNft === false ? (
-        <PaymentPage />
+        <>
+          <PaymentPage />
+          <PaymentByTokenPage />
+        </>
       ) : (
         <>
           <Box
