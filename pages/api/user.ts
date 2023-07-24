@@ -11,7 +11,7 @@ export type User = {
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse<User>) {
-  console.log("call /api/user");
+  // console.log("call /api/user");
   // console.log("req.session.user: ", req.session.user);
 
 	//* Check user login.
@@ -57,7 +57,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<User>) {
       rentPaymentNft = true;
     }
   });
-  console.log("rentPaymentNft: ", rentPaymentNft);
+  // console.log("rentPaymentNft: ", rentPaymentNft);
 
   res.json({
     ...req.session.user,
