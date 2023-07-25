@@ -33,6 +33,7 @@ import fetchJson, { FetchError } from "@/lib/fetchJson";
 import useUser from "@/lib/useUser";
 import { sleep, writeToastMessageState, AlertSeverity } from "@/lib/util";
 import faucetTokenABI from "@/contracts/faucetToken.json";
+import WalletProfile from "@/components/WalletProfile";
 
 export default function DrawImage() {
   // console.log("call DrawImage()");
@@ -696,7 +697,8 @@ export default function DrawImage() {
                     owner: address,
                     spender: RENT_MARKET_CONTRACT_ADDRESS,
                     amount: dataRentData.rentFeeByToken,
-                    contract: contract,
+                    contract,
+                    chain,
                   });
 
                   writeRentNFTByToken?.({
@@ -765,7 +767,8 @@ export default function DrawImage() {
                 </Typography>
               ) : (
                 <Typography>
-                  Rent NFT ({formatEther(dataRentData?.rentFee)} matic)
+                  Rent NFT ({formatEther(dataRentData?.rentFee || BigInt(0))}{" "}
+                  matic)
                 </Typography>
               )}
             </Button>
@@ -775,11 +778,19 @@ export default function DrawImage() {
     );
   }
 
-  async function erc20PermitSignature({ owner, spender, amount, contract }) {
+  async function erc20PermitSignature({
+    owner,
+    spender,
+    amount,
+    contract,
+    chain,
+  }) {
     // console.log("call erc20PermitSignature()");
     // console.log("owner: ", owner);
     // console.log("spender: ", spender);
     // console.log("amount: ", amount);
+    // console.log("contract: ", contract);
+    // console.log("chain: ", chain);
 
     try {
       //* Deadline is 20 minutes later from current timestamp.
@@ -789,6 +800,7 @@ export default function DrawImage() {
       // console.log("nonce: ", nonce);
       const contractName = await contract.read.name();
       // console.log("contractName: ", contractName);
+
       const EIP712Domain = [
         { name: "name", type: "string" },
         { name: "version", type: "string" },
@@ -836,6 +848,7 @@ export default function DrawImage() {
       });
       // console.log("signature: ", signature);
       const signData = utils.splitSignature(signature);
+      // console.log("signData: ", signData);
       const { r, s, v } = signData;
       return {
         r,
@@ -853,6 +866,8 @@ export default function DrawImage() {
   //* https://github.com/mui/material-ui/issues/783
   return (
     <>
+      <WalletProfile />
+
       {user?.rentPaymentNft === false ? (
         <>
           <PaymentPage />
