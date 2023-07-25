@@ -709,12 +709,15 @@ export default function DrawImage() {
             >
               {isLoadingRentNFT || isLoadingRentNFTTx ? (
                 <Typography>
-                  Renting NFT... ({formatEther(dataRentData?.rentFeeByToken)}{" "}
+                  Renting NFT... (
+                  {formatEther(dataRentData?.rentFeeByToken || BigInt(0))}{" "}
                   token)
                 </Typography>
               ) : (
                 <Typography>
-                  Rent NFT ({formatEther(dataRentData?.rentFeeByToken)} token)
+                  Rent NFT (
+                  {formatEther(dataRentData?.rentFeeByToken || BigInt(0))}{" "}
+                  token)
                 </Typography>
               )}
             </Button>
@@ -763,7 +766,8 @@ export default function DrawImage() {
             >
               {isLoadingRentNFT || isLoadingRentNFTTx ? (
                 <Typography>
-                  Renting NFT... ({formatEther(dataRentData?.rentFee)} matic)
+                  Renting NFT... (
+                  {formatEther(dataRentData?.rentFee || BigInt(0))} matic)
                 </Typography>
               ) : (
                 <Typography>
