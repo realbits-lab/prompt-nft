@@ -785,12 +785,12 @@ export default function DrawImage() {
     contract,
     chain,
   }) {
-    console.log("call erc20PermitSignature()");
-    console.log("owner: ", owner);
-    console.log("spender: ", spender);
-    console.log("amount: ", amount);
-    console.log("contract: ", contract);
-    console.log("chain: ", chain);
+    // console.log("call erc20PermitSignature()");
+    // console.log("owner: ", owner);
+    // console.log("spender: ", spender);
+    // console.log("amount: ", amount);
+    // console.log("contract: ", contract);
+    // console.log("chain: ", chain);
 
     try {
       //* Deadline is 20 minutes later from current timestamp.
@@ -846,9 +846,9 @@ export default function DrawImage() {
         method,
         params,
       });
-      console.log("signature: ", signature);
+      // console.log("signature: ", signature);
       const signData = utils.splitSignature(signature);
-      console.log("signData: ", signData);
+      // console.log("signData: ", signData);
       const { r, s, v } = signData;
       return {
         r,
