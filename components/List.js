@@ -473,28 +473,11 @@ function List({ mode, updated, setNewImageCountFunc }) {
           </LoginWrapper>
         ) : mode === "own" ? (
           <LoginWrapper>
-            <ListOwn
-              selectedChain={selectedChain}
-              address={address}
-              isConnected={isConnected}
-              dataWalletClient={dataWalletClient}
-              promptNftContract={promptNftContract}
-              rentMarketContract={rentMarketContract}
-              signTypedDataAsync={signTypedDataAsync}
-              data={allOwnDataArray}
-              isLoading={isLoadingAllMyOwnData}
-            />
+            <ListOwn data={allOwnDataArray} isLoading={isLoadingAllMyOwnData} />
           </LoginWrapper>
         ) : mode === "rent" ? (
           <LoginWrapper>
             <ListRent
-              selectedChain={selectedChain}
-              address={address}
-              isConnected={isConnected}
-              dataWalletClient={dataWalletClient}
-              promptNftContract={promptNftContract}
-              rentMarketContract={rentMarketContract}
-              signTypedDataAsync={signTypedDataAsync}
               data={allMyRentDataArray}
               isLoading={swrIsLoadingRentData}
             />

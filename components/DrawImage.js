@@ -33,6 +33,7 @@ import fetchJson, { FetchError } from "@/lib/fetchJson";
 import useUser from "@/lib/useUser";
 import { sleep, writeToastMessageState, AlertSeverity } from "@/lib/util";
 import faucetTokenABI from "@/contracts/faucetToken.json";
+import WalletProfile from "@/components/WalletProfile";
 
 export default function DrawImage() {
   // console.log("call DrawImage()");
@@ -853,6 +854,8 @@ export default function DrawImage() {
   //* https://github.com/mui/material-ui/issues/783
   return (
     <>
+      <WalletProfile />
+
       {user?.rentPaymentNft === false ? (
         <>
           <PaymentPage />

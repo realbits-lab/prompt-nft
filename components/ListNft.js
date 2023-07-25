@@ -1,30 +1,11 @@
 import React from "react";
-import {
-  useAccount,
-  useNetwork,
-  useWalletClient,
-  useContractRead,
-  useSignTypedData,
-  useContractEvent,
-} from "wagmi";
+import { useAccount, useNetwork, useContractRead } from "wagmi";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
-import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
 import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import Divider from "@mui/material/Divider";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import Avatar from "@mui/material/Avatar";
-import Typography from "@mui/material/Typography";
-import CardNft from "@/components/CardNft";
 import rentmarketABI from "@/contracts/rentMarket.json";
-import ListImteNft from "@/components/ListItemNft";
-import ListItemNft from "./ListItemNft";
+import WalletProfile from "@/components/WalletProfile";
+import ListItemNft from "@/components/ListItemNft";
 
 function ListNft() {
   // console.log("call ListNft()");
@@ -88,18 +69,13 @@ function ListNft() {
 
   return (
     <>
-      <Box sx={{ marginTop: 10 }} display="flex" justifyContent="center">
+      <WalletProfile />
+
+      <Box display="flex" justifyContent="center">
         <List
           sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
         >
           {dataAllRegisterData.map((registerData, idx) => {
-            // console.log("registerData.nftAddress: ", registerData.nftAddress);
-            // console.log(
-            //   "PROMPT_NFT_CONTRACT_ADDRESS: ",
-            //   PROMPT_NFT_CONTRACT_ADDRESS
-            // );
-
-            //* Filter the current prompt NFT contract address.
             if (
               PROMPT_NFT_CONTRACT_ADDRESS.toLowerCase() ===
               registerData.nftAddress.toLowerCase()
