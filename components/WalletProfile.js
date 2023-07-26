@@ -16,7 +16,7 @@ export default function WalletProfile() {
     <>
       <Box display="flex" flexDirection="row" sx={{ mt: CARD_MARGIN_TOP }}>
         <Button>{shortenAddress({ address })}</Button>
-        <Button>{chain.network}</Button>
+        <Button>{chain?.network}</Button>
         <Button>
           {isConnected
             ? "connected"
