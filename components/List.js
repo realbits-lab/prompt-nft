@@ -1,5 +1,4 @@
 import React from "react";
-import { Web3Button, Web3NetworkSwitch, useWeb3Modal } from "@web3modal/react";
 import {
   useAccount,
   useNetwork,
@@ -27,6 +26,8 @@ import ListOwn from "@/components/ListOwn";
 import CarouselOwn from "@/components/CarouselOwn";
 import ListRent from "@/components/ListRent";
 import ThemePage from "@/components/ThemePage";
+import ConnectWrapper from "@/components/ConnectWrapper";
+import LoginWrapper from "@/components/LoginWrapper";
 import fetchJson from "@/lib/fetchJson";
 import { getChainId, isWalletConnected } from "@/lib/util";
 import promptNFTABI from "@/contracts/promptNFT.json";
@@ -62,15 +63,8 @@ function List({ mode, updated, setNewImageCountFunc }) {
   const imageFetchFinished = React.useRef(false);
 
   //*---------------------------------------------------------------------------
-  //* Wagmi and Web3Modal hook.
+  //* Wagmi.
   //*---------------------------------------------------------------------------
-  const {
-    isOpen: isOpenWeb3Modal,
-    open: openWeb3Modal,
-    close: closeWeb3Modal,
-    setDefaultChain: setDefaultChainWeb3Modal,
-  } = useWeb3Modal();
-
   //* Handle a new useNetwork instead of useWeb3ModalNetwork hook.
   const { chains, chain: selectedChain } = useNetwork();
   // console.log("selectedChain: ", selectedChain);
@@ -250,13 +244,12 @@ function List({ mode, updated, setNewImageCountFunc }) {
     // watch: true,
   });
 
-  //* TODO: Use useContractRead hook.
   //* Get all my own data array.
   const {
-    data: dataOwn,
-    error: errorOwn,
-    isLoading: isLoadingOwn,
-    isValidating: isValidatingOwn,
+    data: dataAllMyOwnData,
+    error: errorAllMyOwnData,
+    isLoading: isLoadingAllMyOwnData,
+    isValidating: isValidatingAllMyOwnData,
   } = useSWR(
     {
       command: "getAllMyOwnData",
@@ -268,7 +261,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
       refreshInterval: IMAGE_REFRESH_INTERVAL_TIME,
     }
   );
-  // console.log("dataOwn: ", dataOwn);
+  // console.log("dataAllMyOwnData: ", dataAllMyOwnData);
 
   //*---------------------------------------------------------------------------
   //* Define state data.
@@ -311,8 +304,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
   // console.log("isSuccessSignTypedData: ", isSuccessSignTypedData);
   // console.log("signTypedDataAsync: ", signTypedDataAsync);
 
-  const theme = useTheme();
-
   React.useEffect(
     function () {
       // console.log("call useEffect()");
@@ -330,7 +321,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
 
       initialize();
     },
-    [dataOwn]
+    [dataAllMyOwnData]
   );
 
   function initialize() {
@@ -341,7 +332,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
     // console.log("swrIsValidatingRegisterData: ", swrIsValidatingRegisterData);
     // console.log("swrStatusRegisterData: ", swrStatusRegisterData);
     // console.log("swrDataCollection: ", swrDataCollection);
-    // console.log("dataOwn: ", dataOwn);
+    // console.log("dataAllMyOwnData: ", dataAllMyOwnData);
     // console.log("dataRent: ", dataRent);
 
     //* Find the register data in registered collection.
@@ -362,11 +353,11 @@ function List({ mode, updated, setNewImageCountFunc }) {
     //* Find the own nft from registered nft data.
     // console.log("PROMPT_NFT_CONTRACT_ADDRESS: ", PROMPT_NFT_CONTRACT_ADDRESS);
     let ownDataArray;
-    if (registerData && dataOwn) {
+    if (registerData && dataAllMyOwnData) {
       ownDataArray = registerData.filter(function (nft) {
         // console.log("nft: ", nft);
         // console.log("nft.tokenId: ", nft.tokenId);
-        return dataOwn.some(function (element) {
+        return dataAllMyOwnData.some(function (element) {
           // console.log("element: ", element);
           return (
             nft.tokenId === element.tokenId &&
@@ -462,46 +453,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
     }
   }
 
-  function NoLoginPage() {
-    // console.log("theme: ", theme);
-    return (
-      <Box
-        sx={{
-          "& .MuiTextField-root": { m: 1, width: "25ch" },
-        }}
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
-      >
-        <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-          <Grid
-            container
-            justifyContent="space-around"
-            marginTop={3}
-            marginBottom={1}
-          >
-            <Grid item>
-              <Web3Button />
-            </Grid>
-            <Grid item>
-              <Web3NetworkSwitch />
-            </Grid>
-          </Grid>
-          <CardContent
-            sx={{
-              padding: "10",
-            }}
-          >
-            <Button fullWidth variant="contained" onClick={openWeb3Modal}>
-              Connect Wallet
-            </Button>
-          </CardContent>
-        </Card>
-      </Box>
-    );
-  }
-
   return (
     <div>
       <Box
@@ -511,73 +462,26 @@ function List({ mode, updated, setNewImageCountFunc }) {
         alignItems="center"
       >
         {mode === "draw" ? (
-          <div>
+          <LoginWrapper>
             <DrawImage />
-          </div>
+          </LoginWrapper>
         ) : mode === "image" ? (
-          <div>
-            {/* <CarouselImage data={dataImage} isLoading={isLoadingImage} /> */}
-            <ListImage />
-          </div>
+          <ListImage />
         ) : mode === "nft" ? (
-          <div>
-            {
-              //* TODO: Handle the wrong network case also.
-              isWalletConnected({ isConnected, selectedChain }) === false ? (
-                <NoLoginPage />
-              ) : (
-                // <CarouselNft />
-                <ListNft />
-              )
-            }
-          </div>
+          <LoginWrapper>
+            <ListNft />
+          </LoginWrapper>
         ) : mode === "own" ? (
-          <div>
-            {isWalletConnected({ isConnected, selectedChain }) === false ? (
-              <NoLoginPage />
-            ) : (
-              // <CarouselOwn
-              //   selectedChain={selectedChain}
-              //   address={address}
-              //   isConnected={isConnected}
-              //   dataWalletClient={dataWalletClient}
-              //   promptNftContract={promptNftContract}
-              //   rentMarketContract={rentMarketContract}
-              //   signTypedDataAsync={signTypedDataAsync}
-              //   data={allOwnDataArray}
-              //   isLoading={isLoadingOwn}
-              // />
-              <ListOwn
-                selectedChain={selectedChain}
-                address={address}
-                isConnected={isConnected}
-                dataWalletClient={dataWalletClient}
-                promptNftContract={promptNftContract}
-                rentMarketContract={rentMarketContract}
-                signTypedDataAsync={signTypedDataAsync}
-                data={allOwnDataArray}
-                isLoading={isLoadingOwn}
-              />
-            )}
-          </div>
+          <LoginWrapper>
+            <ListOwn data={allOwnDataArray} isLoading={isLoadingAllMyOwnData} />
+          </LoginWrapper>
         ) : mode === "rent" ? (
-          <div>
-            {isWalletConnected({ isConnected, selectedChain }) === false ? (
-              <NoLoginPage />
-            ) : (
-              <ListRent
-                selectedChain={selectedChain}
-                address={address}
-                isConnected={isConnected}
-                dataWalletClient={dataWalletClient}
-                promptNftContract={promptNftContract}
-                rentMarketContract={rentMarketContract}
-                signTypedDataAsync={signTypedDataAsync}
-                data={allMyRentDataArray}
-                isLoading={swrIsLoadingRentData}
-              />
-            )}
-          </div>
+          <LoginWrapper>
+            <ListRent
+              data={allMyRentDataArray}
+              isLoading={swrIsLoadingRentData}
+            />
+          </LoginWrapper>
         ) : mode === "theme" ? (
           <div>
             <ThemePage />

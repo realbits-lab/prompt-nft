@@ -1,11 +1,23 @@
-import { useAccount, useWalletClient, useNetwork } from "wagmi";
+import { useState, useEffect } from "react";
+import { useAccount, useWalletClient, useNetwork, useConnect } from "wagmi";
 import Button from "@mui/material/Button";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import DialogTitle from "@mui/material/DialogTitle";
+import Dialog from "@mui/material/Dialog";
+import Link from "@mui/material/Link";
 import { useRecoilStateLoadable } from "recoil";
 import useUser from "@/lib/useUser";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
 import { AlertSeverity, writeToastMessageState } from "@/lib/util";
 
 export async function handleSignMessage({ account, chainId, walletClient }) {
+  // console.log("call handleSignMessage()");
+  // console.log("account: ", account);
+  // console.log("chainId: ", chainId);
+  // console.log("walletClient: ", walletClient);
+
   const domain = {
     chainId: chainId,
     name: "Realbits",
@@ -22,7 +34,7 @@ export async function handleSignMessage({ account, chainId, walletClient }) {
     contents: process.env.NEXT_PUBLIC_LOGIN_SIGN_MESSAGE,
   };
 
-  const signature = await walletClient.signTypedData({
+  const signature = await walletClient?.signTypedData({
     account,
     domain,
     types,
@@ -77,55 +89,142 @@ export async function handleLogout({ mutateUser }) {
   }
 }
 
-export default function User() {
+export default function User({ hidden = false }) {
   //*----------------------------------------------------------------------------
-  //* Define constance variables.
+  //* Wagmi.
   //*----------------------------------------------------------------------------
   const { chains, chain: selectedChain } = useNetwork();
   // console.log("selectedChain: ", selectedChain);
-  const { address, isConnected } = useAccount();
+  const { connector: activeConnector, address, isConnected } = useAccount();
   // console.log("address: ", address);
   // console.log("isConnected: ", isConnected);
-  const { data: walletClient } = useWalletClient();
+
+  const { data: walletClient } = useWalletClient({
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+
+      if (clickLogin === true) {
+        handleLoginClick({
+          chainId: selectedChain?.id,
+          walletClient: data,
+          mutateUser,
+        });
+      }
+    },
+    onError(error) {
+      // console.log("error: ", error);
+    },
+    onSettled(data, error) {},
+  });
   // console.log("walletClient: ", walletClient);
+
+  const {
+    connect,
+    connectors,
+    error: errorConnect,
+    isLoading: isLoadingConnect,
+    pendingConnector,
+  } = useConnect({
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+    },
+    onError(error) {
+      // console.log("error: ", error);
+    },
+    onSettled(data, error) {},
+  });
+
+  //*----------------------------------------------------------------------------
+  //* Hook.
+  //*----------------------------------------------------------------------------
   const { user, mutateUser } = useUser();
   // console.log("user: ", user);
+  const [clickLogin, setClickLogin] = useState(false);
 
   //*---------------------------------------------------------------------------
-  //* Snackbar variables.
+  //* Snackbar.
   //*---------------------------------------------------------------------------
   const [writeToastMessageLoadable, setWriteToastMessage] =
     useRecoilStateLoadable(writeToastMessageState);
-  const writeToastMessage =
-    writeToastMessageLoadable?.state === "hasValue"
-      ? writeToastMessageLoadable.contents
-      : {
-          snackbarSeverity: AlertSeverity.info,
-          snackbarMessage: undefined,
-          snackbarTime: new Date(),
-          snackbarOpen: false,
-        };
 
-  async function handleLoginClick() {
-    if (!address) {
-      setWriteToastMessage({
-        snackbarSeverity: AlertSeverity.warning,
-        snackbarMessage: "Wallet is not connected.",
-        snackbarTime: new Date(),
-        snackbarOpen: true,
-      });
-      return;
+  //*---------------------------------------------------------------------------
+  //* Connectors select dialog.
+  //*---------------------------------------------------------------------------
+  const [openConnectorsDialog, setOpenConnectorsDialog] = useState(false);
+
+  //* Listen account change.
+  useEffect(() => {
+    // console.log("call useEffect()");
+    // console.log("activeConnector: ", activeConnector);
+    // console.log("user: ", user);
+
+    async function handleConnectorUpdate({ account, chain }) {
+      // console.log("call handleConnectorUpdate()");
+      // console.log("account: ", account);
+      // console.log("chain: ", chain);
+      // console.log("user: ", user);
+      // console.log("selectedChain?.id: ", selectedChain?.id);
+
+      if (user?.isLoggedIn === true) {
+        try {
+          mutateUser(
+            await fetchJson({ url: "/api/logout" }, { method: "POST" }),
+            false
+          );
+        } catch (error) {
+          if (error instanceof FetchError) {
+            console.error(error.data.message);
+          } else {
+            console.error("An unexpected error happened:", error);
+          }
+        }
+      }
     }
 
-    const publicAddress = address.toLowerCase();
+    if (activeConnector) {
+      activeConnector.on("change", handleConnectorUpdate);
+    }
+
+    return () => {
+      // console.log("call activeConnector?.off()");
+
+      activeConnector?.off("change", handleConnectorUpdate);
+    };
+  }, []);
+
+  //* Handle login click.
+  async function handleLoginClick({ chainId, walletClient, mutateUser }) {
+    // console.log("call handleLoginClick()");
+    // console.log("chainId: ", chainId);
+    // console.log("walletClient: ", walletClient);
+    // console.log("mutateUser: ", mutateUser);
+    // console.log("isConnected: ", isConnected);
+
+    if (isConnected === false) {
+      setOpenConnectorsDialog(true);
+      return;
+    }
+    // if (!address) {
+    //   setWriteToastMessage({
+    //     snackbarSeverity: AlertSeverity.warning,
+    //     snackbarMessage: "Wallet is not connected.",
+    //     snackbarTime: new Date(),
+    //     snackbarOpen: true,
+    //   });
+    //   return;
+    // }
+
+    const publicAddress = address?.toLowerCase();
     // console.log("publicAddress: ", publicAddress);
 
     // Popup MetaMask confirmation modal to sign message with nonce data.
     //* TODO: Should check the chain id.
     const signMessageResult = await handleSignMessage({
       account: publicAddress,
-      chainId: selectedChain.id,
-      walletClient: walletClient,
+      chainId,
+      walletClient,
     });
     // console.log("signMessageResult: ", signMessageResult);
 
@@ -135,34 +234,82 @@ export default function User() {
       signature: signMessageResult,
       mutateUser,
     });
+
+    setClickLogin(false);
   }
 
-  async function handleLogoutClick() {
+  //* Handle logout click.
+  async function handleLogoutClick({ mutateUser }) {
     await handleLogout({ mutateUser });
   }
 
+  function renderConnectorsDialog() {
+    return (
+      <Dialog
+        onClose={() => setOpenConnectorsDialog(false)}
+        open={openConnectorsDialog}
+      >
+        <DialogTitle>Select connectors</DialogTitle>
+        <List sx={{ pt: 0 }}>
+          {connectors.map((connector, idx) => (
+            <ListItem disableGutters key={connector.id}>
+              <ListItemButton
+                disabled={!connector.ready}
+                key={connector.id}
+                onClick={() => {
+                  connect({ connector });
+                  setOpenConnectorsDialog(false);
+                }}
+              >
+                {connector.name}
+                {!connector.ready && " (unsupported)"}
+                {isLoadingConnect &&
+                  connector.id === pendingConnector?.id &&
+                  " (connecting)"}
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      </Dialog>
+    );
+  }
+
+  if (hidden === true) {
+    return null;
+  }
+
+  //* Render.
   return (
     <>
-      {(user === undefined || user.isLoggedIn === false) && (
+      {user?.isLoggedIn !== true && (
         <Button
           sx={{ my: 2, color: "white", display: "block" }}
-          onClick={async () => {
-            await handleLoginClick();
+          onClick={() => {
+            setClickLogin(true);
+
+            handleLoginClick({
+              chainId: selectedChain?.id,
+              walletClient,
+              mutateUser,
+            });
           }}
         >
           Login
         </Button>
       )}
-      {user !== undefined && user.isLoggedIn === true && (
+
+      {user?.isLoggedIn === true && (
         <Button
           sx={{ my: 2, color: "white", display: "block" }}
-          onClick={async () => {
-            await handleLogoutClick();
+          onClick={() => {
+            handleLogoutClick({ mutateUser });
           }}
         >
           Logout
         </Button>
       )}
+
+      {renderConnectorsDialog()}
     </>
   );
 }

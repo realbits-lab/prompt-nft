@@ -1,23 +1,14 @@
 import React from "react";
-import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
 import CardNft from "@/components/CardNft";
+import WalletProfile from "@/components/WalletProfile";
 
 export default function ListOwn({
-  selectedChain,
-  address,
-  isConnected,
-  dataWalletClient,
-  promptNftContract,
-  rentMarketContract,
-  signTypedDataAsync,
   data,
   isLoading,
 }) {
@@ -25,7 +16,6 @@ export default function ListOwn({
   // console.log("isLoading: ", isLoading);
   // console.log("data: ", data);
   // console.log("allMyOwnDataCount: ", allMyOwnDataCount);
-  const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const NUMBER_PER_PAGE = 1;
 
   const CARD_MAX_WIDTH = 420;
@@ -39,15 +29,13 @@ export default function ListOwn({
   function LoadingPage() {
     return (
       <Box
-        sx={{
-          "& .MuiTextField-root": { m: 1, width: "25ch" },
-        }}
         display="flex"
         flexDirection="column"
         justifyContent="center"
         alignItems="center"
         minHeight="100vh"
       >
+        <Typography>Owned NFT list</Typography>
         <CircularProgress sx={{ width: "50vw" }} />
       </Box>
     );
@@ -56,30 +44,19 @@ export default function ListOwn({
   function NoContentPage({ message }) {
     return (
       <Box
-        sx={{
-          "& .MuiTextField-root": { m: 1, width: "25ch" },
-        }}
         display="flex"
         flexDirection="column"
         justifyContent="center"
         alignItems="center"
         minHeight="100vh"
       >
-        {/* <Grid container spacing={2} justifyContent="space-around" padding={2}>
-          <Grid item>
-            <Web3Button />
-          </Grid>
-          <Grid item>
-            <Web3NetworkSwitch />
-          </Grid>
-        </Grid> */}
         <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-          <CardMedia component="img" image={PLACEHOLDER_IMAGE_URL} />
           <CardContent
             sx={{
               padding: "10",
             }}
           >
+            <Typography>Owned NFT list</Typography>
             <Typography variant="h7">{message}</Typography>
           </CardContent>
         </Card>
@@ -90,24 +67,35 @@ export default function ListOwn({
   const OwnCardList = React.useCallback(
     function OwnCardList() {
       if (isLoading === true) {
-        return <LoadingPage />;
+        return (
+          <>
+            <WalletProfile />
+            <LoadingPage />
+          </>
+        );
       }
 
       if (!data || data.length === 0) {
         return (
-          <NoContentPage message={"You do not have any image prompt NFT."} />
+          <>
+            <WalletProfile />
+            <NoContentPage message={"You do not have any image prompt NFT."} />
+          </>
         );
       }
 
       return (
-        <div>
+        <>
+          <WalletProfile />
+
           <Box
-            sx={{ marginTop: 1 }}
             display="flex"
             flexDirection="column"
             justifyContent="center"
             alignItems="center"
           >
+            <Typography>Owned NFT list</Typography>
+
             {data.map((nftData, idx) => {
               // console.log("nftData: ", nftData);
               // console.log("idx: ", idx);
@@ -141,7 +129,7 @@ export default function ListOwn({
               }}
             />
           </Box>
-        </div>
+        </>
       );
     },
     [data, pageIndex, isLoading]

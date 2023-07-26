@@ -82,6 +82,9 @@ async function getAllMyOwnData({
   // console.log("ownerAddress: ", ownerAddress);
 
   //* Check error case.
+  if (!ownerAddress) {
+    throw new Error("ownerAddress is undefined.");
+  }
   if (!promptNftContract) {
     throw new Error("Prompt nft contract is undefined.");
   }

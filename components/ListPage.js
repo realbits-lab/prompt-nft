@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { isMobile } from "react-device-detect";
 import dynamic from "next/dynamic";
 import Router, { useRouter } from "next/router";
@@ -233,8 +233,8 @@ export default function ListPage(props) {
             </Box>
 
             <Box>
-              {(user === undefined || user.isLoggedIn === false) && <User />}
-              {user !== undefined && user.isLoggedIn === true && (
+              <User hidden={user?.isLoggedIn === true} />
+              {user?.isLoggedIn === true && (
                 <Button
                   id="basic-button"
                   aria-controls={openSettingMenu ? "basic-menu" : undefined}
@@ -309,14 +309,14 @@ export default function ListPage(props) {
                     BOARD
                   </MenuItem>
                 </Link>
-                <MenuItem
+                {/* <MenuItem
                   onClick={() => {
                     setCurrentMode(MENU_ENUM.theme);
                     handleSettingMenuClose();
                   }}
                 >
                   THEME
-                </MenuItem>
+                </MenuItem> */}
                 <MenuItem
                   onClick={async () => {
                     setCurrentMode(MENU_ENUM.image);

@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/router";
-import { Web3Button, Web3NetworkSwitch, useWeb3Modal } from "@web3modal/react";
+import { formatEther } from "viem";
 import moment from "moment";
 import momentDurationFormatSetup from "moment-duration-format";
 import { useRecoilStateLoadable } from "recoil";
@@ -14,7 +14,8 @@ import {
   useWatchPendingTransactions,
   useWalletClient,
 } from "wagmi";
-import { polygon, polygonMumbai } from "viem/chains";
+import { getContract } from "@wagmi/core";
+import { polygon, polygonMumbai, localhost } from "wagmi/chains";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
@@ -23,7 +24,6 @@ import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
-import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -31,24 +31,25 @@ import Typography from "@mui/material/Typography";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
 import useUser from "@/lib/useUser";
-import { handleSignMessage, handleAuthenticate } from "@/components/User";
 import { sleep, writeToastMessageState, AlertSeverity } from "@/lib/util";
+import faucetTokenABI from "@/contracts/faucetToken.json";
+import WalletProfile from "@/components/WalletProfile";
 
 export default function DrawImage() {
   // console.log("call DrawImage()");
 
+  const RENT_MARKET_CONTRACT_ADDRESS =
+    process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
   const DEFAULT_MODEL_NAME = "runwayml/stable-diffusion-v1-5";
   const DRAW_API_URL = "/api/draw";
   const POST_API_URL = "/api/post";
   const POSTED_API_URL = "/api/posted";
   const UPLOAD_IMAGE_TO_S3_URL = "/api/upload-image-to-s3";
   const FETCH_RESULT_API_URL = "/api/fetch-result";
-  const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const DISCORD_BOT_TOKEN = process.env.NEXT_PUBLIC_DISCORD_BOT_TOKEN;
   const CARD_MARGIN_TOP = "60px";
   const CARD_MIN_WIDTH = 375;
   const CARD_MAX_WIDTH = 420;
-  const CARD_PADDING = 1;
   const IMAGE_PADDING = 450;
   const { user, mutateUser } = useUser();
   // console.log("user: ", user);
@@ -59,25 +60,15 @@ export default function DrawImage() {
   const [isImagePosted, setIsImagePosted] = React.useState(false);
   const [imageHeight, setImageHeight] = React.useState(0);
   const router = useRouter();
-  const MARGIN_TOP = "60px";
 
   //*---------------------------------------------------------------------------
-  //* Snackbar variables.
+  //* Snackbar.
   //*---------------------------------------------------------------------------
   const [writeToastMessageLoadable, setWriteToastMessage] =
     useRecoilStateLoadable(writeToastMessageState);
-  const writeToastMessage =
-    writeToastMessageLoadable?.state === "hasValue"
-      ? writeToastMessageLoadable.contents
-      : {
-          snackbarSeverity: AlertSeverity.info,
-          snackbarMessage: "",
-          snackbarTime: new Date(),
-          snackbarOpen: true,
-        };
 
   //*---------------------------------------------------------------------------
-  //* Handle text input change.
+  //* Prompt input.
   //*---------------------------------------------------------------------------
   const [formValue, setFormValue] = React.useState({
     prompt: "",
@@ -98,7 +89,7 @@ export default function DrawImage() {
   };
 
   //*---------------------------------------------------------------------------
-  //* Wagmi hook.
+  //* Wagmi.
   //*---------------------------------------------------------------------------
   const RENT_MARKET_CONTRACT_ADDRES =
     process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
@@ -107,50 +98,35 @@ export default function DrawImage() {
   const PAYMENT_NFT_TOKEN_ID = process.env.NEXT_PUBLIC_PAYMENT_NFT_TOKEN;
   const SERVICE_ACCOUNT_ADDRESS =
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
+  const BLOCKCHAIN_NETWORK = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
   const { address, isConnected } = useAccount();
-  const { chains, chain: selectedChain } = useNetwork({
-    onSuccess(data) {
-      // console.log("call onSuccess()");
-      // console.log("data: ", data);
-    },
-    onError(error) {
-      // console.log("call onError()");
-      // console.log("error: ", error);
-    },
-    onSettled(data, error) {
-      // console.log("call onSettled()");
-      // console.log("data: ", data);
-      // console.log("error: ", error);
-    },
-  });
+  const { chains, chain } = useNetwork();
+
   const { data: walletClient } = useWalletClient({
     onSuccess(data) {
       // console.log("call onSuccess()");
       // console.log("data: ", data);
 
-      data.addChain({ chain: polygonMumbai });
-    },
-    onError(error) {
-      // console.log("call onError()");
-      // console.log("error: ", error);
-    },
-    onSettled(data, error) {
-      // console.log("call onSettled()");
-      // console.log("data: ", data);
-      // console.log("error: ", error);
+      switch (BLOCKCHAIN_NETWORK) {
+        case "localhost":
+        default:
+          data.addChain({ chain: localhost });
+          break;
+
+        case "matic":
+          data.addChain({ chain: polygon });
+          break;
+
+        case "maticmum":
+          data.addChain({ chain: polygonMumbai });
+          break;
+      }
     },
   });
-  const [paymentNftRentFee, setPaymentNftRentFee] = React.useState();
+
   const [currentTimestamp, setCurrentTimestamp] = React.useState();
   const [imageFetchEndTime, setImageFetchEndTime] = React.useState();
   const [paymentNftRentEndTime, setPaymentNftRentEndTime] = React.useState();
-
-  const {
-    isOpen: isOpenWeb3Modal,
-    open: openWeb3Modal,
-    close: closeWeb3Modal,
-    setDefaultChain: setDefaultChainWeb3Modal,
-  } = useWeb3Modal();
 
   const {
     data: dataAllRentData,
@@ -185,47 +161,13 @@ export default function DrawImage() {
         }
       });
     },
-    onError(error) {
-      // console.log("call onError()");
-      // console.log("error: ", error);
-    },
-    onSettled(data, error) {
-      // console.log("call onSettled()");
-      // console.log("data: ", data);
-      // console.log("error: ", error);
-    },
   });
 
-  const {
-    data: dataRentData,
-    isError: errorRentData,
-    isLoading: isLoadingRentData,
-    isValidating: isValidatingRentData,
-    status: statusRentData,
-    refetch: refetchRentData,
-  } = useContractRead({
+  const { data: dataRentData, isLoading: isLoadingRentData } = useContractRead({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
     functionName: "getRegisterData",
     args: [PAYMENT_NFT_CONTRACT_ADDRESS, PAYMENT_NFT_TOKEN_ID],
-    // cacheOnBlock: true,
-    // cacheTime: 60_000,
-    // watch: false,
-    onSuccess(data) {
-      // console.log("call onSuccess()");
-      // console.log("data: ", data);
-      // console.log("rentFee: ", Number(data.rentFee) / Math.pow(10, 18));
-      setPaymentNftRentFee(Number(data.rentFee) / Math.pow(10, 18));
-    },
-    onError(error) {
-      // console.log("call onError()");
-      // console.log("error: ", error);
-    },
-    onSettled(data, error) {
-      // console.log("call onSettled()");
-      // console.log("data: ", data);
-      // console.log("error: ", error);
-    },
   });
 
   const { config: configPrepareRentNFT, error: errorPrepareRentNFT } =
@@ -239,25 +181,49 @@ export default function DrawImage() {
         SERVICE_ACCOUNT_ADDRESS,
       ],
       enabled: false,
-      onError(error) {
-        // console.log("call onError()");
-        // console.log("error: ", error);
-      },
-      onMutate(args, overrides) {
-        // console.log("call onMutate()");
-        // console.log("args: ", args);
-        // console.log("overrides: ", overrides);
-      },
-      onSettled(data, error) {
-        // console.log("call onSettled()");
-        // console.log("data: ", data);
-        // console.log("error: ", error);
-      },
-      onSuccess(data) {
-        // console.log("call onSuccess()");
-        // console.log("data: ", data);
-      },
     });
+
+  const {
+    data: dataRentNFTByToken,
+    error: errorRentNFTByToken,
+    isError: isErrorRentNFTByToken,
+    isIdle: isIdleRentNFTByToken,
+    isLoading: isLoadingRentNFTByToken,
+    isSuccess: isSuccessRentNFTByToken,
+    write: writeRentNFTByToken,
+    status: statusRentNFTByToken,
+  } = useContractWrite({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI?.abi,
+    functionName: "rentNFTByToken",
+    args: [
+      PAYMENT_NFT_CONTRACT_ADDRESS,
+      PAYMENT_NFT_TOKEN_ID,
+      SERVICE_ACCOUNT_ADDRESS,
+    ],
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.success,
+        snackbarMessage:
+          "Rent transaction is just started and wait a moment...",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+    onError(error) {
+      // console.log("call onSuccess()");
+      // console.log("error: ", error);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.error,
+        snackbarMessage: `${error}`,
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+  });
+
   const {
     data: dataRentNFT,
     error: errorRentNFT,
@@ -297,12 +263,8 @@ export default function DrawImage() {
         snackbarOpen: true,
       });
     },
-    onSettled(data, error) {
-      // console.log("call onSettled()");
-      // console.log("data: ", data);
-      // console.log("error: ", error);
-    },
   });
+
   const {
     data: dataRentNFTTx,
     isError: isErrorRentNFTTx,
@@ -341,17 +303,39 @@ export default function DrawImage() {
         snackbarOpen: true,
       });
     },
-    onSettled(data, error) {
-      // console.log("call onSettled()");
-      // console.log("data: ", data);
-      // console.log("error: ", error);
-    },
   });
+
   useWatchPendingTransactions({
     listener: function (tx) {
       // console.log("tx: ", tx);
     },
   });
+
+  useEffect(
+    function () {
+      // console.log("call useEffect()");
+      // console.log("window.ethereum: ", window.ethereum);
+
+      momentDurationFormatSetup(moment);
+
+      setImageHeight(window.innerHeight - IMAGE_PADDING);
+      window.addEventListener("resize", handleResize);
+
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
+    },
+    [user]
+  );
+
+  //* TODO: No reload.
+  // useInterval(() => {
+  //   console.log("call useInterval()");
+
+  //   const timestamp = Math.floor(Date.now() / 1000);
+  //   // console.log("timestamp: ", timestamp);
+  //   setCurrentTimestamp((previousTimestamp) => timestamp);
+  // }, 1000);
 
   async function updateUserData() {
     // console.log("call updateUserData()");
@@ -378,33 +362,6 @@ export default function DrawImage() {
       throw error;
     }
   }
-
-  //* Initialize.
-  React.useEffect(
-    function () {
-      // console.log("call useEffect()");
-      // console.log("window.ethereum: ", window.ethereum);
-
-      momentDurationFormatSetup(moment);
-
-      setImageHeight(window.innerHeight - IMAGE_PADDING);
-      window.addEventListener("resize", handleResize);
-
-      return () => {
-        window.removeEventListener("resize", handleResize);
-      };
-    },
-    [user]
-  );
-
-  //* TODO: No reload.
-  // useInterval(() => {
-  //   console.log("call useInterval()");
-
-  //   const timestamp = Math.floor(Date.now() / 1000);
-  //   // console.log("timestamp: ", timestamp);
-  //   setCurrentTimestamp((previousTimestamp) => timestamp);
-  // }, 1000);
 
   function useInterval(callback, delay) {
     const savedCallback = React.useRef();
@@ -699,207 +656,228 @@ export default function DrawImage() {
     setPostingImage(false);
   }
 
-  function WalletConnectPage() {
+  function PaymentByTokenPage() {
     return (
-      <>
-        <Box
+      <Box
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        sx={{ marginTop: "50px" }}
+      >
+        <Card
           sx={{
-            marginTop: "200px",
+            minWidth: CARD_MIN_WIDTH,
+            maxWidth: CARD_MAX_WIDTH,
+            mt: CARD_MARGIN_TOP,
           }}
         >
-          <Button fullWidth variant="contained" onClick={openWeb3Modal}>
-            Connect Wallet
-          </Button>
-        </Box>
-      </>
-    );
-  }
+          <CardContent
+            sx={{
+              padding: "10",
+            }}
+          >
+            <Typography variant="h6">
+              You have to rent NFT for 1-day drawing.
+            </Typography>
+            <Button
+              disabled={isLoadingRentNFT || isLoadingRentNFTTx}
+              fullWidth
+              sx={{ marginTop: "10px" }}
+              variant="contained"
+              onClick={async function () {
+                if (writeRentNFT && dataRentData) {
+                  const contract = getContract({
+                    address: dataRentData.feeTokenAddress,
+                    abi: faucetTokenABI.abi,
+                  });
+                  // console.log("contract: ", contract);
 
-  function WalletLoginPage() {
-    return (
-      <>
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="center"
-          sx={{ marginTop: "50px" }}
-        >
-          <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
-            <CardMedia
-              component="img"
-              image={PLACEHOLDER_IMAGE_URL}
-              height={"200px"}
-            />
-            <CardContent
-              sx={{
-                padding: "10",
+                  await erc20PermitSignature({
+                    owner: address,
+                    spender: RENT_MARKET_CONTRACT_ADDRESS,
+                    amount: dataRentData.rentFeeByToken,
+                    contract,
+                    chain,
+                  });
+
+                  writeRentNFTByToken?.({
+                    value: dataRentData.rentFeeByToken,
+                  });
+                }
               }}
             >
-              <Button
-                fullWidth
-                variant="contained"
-                onClick={async () => {
-                  if (!address) {
-                    setWriteToastMessage({
-                      snackbarSeverity: AlertSeverity.warning,
-                      snackbarMessage: "Wallet is not connected.",
-                      snackbarTime: new Date(),
-                      snackbarOpen: true,
-                    });
-                    return;
-                  }
-
-                  const publicAddress = address.toLowerCase();
-                  // console.log("publicAddress: ", publicAddress);
-
-                  //* TODO: Should check the chain id.
-                  const signMessageResult = await handleSignMessage({
-                    account: publicAddress,
-                    chainId: selectedChain.id,
-                    walletClient: walletClient,
-                  });
-                  // console.log("signMessageResult: ", signMessageResult);
-                  // console.log("handleAuthenticate: ", handleAuthenticate);
-
-                  // Send signature to back-end on the /auth route.
-                  await handleAuthenticate({
-                    publicAddress: publicAddress,
-                    signature: signMessageResult,
-                    mutateUser,
-                  });
-                }}
-              >
-                LOGIN
-              </Button>
-            </CardContent>
-          </Card>
-        </Box>
-      </>
-    );
-  }
-
-  function LoadingPage() {
-    // console.log("call buildLoadingPage()");
-
-    return (
-      <>
-        <Typography>Loading ...</Typography>
-      </>
+              {isLoadingRentNFT || isLoadingRentNFTTx ? (
+                <Typography>
+                  Renting NFT... (
+                  {formatEther(dataRentData?.rentFeeByToken || BigInt(0))}{" "}
+                  token)
+                </Typography>
+              ) : (
+                <Typography>
+                  Rent NFT (
+                  {formatEther(dataRentData?.rentFeeByToken || BigInt(0))}{" "}
+                  token)
+                </Typography>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      </Box>
     );
   }
 
   function PaymentPage() {
     return (
-      <>
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="center"
-          sx={{ marginTop: "50px" }}
+      <Box
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        sx={{ marginTop: "50px" }}
+      >
+        <Card
+          sx={{
+            minWidth: CARD_MIN_WIDTH,
+            maxWidth: CARD_MAX_WIDTH,
+            mt: CARD_MARGIN_TOP,
+          }}
         >
-          <Card
+          <CardContent
             sx={{
-              minWidth: CARD_MIN_WIDTH,
-              maxWidth: CARD_MAX_WIDTH,
+              padding: "10",
             }}
           >
-            <CardMedia
-              component="img"
-              image={PLACEHOLDER_IMAGE_URL}
-              height={"200px"}
-            />
-            <CardContent
-              sx={{
-                padding: "10",
+            <Typography variant="h6">
+              You have to rent NFT for 1-day drawing.
+            </Typography>
+            <Button
+              disabled={isLoadingRentNFT || isLoadingRentNFTTx}
+              fullWidth
+              sx={{ marginTop: "10px" }}
+              variant="contained"
+              onClick={function () {
+                if (writeRentNFT && dataRentData) {
+                  writeRentNFT?.({
+                    value: dataRentData.rentFee,
+                  });
+                }
               }}
             >
-              <Typography variant="h5">
-                You have to rent NFT for drawing.
-              </Typography>
-              <Button
-                disabled={isLoadingRentNFT || isLoadingRentNFTTx}
-                fullWidth
-                sx={{ marginTop: "10px" }}
-                variant="contained"
-                onClick={function () {
-                  if (writeRentNFT && dataRentData) {
-                    writeRentNFT?.({
-                      value: dataRentData.rentFee,
-                    });
-                  }
-                }}
-              >
-                {isLoadingRentNFT || isLoadingRentNFTTx ? (
-                  <Typography>
-                    Renting NFT... ({paymentNftRentFee} matic)
-                  </Typography>
-                ) : (
-                  <Typography>Rent NFT ({paymentNftRentFee} matic)</Typography>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        </Box>
-      </>
+              {isLoadingRentNFT || isLoadingRentNFTTx ? (
+                <Typography>
+                  Renting NFT... (
+                  {formatEther(dataRentData?.rentFee || BigInt(0))} matic)
+                </Typography>
+              ) : (
+                <Typography>
+                  Rent NFT ({formatEther(dataRentData?.rentFee || BigInt(0))}{" "}
+                  matic)
+                </Typography>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      </Box>
     );
   }
 
-  function ImagePage() {
-    // console.log("call ImagePage()");
-    // console.log("imageUrl: ", imageUrl);
-    // console.log("imageHeight: ", imageHeight);
+  async function erc20PermitSignature({
+    owner,
+    spender,
+    amount,
+    contract,
+    chain,
+  }) {
+    // console.log("call erc20PermitSignature()");
+    // console.log("owner: ", owner);
+    // console.log("spender: ", spender);
+    // console.log("amount: ", amount);
+    // console.log("contract: ", contract);
+    // console.log("chain: ", chain);
 
-    return (
-      <Card sx={{ maxWidth: 345 }}>
-        <CardMedia
-          component="img"
-          image={imageUrl}
-          // height={imageHeight}
-          // fit="contain"
-          // sx={{ marginTop: "50px" }}
-        />
-      </Card>
-      // <Image
-      //   src={imageUrl}
-      //   height={imageHeight}
-      //   fit="contain"
-      //   duration={10}
-      //   easing="ease"
-      //   shiftDuration={10}
-      //   sx={{ marginTop: "50px" }}
-      // />
-    );
+    try {
+      //* Deadline is 20 minutes later from current timestamp.
+      const transactionDeadline = Date.now() + 20 * 60;
+      // console.log("transactionDeadline: ", transactionDeadline);
+      const nonce = await contract.read.nonces({ args: [owner] });
+      // console.log("nonce: ", nonce);
+      const contractName = await contract.read.name();
+      // console.log("contractName: ", contractName);
+
+      const EIP712Domain = [
+        { name: "name", type: "string" },
+        { name: "version", type: "string" },
+        { name: "chainId", type: "uint256" },
+        { name: "verifyingContract", type: "address" },
+      ];
+      // console.log("chain: ", chain);
+      const domain = {
+        name: contractName,
+        version: "1",
+        chainId: chain.id,
+        verifyingContract: contract.address,
+      };
+      const Permit = [
+        { name: "owner", type: "address" },
+        { name: "spender", type: "address" },
+        { name: "value", type: "uint256" },
+        { name: "nonce", type: "uint256" },
+        { name: "deadline", type: "uint256" },
+      ];
+      const message = {
+        owner,
+        spender,
+        value: amount.toString(),
+        nonce: nonce.toString(16),
+        deadline: transactionDeadline,
+      };
+      const msgParams = JSON.stringify({
+        types: {
+          EIP712Domain,
+          Permit,
+        },
+        domain,
+        primaryType: "Permit",
+        message,
+      });
+
+      const params = [address, msgParams];
+      const method = "eth_signTypedData_v4";
+      // console.log("params: ", params);
+      // console.log("method: ", method);
+      const signature = await ethereum.request({
+        method,
+        params,
+      });
+      // console.log("signature: ", signature);
+      const signData = utils.splitSignature(signature);
+      // console.log("signData: ", signData);
+      const { r, s, v } = signData;
+      return {
+        r,
+        s,
+        v,
+        deadline: transactionDeadline,
+      };
+    } catch (error) {
+      console.error("error: ", error);
+      return error;
+    }
   }
 
   //* Fix mui textfield problem about focus.
   //* https://github.com/mui/material-ui/issues/783
   return (
     <>
-      <Grid
-        container
-        spacing={2}
-        display="flex"
-        flexDirection="row"
-        justifyContent="flex-end"
-        sx={{ marginTop: MARGIN_TOP }}
-      >
-        <Grid item>
-          <Web3Button />
-        </Grid>
-        <Grid item>
-          <Web3NetworkSwitch />
-        </Grid>
-      </Grid>
+      <WalletProfile />
 
-      {isConnected === false ? (
-        <WalletConnectPage />
-      ) : !dataAllRentData ? (
-        <LoadingPage />
-      ) : user === undefined || user.isLoggedIn === false ? (
-        <WalletLoginPage />
-      ) : user !== undefined && user.rentPaymentNft === true ? (
+      {user?.rentPaymentNft === false ? (
+        <>
+          <PaymentPage />
+          <PaymentByTokenPage />
+        </>
+      ) : (
         <>
           <Box
             component="form"
@@ -907,7 +885,9 @@ export default function DrawImage() {
             autoComplete="off"
             display="flex"
             flexDirection="column"
+            sx={{ mt: CARD_MARGIN_TOP }}
           >
+            {/*//* Show rent status.                                         */}
             {isLoadingRentData ||
             !paymentNftRentEndTime ||
             !currentTimestamp ? (
@@ -923,6 +903,8 @@ export default function DrawImage() {
             ) : (
               <Typography>Rent finished</Typography>
             )}
+
+            {/*//* Prompt input.                                             */}
             <TextField
               required
               id="outlined-required"
@@ -982,6 +964,8 @@ export default function DrawImage() {
                 .humanize()}
             </Typography>
           )} */}
+
+            {/*//* Show action step for draw, post, and mint.                */}
             <Box sx={{ width: "100%" }}>
               <Stepper
                 activeStep={isImageDrawn ? 1 : isImagePosted ? 2 : -1}
@@ -1064,6 +1048,7 @@ export default function DrawImage() {
               </Stepper>
             </Box>
 
+            {/*//* Show image.                                               */}
             {loadingImage ? (
               <Box
                 height={imageHeight}
@@ -1108,8 +1093,6 @@ export default function DrawImage() {
             )}
           </Box>
         </>
-      ) : (
-        <PaymentPage />
       )}
     </>
   );
