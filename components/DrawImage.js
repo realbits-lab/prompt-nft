@@ -31,7 +31,11 @@ import Typography from "@mui/material/Typography";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
 import useUser from "@/lib/useUser";
-import { sleep, writeToastMessageState, AlertSeverity } from "@/lib/util";
+import {
+  sleep,
+  writeToastMessageState,
+  AlertSeverity,
+} from "@/lib/util";
 import faucetTokenABI from "@/contracts/faucetToken.json";
 import WalletProfile from "@/components/WalletProfile";
 
@@ -95,10 +99,12 @@ export default function DrawImage() {
     process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
   const PAYMENT_NFT_CONTRACT_ADDRESS =
     process.env.NEXT_PUBLIC_PAYMENT_NFT_ADDRESS;
-  const PAYMENT_NFT_TOKEN_ID = process.env.NEXT_PUBLIC_PAYMENT_NFT_TOKEN;
+  const PAYMENT_NFT_TOKEN_ID =
+    process.env.NEXT_PUBLIC_PAYMENT_NFT_TOKEN;
   const SERVICE_ACCOUNT_ADDRESS =
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
-  const BLOCKCHAIN_NETWORK = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
+  const BLOCKCHAIN_NETWORK =
+    process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
   const { address, isConnected } = useAccount();
   const { chains, chain } = useNetwork();
 
@@ -126,7 +132,8 @@ export default function DrawImage() {
 
   const [currentTimestamp, setCurrentTimestamp] = React.useState();
   const [imageFetchEndTime, setImageFetchEndTime] = React.useState();
-  const [paymentNftRentEndTime, setPaymentNftRentEndTime] = React.useState();
+  const [paymentNftRentEndTime, setPaymentNftRentEndTime] =
+    React.useState();
 
   const {
     data: dataAllRentData,
@@ -149,13 +156,15 @@ export default function DrawImage() {
       data.map(function (rentData) {
         // console.log("rentData: ", rentData);
         if (
-          rentData.renteeAddress.toLowerCase() === address?.toLowerCase() &&
+          rentData.renteeAddress.toLowerCase() ===
+            address?.toLowerCase() &&
           rentData.nftAddress.toLowerCase() ===
             PAYMENT_NFT_CONTRACT_ADDRESS.toLowerCase() &&
           Number(rentData.tokenId) === Number(PAYMENT_NFT_TOKEN_ID)
         ) {
           const rentEndTime =
-            Number(rentData.rentStartTimestamp) + Number(rentData.rentDuration);
+            Number(rentData.rentStartTimestamp) +
+            Number(rentData.rentDuration);
           // console.log("rentEndTime: ", rentEndTime);
           setPaymentNftRentEndTime(rentEndTime);
         }
@@ -163,12 +172,13 @@ export default function DrawImage() {
     },
   });
 
-  const { data: dataRentData, isLoading: isLoadingRentData } = useContractRead({
-    address: RENT_MARKET_CONTRACT_ADDRES,
-    abi: rentmarketABI.abi,
-    functionName: "getRegisterData",
-    args: [PAYMENT_NFT_CONTRACT_ADDRESS, PAYMENT_NFT_TOKEN_ID],
-  });
+  const { data: dataRentData, isLoading: isLoadingRentData } =
+    useContractRead({
+      address: RENT_MARKET_CONTRACT_ADDRES,
+      abi: rentmarketABI.abi,
+      functionName: "getRegisterData",
+      args: [PAYMENT_NFT_CONTRACT_ADDRESS, PAYMENT_NFT_TOKEN_ID],
+    });
 
   const { config: configPrepareRentNFT, error: errorPrepareRentNFT } =
     usePrepareContractWrite({
@@ -454,7 +464,9 @@ export default function DrawImage() {
       jsonResponse.status !== "processing" &&
       jsonResponse.status !== "success"
     ) {
-      console.error("jsonResponse.status is not processing or success.");
+      console.error(
+        "jsonResponse.status is not processing or success."
+      );
 
       setWriteToastMessage({
         snackbarSeverity: AlertSeverity.warning,
@@ -523,7 +535,10 @@ export default function DrawImage() {
       let event = {};
       event.target = { name: "prompt", value: meta.prompt };
       handleChange(event);
-      event.target = { name: "negativePrompt", value: meta.negative_prompt };
+      event.target = {
+        name: "negativePrompt",
+        value: meta.negative_prompt,
+      };
       handleChange(event);
       event.target = { name: "modelName", value: meta.model };
       handleChange(event);
@@ -541,7 +556,11 @@ export default function DrawImage() {
     return;
   }
 
-  async function postImage({ postImageUrl, inputPrompt, inputNegativePrompt }) {
+  async function postImage({
+    postImageUrl,
+    inputPrompt,
+    inputNegativePrompt,
+  }) {
     setPostingImage(true);
 
     //* Check the duplicate prompt.
@@ -587,7 +606,9 @@ export default function DrawImage() {
         body: JSON.stringify(uploadImageJsonData),
       });
     } catch (error) {
-      console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
+      console.error(
+        `responseUploadImageToS3: ${responseUploadImageToS3}`
+      );
 
       setWriteToastMessage({
         snackbarSeverity: AlertSeverity.warning,
@@ -602,7 +623,9 @@ export default function DrawImage() {
     }
 
     if (responseUploadImageToS3.status !== 200) {
-      console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
+      console.error(
+        `responseUploadImageToS3: ${responseUploadImageToS3}`
+      );
 
       setWriteToastMessage({
         snackbarSeverity: AlertSeverity.warning,
@@ -615,7 +638,8 @@ export default function DrawImage() {
       setPostingImage(false);
       return;
     }
-    const imageUploadJsonResponse = await responseUploadImageToS3.json();
+    const imageUploadJsonResponse =
+      await responseUploadImageToS3.json();
     // console.log("imageUploadJsonResponse: ", imageUploadJsonResponse);
 
     //* Post image and prompt to prompt server.
@@ -710,13 +734,17 @@ export default function DrawImage() {
               {isLoadingRentNFT || isLoadingRentNFTTx ? (
                 <Typography>
                   Renting NFT... (
-                  {formatEther(dataRentData?.rentFeeByToken || BigInt(0))}{" "}
+                  {formatEther(
+                    dataRentData?.rentFeeByToken || BigInt(0)
+                  )}{" "}
                   token)
                 </Typography>
               ) : (
                 <Typography>
                   Rent NFT (
-                  {formatEther(dataRentData?.rentFeeByToken || BigInt(0))}{" "}
+                  {formatEther(
+                    dataRentData?.rentFeeByToken || BigInt(0)
+                  )}{" "}
                   token)
                 </Typography>
               )}
@@ -767,11 +795,13 @@ export default function DrawImage() {
               {isLoadingRentNFT || isLoadingRentNFTTx ? (
                 <Typography>
                   Renting NFT... (
-                  {formatEther(dataRentData?.rentFee || BigInt(0))} matic)
+                  {formatEther(dataRentData?.rentFee || BigInt(0))}{" "}
+                  matic)
                 </Typography>
               ) : (
                 <Typography>
-                  Rent NFT ({formatEther(dataRentData?.rentFee || BigInt(0))}{" "}
+                  Rent NFT (
+                  {formatEther(dataRentData?.rentFee || BigInt(0))}{" "}
                   matic)
                 </Typography>
               )}
@@ -897,7 +927,9 @@ export default function DrawImage() {
               currentTimestamp < paymentNftRentEndTime ? (
               <Typography color="black">
                 {moment
-                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+                  .duration(
+                    (paymentNftRentEndTime - currentTimestamp) * 1000
+                  )
                   .format()}
               </Typography>
             ) : (
@@ -943,6 +975,9 @@ export default function DrawImage() {
             display="flex"
             flexDirection="column"
             alignItems="center"
+            sx={{
+              width: "100%",
+            }}
           >
             {/*//*TODO: Show image fetch time. */}
             {/* {imageFetchEndTime && (
@@ -1030,7 +1065,8 @@ export default function DrawImage() {
                         //* Get URI encoded string.
                         const imageUrlEncodedString =
                           encodeURIComponent(imageUrl);
-                        const promptEncodedString = encodeURIComponent(prompt);
+                        const promptEncodedString =
+                          encodeURIComponent(prompt);
                         const negativePromptEncodedString =
                           encodeURIComponent(negativePrompt);
                         const link = `/mint/${promptEncodedString}/${imageUrlEncodedString}/${negativePromptEncodedString}`;
@@ -1039,7 +1075,9 @@ export default function DrawImage() {
                       sx={{
                         m: 1,
                       }}
-                      disabled={!imageUrl || loadingImage || !isImagePosted}
+                      disabled={
+                        !imageUrl || loadingImage || !isImagePosted
+                      }
                     >
                       Mint
                     </Button>
@@ -1062,6 +1100,7 @@ export default function DrawImage() {
             ) : (
               <Card
                 sx={{
+                  width: "80%",
                   minWidth: 200,
                   maxWidth: 600,
                   minHeight: 200,
@@ -1071,7 +1110,7 @@ export default function DrawImage() {
               >
                 <CardMedia
                   component="img"
-                  sx={{ height: imageHeight, width: 600 }}
+                  sx={{ height: imageHeight, width: "100%" }}
                   image={imageUrl}
                   title={prompt}
                   onError={(e) => {
