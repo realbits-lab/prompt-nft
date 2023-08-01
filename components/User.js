@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { useAccount, useWalletClient, useNetwork, useConnect } from "wagmi";
+import {
+  useAccount,
+  useWalletClient,
+  useNetwork,
+  useConnect,
+} from "wagmi";
 import Button from "@mui/material/Button";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -12,7 +17,41 @@ import useUser from "@/lib/useUser";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
 import { AlertSeverity, writeToastMessageState } from "@/lib/util";
 
-export async function handleSignMessage({ account, chainId, walletClient }) {
+const networks = {
+  mumbai: {
+    chainId: `0x${Number(80001).toString(16)}`,
+    chainName: "Mumbai",
+    nativeCurrency: {
+      name: "MATIC",
+      symbol: "MATIC",
+      decimals: 18,
+    },
+    rpcUrls: ["https://rpc-mumbai.maticvigil.com/"],
+    blockExplorerUrls: ["https://mumbai.polygonscan.com/"],
+  },
+};
+
+export const changeNetwork = async ({ networkName }) => {
+  try {
+    if (!window.ethereum) throw new Error("No crypto wallet found");
+    await window.ethereum.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          ...networks[networkName],
+        },
+      ],
+    });
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export async function handleSignMessage({
+  account,
+  chainId,
+  walletClient,
+}) {
   // console.log("call handleSignMessage()");
   // console.log("account: ", account);
   // console.log("chainId: ", chainId);
@@ -53,14 +92,20 @@ export async function handleAuthenticate({
   // console.log("call handleAuthenticate()");
 
   const body = { publicAddress, signature };
-  const userData = await fetchJson(
-    { url: "/api/login" },
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    }
-  );
+  let userData;
+  try {
+    userData = await fetchJson(
+      { url: "/api/login" },
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }
+    );
+  } catch (error) {
+    changeNetwork({ networkName: "mumbai" });
+  }
+
   // console.log("userData: ", userData);
 
   try {
@@ -95,7 +140,11 @@ export default function User({ hidden = false }) {
   //*----------------------------------------------------------------------------
   const { chains, chain: selectedChain } = useNetwork();
   // console.log("selectedChain: ", selectedChain);
-  const { connector: activeConnector, address, isConnected } = useAccount();
+  const {
+    connector: activeConnector,
+    address,
+    isConnected,
+  } = useAccount();
   // console.log("address: ", address);
   // console.log("isConnected: ", isConnected);
 
@@ -152,7 +201,8 @@ export default function User({ hidden = false }) {
   //*---------------------------------------------------------------------------
   //* Connectors select dialog.
   //*---------------------------------------------------------------------------
-  const [openConnectorsDialog, setOpenConnectorsDialog] = useState(false);
+  const [openConnectorsDialog, setOpenConnectorsDialog] =
+    useState(false);
 
   //* Listen account change.
   useEffect(() => {
@@ -170,7 +220,10 @@ export default function User({ hidden = false }) {
       if (user?.isLoggedIn === true) {
         try {
           mutateUser(
-            await fetchJson({ url: "/api/logout" }, { method: "POST" }),
+            await fetchJson(
+              { url: "/api/logout" },
+              { method: "POST" }
+            ),
             false
           );
         } catch (error) {
@@ -195,7 +248,11 @@ export default function User({ hidden = false }) {
   }, []);
 
   //* Handle login click.
-  async function handleLoginClick({ chainId, walletClient, mutateUser }) {
+  async function handleLoginClick({
+    chainId,
+    walletClient,
+    mutateUser,
+  }) {
     // console.log("call handleLoginClick()");
     // console.log("chainId: ", chainId);
     // console.log("walletClient: ", walletClient);
