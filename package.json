@@ -31,6 +31,7 @@
     "moment-duration-format": "^2.3.2",
     "mui-image": "^1.0.7",
     "next": "13.0.6",
+    "nextjs-google-analytics": "^2.3.3",
     "react": "18.2.0",
     "react-device-detect": "^2.2.2",
     "react-dom": "18.2.0",

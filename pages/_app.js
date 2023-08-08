@@ -5,6 +5,7 @@ import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 import { SWRConfig } from "swr";
 import { RecoilRoot } from "recoil";
+import { GoogleAnalytics } from "nextjs-google-analytics";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
@@ -72,6 +73,7 @@ function MyApp(props) {
           <CssBaseline />
           <WagmiConfig config={wagmiConfig}>
             <RecoilRoot>
+              <GoogleAnalytics trackPageViews />
               <Component {...pageProps} />
             </RecoilRoot>
           </WagmiConfig>
