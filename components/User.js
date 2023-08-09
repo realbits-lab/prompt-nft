@@ -177,6 +177,23 @@ export default function User({ hidden = false }) {
   const [openConnectorsDialog, setOpenConnectorsDialog] =
     useState(false);
 
+  useEffect(() => {
+    window.ethereum.on("chainChanged", async () => {
+      try {
+        await mutateUser(
+          await fetchJson({ url: "/api/logout" }, { method: "POST" }),
+          false
+        );
+      } catch (error) {
+        if (error instanceof FetchError) {
+          console.error(error.data.message);
+        } else {
+          console.error("An unexpected error happened:", error);
+        }
+      }
+    });
+  }, []);
+
   //* Listen account change.
   useEffect(() => {
     // console.log("call useEffect()");
@@ -192,7 +209,7 @@ export default function User({ hidden = false }) {
 
       if (user?.isLoggedIn === true) {
         try {
-          mutateUser(
+          await mutateUser(
             await fetchJson(
               { url: "/api/logout" },
               { method: "POST" }
