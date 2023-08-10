@@ -1,3 +1,7 @@
+# Lock file
+package-lock.json
+yarn.lock
+
 #Prisma
 dev.db
 dev.db-journal
