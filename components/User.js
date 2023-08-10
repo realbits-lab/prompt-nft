@@ -16,36 +16,9 @@ import { useRecoilStateLoadable } from "recoil";
 import useUser from "@/lib/useUser";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
 import { AlertSeverity, writeToastMessageState } from "@/lib/util";
+import { handleChangeNetwork } from "@/lib/util";
 
-const networks = {
-  mumbai: {
-    chainId: `0x${Number(80001).toString(16)}`,
-    chainName: "Mumbai",
-    nativeCurrency: {
-      name: "MATIC",
-      symbol: "MATIC",
-      decimals: 18,
-    },
-    rpcUrls: ["https://rpc-mumbai.maticvigil.com/"],
-    blockExplorerUrls: ["https://mumbai.polygonscan.com/"],
-  },
-};
-
-export const changeNetwork = async ({ networkName }) => {
-  try {
-    if (!window.ethereum) throw new Error("No crypto wallet found");
-    await window.ethereum.request({
-      method: "wallet_addEthereumChain",
-      params: [
-        {
-          ...networks[networkName],
-        },
-      ],
-    });
-  } catch (err) {
-    console.error(err);
-  }
-};
+const targetNetWorkName = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
 
 export async function handleSignMessage({
   account,
@@ -103,7 +76,7 @@ export async function handleAuthenticate({
       }
     );
   } catch (error) {
-    changeNetwork({ networkName: "mumbai" });
+    handleChangeNetwork({ networkName: targetNetWorkName });
   }
 
   // console.log("userData: ", userData);
@@ -204,6 +177,23 @@ export default function User({ hidden = false }) {
   const [openConnectorsDialog, setOpenConnectorsDialog] =
     useState(false);
 
+  useEffect(() => {
+    window.ethereum.on("chainChanged", async () => {
+      try {
+        await mutateUser(
+          await fetchJson({ url: "/api/logout" }, { method: "POST" }),
+          false
+        );
+      } catch (error) {
+        if (error instanceof FetchError) {
+          console.error(error.data.message);
+        } else {
+          console.error("An unexpected error happened:", error);
+        }
+      }
+    });
+  }, []);
+
   //* Listen account change.
   useEffect(() => {
     // console.log("call useEffect()");
@@ -219,7 +209,7 @@ export default function User({ hidden = false }) {
 
       if (user?.isLoggedIn === true) {
         try {
-          mutateUser(
+          await mutateUser(
             await fetchJson(
               { url: "/api/logout" },
               { method: "POST" }
