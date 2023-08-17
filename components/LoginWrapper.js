@@ -5,6 +5,7 @@ import {
   useEnsAvatar,
   useEnsName,
 } from "wagmi";
+import { useEffect } from "react";
 import Box from "@mui/material/Box";
 import useUser from "@/lib/useUser";
 

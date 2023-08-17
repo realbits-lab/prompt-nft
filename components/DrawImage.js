@@ -205,6 +205,7 @@ export default function DrawImage() {
   } = useContractWrite({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI?.abi,
+
     functionName: "rentNFTByToken",
     args: [
       PAYMENT_NFT_CONTRACT_ADDRESS,
