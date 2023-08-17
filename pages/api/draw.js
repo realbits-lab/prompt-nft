@@ -6,7 +6,8 @@ async function handler(req, res) {
 
   //* Check method error.
   if (req.method !== "POST") {
-    // console.log("req.method: ", req.method);
+    console.error("req.method: ", req.method);
+
     res.status(500).json({ error: "Invalid method. Support only POST." });
     return;
   }
@@ -17,6 +18,8 @@ async function handler(req, res) {
     req.session.user.isLoggedIn !== true ||
     req.session.user.rentPaymentNft !== true
   ) {
+    console.error("req.session.user: ", req.session.user);
+
     return res.status(500).json({ data: "nok" });
   }
 
@@ -55,7 +58,8 @@ async function handler(req, res) {
 
   //* Check the response error.
   if (fetchResponse.status !== 200) {
-    console.error(error);
+    console.error("Error: ", error);
+
     res.status(500).json({ message: "Response is not success." });
   }
 
@@ -65,7 +69,8 @@ async function handler(req, res) {
     jsonResponse = await fetchResponse.json();
     // console.log("jsonResponse: ", jsonResponse);
   } catch (error) {
-    console.error(error);
+    console.error("Error: ", error);
+
     res.status(500).json({ message: "Response is not success." });
   }
   console.log("jsonResponse: ", jsonResponse);
@@ -93,7 +98,8 @@ async function handler(req, res) {
       meta: jsonResponse.meta,
     });
   } else {
-    console.error("jsonResponse.status is not success.");
+    console.error("jsonResponse.status: ", jsonResponse.status);
+
     res.status(500).json({ message: "Response is not success." });
   }
 }
