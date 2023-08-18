@@ -8,10 +8,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CardNft from "@/components/CardNft";
 import WalletProfile from "@/components/WalletProfile";
 
-export default function ListOwn({
-  data,
-  isLoading,
-}) {
+export default function ListOwn({ data, isLoading }) {
   // console.log("call ListOwn()");
   // console.log("isLoading: ", isLoading);
   // console.log("data: ", data);
@@ -50,7 +47,9 @@ export default function ListOwn({
         alignItems="center"
         minHeight="100vh"
       >
-        <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
+        <Card
+          sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}
+        >
           <CardContent
             sx={{
               padding: "10",
@@ -79,7 +78,9 @@ export default function ListOwn({
         return (
           <>
             <WalletProfile />
-            <NoContentPage message={"You do not have any image prompt NFT."} />
+            <NoContentPage
+              message={"You do not have any image prompt NFT."}
+            />
           </>
         );
       }
@@ -89,6 +90,7 @@ export default function ListOwn({
           <WalletProfile />
 
           <Box
+            sx={{ marginTop: 1 }}
             display="flex"
             flexDirection="column"
             justifyContent="center"
@@ -103,31 +105,21 @@ export default function ListOwn({
               // Check idx is in pagination.
               // pageIndex.own starts from 1.
               // idx starts from 0.
-              if (
-                idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
-                idx < pageIndex * NUMBER_PER_PAGE
-              ) {
-                return <CardNft nftData={nftData} key={idx} />;
-              }
+
+              return (
+                <Box
+                  sx={{
+                    width: "100%",
+                    marginTop: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <CardNft nftData={nftData} key={idx} />
+                </Box>
+              );
             })}
-            <Pagination
-              count={Math.ceil(data.length / NUMBER_PER_PAGE)}
-              page={pageIndex}
-              onChange={handlePageIndexChange}
-              variant="outlined"
-              sx={{
-                padding: "10",
-                ul: {
-                  "& .MuiPaginationItem-root": {
-                    color: "darkgrey",
-                    "&.Mui-selected": {
-                      background: "lightcyan",
-                      color: "darkgrey",
-                    },
-                  },
-                },
-              }}
-            />
           </Box>
         </>
       );
