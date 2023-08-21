@@ -12,7 +12,7 @@ import MobileStepper from "@mui/material/MobileStepper";
 import CircularProgress from "@mui/material/CircularProgress";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
-import CardImage from "./cardImage/CardImage";
+import CardImage from "@/components/cardimage/CardImage";
 
 function CarouselImage({ data, isLoading }) {
   // console.log("data: ", data);

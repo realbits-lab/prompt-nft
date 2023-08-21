@@ -1,7 +1,7 @@
 import React from "react";
-import { CardImageDesktop } from "./CardImage.styled";
 import Card from "@mui/material/Card";
 import { Skeleton } from "@mui/material";
+import { CardImageDesktop } from "@/components/cardimage/CardImage.styled";
 
 const CARD_MIN_WIDTH = 375;
 const CARD_MARGIN_BOTTOM = 200;
