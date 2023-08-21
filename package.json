@@ -2,6 +2,9 @@
   "name": "prompt-nft",
   "version": "0.0.1",
   "private": true,
+  "cacheDirectories": [
+    ".next/cache"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
