@@ -178,7 +178,7 @@ export default function User({ hidden = false }) {
     useState(false);
 
   useEffect(() => {
-    window.ethereum.on("chainChanged", async () => {
+    window.ethereum?.on("chainChanged", async () => {
       try {
         await mutateUser(
           await fetchJson({ url: "/api/logout" }, { method: "POST" }),
