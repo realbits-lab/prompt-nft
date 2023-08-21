@@ -96,7 +96,7 @@ export default function ListRent({ data, isLoading }) {
           >
             <Typography>Rented NFT list</Typography>
 
-            {[data[0]].map((nftData, idx) => {
+            {data.map((nftData, idx) => {
               // console.log("nftData: ", nftData);
               // console.log("idx: ", idx);
               // console.log("pageIndex: ", pageIndex);
