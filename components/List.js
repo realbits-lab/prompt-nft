@@ -32,6 +32,8 @@ import fetchJson from "@/lib/fetchJson";
 import { getChainId, isWalletConnected } from "@/lib/util";
 import promptNFTABI from "@/contracts/promptNFT.json";
 import rentmarketABI from "@/contracts/rentMarket.json";
+import ListFaucet from "./faucet/ListFaucet";
+
 const DrawImage = dynamic(() => import("./DrawImage"), {
   ssr: false,
 });
@@ -49,7 +51,8 @@ function List({ mode, updated, setNewImageCountFunc }) {
   //* Image refresh interval time by milli-second unit.
   const IMAGE_REFRESH_INTERVAL_TIME = 60000;
 
-  const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
+  const PLACEHOLDER_IMAGE_URL =
+    process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const RENT_MARKET_CONTRACT_ADDRES =
     process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
   // console.log("RENT_MARKET_CONTRACT_ADDRES: ", RENT_MARKET_CONTRACT_ADDRES);
@@ -268,7 +271,8 @@ function List({ mode, updated, setNewImageCountFunc }) {
   //*---------------------------------------------------------------------------
   const [allNftDataArray, setAllNftDataArray] = React.useState();
   const [allOwnDataArray, setAllOwnDataArray] = React.useState();
-  const [allMyRentDataArray, setAllMyRentDataArray] = React.useState();
+  const [allMyRentDataArray, setAllMyRentDataArray] =
+    React.useState();
 
   //*---------------------------------------------------------------------------
   //* Define signature data.
@@ -339,7 +343,9 @@ function List({ mode, updated, setNewImageCountFunc }) {
     //* After registering data, even though collection is removed, register data remains.
     let registerData;
     if (swrDataRegisterData && swrDataCollection) {
-      registerData = swrDataRegisterData.filter(function (registerData) {
+      registerData = swrDataRegisterData.filter(function (
+        registerData
+      ) {
         return swrDataCollection.some(function (collection) {
           return (
             collection.collectionAddress.toLowerCase() ===
@@ -420,13 +426,19 @@ function List({ mode, updated, setNewImageCountFunc }) {
 
         //* Check rent status.
         if (allMyRentDataArray) {
-          const someResult = allMyRentDataArray.some(function (rentData) {
+          const someResult = allMyRentDataArray.some(function (
+            rentData
+          ) {
             // console.log("rentData: ", rentData);
             return (
               rentData.tokenId === nft.tokenId &&
-              rentData.renteeAddress.localeCompare(address, undefined, {
-                sensitivity: "accent",
-              }) === 0
+              rentData.renteeAddress.localeCompare(
+                address,
+                undefined,
+                {
+                  sensitivity: "accent",
+                }
+              ) === 0
             );
           });
 
@@ -453,6 +465,8 @@ function List({ mode, updated, setNewImageCountFunc }) {
     }
   }
 
+  console.log(mode);
+
   return (
     <div>
       <Box
@@ -473,7 +487,10 @@ function List({ mode, updated, setNewImageCountFunc }) {
           </LoginWrapper>
         ) : mode === "own" ? (
           <LoginWrapper>
-            <ListOwn data={allOwnDataArray} isLoading={isLoadingAllMyOwnData} />
+            <ListOwn
+              data={allOwnDataArray}
+              isLoading={isLoadingAllMyOwnData}
+            />
           </LoginWrapper>
         ) : mode === "rent" ? (
           <LoginWrapper>
@@ -486,6 +503,10 @@ function List({ mode, updated, setNewImageCountFunc }) {
           <div>
             <ThemePage />
           </div>
+        ) : mode === "faucet" ? (
+          <LoginWrapper>
+            <ListFaucet />
+          </LoginWrapper>
         ) : null}
       </Box>
     </div>
