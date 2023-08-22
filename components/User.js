@@ -17,6 +17,7 @@ import useUser from "@/lib/useUser";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
 import { AlertSeverity, writeToastMessageState } from "@/lib/util";
 import { handleChangeNetwork } from "@/lib/util";
+import { Typography } from "@mui/material";
 
 const targetNetWorkName = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
 
@@ -300,20 +301,32 @@ export default function User({ hidden = false }) {
         <List sx={{ pt: 0 }}>
           {connectors.map((connector, idx) => (
             <ListItem disableGutters key={connector.id}>
-              <ListItemButton
-                disabled={!connector.ready}
-                key={connector.id}
-                onClick={() => {
-                  connect({ connector });
-                  setOpenConnectorsDialog(false);
-                }}
-              >
-                {connector.name}
-                {!connector.ready && " (unsupported)"}
-                {isLoadingConnect &&
-                  connector.id === pendingConnector?.id &&
-                  " (connecting)"}
-              </ListItemButton>
+              {connector.ready ? (
+                <ListItemButton
+                  disabled={!connector.ready}
+                  key={connector.id}
+                  onClick={() => {
+                    connect({ connector });
+                    setOpenConnectorsDialog(false);
+                  }}
+                >
+                  {connector.name}
+                  {!connector.ready && " (unsupported)1"}
+                  {isLoadingConnect &&
+                    connector.id === pendingConnector?.id &&
+                    " (connecting)"}
+                </ListItemButton>
+              ) : (
+                <ListItemButton
+                  onClick={() => {
+                    window.open(
+                      "https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn/related"
+                    );
+                  }}
+                >
+                  MetaMask를 설치한 후 다시 로그인해 주세요.
+                </ListItemButton>
+              )}
             </ListItem>
           ))}
         </List>
