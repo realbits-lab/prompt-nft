@@ -420,7 +420,7 @@ export default function DrawImage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(jsonData),
       });
-      // console.log("fetchResponse: ", fetchResponse);
+      console.log("fetchResponse: ", fetchResponse);
     } catch (error) {
       console.error(error);
       setWriteToastMessage({
@@ -548,33 +548,33 @@ export default function DrawImage() {
   async function postImage({ postImageUrl, inputPrompt, inputNegativePrompt }) {
     setPostingImage(true);
 
-    //* Check the duplicate prompt.
-    const postedResponse = await fetch(POSTED_API_URL, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        prompt: inputPrompt,
-      }),
-    });
+    // //* Check the duplicate prompt.
+    // const postedResponse = await fetch(POSTED_API_URL, {
+    //   method: "POST",
+    //   headers: {
+    //     Accept: "application/json",
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     prompt: inputPrompt,
+    //   }),
+    // });
 
-    if (postedResponse.status === 200) {
-      console.error("postedResponse: ", postedResponse);
+    // if (postedResponse.status === 200) {
+    //   console.error("postedResponse: ", postedResponse);
 
-      setWriteToastMessage({
-        snackbarSeverity: AlertSeverity.warning,
-        snackbarMessage: "Prompt is already posted.",
-        snackbarTime: new Date(),
-        snackbarOpen: true,
-      });
+    //   setWriteToastMessage({
+    //     snackbarSeverity: AlertSeverity.warning,
+    //     snackbarMessage: "Prompt is already posted.",
+    //     snackbarTime: new Date(),
+    //     snackbarOpen: true,
+    //   });
 
-      setIsImagePosted(false);
-      setPostingImage(false);
+    //   setIsImagePosted(false);
+    //   setPostingImage(false);
 
-      return;
-    }
+    //   return;
+    // }
 
     //* Upload image to S3.
     const uploadImageJsonData = {

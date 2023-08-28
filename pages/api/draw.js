@@ -2,7 +2,7 @@ import { withIronSessionApiRoute } from "iron-session/next";
 import { sessionOptions } from "@/lib/session";
 
 async function handler(req, res) {
-  // console.log("call /api/draw");
+  console.log("call /api/draw");
 
   //* Check method error.
   if (req.method !== "POST") {
