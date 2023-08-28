@@ -37,7 +37,7 @@ def get_samplers():
         print(f'name: {data["name"]}')
 
 
-def draw_image(prompt):
+def draw_image(prompt, file_name):
     payload = {
         "prompt": prompt,
         "sampler_name": "DPM++ 2M Karras",
@@ -64,7 +64,7 @@ def draw_image(prompt):
 
         pnginfo = PngImagePlugin.PngInfo()
         pnginfo.add_text("parameters", response2.json().get("info"))
-        image_data.save(f'{OUTPUT_DIR}{idx}.png', pnginfo=pnginfo)
+        image_data.save(f'{OUTPUT_DIR}{file_name}', pnginfo=pnginfo)
 
 
 def get_pages(num_pages=None):
@@ -117,11 +117,11 @@ def main():
     # with open("data.json", "w", encoding="utf8") as f:
     #     json.dump(results, f, ensure_ascii=False, indent=4)
 
-    for result in results:
+    for idx, result in enumerate(results):
         plain_text = result['properties']['prompt']['title'][0][
             'plain_text']
         print(f'plain_text: {plain_text}')
-        draw_image(plain_text)
+        draw_image(plain_text, f'{idx}.png')
 
 
 main()
