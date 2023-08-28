@@ -1093,7 +1093,9 @@ export default function DrawImage() {
               >
                 <CardMedia
                   component="img"
-                  sx={{ height: imageHeight, width: "100%" }}
+                  sx={{
+                    objectFit: "fill",
+                  }}
                   image={imageUrl}
                   title={prompt}
                   onError={(e) => {
