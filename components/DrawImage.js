@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
+import { utils } from "ethers";
 import { formatEther } from "viem";
 import moment from "moment";
 import momentDurationFormatSetup from "moment-duration-format";
@@ -31,11 +32,7 @@ import Typography from "@mui/material/Typography";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
 import useUser from "@/lib/useUser";
-import {
-  sleep,
-  writeToastMessageState,
-  AlertSeverity,
-} from "@/lib/util";
+import { sleep, writeToastMessageState, AlertSeverity } from "@/lib/util";
 import faucetTokenABI from "@/contracts/faucetToken.json";
 import WalletProfile from "@/components/WalletProfile";
 
@@ -99,12 +96,10 @@ export default function DrawImage() {
     process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
   const PAYMENT_NFT_CONTRACT_ADDRESS =
     process.env.NEXT_PUBLIC_PAYMENT_NFT_ADDRESS;
-  const PAYMENT_NFT_TOKEN_ID =
-    process.env.NEXT_PUBLIC_PAYMENT_NFT_TOKEN;
+  const PAYMENT_NFT_TOKEN_ID = process.env.NEXT_PUBLIC_PAYMENT_NFT_TOKEN;
   const SERVICE_ACCOUNT_ADDRESS =
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
-  const BLOCKCHAIN_NETWORK =
-    process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
+  const BLOCKCHAIN_NETWORK = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
   const { address, isConnected } = useAccount();
   const { chains, chain } = useNetwork();
 
@@ -132,8 +127,7 @@ export default function DrawImage() {
 
   const [currentTimestamp, setCurrentTimestamp] = React.useState();
   const [imageFetchEndTime, setImageFetchEndTime] = React.useState();
-  const [paymentNftRentEndTime, setPaymentNftRentEndTime] =
-    React.useState();
+  const [paymentNftRentEndTime, setPaymentNftRentEndTime] = React.useState();
 
   const {
     data: dataAllRentData,
@@ -156,15 +150,13 @@ export default function DrawImage() {
       data.map(function (rentData) {
         // console.log("rentData: ", rentData);
         if (
-          rentData.renteeAddress.toLowerCase() ===
-            address?.toLowerCase() &&
+          rentData.renteeAddress.toLowerCase() === address?.toLowerCase() &&
           rentData.nftAddress.toLowerCase() ===
             PAYMENT_NFT_CONTRACT_ADDRESS.toLowerCase() &&
           Number(rentData.tokenId) === Number(PAYMENT_NFT_TOKEN_ID)
         ) {
           const rentEndTime =
-            Number(rentData.rentStartTimestamp) +
-            Number(rentData.rentDuration);
+            Number(rentData.rentStartTimestamp) + Number(rentData.rentDuration);
           // console.log("rentEndTime: ", rentEndTime);
           setPaymentNftRentEndTime(rentEndTime);
         }
@@ -172,13 +164,12 @@ export default function DrawImage() {
     },
   });
 
-  const { data: dataRentData, isLoading: isLoadingRentData } =
-    useContractRead({
-      address: RENT_MARKET_CONTRACT_ADDRES,
-      abi: rentmarketABI.abi,
-      functionName: "getRegisterData",
-      args: [PAYMENT_NFT_CONTRACT_ADDRESS, PAYMENT_NFT_TOKEN_ID],
-    });
+  const { data: dataRentData, isLoading: isLoadingRentData } = useContractRead({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI.abi,
+    functionName: "getRegisterData",
+    args: [PAYMENT_NFT_CONTRACT_ADDRESS, PAYMENT_NFT_TOKEN_ID],
+  });
 
   const { config: configPrepareRentNFT, error: errorPrepareRentNFT } =
     usePrepareContractWrite({
@@ -205,13 +196,12 @@ export default function DrawImage() {
   } = useContractWrite({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI?.abi,
-
     functionName: "rentNFTByToken",
-    args: [
-      PAYMENT_NFT_CONTRACT_ADDRESS,
-      PAYMENT_NFT_TOKEN_ID,
-      SERVICE_ACCOUNT_ADDRESS,
-    ],
+    // args: [
+    //   PAYMENT_NFT_CONTRACT_ADDRESS,
+    //   PAYMENT_NFT_TOKEN_ID,
+    //   SERVICE_ACCOUNT_ADDRESS,
+    // ],
     onSuccess(data) {
       // console.log("call onSuccess()");
       // console.log("data: ", data);
@@ -465,9 +455,7 @@ export default function DrawImage() {
       jsonResponse.status !== "processing" &&
       jsonResponse.status !== "success"
     ) {
-      console.error(
-        "jsonResponse.status is not processing or success."
-      );
+      console.error("jsonResponse.status is not processing or success.");
 
       setWriteToastMessage({
         snackbarSeverity: AlertSeverity.warning,
@@ -557,11 +545,7 @@ export default function DrawImage() {
     return;
   }
 
-  async function postImage({
-    postImageUrl,
-    inputPrompt,
-    inputNegativePrompt,
-  }) {
+  async function postImage({ postImageUrl, inputPrompt, inputNegativePrompt }) {
     setPostingImage(true);
 
     //* Check the duplicate prompt.
@@ -607,9 +591,7 @@ export default function DrawImage() {
         body: JSON.stringify(uploadImageJsonData),
       });
     } catch (error) {
-      console.error(
-        `responseUploadImageToS3: ${responseUploadImageToS3}`
-      );
+      console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
 
       setWriteToastMessage({
         snackbarSeverity: AlertSeverity.warning,
@@ -624,9 +606,7 @@ export default function DrawImage() {
     }
 
     if (responseUploadImageToS3.status !== 200) {
-      console.error(
-        `responseUploadImageToS3: ${responseUploadImageToS3}`
-      );
+      console.error(`responseUploadImageToS3: ${responseUploadImageToS3}`);
 
       setWriteToastMessage({
         snackbarSeverity: AlertSeverity.warning,
@@ -639,8 +619,7 @@ export default function DrawImage() {
       setPostingImage(false);
       return;
     }
-    const imageUploadJsonResponse =
-      await responseUploadImageToS3.json();
+    const imageUploadJsonResponse = await responseUploadImageToS3.json();
     // console.log("imageUploadJsonResponse: ", imageUploadJsonResponse);
 
     //* Post image and prompt to prompt server.
@@ -718,7 +697,7 @@ export default function DrawImage() {
                   });
                   // console.log("contract: ", contract);
 
-                  await erc20PermitSignature({
+                  const { r, s, v, deadline } = await erc20PermitSignature({
                     owner: address,
                     spender: RENT_MARKET_CONTRACT_ADDRESS,
                     amount: dataRentData.rentFeeByToken,
@@ -727,7 +706,16 @@ export default function DrawImage() {
                   });
 
                   writeRentNFTByToken?.({
-                    value: dataRentData.rentFeeByToken,
+                    // value: dataRentData.rentFeeByToken,
+                    args: [
+                      PAYMENT_NFT_CONTRACT_ADDRESS,
+                      PAYMENT_NFT_TOKEN_ID,
+                      SERVICE_ACCOUNT_ADDRESS,
+                      deadline,
+                      v,
+                      r,
+                      s,
+                    ],
                   });
                 }
               }}
@@ -735,17 +723,13 @@ export default function DrawImage() {
               {isLoadingRentNFT || isLoadingRentNFTTx ? (
                 <Typography>
                   Renting NFT... (
-                  {formatEther(
-                    dataRentData?.rentFeeByToken || BigInt(0)
-                  )}{" "}
+                  {formatEther(dataRentData?.rentFeeByToken || BigInt(0))}{" "}
                   token)
                 </Typography>
               ) : (
                 <Typography>
                   Rent NFT (
-                  {formatEther(
-                    dataRentData?.rentFeeByToken || BigInt(0)
-                  )}{" "}
+                  {formatEther(dataRentData?.rentFeeByToken || BigInt(0))}{" "}
                   token)
                 </Typography>
               )}
@@ -796,13 +780,11 @@ export default function DrawImage() {
               {isLoadingRentNFT || isLoadingRentNFTTx ? (
                 <Typography>
                   Renting NFT... (
-                  {formatEther(dataRentData?.rentFee || BigInt(0))}{" "}
-                  matic)
+                  {formatEther(dataRentData?.rentFee || BigInt(0))} matic)
                 </Typography>
               ) : (
                 <Typography>
-                  Rent NFT (
-                  {formatEther(dataRentData?.rentFee || BigInt(0))}{" "}
+                  Rent NFT ({formatEther(dataRentData?.rentFee || BigInt(0))}{" "}
                   matic)
                 </Typography>
               )}
@@ -875,15 +857,19 @@ export default function DrawImage() {
 
       const params = [address, msgParams];
       const method = "eth_signTypedData_v4";
-      // console.log("params: ", params);
-      // console.log("method: ", method);
+      console.log("params: ", params);
+      console.log("method: ", method);
+
       const signature = await ethereum.request({
         method,
         params,
       });
-      // console.log("signature: ", signature);
+      console.log("signature: ", signature);
+
+      console.log("utils: ", utils);
       const signData = utils.splitSignature(signature);
-      // console.log("signData: ", signData);
+      console.log("signData: ", signData);
+
       const { r, s, v } = signData;
       return {
         r,
@@ -928,9 +914,7 @@ export default function DrawImage() {
               currentTimestamp < paymentNftRentEndTime ? (
               <Typography color="black">
                 {moment
-                  .duration(
-                    (paymentNftRentEndTime - currentTimestamp) * 1000
-                  )
+                  .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
                   .format()}
               </Typography>
             ) : (
@@ -1066,8 +1050,7 @@ export default function DrawImage() {
                         //* Get URI encoded string.
                         const imageUrlEncodedString =
                           encodeURIComponent(imageUrl);
-                        const promptEncodedString =
-                          encodeURIComponent(prompt);
+                        const promptEncodedString = encodeURIComponent(prompt);
                         const negativePromptEncodedString =
                           encodeURIComponent(negativePrompt);
                         const link = `/mint/${promptEncodedString}/${imageUrlEncodedString}/${negativePromptEncodedString}`;
@@ -1076,9 +1059,7 @@ export default function DrawImage() {
                       sx={{
                         m: 1,
                       }}
-                      disabled={
-                        !imageUrl || loadingImage || !isImagePosted
-                      }
+                      disabled={!imageUrl || loadingImage || !isImagePosted}
                     >
                       Mint
                     </Button>
