@@ -1,3 +1,6 @@
+# Image output directory
+**/outputs/
+
 # Lock file
 package-lock.json
 yarn.lock
