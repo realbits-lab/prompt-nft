@@ -14,13 +14,17 @@ export default async function handler(req, res) {
   //* Find image by take limit.
   const findManyResult = await prisma.post.findMany({
     take: IMAGE_TAKE_COUNT,
-    where: {
-      isEncrypted: false,
-    },
     orderBy: {
       createdAt: "desc",
     },
-    take: IMAGE_TAKE_COUNT,
+    select: {
+      id: true,
+      createdAt: true,
+      prompt: false,
+      negativePrompt: false,
+      imageUrl: true,
+      isEncrypted: false,
+    },
   });
   // console.log("findManyResult: ", findManyResult);
 
