@@ -472,7 +472,7 @@ export default function DrawImage() {
     //* Handle fetch result.
     let imageUrlResponse;
     if (jsonResponse.status === "processing") {
-      // console.log("jsonResponse: ", jsonResponse);
+      console.log("jsonResponse: ", jsonResponse);
       const eta = jsonResponse.eta;
       const timestamp = Math.floor(Date.now() / 1000);
       setImageFetchEndTime(timestamp + eta);
