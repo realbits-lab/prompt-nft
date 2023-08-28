@@ -857,18 +857,19 @@ export default function DrawImage() {
 
       const params = [address, msgParams];
       const method = "eth_signTypedData_v4";
-      console.log("params: ", params);
-      console.log("method: ", method);
+      // console.log("params: ", params);
+      // console.log("method: ", method);
 
       const signature = await ethereum.request({
         method,
         params,
       });
-      console.log("signature: ", signature);
+      // console.log("signature: ", signature);
 
-      console.log("utils: ", utils);
+      // console.log("utils: ", utils);
+      //* TODO: In ethers ^5.7.2 version. In ethers version 6, got error.
       const signData = utils.splitSignature(signature);
-      console.log("signData: ", signData);
+      // console.log("signData: ", signData);
 
       const { r, s, v } = signData;
       return {
