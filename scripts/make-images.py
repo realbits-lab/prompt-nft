@@ -106,19 +106,22 @@ def get_pages(num_pages=None):
 
 
 def main():
-    # results = get_pages(100)
-    # for result in results:
-    #     plain_text = result['properties']['prompt']['title'][0][
-    #         'plain_text']
-    #     print(f"plain_text: {plain_text}")
-
     # get_samplers()
 
     # get_models()
 
-    set_models("sd_xl_base_1.0")
+    set_models('sd_xl_base_1.0')
 
-    draw_image("puppy dog")
+    results = get_pages(100)
+    # import json
+    # with open("data.json", "w", encoding="utf8") as f:
+    #     json.dump(results, f, ensure_ascii=False, indent=4)
+
+    for result in results:
+        plain_text = result['properties']['prompt']['title'][0][
+            'plain_text']
+        print(f'plain_text: {plain_text}')
+        draw_image(plain_text)
 
 
 main()
