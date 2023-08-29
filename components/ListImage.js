@@ -53,20 +53,12 @@ function ListImage() {
         {dataLatestImage?.data.map((imageData, idx) => {
           return (
             <Card sx={{ maxWidth: 345, my: 2 }} key={idx}>
-              <CardHeader
-                title={truncate(imageData.prompt, TRUNCATE_COUNT)}
-                subheader={moment(imageData.createdAt).fromNow()}
-              />
+              <CardHeader subheader={moment(imageData.createdAt).fromNow()} />
               <CardMedia
                 component="img"
                 image={imageData.imageUrl}
                 alt="prompt image"
               />
-              <CardContent>
-                <Typography variant="body2" color="text.secondary">
-                  {imageData.prompt}
-                </Typography>
-              </CardContent>
             </Card>
           );
         })}

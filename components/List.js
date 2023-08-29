@@ -465,7 +465,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
     }
   }
 
-  console.log(mode);
+  // console.log(mode);
 
   return (
     <div>
