@@ -99,7 +99,7 @@ def get_pages(num_pages=None):
         results.extend(data["results"])
 
     import json
-    with open("data.json", "w", encoding="utf8") as f:
+    with open("outputs/data.json", "w", encoding="utf8") as f:
         json.dump(results, f, ensure_ascii=False, indent=4)
 
     return results
@@ -114,7 +114,7 @@ def main():
 
     results = get_pages(100)
     # import json
-    # with open("data.json", "w", encoding="utf8") as f:
+    # with open("outputs/data.json", "w", encoding="utf8") as f:
     #     json.dump(results, f, ensure_ascii=False, indent=4)
 
     for idx, result in enumerate(results):
