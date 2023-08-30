@@ -41,8 +41,9 @@ import {
 import useUser from "@/lib/useUser";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import promptNFTABI from "@/contracts/promptNFT.json";
+import { TextField } from "@mui/material";
 
-export default function CardNft({ nftData }) {
+export default function CardNft({ nftData, isRent = false }) {
   // console.log("call CardNft()");
   // console.log("nftData: ", nftData);
 
@@ -69,13 +70,16 @@ export default function CardNft({ nftData }) {
   //*---------------------------------------------------------------------------
   //* Define constant variables.
   //*---------------------------------------------------------------------------
-  const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
+  const PLACEHOLDER_IMAGE_URL =
+    process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const RENT_MARKET_CONTRACT_ADDRES =
     process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
   const PROMPT_NFT_CONTRACT_ADDRESS =
     process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS;
   const SERVICE_ACCOUNT_ADDRESS =
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
+  const ZERO_ADDRESS_STRING =
+    "0x0000000000000000000000000000000000000000";
 
   const CARD_MARGIN_TOP = "60px";
   const CARD_MARGIN_BOTTOM = 600;
@@ -85,13 +89,23 @@ export default function CardNft({ nftData }) {
   const [cardImageHeight, setCardImageHeight] = React.useState(0);
   const { user, mutateUser } = useUser();
 
+  const rentMarketRef = React.useRef();
+
   //*---------------------------------------------------------------------------
   //* Wagmi hook
   //*---------------------------------------------------------------------------
   const [metadata, setMetadata] = React.useState();
+  const [inputRentFee, setInputRentFee] = React.useState(1);
+  const [changeElement, setChangeElement] = React.useState([]);
   const promptNftContract = getContract({
     address: PROMPT_NFT_CONTRACT_ADDRESS,
     abi: promptNFTABI["abi"],
+  });
+  const [formValue, setFormValue] = React.useState({
+    inputRentFee: 0,
+    inputFeeTokenAddress: ZERO_ADDRESS_STRING,
+    inputRentFeeByToken: 0,
+    inputRentDuration: 0,
   });
   const { chains, chain: selectedChain } = useNetwork();
   const { address, isConnected } = useAccount();
@@ -184,7 +198,9 @@ export default function CardNft({ nftData }) {
       // console.log("call onSuccess()");
       // console.log("data.renteeAddress: ", data.renteeAddress);
       // console.log("address: ", address);
-      if (data.renteeAddress.toLowerCase() === address.toLowerCase()) {
+      if (
+        data.renteeAddress.toLowerCase() === address.toLowerCase()
+      ) {
         setIsOwnerOrRentee(true);
       } else {
         setIsOwnerOrRentee(false);
@@ -364,6 +380,50 @@ export default function CardNft({ nftData }) {
     });
   }, []);
 
+  // Update Rent Fee
+  const updateTokenFee = async () => {
+    try {
+      //* Create WalletConnect Provider.
+      let provider;
+      if (isMobile === true) {
+        provider = new WalletConnectProvider({
+          rpc: {
+            137: "https://rpc-mainnet.maticvigil.com",
+            80001: "https://rpc-mumbai.maticvigil.com/",
+          },
+          infuraId: process.env.NEXT_PUBLIC_INFURA_KEY, // 현재 INFURA_KEY 없음 MARKET .env파일에서 가져와야함
+        });
+
+        //* Enable session (triggers QR Code modal).
+        await provider.enable();
+      }
+
+      //* rent fee and rent fee by token should be an ether unit expression.
+      await rentMarketRef.current.changeNFT({
+        provider: provider,
+        element: changeElement,
+        rentFee: inputRentFee.toString(),
+      });
+    } catch (error) {
+      console.error(error);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.error,
+        snackbarMessage: error.reason,
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    }
+    setFormValue((prevState) => {
+      return {
+        ...prevState,
+        inputRentFee: 0,
+        inputFeeTokenAddress: "",
+        inputRentFeeByToken: 0,
+        inputRentDuration: 0,
+      };
+    });
+  };
+
   function handleCardMediaImageError(e) {
     e.target.onerror = null;
     e.target.src = PLACEHOLDER_IMAGE_URL;
@@ -388,7 +448,9 @@ export default function CardNft({ nftData }) {
 
       return;
     } else {
-      if (isWalletConnected({ isConnected, selectedChain }) === false) {
+      if (
+        isWalletConnected({ isConnected, selectedChain }) === false
+      ) {
         setWriteToastMessage({
           snackbarSeverity: AlertSeverity.warning,
           snackbarMessage: `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`,
@@ -445,13 +507,19 @@ export default function CardNft({ nftData }) {
             <Table>
               <TableHead>
                 <TableRow>
-                  <StyledTableCell align="center">Item</StyledTableCell>
-                  <StyledTableCell align="center">Value</StyledTableCell>
+                  <StyledTableCell align="center">
+                    Item
+                  </StyledTableCell>
+                  <StyledTableCell align="center">
+                    Value
+                  </StyledTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 <StyledTableRow>
-                  <StyledTableCell align="left">Token ID</StyledTableCell>
+                  <StyledTableCell align="left">
+                    Token ID
+                  </StyledTableCell>
                   <StyledTableCell align="left">
                     {nftData?.tokenId.toString()}
                   </StyledTableCell>
@@ -465,14 +533,18 @@ export default function CardNft({ nftData }) {
                 </StyledTableRow>
 
                 <StyledTableRow>
-                  <StyledTableCell align="left">Description</StyledTableCell>
+                  <StyledTableCell align="left">
+                    Description
+                  </StyledTableCell>
                   <StyledTableCell align="left">
                     {metadata ? metadata.description : "loading..."}
                   </StyledTableCell>
                 </StyledTableRow>
 
                 <StyledTableRow>
-                  <StyledTableCell align="left">Opensea</StyledTableCell>
+                  <StyledTableCell align="left">
+                    Opensea
+                  </StyledTableCell>
                   <StyledTableCell align="left">
                     {shortenAddress({
                       address: nftData?.nftAddress,
@@ -483,7 +555,9 @@ export default function CardNft({ nftData }) {
                 </StyledTableRow>
 
                 <StyledTableRow>
-                  <StyledTableCell align="left">Explorer</StyledTableCell>
+                  <StyledTableCell align="left">
+                    Explorer
+                  </StyledTableCell>
                   <StyledTableCell align="left">
                     {shortenAddress({
                       address: nftData?.nftAddress,
@@ -513,8 +587,9 @@ export default function CardNft({ nftData }) {
                   </StyledTableCell>
                   <StyledTableCell align="left">
                     {(
-                      Number((nftData?.rentFee * 1000000n) / 10n ** 18n) /
-                      1000000
+                      Number(
+                        (nftData?.rentFee * 1000000n) / 10n ** 18n
+                      ) / 1000000
                     ).toString()}{" "}
                     matic
                   </StyledTableCell>
@@ -526,7 +601,9 @@ export default function CardNft({ nftData }) {
                       <Button
                         size="small"
                         disabled={
-                          isRenting || isLoadingRentData || isLoadingOwnerOf
+                          isRenting ||
+                          isLoadingRentData ||
+                          isLoadingOwnerOf
                         }
                         variant="outlined"
                         onClick={handleRentPayment}
@@ -545,13 +622,48 @@ export default function CardNft({ nftData }) {
                     <StyledTableCell align="left">
                       {(
                         Number(
-                          (nftData?.rentFeeByToken * 1000000n) / 10n ** 18n
+                          (nftData?.rentFeeByToken * 1000000n) /
+                            10n ** 18n
                         ) / 1000000
                       ).toString()}{" "}
                       token
                     </StyledTableCell>
                   </StyledTableRow>
                 ) : null}
+                {isRent ? (
+                  <></>
+                ) : (
+                  <StyledTableRow>
+                    <StyledTableCell align="left">
+                      Setting Fee
+                    </StyledTableCell>
+                    <StyledTableCell>
+                      <div
+                        style={{
+                          width: "100%",
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <TextField
+                          required
+                          id="outlined-required"
+                          label="Rent Fee (matic)"
+                          name="inputRentFee"
+                          value={inputRentFee}
+                          onChange={(e) => {
+                            setInputRentFee(e.target.value);
+                          }}
+                          sx={{
+                            marginTop: "10px",
+                            marginBottom: "10px",
+                          }}
+                        />
+                        <Button onClick={updateTokenFee}>SAVE</Button>
+                      </div>
+                    </StyledTableCell>
+                  </StyledTableRow>
+                )}
               </TableBody>
             </Table>
           </TableContainer>

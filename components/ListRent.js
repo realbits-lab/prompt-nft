@@ -103,7 +103,7 @@ export default function ListRent({ data, isLoading }) {
               // Check idx is in pagination.
               // pageIndex.rent starts from 1.
               // idx starts from 0.
-              return <CardNft nftData={nftData} />;
+              return <CardNft nftData={nftData} isRent={true} />;
             })}
           </Box>
         </>
