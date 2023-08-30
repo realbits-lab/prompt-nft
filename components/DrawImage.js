@@ -485,6 +485,7 @@ export default function DrawImage() {
     let imageUrlResponse;
     console.log("jsonResponse: ", jsonResponse);
     if (jsonResponse.status === "processing") {
+      console.log("jsonResponse: ", jsonResponse);
       const eta = jsonResponse.eta;
       const timestamp = Math.floor(Date.now() / 1000);
       setImageFetchEndTime(timestamp + eta);
@@ -517,11 +518,11 @@ export default function DrawImage() {
       }
 
       //* Get the stable diffusion api result by json.
-      const jsonResponse = await fetchResultResponse.json();
-      // console.log("jsonResponse: ", jsonResponse);
+      const jsonFetchResultResponse = await fetchResultResponse.json();
+      // console.log("jsonFetchResultResponse: ", jsonFetchResultResponse);
 
       //* Set image url.
-      imageUrlResponse = jsonResponse.output[0];
+      imageUrlResponse = jsonFetchResultResponse.output[0];
     }
 
     if (jsonResponse.status === "success") {
