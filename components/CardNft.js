@@ -43,7 +43,7 @@ import rentmarketABI from "@/contracts/rentMarket.json";
 import promptNFTABI from "@/contracts/promptNFT.json";
 import { TextField } from "@mui/material";
 
-export default function CardNft({ nftData }) {
+export default function CardNft({ nftData, isRent = false }) {
   // console.log("call CardNft()");
   // console.log("nftData: ", nftData);
 
@@ -630,37 +630,40 @@ export default function CardNft({ nftData }) {
                     </StyledTableCell>
                   </StyledTableRow>
                 ) : null}
-
-                <StyledTableRow>
-                  <StyledTableCell align="left">
-                    Setting Fee
-                  </StyledTableCell>
-                  <StyledTableCell>
-                    <div
-                      style={{
-                        width: "100%",
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <TextField
-                        required
-                        id="outlined-required"
-                        label="Rent Fee (matic)"
-                        name="inputRentFee"
-                        value={inputRentFee}
-                        onChange={(e) => {
-                          setInputRentFee(e.target.value);
+                {isRent ? (
+                  <></>
+                ) : (
+                  <StyledTableRow>
+                    <StyledTableCell align="left">
+                      Setting Fee
+                    </StyledTableCell>
+                    <StyledTableCell>
+                      <div
+                        style={{
+                          width: "100%",
+                          display: "flex",
+                          justifyContent: "space-between",
                         }}
-                        sx={{
-                          marginTop: "10px",
-                          marginBottom: "10px",
-                        }}
-                      />
-                      <Button onClick={updateTokenFee}>SAVE</Button>
-                    </div>
-                  </StyledTableCell>
-                </StyledTableRow>
+                      >
+                        <TextField
+                          required
+                          id="outlined-required"
+                          label="Rent Fee (matic)"
+                          name="inputRentFee"
+                          value={inputRentFee}
+                          onChange={(e) => {
+                            setInputRentFee(e.target.value);
+                          }}
+                          sx={{
+                            marginTop: "10px",
+                            marginBottom: "10px",
+                          }}
+                        />
+                        <Button onClick={updateTokenFee}>SAVE</Button>
+                      </div>
+                    </StyledTableCell>
+                  </StyledTableRow>
+                )}
               </TableBody>
             </Table>
           </TableContainer>
