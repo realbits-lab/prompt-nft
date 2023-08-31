@@ -1,5 +1,6 @@
 # Image output directory
 **/outputs/
+.DS_Store
 
 # Lock file
 package-lock.json

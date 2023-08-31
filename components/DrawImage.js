@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
-// import { utils } from "ethers";
+import { utils } from "ethers";
 import { formatEther } from "viem";
 import moment from "moment";
 import momentDurationFormatSetup from "moment-duration-format";
@@ -483,6 +483,7 @@ export default function DrawImage() {
 
     //* Handle fetch result.
     let imageUrlResponse;
+    console.log("jsonResponse: ", jsonResponse);
     if (jsonResponse.status === "processing") {
       console.log("jsonResponse: ", jsonResponse);
       const eta = jsonResponse.eta;
@@ -517,11 +518,12 @@ export default function DrawImage() {
       }
 
       //* Get the stable diffusion api result by json.
-      const responseJson = await fetchResultResponse.json();
-      // console.log("jsonResponse: ", jsonResponse);
+      const jsonFetchResultResponse =
+        await fetchResultResponse.json();
+      // console.log("jsonFetchResultResponse: ", jsonFetchResultResponse);
 
       //* Set image url.
-      imageUrlResponse = responseJson.output[0];
+      imageUrlResponse = jsonFetchResultResponse.output[0];
     }
 
     if (jsonResponse.status === "success") {
@@ -549,6 +551,7 @@ export default function DrawImage() {
       inputModelName = meta.model;
     }
 
+    //* TODO: Check imageUrlResponse is valid. If invalid, wait for 3-5 seconds and try again.
     setImageUrl(imageUrlResponse);
     setLoadingImage(false);
     setIsImagePosted(false);
@@ -966,7 +969,7 @@ export default function DrawImage() {
               }}
               sx={{ m: 2 }}
               disabled={loadingImage}
-              autoComplete="on"
+              autoComplete="off"
             />
             <TextField
               required
@@ -981,7 +984,7 @@ export default function DrawImage() {
               }}
               sx={{ m: 2 }}
               disabled={loadingImage}
-              autoComplete="on"
+              autoComplete="off"
             />
           </Box>
           <Box
