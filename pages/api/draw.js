@@ -119,12 +119,8 @@ async function handler(req, res) {
   }
   console.log("jsonResponse: ", jsonResponse);
 
-  const publicImagesFilePath = path.join(
-    process.cwd(),
-    "public/images",
-    uuidv4(),
-    ".png"
-  );
+  const publicImagesFilePath =
+    path.join(process.cwd(), "public/images") + uuidv4() + ".png";
   console.log("publicImagesFilePath: ", publicImagesFilePath);
 
   if (jsonResponse.status === "processing") {
