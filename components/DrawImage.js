@@ -968,7 +968,7 @@ export default function DrawImage() {
               }}
               sx={{ m: 2 }}
               disabled={loadingImage}
-              autoComplete="on"
+              autoComplete="off"
             />
             <TextField
               required
@@ -983,7 +983,7 @@ export default function DrawImage() {
               }}
               sx={{ m: 2 }}
               disabled={loadingImage}
-              autoComplete="on"
+              autoComplete="off"
             />
           </Box>
           <Box
