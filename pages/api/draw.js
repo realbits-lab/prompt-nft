@@ -1,5 +1,9 @@
 import { withIronSessionApiRoute } from "iron-session/next";
 import { sessionOptions } from "@/lib/session";
+import { v4 as uuidv4, v1 } from "uuid";
+import fs from "fs";
+import path from "path";
+import axios from "axios";
 
 async function handler(req, res) {
   console.log("call /api/draw");
@@ -115,6 +119,14 @@ async function handler(req, res) {
   }
   console.log("jsonResponse: ", jsonResponse);
 
+  const publicImagesFilePath = path.join(
+    process.cwd(),
+    "public/images",
+    uuidv4(),
+    ".png"
+  );
+  console.log("publicImagesFilePath: ", publicImagesFilePath);
+
   if (jsonResponse.status === "processing") {
     //* Processing status case.
     return res.status(200).json({
@@ -126,6 +138,11 @@ async function handler(req, res) {
     });
   } else if (jsonResponse.status === "success") {
     //* Success status case.
+    await downloadImage({
+      url: jsonResponse.output,
+      filepath: publicImagesFilePath,
+    });
+
     return res.status(200).json({
       status: jsonResponse.status,
       imageUrl: jsonResponse.output,
@@ -136,6 +153,21 @@ async function handler(req, res) {
     console.error("jsonResponse.status: ", jsonResponse.status);
     return res.status(500).json({ message: "Response is not success." });
   }
+}
+
+async function downloadImage({ url, filepath }) {
+  const response = await axios({
+    url,
+    method: "GET",
+    responseType: "stream",
+  });
+
+  return new Promise((resolve, reject) => {
+    response.data
+      .pipe(fs.createWriteStream(filepath))
+      .on("error", reject)
+      .once("close", () => resolve(filepath));
+  });
 }
 
 export default withIronSessionApiRoute(handler, sessionOptions);
