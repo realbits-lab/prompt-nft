@@ -517,11 +517,11 @@ export default function DrawImage() {
       }
 
       //* Get the stable diffusion api result by json.
-      const jsonResponse = await fetchResultResponse.json();
+      const responseJson = await fetchResultResponse.json();
       // console.log("jsonResponse: ", jsonResponse);
 
       //* Set image url.
-      imageUrlResponse = jsonResponse.output[0];
+      imageUrlResponse = responseJson.output[0];
     }
 
     if (jsonResponse.status === "success") {
