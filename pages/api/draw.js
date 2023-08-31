@@ -27,8 +27,10 @@ async function handler(req, res) {
   }
 
   // Stable diffusion api url.
-  // const TEXT2IMG_API_URL = "https://stablediffusionapi.com/api/v3/text2img";
-  const TEXT2IMG_API_URL = "https://stablediffusionapi.com/api/v4/dreambooth";
+  //* TODO: Use v4 dreambooth API after fixing ouput url connectivity error.
+  // const TEXT2IMG_API_URL = "https://stablediffusionapi.com/api/v4/dreambooth";
+  const TEXT2IMG_API_URL = "https://stablediffusionapi.com/api/v3/text2img";
+
   const STABLE_DIFFUSION_API_KEY =
     process.env.NEXT_PUBLIC_STABLE_DIFFUSION_API_KEY;
   const WIDTH = "1024";
@@ -47,49 +49,51 @@ async function handler(req, res) {
   // console.log("negativePrompt: ", negativePrompt);
 
   //* Stable diffusion api option.
-  // const jsonData = {
-  //   key: process.env.NEXT_PUBLIC_STABLE_DIFFUSION_API_KEY,
-  //   prompt: prompt,
-  //   negative_prompt: negativePrompt,
-  //   width: "512",
-  //   height: "512",
-  //   samples: "1",
-  //   num_inference_steps: "20",
-  //   safety_checker: "yes",
-  //   enhance_prompt: "no",
-  //   seed: null,
-  //   guidance_scale: 7.5,
-  //   webhook: null,
-  //   track_id: null,
-  // };
   const jsonData = {
-    key: STABLE_DIFFUSION_API_KEY,
-    model_id: MODEL_ID,
+    key: process.env.NEXT_PUBLIC_STABLE_DIFFUSION_API_KEY,
     prompt: prompt,
     negative_prompt: negativePrompt,
-    width: WIDTH,
-    height: HEIGHT,
-    samples: SAMPLES,
-    num_inference_steps: NUM_INFERENCE_STEPS,
+    width: "512",
+    height: "512",
+    samples: "1",
+    num_inference_steps: "20",
     safety_checker: "yes",
     enhance_prompt: "no",
     seed: null,
-    guidance_scale: GUIDANCE_SCALE,
-    multi_lingual: "no",
-    panorama: "no",
-    self_attention: "no",
-    upscale: "no",
-    embeddings_model: null,
-    lora_model: null,
-    tomesd: "yes",
-    use_karras_sigmas: "yes",
-    vae: null,
-    lora_strength: null,
-    scheduler: SCHEDULER,
-    clip_skip: CLIP_SKIP,
+    guidance_scale: 7.5,
     webhook: null,
     track_id: null,
   };
+
+  //* TODO: Use v4 dreambooth API after fixing ouput url connectivity error.
+  // const jsonData = {
+  //   key: STABLE_DIFFUSION_API_KEY,
+  //   model_id: MODEL_ID,
+  //   prompt: prompt,
+  //   negative_prompt: negativePrompt,
+  //   width: WIDTH,
+  //   height: HEIGHT,
+  //   samples: SAMPLES,
+  //   num_inference_steps: NUM_INFERENCE_STEPS,
+  //   safety_checker: "yes",
+  //   enhance_prompt: "no",
+  //   seed: null,
+  //   guidance_scale: GUIDANCE_SCALE,
+  //   multi_lingual: "no",
+  //   panorama: "no",
+  //   self_attention: "no",
+  //   upscale: "no",
+  //   embeddings_model: null,
+  //   lora_model: null,
+  //   tomesd: "yes",
+  //   use_karras_sigmas: "yes",
+  //   vae: null,
+  //   lora_strength: null,
+  //   scheduler: SCHEDULER,
+  //   clip_skip: CLIP_SKIP,
+  //   webhook: null,
+  //   track_id: null,
+  // };
 
   //* Fetch image.
   let myHeaders = new Headers();
@@ -119,9 +123,10 @@ async function handler(req, res) {
   }
   console.log("jsonResponse: ", jsonResponse);
 
-  const publicImagesFilePath =
-    path.join(process.cwd(), "public/images") + uuidv4() + ".png";
-  console.log("publicImagesFilePath: ", publicImagesFilePath);
+  //* TODO: Use the original image url instead of downloading image data.
+  // const publicImagesFilePath =
+  //   path.join(process.cwd(), "public/images/") + uuidv4() + ".png";
+  // console.log("publicImagesFilePath: ", publicImagesFilePath);
 
   if (jsonResponse.status === "processing") {
     //* Processing status case.
@@ -134,10 +139,11 @@ async function handler(req, res) {
     });
   } else if (jsonResponse.status === "success") {
     //* Success status case.
-    await downloadImage({
-      url: jsonResponse.output,
-      filepath: publicImagesFilePath,
-    });
+    //* TODO: Use the original image url instead of downloading image data.
+    // await downloadImage({
+    //   url: jsonResponse.output,
+    //   filepath: publicImagesFilePath,
+    // });
 
     return res.status(200).json({
       status: jsonResponse.status,
