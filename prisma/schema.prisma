@@ -16,3 +16,11 @@ model Post {
   imageUrl       String   @unique @default("")
   isEncrypted    Boolean  @default(false)
 }
+
+model Tweet {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  groupId   String   @default("")
+  channelId String   @default("")
+  threadId  String   @unique @default("")
+}
