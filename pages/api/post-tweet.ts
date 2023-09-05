@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
+import { prisma } from "@/lib/client";
 import { sessionOptions } from "@/lib/session";
 
 type ResponseData = {
@@ -152,6 +153,14 @@ async function handler(
   fs.unlinkSync(path.join(process.cwd(), fileName));
 
   //* Record tweeted thread in database with group, channel, thread id.
+  const createTweetResponse = await prisma.tweet.create({
+    data: {
+      groupId: MOIM_GROUP_ID,
+      channelId: MOIM_CHANNEL_ID,
+      threadId: threadId,
+    },
+  });
+  console.log("createTweetResponse: ", createTweetResponse);
 
   //* Return success.
   return res.status(200).json({ message: "success" });
