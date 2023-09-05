@@ -129,6 +129,7 @@ export default function DrawImage() {
   const [imageFetchEndTime, setImageFetchEndTime] = React.useState();
   const [paymentNftRentEndTime, setPaymentNftRentEndTime] = React.useState();
 
+  //* getAllRentData function with wagmi hooks.
   const {
     data: dataAllRentData,
     isError: errorAllRentData,
@@ -164,6 +165,7 @@ export default function DrawImage() {
     },
   });
 
+  //* getRegisterData function with wagmi hooks.
   const { data: dataRentData, isLoading: isLoadingRentData } = useContractRead({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
@@ -171,6 +173,7 @@ export default function DrawImage() {
     args: [PAYMENT_NFT_CONTRACT_ADDRESS, PAYMENT_NFT_TOKEN_ID],
   });
 
+  //* rentNFT function with wagmi hooks.
   const { config: configPrepareRentNFT, error: errorPrepareRentNFT } =
     usePrepareContractWrite({
       address: RENT_MARKET_CONTRACT_ADDRES,
@@ -265,6 +268,7 @@ export default function DrawImage() {
     },
   });
 
+  //* rentNFTByToken function with wagmi hooks.
   const {
     config: configPrepareRentNFTByToken,
     error: errorPrepareRentNFTByToken,
