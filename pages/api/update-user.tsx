@@ -5,6 +5,8 @@ import { sessionOptions } from "@/lib/session";
 import { getChainId } from "@/lib/util";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import { rentData } from "@/types/rentData";
+import { ErrorWithMessage } from "@/types/error";
+import { getErrorMessage } from "@/lib/error";
 const sigUtil = require("@metamask/eth-sig-util");
 
 const RENT_MARKET_CONTRACT_ADDRES =
@@ -133,7 +135,7 @@ async function handler(
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: getErrorMessage(error) });
   }
   console.log("recovered: ", recovered);
   console.log("publicAddress: ", publicAddress);
@@ -151,7 +153,7 @@ async function handler(
   await req.session.save();
   console.log("req.session.user: ", req.session.user);
 
-  return res.status(200).json(user);
+  return res.status(200).json({ user });
 }
 
 export default withIronSessionApiRoute(handler, sessionOptions);

@@ -185,47 +185,6 @@ export default function DrawImage() {
     });
 
   const {
-    data: dataRentNFTByToken,
-    error: errorRentNFTByToken,
-    isError: isErrorRentNFTByToken,
-    isIdle: isIdleRentNFTByToken,
-    isLoading: isLoadingRentNFTByToken,
-    isSuccess: isSuccessRentNFTByToken,
-    write: writeRentNFTByToken,
-    status: statusRentNFTByToken,
-  } = useContractWrite({
-    address: RENT_MARKET_CONTRACT_ADDRES,
-    abi: rentmarketABI?.abi,
-    functionName: "rentNFTByToken",
-    // args: [
-    //   PAYMENT_NFT_CONTRACT_ADDRESS,
-    //   PAYMENT_NFT_TOKEN_ID,
-    //   SERVICE_ACCOUNT_ADDRESS,
-    // ],
-    onSuccess(data) {
-      // console.log("call onSuccess()");
-      // console.log("data: ", data);
-      setWriteToastMessage({
-        snackbarSeverity: AlertSeverity.success,
-        snackbarMessage:
-          "Rent transaction is just started and wait a moment...",
-        snackbarTime: new Date(),
-        snackbarOpen: true,
-      });
-    },
-    onError(error) {
-      // console.log("call onSuccess()");
-      // console.log("error: ", error);
-      setWriteToastMessage({
-        snackbarSeverity: AlertSeverity.error,
-        snackbarMessage: `${error}`,
-        snackbarTime: new Date(),
-        snackbarOpen: true,
-      });
-    },
-  });
-
-  const {
     data: dataRentNFT,
     error: errorRentNFT,
     isError: isErrorRentNFT,
@@ -306,6 +265,103 @@ export default function DrawImage() {
     },
   });
 
+  const {
+    config: configPrepareRentNFTByToken,
+    error: errorPrepareRentNFTByToken,
+  } = usePrepareContractWrite({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI.abi,
+    functionName: "rentNFTByToken",
+    args: [
+      PAYMENT_NFT_CONTRACT_ADDRESS,
+      PAYMENT_NFT_TOKEN_ID,
+      SERVICE_ACCOUNT_ADDRESS,
+    ],
+    enabled: false,
+  });
+
+  const {
+    data: dataRentNFTByToken,
+    error: errorRentNFTByToken,
+    isError: isErrorRentNFTByToken,
+    isIdle: isIdleRentNFTByToken,
+    isLoading: isLoadingRentNFTByToken,
+    isSuccess: isSuccessRentNFTByToken,
+    write: writeRentNFTByToken,
+    status: statusRentNFTByToken,
+  } = useContractWrite({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI?.abi,
+    functionName: "rentNFTByToken",
+    // args: [
+    //   PAYMENT_NFT_CONTRACT_ADDRESS,
+    //   PAYMENT_NFT_TOKEN_ID,
+    //   SERVICE_ACCOUNT_ADDRESS,
+    // ],
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.success,
+        snackbarMessage:
+          "Rent by token transaction is just started and wait a moment...",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+    onError(error) {
+      // console.log("call onSuccess()");
+      // console.log("error: ", error);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.error,
+        snackbarMessage: `${error}`,
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+  });
+
+  const {
+    data: dataRentNFTByTokenTx,
+    isError: isErrorRentNFTByTokenTx,
+    isLoading: isLoadingRentNFTByTokenTx,
+  } = useWaitForTransaction({
+    hash: dataRentNFT?.hash,
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+
+      updateUserData()
+        .then(() => {
+          setWriteToastMessage({
+            snackbarSeverity: AlertSeverity.success,
+            snackbarMessage:
+              "Rent by token transaction is finished successfully.",
+            snackbarTime: new Date(),
+            snackbarOpen: true,
+          });
+        })
+        .catch((error) => {
+          setWriteToastMessage({
+            snackbarSeverity: AlertSeverity.error,
+            snackbarMessage: "Updating user data is falied.",
+            snackbarTime: new Date(),
+            snackbarOpen: true,
+          });
+        });
+    },
+    onError(error) {
+      // console.log("call onError()");
+      // console.log("error: ", error);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.error,
+        snackbarMessage: "Renting is failed.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+  });
+
   useWatchPendingTransactions({
     listener: function (tx) {
       // console.log("tx: ", tx);
@@ -343,16 +399,19 @@ export default function DrawImage() {
 
     const body = { publicAddress: address };
     try {
-      mutateUser(
-        await fetchJson(
-          { url: "/api/login" },
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          }
-        )
+      const response = await fetchJson(
+        { url: "/api/update-user" },
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }
       );
+      console.log("response: ", response);
+      if (response.user) {
+        console.log("response.user: ", response.user);
+        mutateUser(response.user);
+      }
     } catch (error) {
       if (error instanceof FetchError) {
         console.error(error.data.message);
