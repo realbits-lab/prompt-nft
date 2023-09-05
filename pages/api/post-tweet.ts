@@ -3,12 +3,27 @@ import { withIronSessionApiRoute } from "iron-session/next";
 import { TwitterApi } from "twitter-api-v2";
 import fs from "fs";
 import path from "path";
+import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 import { sessionOptions } from "@/lib/session";
 
 type ResponseData = {
   message?: string;
   error?: string;
 };
+
+const tweetTextList = [
+  "📸 Ready to flex your creative muscles? Click the link to discover an intriguing image prompt that will ignite your imagination! 🔥 #WritingPrompt #CreativityUnleashed",
+  "🖼️ Dive into a world of inspiration with this captivating image prompt! Click the link to uncover the muse for your next masterpiece. 📝 #WritingCommunity #Inspiration",
+  "🌟 Seeking a visual spark for your storytelling? Look no further! Click the link to access a thought-provoking image prompt. 📷✨ #AmWriting #WritingInspiration",
+  "🧐 Challenge your creativity with a mysterious image prompt! Click the link to unravel the story hidden within the pixels. 🕵️‍♀️🔍 #WritersBlockBuster #WritingPrompts",
+  "🎨 Get ready to paint a thousand words with this captivating image prompt! Click the link and let your imagination run wild. 🖌️📚 #Storytelling #WritingPrompt",
+  "📷 Unlock the door to your next literary adventure! Click the link for an intriguing image prompt that will transport you to new worlds. 🚪📖 #WritingJourney #Creativity",
+  "🌄 Let your creativity soar like never before! Click the link to discover an awe-inspiring image prompt that will fuel your writing journey. 🚀📝 #WritingCommunity #Inspiration",
+  "🤔 Ready to craft a tale inspired by an enigmatic image? Click the link to reveal the mystery and embark on your writing adventure. 📜🔮 #AmWriting #WritingPrompts",
+  "📸 Seeking a fresh perspective? Click the link for an image prompt that will transport you to uncharted territories of creativity! 🌍📚 #Storytelling #WritingInspiration",
+  "🖼️ Unleash your storytelling superpowers with this intriguing image prompt! Click the link and let your imagination take flight. 🚀📖 #WritingPrompt #Creativity",
+];
 
 async function handler(
   req: NextApiRequest,
@@ -37,13 +52,15 @@ async function handler(
   }
 
   //* Get the next image post from moim channel.
+  //* TODO: If already 100 posts in tweet?
   const postSearchThreadData = {
     query: {
       groupId: MOIM_GROUP_ID,
-      limit: 10, // optional. default: 30
+      limit: 100,
       channelId: MOIM_CHANNEL_ID,
-      sort: "editedAt", // optional. defauilt: createdAt
-      order: "desc", // optional. default: desc
+      sort: "createdAt",
+      // From the start
+      order: "asc",
     },
   };
   let postSearchThreadResponse;
@@ -69,6 +86,7 @@ async function handler(
   console.log("postSearchThreadResponseJson: ", postSearchThreadResponseJson);
 
   let getThreadResponse;
+  let threadId;
   for (const threadData of postSearchThreadResponseJson.data) {
     //* TODO: Check if already tweeted with database.
     getThreadResponse = await fetch(
@@ -77,6 +95,7 @@ async function handler(
         method: "GET",
       }
     );
+    threadId = threadData.id;
     break;
   }
   const getThreadResponseJson = await getThreadResponse?.json();
@@ -87,13 +106,23 @@ async function handler(
 
   //* Get image source url.
   const contentDataList = getThreadResponseJson.data.content;
+  let imageSrc;
   for (const contentData of contentDataList) {
     if (contentData.type === "image") {
-      const imageSrc = contentData.src;
+      imageSrc = contentData.src;
     }
   }
 
   //* Download image data.
+  const imageDataResponse = await axios.get(imageSrc, {
+    responseType: "arraybuffer",
+  });
+  if (!imageDataResponse) {
+    return res.status(500).json({ error: "Invalid image url." });
+  }
+  const fileName = `public/images/${uuidv4()}.png`;
+
+  fs.writeFileSync(path.join(process.cwd(), fileName), imageDataResponse.data);
 
   //* Upload tweet with image data.
   const twitterApi = new TwitterApi({
@@ -104,18 +133,23 @@ async function handler(
   });
   const twitterClient = twitterApi.readWrite;
 
+  const threadLinkUrl = `https://muve.moim.co/forums/${MOIM_CHANNEL_ID}/threads/${threadId}`;
   try {
     const mediaId = await twitterApi.v1.uploadMedia(
-      path.join(process.cwd(), "public/no-image.png")
+      path.join(process.cwd(), fileName)
     );
+
+    const tweetTextListRandomIndex = Math.floor(Math.random() * 9);
     await twitterClient.v2.tweet({
-      text: "Twitter is a fantastic social network. Look at this:",
+      text: `🤔 Click prompt ➔ ${threadLinkUrl}\n\n${tweetTextList[tweetTextListRandomIndex]}`,
       media: { media_ids: [mediaId] },
     });
   } catch (error) {
     console.error("Error: ", error);
+    fs.unlinkSync(path.join(process.cwd(), fileName));
   }
-  console.log("success");
+  console.log("Success to tweet.");
+  fs.unlinkSync(path.join(process.cwd(), fileName));
 
   //* Record tweeted thread in database with group, channel, thread id.
 
