@@ -74,13 +74,12 @@ async function handler(
   if (req.method !== "POST") {
     return res
       .status(500)
-      .json({ message: "Invalid method. Support only POST." });
+      .json({ error: "Invalid method. Support only POST." });
   }
 
   //* Get body data.
-  const { publicAddress, signature } = await req.body;
+  const { publicAddress } = await req.body;
   console.log("publicAddress: ", publicAddress);
-  console.log("signature: ", signature);
 
   //* Check public address data.
   if (!publicAddress) {
@@ -89,61 +88,14 @@ async function handler(
     });
   }
 
-  //* Check signature data.
-  if (!signature) {
-    return res.status(500).json({
-      error: `signature: ${signature} is invalid.`,
-    });
-  }
-
-  //* Get chain id from configuration.
-  const chainId = getChainId({
-    chainName: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
-  });
-  // console.log("chainId: ", chainId);
-
-  const msgParams = JSON.stringify({
-    domain: {
-      chainId: chainId,
-      name: "Realbits",
-    },
-
-    //* Defining the message signing data content.
-    message: {
-      contents: process.env.NEXT_PUBLIC_LOGIN_SIGN_MESSAGE,
-    },
-
-    //* Refers to the keys of the *types* object below.
-    primaryType: "Login",
-
-    types: {
-      EIP712Domain: [
-        { name: "name", type: "string" },
-        { name: "chainId", type: "uint256" },
-      ],
-      //* Refer to PrimaryType
-      Login: [{ name: "contents", type: "string" }],
-    },
-  });
-
-  let recovered;
-  try {
-    recovered = sigUtil.recoverTypedSignature({
-      data: JSON.parse(msgParams),
-      signature: signature,
-      version: sigUtil.SignTypedDataVersion.V4,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: getErrorMessage(error) });
-  }
-  console.log("recovered: ", recovered);
-  console.log("publicAddress: ", publicAddress);
-
-  //* Check address between decrypted address and post body data.
-  if (recovered.toLowerCase() !== publicAddress.toLowerCase()) {
-    console.error("Recovered address is not the same as input address.");
-    return res.status(401).json({ error: "Signature verification failed." });
+  //* Check if already logined.
+  if (
+    !req.session.user ||
+    req.session.user.isLoggedIn !== true ||
+    req.session.user.publicAddress.toLowerCase() !== publicAddress.toLowerCase()
+  ) {
+    console.error("User is not logined.");
+    return res.status(200).json({ error: "User is not loginned." });
   }
 
   //* Check whether or not user rented the payment nft.

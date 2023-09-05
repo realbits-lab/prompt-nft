@@ -330,10 +330,10 @@ export default function DrawImage() {
     isError: isErrorRentNFTByTokenTx,
     isLoading: isLoadingRentNFTByTokenTx,
   } = useWaitForTransaction({
-    hash: dataRentNFT?.hash,
+    hash: dataRentNFTByToken?.hash,
     onSuccess(data) {
-      // console.log("call onSuccess()");
-      // console.log("data: ", data);
+      console.log("call onSuccess()");
+      console.log("data: ", data);
 
       updateUserData()
         .then(() => {
