@@ -53,69 +53,89 @@ async function handler(
   }
 
   //* Get the next image post from moim channel.
-  //* TODO: If already 100 posts in tweet?
-  const postSearchThreadData = {
-    query: {
-      groupId: MOIM_GROUP_ID,
-      limit: 100,
-      channelId: MOIM_CHANNEL_ID,
-      sort: "createdAt",
-      // From the start
-      order: "asc",
-    },
-  };
-  let postSearchThreadResponse;
-  try {
-    postSearchThreadResponse = await fetch(
-      `${MOIM_DOMAIN}/api/search/threads`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${MOIM_BOT_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(postSearchThreadData),
-      }
-    );
-  } catch (error) {
-    throw error;
-  }
-  // console.log("postSearchThreadResponse: ", postSearchThreadResponse);
-
-  //* Upload image and text with link to twitter.
-  const postSearchThreadResponseJson = await postSearchThreadResponse.json();
-  console.log("postSearchThreadResponseJson: ", postSearchThreadResponseJson);
-  console.log(
-    "postSearchThreadResponseJson.paging.total: ",
-    postSearchThreadResponseJson.paging.total
-  );
-
-  let getThreadResponse;
+  let fromCount = 0;
+  const limitCount = 100;
+  let foundNotTweetedThread = false;
+  let getThreadResponseJson;
   let threadId;
-  for (const threadData of postSearchThreadResponseJson.data) {
-    //* Check if already tweeted with database.
-    const findUniqueTweetResponse = await prisma.tweet.findUnique({
-      where: {
-        threadId: threadData.id,
-      },
-    });
 
-    if (findUniqueTweetResponse === null) {
-      getThreadResponse = await fetch(
-        `${MOIM_DOMAIN}/api/threads/${threadData.id}`,
+  while (foundNotTweetedThread === false) {
+    const postSearchThreadData = {
+      query: {
+        groupId: MOIM_GROUP_ID,
+        limit: limitCount,
+        from: fromCount,
+        channelId: MOIM_CHANNEL_ID,
+        sort: "createdAt",
+        // From the start
+        order: "asc",
+      },
+    };
+    let postSearchThreadResponse;
+    try {
+      postSearchThreadResponse = await fetch(
+        `${MOIM_DOMAIN}/api/search/threads`,
         {
-          method: "GET",
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${MOIM_BOT_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(postSearchThreadData),
         }
       );
-      threadId = threadData.id;
-      break;
+    } catch (error) {
+      console.error("Error: ", error);
+      return res
+        .status(500)
+        .json({ error: "Invalid api/search/threads response." });
     }
+    // console.log("postSearchThreadResponse: ", postSearchThreadResponse);
+
+    //* Upload image and text with link to twitter.
+    const postSearchThreadResponseJson = await postSearchThreadResponse.json();
+    console.log("postSearchThreadResponseJson: ", postSearchThreadResponseJson);
+    console.log(
+      "postSearchThreadResponseJson.paging.total: ",
+      postSearchThreadResponseJson.paging.total
+    );
+    if (
+      !postSearchThreadResponseJson.paging.total ||
+      postSearchThreadResponseJson.paging.total === 0
+    ) {
+      return res.status(500).json({
+        error: "The paging.total is 0 or invalid paging.total value.",
+      });
+    }
+
+    let getThreadResponse;
+    for (const threadData of postSearchThreadResponseJson.data) {
+      //* Check if already tweeted with database.
+      const findUniqueTweetResponse = await prisma.tweet.findUnique({
+        where: {
+          threadId: threadData.id,
+        },
+      });
+
+      if (findUniqueTweetResponse === null) {
+        getThreadResponse = await fetch(
+          `${MOIM_DOMAIN}/api/threads/${threadData.id}`,
+          {
+            method: "GET",
+          }
+        );
+        threadId = threadData.id;
+        foundNotTweetedThread = true;
+        break;
+      }
+    }
+    getThreadResponseJson = await getThreadResponse?.json();
+    fromCount += limitCount;
+    // console.log(
+    //   "getThreadResponseJson.data.content: ",
+    //   getThreadResponseJson.data.content
+    // );
   }
-  const getThreadResponseJson = await getThreadResponse?.json();
-  // console.log(
-  //   "getThreadResponseJson.data.content: ",
-  //   getThreadResponseJson.data.content
-  // );
 
   //* Get image source url.
   const contentDataList = getThreadResponseJson.data.content;
