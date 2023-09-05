@@ -26,12 +26,15 @@ import ListOwn from "@/components/ListOwn";
 import CarouselOwn from "@/components/CarouselOwn";
 import ListRent from "@/components/ListRent";
 import ThemePage from "@/components/ThemePage";
+import Settings from "@/components/Settings";
 import ConnectWrapper from "@/components/ConnectWrapper";
 import LoginWrapper from "@/components/LoginWrapper";
 import fetchJson from "@/lib/fetchJson";
 import { getChainId, isWalletConnected } from "@/lib/util";
 import promptNFTABI from "@/contracts/promptNFT.json";
 import rentmarketABI from "@/contracts/rentMarket.json";
+import ListFaucet from "./faucet/ListFaucet";
+
 const DrawImage = dynamic(() => import("./DrawImage"), {
   ssr: false,
 });
@@ -453,6 +456,8 @@ function List({ mode, updated, setNewImageCountFunc }) {
     }
   }
 
+  // console.log(mode);
+
   return (
     <div>
       <Box
@@ -482,10 +487,18 @@ function List({ mode, updated, setNewImageCountFunc }) {
               isLoading={swrIsLoadingRentData}
             />
           </LoginWrapper>
+        ) : mode === "settings" ? (
+          <div>
+            <Settings />
+          </div>
         ) : mode === "theme" ? (
           <div>
             <ThemePage />
           </div>
+        ) : mode === "faucet" ? (
+          <LoginWrapper>
+            <ListFaucet />
+          </LoginWrapper>
         ) : null}
       </Box>
     </div>

@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { useAccount, useWalletClient, useNetwork, useConnect } from "wagmi";
+import {
+  useAccount,
+  useWalletClient,
+  useNetwork,
+  useConnect,
+} from "wagmi";
 import Button from "@mui/material/Button";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -11,8 +16,16 @@ import { useRecoilStateLoadable } from "recoil";
 import useUser from "@/lib/useUser";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
 import { AlertSeverity, writeToastMessageState } from "@/lib/util";
+import { handleChangeNetwork } from "@/lib/util";
+import { Typography } from "@mui/material";
 
-export async function handleSignMessage({ account, chainId, walletClient }) {
+const targetNetWorkName = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
+
+export async function handleSignMessage({
+  account,
+  chainId,
+  walletClient,
+}) {
   // console.log("call handleSignMessage()");
   // console.log("account: ", account);
   // console.log("chainId: ", chainId);
@@ -53,14 +66,20 @@ export async function handleAuthenticate({
   // console.log("call handleAuthenticate()");
 
   const body = { publicAddress, signature };
-  const userData = await fetchJson(
-    { url: "/api/login" },
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    }
-  );
+  let userData;
+  try {
+    userData = await fetchJson(
+      { url: "/api/login" },
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }
+    );
+  } catch (error) {
+    handleChangeNetwork({ networkName: targetNetWorkName });
+  }
+
   // console.log("userData: ", userData);
 
   try {
@@ -95,7 +114,11 @@ export default function User({ hidden = false }) {
   //*----------------------------------------------------------------------------
   const { chains, chain: selectedChain } = useNetwork();
   // console.log("selectedChain: ", selectedChain);
-  const { connector: activeConnector, address, isConnected } = useAccount();
+  const {
+    connector: activeConnector,
+    address,
+    isConnected,
+  } = useAccount();
   // console.log("address: ", address);
   // console.log("isConnected: ", isConnected);
 
@@ -152,7 +175,25 @@ export default function User({ hidden = false }) {
   //*---------------------------------------------------------------------------
   //* Connectors select dialog.
   //*---------------------------------------------------------------------------
-  const [openConnectorsDialog, setOpenConnectorsDialog] = useState(false);
+  const [openConnectorsDialog, setOpenConnectorsDialog] =
+    useState(false);
+
+  useEffect(() => {
+    window.ethereum?.on("chainChanged", async () => {
+      try {
+        await mutateUser(
+          await fetchJson({ url: "/api/logout" }, { method: "POST" }),
+          false
+        );
+      } catch (error) {
+        if (error instanceof FetchError) {
+          console.error(error.data.message);
+        } else {
+          console.error("An unexpected error happened:", error);
+        }
+      }
+    });
+  }, []);
 
   //* Listen account change.
   useEffect(() => {
@@ -169,8 +210,11 @@ export default function User({ hidden = false }) {
 
       if (user?.isLoggedIn === true) {
         try {
-          mutateUser(
-            await fetchJson({ url: "/api/logout" }, { method: "POST" }),
+          await mutateUser(
+            await fetchJson(
+              { url: "/api/logout" },
+              { method: "POST" }
+            ),
             false
           );
         } catch (error) {
@@ -195,7 +239,11 @@ export default function User({ hidden = false }) {
   }, []);
 
   //* Handle login click.
-  async function handleLoginClick({ chainId, walletClient, mutateUser }) {
+  async function handleLoginClick({
+    chainId,
+    walletClient,
+    mutateUser,
+  }) {
     // console.log("call handleLoginClick()");
     // console.log("chainId: ", chainId);
     // console.log("walletClient: ", walletClient);
@@ -253,20 +301,32 @@ export default function User({ hidden = false }) {
         <List sx={{ pt: 0 }}>
           {connectors.map((connector, idx) => (
             <ListItem disableGutters key={connector.id}>
-              <ListItemButton
-                disabled={!connector.ready}
-                key={connector.id}
-                onClick={() => {
-                  connect({ connector });
-                  setOpenConnectorsDialog(false);
-                }}
-              >
-                {connector.name}
-                {!connector.ready && " (unsupported)"}
-                {isLoadingConnect &&
-                  connector.id === pendingConnector?.id &&
-                  " (connecting)"}
-              </ListItemButton>
+              {connector.ready ? (
+                <ListItemButton
+                  disabled={!connector.ready}
+                  key={connector.id}
+                  onClick={() => {
+                    connect({ connector });
+                    setOpenConnectorsDialog(false);
+                  }}
+                >
+                  {connector.name}
+                  {!connector.ready && " (unsupported)1"}
+                  {isLoadingConnect &&
+                    connector.id === pendingConnector?.id &&
+                    " (connecting)"}
+                </ListItemButton>
+              ) : (
+                <ListItemButton
+                  onClick={() => {
+                    window.open(
+                      "https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn/related"
+                    );
+                  }}
+                >
+                  MetaMask를 설치한 후 다시 로그인해 주세요.
+                </ListItemButton>
+              )}
             </ListItem>
           ))}
         </List>

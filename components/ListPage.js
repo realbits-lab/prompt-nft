@@ -21,6 +21,7 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import MenuIcon from "@mui/icons-material/Menu";
 import List from "@/components/List";
+import Settings from "@/components/Settings";
 import useUser from "@/lib/useUser";
 import {
   RBSnackbar,
@@ -61,10 +62,12 @@ export default function ListPage(props) {
   // console.log("call ListPage()");
   const MENU_ENUM = {
     draw: "draw",
+    faucet: "faucet",
     image: "image",
     nft: "nft",
     own: "own",
     rent: "rent",
+    settings: "settings",
     theme: "theme",
   };
 
@@ -169,7 +172,7 @@ export default function ListPage(props) {
       // console.log("queryMode: ", queryMode);
 
       const mode = getMode({ mode: queryMode?.[0] || DEFAULT_MENU });
-      // console.log("mode: ", mode);
+
       setCurrentMode(mode || DEFAULT_MENU);
     },
     [queryMode]
@@ -230,6 +233,7 @@ export default function ListPage(props) {
                 <AppBarButton buttonMode="image" />
               </Badge>
               <AppBarButton buttonMode="nft" />
+              <AppBarButton buttonMode="faucet" />
             </Box>
 
             <Box>
@@ -275,6 +279,7 @@ export default function ListPage(props) {
                 >
                   OWN
                 </MenuItem>
+
                 <MenuItem
                   onClick={() => {
                     setCurrentMode(MENU_ENUM.rent);
@@ -283,10 +288,14 @@ export default function ListPage(props) {
                 >
                   RENT
                 </MenuItem>
+
                 <Link
                   href={MARKET_URL}
                   target="_blank"
-                  style={{ color: "inherit", textDecoration: "inherit" }}
+                  style={{
+                    color: "inherit",
+                    textDecoration: "inherit",
+                  }}
                 >
                   <MenuItem
                     onClick={() => {
@@ -296,10 +305,14 @@ export default function ListPage(props) {
                     MARKET
                   </MenuItem>
                 </Link>
+
                 <Link
                   href={BOARD_URL}
                   target="_blank"
-                  style={{ color: "inherit", textDecoration: "inherit" }}
+                  style={{
+                    color: "inherit",
+                    textDecoration: "inherit",
+                  }}
                 >
                   <MenuItem
                     onClick={() => {
@@ -309,6 +322,16 @@ export default function ListPage(props) {
                     BOARD
                   </MenuItem>
                 </Link>
+
+                <MenuItem
+                  onClick={() => {
+                    setCurrentMode(MENU_ENUM.settings);
+                    handleSettingMenuClose();
+                  }}
+                >
+                  SETTINGS
+                </MenuItem>
+
                 {/* <MenuItem
                   onClick={() => {
                     setCurrentMode(MENU_ENUM.theme);
@@ -317,6 +340,7 @@ export default function ListPage(props) {
                 >
                   THEME
                 </MenuItem> */}
+
                 <MenuItem
                   onClick={async () => {
                     setCurrentMode(MENU_ENUM.image);

@@ -60,8 +60,7 @@ async function handler(req, res) {
   //* Check if already logined.
   if (req.session.user && req.session.user.isLoggedIn === true) {
     // console.log("User is already logined.");
-    res.status(200).json(req.session.user);
-    return;
+    return res.status(200).json(req.session.user);
   }
 
   const { publicAddress, signature } = await req.body;
@@ -69,17 +68,15 @@ async function handler(req, res) {
   console.log("signature: ", signature);
 
   if (!publicAddress) {
-    res.status(500).json({
+    return res.status(500).json({
       error: `publicAddress: ${publicAddress} is invalid.`,
     });
-    return;
   }
 
   if (!signature) {
-    res.status(500).json({
+    return res.status(500).json({
       error: `signature: ${signature} is invalid.`,
     });
-    return;
   }
 
   const chainId = getChainId({
@@ -120,8 +117,7 @@ async function handler(req, res) {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: error.message });
-    return;
+    return res.status(500).json({ message: error.message });
   }
   console.log("recovered: ", recovered);
   console.log("publicAddress: ", publicAddress);
@@ -134,13 +130,11 @@ async function handler(req, res) {
     // console.log("save req.session.user data");
     // console.log("req.session.user: ", req.session.user);
 
-    res.status(200).json(user);
-    return;
+    return res.status(200).json(user);
   } else {
     console.error("Recovered address is not the same as input address.");
 
-    res.status(401).json({ error: "Signature verification failed." });
-    return;
+    return res.status(401).json({ error: "Signature verification failed." });
   }
 }
 

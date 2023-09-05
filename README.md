@@ -2,6 +2,7 @@
 
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 <a href="http://www.repostatus.org/#active"><img src="http://www.repostatus.org/badges/latest/active.svg" /></a>
+[![Next.js](https://img.shields.io/badge/built_with-Next.js-0070f3)](https://nextjs.org/)
 
 Generative image NFT service platform.
 

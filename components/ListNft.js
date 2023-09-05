@@ -75,7 +75,7 @@ function ListNft() {
         <List
           sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
         >
-          {dataAllRegisterData.map((registerData, idx) => {
+          {dataAllRegisterData.toReversed().map((registerData, idx) => {
             if (
               PROMPT_NFT_CONTRACT_ADDRESS.toLowerCase() ===
               registerData.nftAddress.toLowerCase()

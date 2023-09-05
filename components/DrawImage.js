@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
+import { utils } from "ethers";
 import { formatEther } from "viem";
 import moment from "moment";
 import momentDurationFormatSetup from "moment-duration-format";
@@ -128,6 +129,7 @@ export default function DrawImage() {
   const [imageFetchEndTime, setImageFetchEndTime] = React.useState();
   const [paymentNftRentEndTime, setPaymentNftRentEndTime] = React.useState();
 
+  //* getAllRentData function with wagmi hooks.
   const {
     data: dataAllRentData,
     isError: errorAllRentData,
@@ -163,6 +165,7 @@ export default function DrawImage() {
     },
   });
 
+  //* getRegisterData function with wagmi hooks.
   const { data: dataRentData, isLoading: isLoadingRentData } = useContractRead({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
@@ -170,6 +173,7 @@ export default function DrawImage() {
     args: [PAYMENT_NFT_CONTRACT_ADDRESS, PAYMENT_NFT_TOKEN_ID],
   });
 
+  //* rentNFT function with wagmi hooks.
   const { config: configPrepareRentNFT, error: errorPrepareRentNFT } =
     usePrepareContractWrite({
       address: RENT_MARKET_CONTRACT_ADDRES,
@@ -182,47 +186,6 @@ export default function DrawImage() {
       ],
       enabled: false,
     });
-
-  const {
-    data: dataRentNFTByToken,
-    error: errorRentNFTByToken,
-    isError: isErrorRentNFTByToken,
-    isIdle: isIdleRentNFTByToken,
-    isLoading: isLoadingRentNFTByToken,
-    isSuccess: isSuccessRentNFTByToken,
-    write: writeRentNFTByToken,
-    status: statusRentNFTByToken,
-  } = useContractWrite({
-    address: RENT_MARKET_CONTRACT_ADDRES,
-    abi: rentmarketABI?.abi,
-    functionName: "rentNFTByToken",
-    args: [
-      PAYMENT_NFT_CONTRACT_ADDRESS,
-      PAYMENT_NFT_TOKEN_ID,
-      SERVICE_ACCOUNT_ADDRESS,
-    ],
-    onSuccess(data) {
-      // console.log("call onSuccess()");
-      // console.log("data: ", data);
-      setWriteToastMessage({
-        snackbarSeverity: AlertSeverity.success,
-        snackbarMessage:
-          "Rent transaction is just started and wait a moment...",
-        snackbarTime: new Date(),
-        snackbarOpen: true,
-      });
-    },
-    onError(error) {
-      // console.log("call onSuccess()");
-      // console.log("error: ", error);
-      setWriteToastMessage({
-        snackbarSeverity: AlertSeverity.error,
-        snackbarMessage: `${error}`,
-        snackbarTime: new Date(),
-        snackbarOpen: true,
-      });
-    },
-  });
 
   const {
     data: dataRentNFT,
@@ -279,7 +242,105 @@ export default function DrawImage() {
         .then(() => {
           setWriteToastMessage({
             snackbarSeverity: AlertSeverity.success,
-            snackbarMessage: "Renting is finished successfully.",
+            snackbarMessage: "Rent transaction is finished successfully.",
+            snackbarTime: new Date(),
+            snackbarOpen: true,
+          });
+        })
+        .catch((error) => {
+          setWriteToastMessage({
+            snackbarSeverity: AlertSeverity.error,
+            snackbarMessage: "Updating user data is falied.",
+            snackbarTime: new Date(),
+            snackbarOpen: true,
+          });
+        });
+    },
+    onError(error) {
+      // console.log("call onError()");
+      // console.log("error: ", error);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.error,
+        snackbarMessage: "Renting is failed.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+  });
+
+  //* rentNFTByToken function with wagmi hooks.
+  const {
+    config: configPrepareRentNFTByToken,
+    error: errorPrepareRentNFTByToken,
+  } = usePrepareContractWrite({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI.abi,
+    functionName: "rentNFTByToken",
+    args: [
+      PAYMENT_NFT_CONTRACT_ADDRESS,
+      PAYMENT_NFT_TOKEN_ID,
+      SERVICE_ACCOUNT_ADDRESS,
+    ],
+    enabled: false,
+  });
+
+  const {
+    data: dataRentNFTByToken,
+    error: errorRentNFTByToken,
+    isError: isErrorRentNFTByToken,
+    isIdle: isIdleRentNFTByToken,
+    isLoading: isLoadingRentNFTByToken,
+    isSuccess: isSuccessRentNFTByToken,
+    write: writeRentNFTByToken,
+    status: statusRentNFTByToken,
+  } = useContractWrite({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI?.abi,
+    functionName: "rentNFTByToken",
+    // args: [
+    //   PAYMENT_NFT_CONTRACT_ADDRESS,
+    //   PAYMENT_NFT_TOKEN_ID,
+    //   SERVICE_ACCOUNT_ADDRESS,
+    // ],
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.success,
+        snackbarMessage:
+          "Rent by token transaction is just started and wait a moment...",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+    onError(error) {
+      // console.log("call onSuccess()");
+      // console.log("error: ", error);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.error,
+        snackbarMessage: `${error}`,
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+  });
+
+  const {
+    data: dataRentNFTByTokenTx,
+    isError: isErrorRentNFTByTokenTx,
+    isLoading: isLoadingRentNFTByTokenTx,
+  } = useWaitForTransaction({
+    hash: dataRentNFTByToken?.hash,
+    onSuccess(data) {
+      console.log("call onSuccess()");
+      console.log("data: ", data);
+
+      updateUserData()
+        .then(() => {
+          setWriteToastMessage({
+            snackbarSeverity: AlertSeverity.success,
+            snackbarMessage:
+              "Rent by token transaction is finished successfully.",
             snackbarTime: new Date(),
             snackbarOpen: true,
           });
@@ -338,20 +399,23 @@ export default function DrawImage() {
   // }, 1000);
 
   async function updateUserData() {
-    // console.log("call updateUserData()");
+    console.log("call updateUserData()");
 
     const body = { publicAddress: address };
     try {
-      mutateUser(
-        await fetchJson(
-          { url: "/api/login" },
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          }
-        )
+      const response = await fetchJson(
+        { url: "/api/update-user" },
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }
       );
+      console.log("response: ", response);
+      if (response.user) {
+        console.log("response.user: ", response.user);
+        mutateUser(response.user);
+      }
     } catch (error) {
       if (error instanceof FetchError) {
         console.error(error.data.message);
@@ -419,7 +483,7 @@ export default function DrawImage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(jsonData),
       });
-      // console.log("fetchResponse: ", fetchResponse);
+      console.log("fetchResponse: ", fetchResponse);
     } catch (error) {
       console.error(error);
       setWriteToastMessage({
@@ -470,8 +534,9 @@ export default function DrawImage() {
 
     //* Handle fetch result.
     let imageUrlResponse;
+    console.log("jsonResponse: ", jsonResponse);
     if (jsonResponse.status === "processing") {
-      // console.log("jsonResponse: ", jsonResponse);
+      console.log("jsonResponse: ", jsonResponse);
       const eta = jsonResponse.eta;
       const timestamp = Math.floor(Date.now() / 1000);
       setImageFetchEndTime(timestamp + eta);
@@ -504,11 +569,11 @@ export default function DrawImage() {
       }
 
       //* Get the stable diffusion api result by json.
-      const jsonResponse = await fetchResultResponse.json();
-      // console.log("jsonResponse: ", jsonResponse);
+      const jsonFetchResultResponse = await fetchResultResponse.json();
+      // console.log("jsonFetchResultResponse: ", jsonFetchResultResponse);
 
       //* Set image url.
-      imageUrlResponse = jsonResponse.output[0];
+      imageUrlResponse = jsonFetchResultResponse.output[0];
     }
 
     if (jsonResponse.status === "success") {
@@ -523,7 +588,10 @@ export default function DrawImage() {
       let event = {};
       event.target = { name: "prompt", value: meta.prompt };
       handleChange(event);
-      event.target = { name: "negativePrompt", value: meta.negative_prompt };
+      event.target = {
+        name: "negativePrompt",
+        value: meta.negative_prompt,
+      };
       handleChange(event);
       event.target = { name: "modelName", value: meta.model };
       handleChange(event);
@@ -533,6 +601,7 @@ export default function DrawImage() {
       inputModelName = meta.model;
     }
 
+    //* TODO: Check imageUrlResponse is valid. If invalid, wait for 3-5 seconds and try again.
     setImageUrl(imageUrlResponse);
     setLoadingImage(false);
     setIsImagePosted(false);
@@ -544,33 +613,33 @@ export default function DrawImage() {
   async function postImage({ postImageUrl, inputPrompt, inputNegativePrompt }) {
     setPostingImage(true);
 
-    //* Check the duplicate prompt.
-    const postedResponse = await fetch(POSTED_API_URL, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        prompt: inputPrompt,
-      }),
-    });
+    // //* Check the duplicate prompt.
+    // const postedResponse = await fetch(POSTED_API_URL, {
+    //   method: "POST",
+    //   headers: {
+    //     Accept: "application/json",
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     prompt: inputPrompt,
+    //   }),
+    // });
 
-    if (postedResponse.status === 200) {
-      console.error("postedResponse: ", postedResponse);
+    // if (postedResponse.status === 200) {
+    //   console.error("postedResponse: ", postedResponse);
 
-      setWriteToastMessage({
-        snackbarSeverity: AlertSeverity.warning,
-        snackbarMessage: "Prompt is already posted.",
-        snackbarTime: new Date(),
-        snackbarOpen: true,
-      });
+    //   setWriteToastMessage({
+    //     snackbarSeverity: AlertSeverity.warning,
+    //     snackbarMessage: "Prompt is already posted.",
+    //     snackbarTime: new Date(),
+    //     snackbarOpen: true,
+    //   });
 
-      setIsImagePosted(false);
-      setPostingImage(false);
+    //   setIsImagePosted(false);
+    //   setPostingImage(false);
 
-      return;
-    }
+    //   return;
+    // }
 
     //* Upload image to S3.
     const uploadImageJsonData = {
@@ -693,7 +762,7 @@ export default function DrawImage() {
                   });
                   // console.log("contract: ", contract);
 
-                  await erc20PermitSignature({
+                  const { r, s, v, deadline } = await erc20PermitSignature({
                     owner: address,
                     spender: RENT_MARKET_CONTRACT_ADDRESS,
                     amount: dataRentData.rentFeeByToken,
@@ -702,7 +771,16 @@ export default function DrawImage() {
                   });
 
                   writeRentNFTByToken?.({
-                    value: dataRentData.rentFeeByToken,
+                    // value: dataRentData.rentFeeByToken,
+                    args: [
+                      PAYMENT_NFT_CONTRACT_ADDRESS,
+                      PAYMENT_NFT_TOKEN_ID,
+                      SERVICE_ACCOUNT_ADDRESS,
+                      deadline,
+                      v,
+                      r,
+                      s,
+                    ],
                   });
                 }
               }}
@@ -846,13 +924,18 @@ export default function DrawImage() {
       const method = "eth_signTypedData_v4";
       // console.log("params: ", params);
       // console.log("method: ", method);
+
       const signature = await ethereum.request({
         method,
         params,
       });
       // console.log("signature: ", signature);
+
+      // console.log("utils: ", utils);
+      //* TODO: In ethers ^5.7.2 version. In ethers version 6, got error.
       const signData = utils.splitSignature(signature);
       // console.log("signData: ", signData);
+
       const { r, s, v } = signData;
       return {
         r,
@@ -918,7 +1001,7 @@ export default function DrawImage() {
               }}
               sx={{ m: 2 }}
               disabled={loadingImage}
-              autoComplete="on"
+              autoComplete="off"
             />
             <TextField
               required
@@ -933,7 +1016,7 @@ export default function DrawImage() {
               }}
               sx={{ m: 2 }}
               disabled={loadingImage}
-              autoComplete="on"
+              autoComplete="off"
             />
           </Box>
           <Box
@@ -943,6 +1026,9 @@ export default function DrawImage() {
             display="flex"
             flexDirection="column"
             alignItems="center"
+            sx={{
+              width: "100%",
+            }}
           >
             {/*//*TODO: Show image fetch time. */}
             {/* {imageFetchEndTime && (
@@ -1062,6 +1148,7 @@ export default function DrawImage() {
             ) : (
               <Card
                 sx={{
+                  width: "80%",
                   minWidth: 200,
                   maxWidth: 600,
                   minHeight: 200,
@@ -1071,7 +1158,9 @@ export default function DrawImage() {
               >
                 <CardMedia
                   component="img"
-                  sx={{ height: imageHeight, width: 600 }}
+                  sx={{
+                    objectFit: "fill",
+                  }}
                   image={imageUrl}
                   title={prompt}
                   onError={(e) => {

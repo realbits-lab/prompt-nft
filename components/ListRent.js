@@ -9,7 +9,8 @@ import CardNft from "@/components/CardNft";
 import WalletProfile from "@/components/WalletProfile";
 
 export default function ListRent({ data, isLoading }) {
-  const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
+  const PLACEHOLDER_IMAGE_URL =
+    process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const NUMBER_PER_PAGE = 1;
 
   const CARD_MAX_WIDTH = 420;
@@ -44,7 +45,9 @@ export default function ListRent({ data, isLoading }) {
         alignItems="center"
         minHeight="100vh"
       >
-        <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
+        <Card
+          sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}
+        >
           <Typography>Rented NFT list</Typography>
           <CardContent
             sx={{
@@ -74,7 +77,9 @@ export default function ListRent({ data, isLoading }) {
           <>
             <WalletProfile />
             <NoContentPage
-              message={"You have not yet rented any image prompt NFT."}
+              message={
+                "You have not yet rented any image prompt NFT."
+              }
             />
           </>
         );
@@ -98,31 +103,8 @@ export default function ListRent({ data, isLoading }) {
               // Check idx is in pagination.
               // pageIndex.rent starts from 1.
               // idx starts from 0.
-              if (
-                idx >= (pageIndex - 1) * NUMBER_PER_PAGE &&
-                idx < pageIndex * NUMBER_PER_PAGE
-              ) {
-                return <CardNft nftData={nftData} />;
-              }
+              return <CardNft nftData={nftData} isRent={true} />;
             })}
-            <Pagination
-              count={Math.ceil(data.length / NUMBER_PER_PAGE)}
-              page={pageIndex}
-              onChange={handlePageIndexChange}
-              variant="outlined"
-              sx={{
-                padding: "10",
-                ul: {
-                  "& .MuiPaginationItem-root": {
-                    color: "darkgrey",
-                    "&.Mui-selected": {
-                      background: "lightcyan",
-                      color: "darkgrey",
-                    },
-                  },
-                },
-              }}
-            />
           </Box>
         </>
       );

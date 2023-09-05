@@ -12,12 +12,13 @@ import MobileStepper from "@mui/material/MobileStepper";
 import CircularProgress from "@mui/material/CircularProgress";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
-import CardImage from "./CardImage";
+import CardImage from "@/components/cardimage/CardImage";
 
 function CarouselImage({ data, isLoading }) {
   // console.log("data: ", data);
   // console.log("isLoading: ", isLoading);
-  const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
+  const PLACEHOLDER_IMAGE_URL =
+    process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
 
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
@@ -72,7 +73,9 @@ function CarouselImage({ data, isLoading }) {
         alignItems="center"
         minHeight="100vh"
       >
-        <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
+        <Card
+          sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}
+        >
           <CardMedia component="img" image={PLACEHOLDER_IMAGE_URL} />
           <CardContent
             sx={{
