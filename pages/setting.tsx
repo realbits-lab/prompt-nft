@@ -1,5 +1,5 @@
 import Settings from "@/components/Settings";
 
-function SettingPage() {
+export default function SettingPage() {
   return <Settings />;
 }
