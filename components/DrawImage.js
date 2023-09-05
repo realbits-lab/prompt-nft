@@ -129,6 +129,7 @@ export default function DrawImage() {
   const [imageFetchEndTime, setImageFetchEndTime] = React.useState();
   const [paymentNftRentEndTime, setPaymentNftRentEndTime] = React.useState();
 
+  //* getAllRentData function with wagmi hooks.
   const {
     data: dataAllRentData,
     isError: errorAllRentData,
@@ -164,6 +165,7 @@ export default function DrawImage() {
     },
   });
 
+  //* getRegisterData function with wagmi hooks.
   const { data: dataRentData, isLoading: isLoadingRentData } = useContractRead({
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
@@ -171,6 +173,7 @@ export default function DrawImage() {
     args: [PAYMENT_NFT_CONTRACT_ADDRESS, PAYMENT_NFT_TOKEN_ID],
   });
 
+  //* rentNFT function with wagmi hooks.
   const { config: configPrepareRentNFT, error: errorPrepareRentNFT } =
     usePrepareContractWrite({
       address: RENT_MARKET_CONTRACT_ADDRES,
@@ -183,47 +186,6 @@ export default function DrawImage() {
       ],
       enabled: false,
     });
-
-  const {
-    data: dataRentNFTByToken,
-    error: errorRentNFTByToken,
-    isError: isErrorRentNFTByToken,
-    isIdle: isIdleRentNFTByToken,
-    isLoading: isLoadingRentNFTByToken,
-    isSuccess: isSuccessRentNFTByToken,
-    write: writeRentNFTByToken,
-    status: statusRentNFTByToken,
-  } = useContractWrite({
-    address: RENT_MARKET_CONTRACT_ADDRES,
-    abi: rentmarketABI?.abi,
-    functionName: "rentNFTByToken",
-    // args: [
-    //   PAYMENT_NFT_CONTRACT_ADDRESS,
-    //   PAYMENT_NFT_TOKEN_ID,
-    //   SERVICE_ACCOUNT_ADDRESS,
-    // ],
-    onSuccess(data) {
-      // console.log("call onSuccess()");
-      // console.log("data: ", data);
-      setWriteToastMessage({
-        snackbarSeverity: AlertSeverity.success,
-        snackbarMessage:
-          "Rent transaction is just started and wait a moment...",
-        snackbarTime: new Date(),
-        snackbarOpen: true,
-      });
-    },
-    onError(error) {
-      // console.log("call onSuccess()");
-      // console.log("error: ", error);
-      setWriteToastMessage({
-        snackbarSeverity: AlertSeverity.error,
-        snackbarMessage: `${error}`,
-        snackbarTime: new Date(),
-        snackbarOpen: true,
-      });
-    },
-  });
 
   const {
     data: dataRentNFT,
@@ -280,7 +242,105 @@ export default function DrawImage() {
         .then(() => {
           setWriteToastMessage({
             snackbarSeverity: AlertSeverity.success,
-            snackbarMessage: "Renting is finished successfully.",
+            snackbarMessage: "Rent transaction is finished successfully.",
+            snackbarTime: new Date(),
+            snackbarOpen: true,
+          });
+        })
+        .catch((error) => {
+          setWriteToastMessage({
+            snackbarSeverity: AlertSeverity.error,
+            snackbarMessage: "Updating user data is falied.",
+            snackbarTime: new Date(),
+            snackbarOpen: true,
+          });
+        });
+    },
+    onError(error) {
+      // console.log("call onError()");
+      // console.log("error: ", error);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.error,
+        snackbarMessage: "Renting is failed.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+  });
+
+  //* rentNFTByToken function with wagmi hooks.
+  const {
+    config: configPrepareRentNFTByToken,
+    error: errorPrepareRentNFTByToken,
+  } = usePrepareContractWrite({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI.abi,
+    functionName: "rentNFTByToken",
+    args: [
+      PAYMENT_NFT_CONTRACT_ADDRESS,
+      PAYMENT_NFT_TOKEN_ID,
+      SERVICE_ACCOUNT_ADDRESS,
+    ],
+    enabled: false,
+  });
+
+  const {
+    data: dataRentNFTByToken,
+    error: errorRentNFTByToken,
+    isError: isErrorRentNFTByToken,
+    isIdle: isIdleRentNFTByToken,
+    isLoading: isLoadingRentNFTByToken,
+    isSuccess: isSuccessRentNFTByToken,
+    write: writeRentNFTByToken,
+    status: statusRentNFTByToken,
+  } = useContractWrite({
+    address: RENT_MARKET_CONTRACT_ADDRES,
+    abi: rentmarketABI?.abi,
+    functionName: "rentNFTByToken",
+    // args: [
+    //   PAYMENT_NFT_CONTRACT_ADDRESS,
+    //   PAYMENT_NFT_TOKEN_ID,
+    //   SERVICE_ACCOUNT_ADDRESS,
+    // ],
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.success,
+        snackbarMessage:
+          "Rent by token transaction is just started and wait a moment...",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+    onError(error) {
+      // console.log("call onSuccess()");
+      // console.log("error: ", error);
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.error,
+        snackbarMessage: `${error}`,
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+  });
+
+  const {
+    data: dataRentNFTByTokenTx,
+    isError: isErrorRentNFTByTokenTx,
+    isLoading: isLoadingRentNFTByTokenTx,
+  } = useWaitForTransaction({
+    hash: dataRentNFTByToken?.hash,
+    onSuccess(data) {
+      console.log("call onSuccess()");
+      console.log("data: ", data);
+
+      updateUserData()
+        .then(() => {
+          setWriteToastMessage({
+            snackbarSeverity: AlertSeverity.success,
+            snackbarMessage:
+              "Rent by token transaction is finished successfully.",
             snackbarTime: new Date(),
             snackbarOpen: true,
           });
@@ -339,20 +399,23 @@ export default function DrawImage() {
   // }, 1000);
 
   async function updateUserData() {
-    // console.log("call updateUserData()");
+    console.log("call updateUserData()");
 
     const body = { publicAddress: address };
     try {
-      mutateUser(
-        await fetchJson(
-          { url: "/api/login" },
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          }
-        )
+      const response = await fetchJson(
+        { url: "/api/update-user" },
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }
       );
+      console.log("response: ", response);
+      if (response.user) {
+        console.log("response.user: ", response.user);
+        mutateUser(response.user);
+      }
     } catch (error) {
       if (error instanceof FetchError) {
         console.error(error.data.message);

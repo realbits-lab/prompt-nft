@@ -3,18 +3,13 @@ import { NextApiRequest, NextApiResponse } from "next";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import Web3 from "web3";
 import { sessionOptions } from "@/lib/session";
-
-export type User = {
-  isLoggedIn: boolean;
-  publicAddress: string;
-  rentPaymentNft: boolean;
-};
+import { User } from "@/types/user";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<User>) {
   // console.log("call /api/user");
   // console.log("req.session.user: ", req.session.user);
 
-	//* Check user login.
+  //* Check user login.
   if (!req.session.user) {
     res.json({
       isLoggedIn: false,
@@ -47,7 +42,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<User>) {
     console.log("PAYMENT_NFT_CONTRACT_ADDRESS: ", PAYMENT_NFT_CONTRACT_ADDRESS);
     console.log("PAYMENT_NFT_TOKEN_ID: ", PAYMENT_NFT_TOKEN_ID);
 
-		//* Find user rent history for payment nft.
+    //* Find user rent history for payment nft.
     if (
       rentData.renteeAddress.toLowerCase() === publicAddress?.toLowerCase() &&
       rentData.nftAddress.toLowerCase() ===
