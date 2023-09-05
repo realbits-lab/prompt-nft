@@ -280,7 +280,7 @@ export default function DrawImage() {
         .then(() => {
           setWriteToastMessage({
             snackbarSeverity: AlertSeverity.success,
-            snackbarMessage: "Renting is finished successfully.",
+            snackbarMessage: "Rent transaction is finished successfully.",
             snackbarTime: new Date(),
             snackbarOpen: true,
           });
