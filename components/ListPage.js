@@ -3,10 +3,7 @@ import { isMobile } from "react-device-detect";
 import dynamic from "next/dynamic";
 import Router, { useRouter } from "next/router";
 import PropTypes from "prop-types";
-import {
-  useRecoilStateLoadable,
-  useRecoilValueLoadable,
-} from "recoil";
+import { useRecoilStateLoadable, useRecoilValueLoadable } from "recoil";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
@@ -24,6 +21,7 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import MenuIcon from "@mui/icons-material/Menu";
 import List from "@/components/List";
+import Settings from "@/components/Settings";
 import useUser from "@/lib/useUser";
 import {
   RBSnackbar,
@@ -69,6 +67,7 @@ export default function ListPage(props) {
     nft: "nft",
     own: "own",
     rent: "rent",
+    settings: "settings",
     theme: "theme",
   };
 
@@ -105,8 +104,7 @@ export default function ListPage(props) {
   //*---------------------------------------------------------------------------
   //* Setting menu variables.
   //*---------------------------------------------------------------------------
-  const [settingMenuAnchorEl, setSettingMenuAnchorEl] =
-    React.useState(null);
+  const [settingMenuAnchorEl, setSettingMenuAnchorEl] = React.useState(null);
   const openSettingMenu = Boolean(settingMenuAnchorEl);
   function handleSettingMenuOpen(event) {
     setSettingMenuAnchorEl(event.currentTarget);
@@ -243,15 +241,12 @@ export default function ListPage(props) {
               {user?.isLoggedIn === true && (
                 <Button
                   id="basic-button"
-                  aria-controls={
-                    openSettingMenu ? "basic-menu" : undefined
-                  }
+                  aria-controls={openSettingMenu ? "basic-menu" : undefined}
                   aria-haspopup="true"
                   aria-expanded={openSettingMenu ? "true" : undefined}
                   onClick={(event) => {
                     if (
-                      (user !== undefined &&
-                        user.isLoggedIn === true) ||
+                      (user !== undefined && user.isLoggedIn === true) ||
                       isMobile
                     ) {
                       handleSettingMenuOpen(event);
@@ -284,6 +279,7 @@ export default function ListPage(props) {
                 >
                   OWN
                 </MenuItem>
+
                 <MenuItem
                   onClick={() => {
                     setCurrentMode(MENU_ENUM.rent);
@@ -292,6 +288,7 @@ export default function ListPage(props) {
                 >
                   RENT
                 </MenuItem>
+
                 <Link
                   href={MARKET_URL}
                   target="_blank"
@@ -308,6 +305,7 @@ export default function ListPage(props) {
                     MARKET
                   </MenuItem>
                 </Link>
+
                 <Link
                   href={BOARD_URL}
                   target="_blank"
@@ -324,6 +322,16 @@ export default function ListPage(props) {
                     BOARD
                   </MenuItem>
                 </Link>
+
+                <MenuItem
+                  onClick={() => {
+                    setCurrentMode(MENU_ENUM.settings);
+                    handleSettingMenuClose();
+                  }}
+                >
+                  SETTINGS
+                </MenuItem>
+
                 {/* <MenuItem
                   onClick={() => {
                     setCurrentMode(MENU_ENUM.theme);
@@ -332,6 +340,7 @@ export default function ListPage(props) {
                 >
                   THEME
                 </MenuItem> */}
+
                 <MenuItem
                   onClick={async () => {
                     setCurrentMode(MENU_ENUM.image);
@@ -349,10 +358,7 @@ export default function ListPage(props) {
                       if (error instanceof FetchError) {
                         console.error(error.data.message);
                       } else {
-                        console.error(
-                          "An unexpected error happened:",
-                          error
-                        );
+                        console.error("An unexpected error happened:", error);
                       }
                     }
                   }}
