@@ -85,19 +85,31 @@ async function handler(
   //* Upload image and text with link to twitter.
   const postSearchThreadResponseJson = await postSearchThreadResponse.json();
   console.log("postSearchThreadResponseJson: ", postSearchThreadResponseJson);
+  console.log(
+    "postSearchThreadResponseJson.paging.total: ",
+    postSearchThreadResponseJson.paging.total
+  );
 
   let getThreadResponse;
   let threadId;
   for (const threadData of postSearchThreadResponseJson.data) {
-    //* TODO: Check if already tweeted with database.
-    getThreadResponse = await fetch(
-      `${MOIM_DOMAIN}/api/threads/${threadData.id}`,
-      {
-        method: "GET",
-      }
-    );
-    threadId = threadData.id;
-    break;
+    //* Check if already tweeted with database.
+    const findUniqueTweetResponse = await prisma.tweet.findUnique({
+      where: {
+        threadId: threadData.id,
+      },
+    });
+
+    if (findUniqueTweetResponse === null) {
+      getThreadResponse = await fetch(
+        `${MOIM_DOMAIN}/api/threads/${threadData.id}`,
+        {
+          method: "GET",
+        }
+      );
+      threadId = threadData.id;
+      break;
+    }
   }
   const getThreadResponseJson = await getThreadResponse?.json();
   // console.log(
