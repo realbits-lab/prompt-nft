@@ -2,12 +2,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { withIronSessionApiRoute } from "iron-session/next";
 import Web3 from "web3";
 import { sessionOptions } from "@/lib/session";
-import { getChainId } from "@/lib/util";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import { rentData } from "@/types/rentData";
-import { ErrorWithMessage } from "@/types/error";
-import { getErrorMessage } from "@/lib/error";
-const sigUtil = require("@metamask/eth-sig-util");
 
 const RENT_MARKET_CONTRACT_ADDRES =
   process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
