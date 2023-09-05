@@ -339,7 +339,7 @@ export default function DrawImage() {
   // }, 1000);
 
   async function updateUserData() {
-    // console.log("call updateUserData()");
+    console.log("call updateUserData()");
 
     const body = { publicAddress: address };
     try {
