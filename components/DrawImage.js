@@ -550,6 +550,7 @@ export default function DrawImage() {
       let fetchResultResponse;
 
       while (fetchStatus !== 200) {
+      	//* TODO: Add elapsed time to screen.
         const timestamp = Math.floor(Date.now() / 1000);
         setImageFetchEndTime(timestamp + eta);
 
