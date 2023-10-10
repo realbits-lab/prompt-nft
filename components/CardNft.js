@@ -70,16 +70,14 @@ export default function CardNft({ nftData, isRent = false }) {
   //*---------------------------------------------------------------------------
   //* Define constant variables.
   //*---------------------------------------------------------------------------
-  const PLACEHOLDER_IMAGE_URL =
-    process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
+  const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const RENT_MARKET_CONTRACT_ADDRES =
     process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
   const PROMPT_NFT_CONTRACT_ADDRESS =
     process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS;
   const SERVICE_ACCOUNT_ADDRESS =
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
-  const ZERO_ADDRESS_STRING =
-    "0x0000000000000000000000000000000000000000";
+  const ZERO_ADDRESS_STRING = "0x0000000000000000000000000000000000000000";
 
   const CARD_MARGIN_TOP = "60px";
   const CARD_MARGIN_BOTTOM = 600;
@@ -195,14 +193,14 @@ export default function CardNft({ nftData, isRent = false }) {
     args: [nftData?.nftAddress, nftData?.tokenId],
     watch: true,
     onSuccess(data) {
-      // console.log("call onSuccess()");
-      // console.log("data.renteeAddress: ", data.renteeAddress);
-      // console.log("address: ", address);
-      if (
-        data.renteeAddress.toLowerCase() === address.toLowerCase()
-      ) {
+      console.log("call onSuccess()");
+      console.log("data.renteeAddress: ", data.renteeAddress);
+      console.log("address: ", address);
+      if (data.renteeAddress.toLowerCase() === address.toLowerCase()) {
+        console.log("setIsOwnerOrRentee true");
         setIsOwnerOrRentee(true);
       } else {
+        console.log("setIsOwnerOrRentee false");
         setIsOwnerOrRentee(false);
       }
     },
@@ -365,7 +363,7 @@ export default function CardNft({ nftData, isRent = false }) {
 
   const [isRenting, setIsRenting] = React.useState(false);
   const [isOwnerOrRentee, setIsOwnerOrRentee] = React.useState();
-  // console.log("isOwnerOrRentee: ", isOwnerOrRentee);
+  console.log("isOwnerOrRentee: ", isOwnerOrRentee);
 
   React.useEffect(function () {
     // console.log("call useEffect()");
@@ -448,9 +446,7 @@ export default function CardNft({ nftData, isRent = false }) {
 
       return;
     } else {
-      if (
-        isWalletConnected({ isConnected, selectedChain }) === false
-      ) {
+      if (isWalletConnected({ isConnected, selectedChain }) === false) {
         setWriteToastMessage({
           snackbarSeverity: AlertSeverity.warning,
           snackbarMessage: `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`,
@@ -507,19 +503,13 @@ export default function CardNft({ nftData, isRent = false }) {
             <Table>
               <TableHead>
                 <TableRow>
-                  <StyledTableCell align="center">
-                    Item
-                  </StyledTableCell>
-                  <StyledTableCell align="center">
-                    Value
-                  </StyledTableCell>
+                  <StyledTableCell align="center">Item</StyledTableCell>
+                  <StyledTableCell align="center">Value</StyledTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 <StyledTableRow>
-                  <StyledTableCell align="left">
-                    Token ID
-                  </StyledTableCell>
+                  <StyledTableCell align="left">Token ID</StyledTableCell>
                   <StyledTableCell align="left">
                     {nftData?.tokenId.toString()}
                   </StyledTableCell>
@@ -533,18 +523,14 @@ export default function CardNft({ nftData, isRent = false }) {
                 </StyledTableRow>
 
                 <StyledTableRow>
-                  <StyledTableCell align="left">
-                    Description
-                  </StyledTableCell>
+                  <StyledTableCell align="left">Description</StyledTableCell>
                   <StyledTableCell align="left">
                     {metadata ? metadata.description : "loading..."}
                   </StyledTableCell>
                 </StyledTableRow>
 
                 <StyledTableRow>
-                  <StyledTableCell align="left">
-                    Opensea
-                  </StyledTableCell>
+                  <StyledTableCell align="left">Opensea</StyledTableCell>
                   <StyledTableCell align="left">
                     {shortenAddress({
                       address: nftData?.nftAddress,
@@ -555,9 +541,7 @@ export default function CardNft({ nftData, isRent = false }) {
                 </StyledTableRow>
 
                 <StyledTableRow>
-                  <StyledTableCell align="left">
-                    Explorer
-                  </StyledTableCell>
+                  <StyledTableCell align="left">Explorer</StyledTableCell>
                   <StyledTableCell align="left">
                     {shortenAddress({
                       address: nftData?.nftAddress,
@@ -574,7 +558,7 @@ export default function CardNft({ nftData, isRent = false }) {
                       variant="outlined"
                       onClick={handleRentPayment}
                     >
-                      {isOwnerOrRentee === undefined ? (
+                      {isLoadingRentData === true ? (
                         <>Loading...</>
                       ) : isRenting ? (
                         <>Renting...</>
@@ -587,9 +571,8 @@ export default function CardNft({ nftData, isRent = false }) {
                   </StyledTableCell>
                   <StyledTableCell align="left">
                     {(
-                      Number(
-                        (nftData?.rentFee * 1000000n) / 10n ** 18n
-                      ) / 1000000
+                      Number((nftData?.rentFee * 1000000n) / 10n ** 18n) /
+                      1000000
                     ).toString()}{" "}
                     matic
                   </StyledTableCell>
@@ -601,18 +584,16 @@ export default function CardNft({ nftData, isRent = false }) {
                       <Button
                         size="small"
                         disabled={
-                          isRenting ||
-                          isLoadingRentData ||
-                          isLoadingOwnerOf
+                          isRenting || isLoadingRentData || isLoadingOwnerOf
                         }
                         variant="outlined"
                         onClick={handleRentPayment}
                       >
-                        {isOwnerOrRentee === undefined ? (
+                        {isLoadingRentData === true ? (
                           <>Loading...</>
                         ) : isRenting ? (
                           <>Renting...</>
-                        ) : isOwnerOrRentee ? (
+                        ) : isOwnerOrRentee === true ? (
                           <>Prompt</>
                         ) : (
                           <>Rent</>
@@ -622,8 +603,7 @@ export default function CardNft({ nftData, isRent = false }) {
                     <StyledTableCell align="left">
                       {(
                         Number(
-                          (nftData?.rentFeeByToken * 1000000n) /
-                            10n ** 18n
+                          (nftData?.rentFeeByToken * 1000000n) / 10n ** 18n
                         ) / 1000000
                       ).toString()}{" "}
                       token
@@ -634,9 +614,7 @@ export default function CardNft({ nftData, isRent = false }) {
                   <></>
                 ) : (
                   <StyledTableRow>
-                    <StyledTableCell align="left">
-                      Setting Fee
-                    </StyledTableCell>
+                    <StyledTableCell align="left">Setting Fee</StyledTableCell>
                     <StyledTableCell>
                       <div
                         style={{
