@@ -6,9 +6,7 @@ import {
   useWalletClient,
   useContractRead,
   useSignTypedData,
-  useContractEvent,
   useContractWrite,
-  usePrepareContractWrite,
   useWaitForTransaction,
   useWatchPendingTransactions,
 } from "wagmi";
@@ -27,7 +25,6 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
 import {
   isWalletConnected,
@@ -44,8 +41,8 @@ import promptNFTABI from "@/contracts/promptNFT.json";
 import { TextField } from "@mui/material";
 
 export default function CardNft({ nftData, isRent = false }) {
-  console.log("call CardNft()");
-  console.log("nftData: ", nftData);
+  // console.log("call CardNft()");
+  // console.log("nftData: ", nftData);
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -81,8 +78,6 @@ export default function CardNft({ nftData, isRent = false }) {
 
   const CARD_MARGIN_TOP = "60px";
   const CARD_MARGIN_BOTTOM = 600;
-  const CARD_MAX_WIDTH = 420;
-  const CARD_MIN_WIDTH = 375;
   const CARD_PADDING = 1;
   const [cardImageHeight, setCardImageHeight] = React.useState(0);
   const { user, mutateUser } = useUser();
@@ -199,9 +194,6 @@ export default function CardNft({ nftData, isRent = false }) {
       if (data.renteeAddress.toLowerCase() === address.toLowerCase()) {
         console.log("setIsOwnerOrRentee true");
         setIsOwnerOrRentee(true);
-      } else {
-        console.log("setIsOwnerOrRentee false");
-        setIsOwnerOrRentee(false);
       }
     },
     onError(error) {
@@ -236,8 +228,6 @@ export default function CardNft({ nftData, isRent = false }) {
       // console.log("address: ", address);
       if (data.toLowerCase() === address.toLowerCase()) {
         setIsOwnerOrRentee(true);
-      } else {
-        setIsOwnerOrRentee(false);
       }
     },
     onError(error) {
@@ -362,8 +352,8 @@ export default function CardNft({ nftData, isRent = false }) {
         };
 
   const [isRenting, setIsRenting] = React.useState(false);
-  const [isOwnerOrRentee, setIsOwnerOrRentee] = React.useState();
-  console.log("isOwnerOrRentee: ", isOwnerOrRentee);
+  const [isOwnerOrRentee, setIsOwnerOrRentee] = React.useState(false);
+  // console.log("isOwnerOrRentee: ", isOwnerOrRentee);
 
   React.useEffect(function () {
     // console.log("call useEffect()");

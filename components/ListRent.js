@@ -8,7 +8,7 @@ import CardNft from "@/components/CardNft";
 import WalletProfile from "@/components/WalletProfile";
 
 export default function ListRent({ data, isLoading }) {
-  console.log("call ListRent()");
+  // console.log("call ListRent()");
 
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
