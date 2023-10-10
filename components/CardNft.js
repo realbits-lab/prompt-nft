@@ -44,8 +44,8 @@ import promptNFTABI from "@/contracts/promptNFT.json";
 import { TextField } from "@mui/material";
 
 export default function CardNft({ nftData, isRent = false }) {
-  // console.log("call CardNft()");
-  // console.log("nftData: ", nftData);
+  console.log("call CardNft()");
+  console.log("nftData: ", nftData);
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -153,7 +153,7 @@ export default function CardNft({ nftData, isRent = false }) {
     abi: promptNFTABI.abi,
     functionName: "tokenURI",
     args: [nftData?.tokenId],
-    watch: true,
+    // watch: true,
     onSuccess(data) {
       // console.log("call onSuccess()");
       // console.log("data: ", data);
@@ -191,7 +191,7 @@ export default function CardNft({ nftData, isRent = false }) {
     abi: rentmarketABI.abi,
     functionName: "getRentData",
     args: [nftData?.nftAddress, nftData?.tokenId],
-    watch: true,
+    // watch: true,
     onSuccess(data) {
       console.log("call onSuccess()");
       console.log("data.renteeAddress: ", data.renteeAddress);
@@ -229,7 +229,7 @@ export default function CardNft({ nftData, isRent = false }) {
     abi: promptNFTABI.abi,
     functionName: "ownerOf",
     args: [nftData?.tokenId],
-    watch: true,
+    // watch: true,
     onSuccess(data) {
       // console.log("call onSuccess()");
       // console.log("data: ", data);

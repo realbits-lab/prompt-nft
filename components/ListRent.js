@@ -8,6 +8,8 @@ import CardNft from "@/components/CardNft";
 import WalletProfile from "@/components/WalletProfile";
 
 export default function ListRent({ data, isLoading }) {
+  console.log("call ListRent()");
+
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
 
@@ -82,8 +84,8 @@ export default function ListRent({ data, isLoading }) {
           >
             <Typography>Rented NFT list</Typography>
 
-            {data.map((nftData) => {
-              return <CardNft nftData={nftData} isRent={true} />;
+            {data.map((nftData, idx) => {
+              return <CardNft nftData={nftData} isRent={true} key={idx} />;
             })}
           </Box>
         </>
