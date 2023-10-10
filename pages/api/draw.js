@@ -141,6 +141,7 @@ async function handler(req, res) {
     //* Processing status case.
     return res.status(200).json({
       status: jsonResponse.status,
+      meta: jsonResponse.meta,
       message: jsonResponse.message,
       eta: jsonResponse.eta,
       fetch_result: jsonResponse.fetch_result,

@@ -29,13 +29,9 @@ async function handler(req, res) {
 
   //* Required fields in body: id
   const { id } = req.body;
-  // console.log("id: ", id);
+  console.log("id: ", id);
 
   //* Stable diffusion api option.
-  // const jsonData = {
-  //   key: process.env.NEXT_PUBLIC_STABLE_DIFFUSION_API_KEY,
-  //   id: id,
-  // };
   const jsonData = {
     key: process.env.NEXT_PUBLIC_STABLE_DIFFUSION_API_KEY,
     request_id: id,
