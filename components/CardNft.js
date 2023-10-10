@@ -562,7 +562,7 @@ export default function CardNft({ nftData, isRent = false }) {
                         <>Loading...</>
                       ) : isRenting ? (
                         <>Renting...</>
-                      ) : isOwnerOrRentee ? (
+                      ) : isOwnerOrRentee === true ? (
                         <>Prompt</>
                       ) : (
                         <>Rent</>
