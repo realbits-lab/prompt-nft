@@ -4,7 +4,7 @@ export const themeOptions: ThemeOptions = {
   palette: {
     mode: "light",
     primary: {
-      main: "rgb(0,179,204)",
+      main: "#00b3cc",
     },
     secondary: {
       main: "#22252d",
