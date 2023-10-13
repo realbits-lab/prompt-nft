@@ -26,44 +26,51 @@ async function setConfig() {
 
   jsonConfigResponse = JSON.parse(stdout);
   // console.log("jsonConfigResponse: ", jsonConfigResponse);
-
-  //* Unset all heroku config variables.
-  let promies = Object.entries(jsonConfigResponse).map(
-    async ([key, value], idx) => {
-      // console.log("key: ", key);
-      // console.log("value: ", value);
-      if (key !== "DATABASE_URL") {
-        await wait(WAIT_TIME);
-        const { stdout, stderr } = await exec(
-          `${HEROKU_CONFIG_UNSET_COMMAND} ${key}`
-        );
-        console.log(`heroku config:unset ${key}`);
-        // console.log("stdout: " + stdout);
-      }
+  for (const key in jsonConfigResponse) {
+    // console.log(`${key}: ${jsonConfigResponse[key]}`);
+    if (jsonConfigResponse.hasOwnProperty(key) && key !== "DATABASE_URL") {
+      await wait(WAIT_TIME);
+      const { stdout, stderr } = await exec(
+        `${HEROKU_CONFIG_UNSET_COMMAND} ${key}`
+      );
+      console.log(`heroku config:unset ${key}`);
+      // console.log("stdout: " + stdout);
     }
-  );
-  await Promise.all(promies);
+  }
 
   //* Set heroku config variables with .env HEROKU_CONFIG_UNSET_COMMAND.
   let dotenvConfig = dotenv.config();
   // console.log("dotenvConfig: ", dotenvConfig);
 
-  promies = Object.entries(dotenvConfig.parsed).map(
-    async ([key, value], idx) => {
-      // console.log("key: ", key);
-      // console.log("value: ", value);
-      if (key !== "DATABASE_URL") {
-        await wait(WAIT_TIME);
-        const { stdout, stderr } = await exec(
-          `${HEROKU_CONFIG_SET_COMMAND} ${key}=\"${value}\"`
-        );
-        console.log(`heroku config:set ${key}=\"${value}\"`);
-        // console.log("stdout: " + stdout);
-        // console.log("stderr: " + stderr);
-      }
+  for (const key in dotenvConfig.parsed) {
+    // console.log(`${key}: ${jsonConfigResponse[key]}`);
+    if (dotenvConfig.parsed.hasOwnProperty(key) && key !== "DATABASE_URL") {
+      await wait(WAIT_TIME);
+      const { stdout, stderr } = await exec(
+        `${HEROKU_CONFIG_SET_COMMAND} ${key}=\"${value}\"`
+      );
+      console.log(`heroku config:set ${key}=\"${value}\"`);
+      // console.log("stdout: " + stdout);
+      // console.log("stderr: " + stderr);
     }
-  );
-  await Promise.all(promies);
+  }
+
+  // promies = Object.entries(dotenvConfig.parsed).map(
+  //   async ([key, value], idx) => {
+  //     // console.log("key: ", key);
+  //     // console.log("value: ", value);
+  //     if (key !== "DATABASE_URL") {
+  //       await wait(WAIT_TIME);
+  //       const { stdout, stderr } = await exec(
+  //         `${HEROKU_CONFIG_SET_COMMAND} ${key}=\"${value}\"`
+  //       );
+  //       console.log(`heroku config:set ${key}=\"${value}\"`);
+  //       // console.log("stdout: " + stdout);
+  //       // console.log("stderr: " + stderr);
+  //     }
+  //   }
+  // );
+  // await Promise.all(promies);
 }
 
 async function compare() {
