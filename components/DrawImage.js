@@ -53,7 +53,7 @@ export default function DrawImage() {
   const CARD_MAX_WIDTH = 420;
   const IMAGE_PADDING = 450;
   const { user, mutateUser } = useUser();
-  // console.log("user: ", user);
+  console.log("user: ", user);
   const [imageUrl, setImageUrl] = React.useState("");
   const [loadingImage, setLoadingImage] = React.useState(false);
   const [postingImage, setPostingImage] = React.useState(false);
@@ -512,6 +512,7 @@ export default function DrawImage() {
 
     //* Get the stable diffusion api result by json.
     const jsonResponse = await fetchResponse.json();
+    console.log("jsonResponse: ", jsonResponse);
 
     //* Check error response.
     if (
@@ -532,40 +533,44 @@ export default function DrawImage() {
       return;
     }
 
+    const meta = jsonResponse.meta;
+    console.log("meta.negative_prompt: ", meta.negative_prompt);
+    console.log("meta.prompt: ", meta.prompt);
+    console.log("meta.model: ", meta.model);
+
     //* Handle fetch result.
     let imageUrlResponse;
     console.log("jsonResponse: ", jsonResponse);
-    if (jsonResponse.status === "processing") {
+    if (jsonResponse.status === "success") {
+      imageUrlResponse = jsonResponse.imageUrl[0];
+    } else if (jsonResponse.status === "processing") {
       console.log("jsonResponse: ", jsonResponse);
-      const eta = jsonResponse.eta;
-      const timestamp = Math.floor(Date.now() / 1000);
-      setImageFetchEndTime(timestamp + eta);
+      let eta = jsonResponse.eta;
+      let fetchStatus = 500;
+      let fetchResultResponse;
 
-      await sleep((eta + 1) * 1000);
-      setImageFetchEndTime(undefined);
+      while (fetchStatus !== 200) {
+      	//* TODO: Add elapsed time to screen.
+        const timestamp = Math.floor(Date.now() / 1000);
+        setImageFetchEndTime(timestamp + eta);
 
-      const fetchJsonData = {
-        id: jsonResponse.id,
-      };
-      const fetchResultResponse = await fetch(FETCH_RESULT_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(fetchJsonData),
-      });
+        await sleep((eta + 1) * 1000);
+        setImageFetchEndTime(undefined);
 
-      //* Check error response.
-      if (fetchResultResponse.status !== 200) {
-        console.error("jsonResponse.status is not success.");
-
-        setWriteToastMessage({
-          snackbarSeverity: AlertSeverity.warning,
-          snackbarMessage: "Fetching image is failed.",
-          snackbarTime: new Date(),
-          snackbarOpen: true,
+        const fetchJsonData = {
+          id: jsonResponse.id,
+        };
+        fetchResultResponse = await fetch(FETCH_RESULT_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(fetchJsonData),
         });
+        console.log("fetchResultResponse: ", fetchResultResponse);
 
-        setLoadingImage(false);
-        return;
+        fetchStatus = fetchResultResponse.status;
+
+        // Add 2 seconds for fetch wait.
+        eta = 2;
       }
 
       //* Get the stable diffusion api result by json.
@@ -575,31 +580,23 @@ export default function DrawImage() {
       //* Set image url.
       imageUrlResponse = jsonFetchResultResponse.output[0];
     }
+    console.log("imageUrlResponse: ", imageUrlResponse);
 
-    if (jsonResponse.status === "success") {
-      imageUrlResponse = jsonResponse.imageUrl[0];
-      const meta = jsonResponse.meta;
-      // console.log("imageUrlResponse: ", imageUrlResponse);
-      // console.log("meta.negative_prompt: ", meta.negative_prompt);
-      // console.log("meta.prompt: ", meta.prompt);
-      // console.log("meta.model: ", meta.model);
+    //* Change prompt, negativePrompt, modelName.
+    let event = {};
+    event.target = { name: "prompt", value: meta.prompt };
+    handleChange(event);
+    event.target = {
+      name: "negativePrompt",
+      value: meta.negative_prompt,
+    };
+    handleChange(event);
+    event.target = { name: "modelName", value: meta.model };
+    handleChange(event);
 
-      //* Change prompt, negativePrompt, modelName.
-      let event = {};
-      event.target = { name: "prompt", value: meta.prompt };
-      handleChange(event);
-      event.target = {
-        name: "negativePrompt",
-        value: meta.negative_prompt,
-      };
-      handleChange(event);
-      event.target = { name: "modelName", value: meta.model };
-      handleChange(event);
-
-      inputPrompt = meta.prompt;
-      inputNegativePrompt = meta.negative_prompt;
-      inputModelName = meta.model;
-    }
+    inputPrompt = meta.prompt;
+    inputNegativePrompt = meta.negative_prompt;
+    inputModelName = meta.model;
 
     //* TODO: Check imageUrlResponse is valid. If invalid, wait for 3-5 seconds and try again.
     setImageUrl(imageUrlResponse);

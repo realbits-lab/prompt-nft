@@ -3,23 +3,15 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
 import CardNft from "@/components/CardNft";
 import WalletProfile from "@/components/WalletProfile";
 
 export default function ListRent({ data, isLoading }) {
-  const PLACEHOLDER_IMAGE_URL =
-    process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
-  const NUMBER_PER_PAGE = 1;
+  // console.log("call ListRent()");
 
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
-
-  const [pageIndex, setPageIndex] = React.useState(1);
-  const handlePageIndexChange = (event, value) => {
-    setPageIndex(value);
-  };
 
   function LoadingPage() {
     return (
@@ -45,9 +37,7 @@ export default function ListRent({ data, isLoading }) {
         alignItems="center"
         minHeight="100vh"
       >
-        <Card
-          sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}
-        >
+        <Card sx={{ minWidth: CARD_MIN_WIDTH, maxWidth: CARD_MAX_WIDTH }}>
           <Typography>Rented NFT list</Typography>
           <CardContent
             sx={{
@@ -77,9 +67,7 @@ export default function ListRent({ data, isLoading }) {
           <>
             <WalletProfile />
             <NoContentPage
-              message={
-                "You have not yet rented any image prompt NFT."
-              }
+              message={"You have not yet rented any image prompt NFT."}
             />
           </>
         );
@@ -97,19 +85,13 @@ export default function ListRent({ data, isLoading }) {
             <Typography>Rented NFT list</Typography>
 
             {data.map((nftData, idx) => {
-              // console.log("nftData: ", nftData);
-              // console.log("idx: ", idx);
-              // console.log("pageIndex: ", pageIndex);
-              // Check idx is in pagination.
-              // pageIndex.rent starts from 1.
-              // idx starts from 0.
-              return <CardNft nftData={nftData} isRent={true} />;
+              return <CardNft nftData={nftData} isRent={true} key={idx} />;
             })}
           </Box>
         </>
       );
     },
-    [data, pageIndex]
+    [data]
   );
 
   return <RentCardList />;

@@ -4,6 +4,8 @@ import { sessionOptions } from "@/lib/session";
 async function handler(req, res) {
   console.log("call /api/fetch-result");
 
+  const USE_SDXL = true;
+
   //* Check method error.
   if (req.method !== "POST") {
     console.log("req.method: ", req.method);
@@ -18,19 +20,18 @@ async function handler(req, res) {
   }
 
   //* Stable diffusion api url.
-  // const FETCH_API_URL = "https://stablediffusionapi.com/api/v3/fetch";
-  const FETCH_API_URL =
-    "https://stablediffusionapi.com/api/v4/dreambooth/fetch";
+  let FETCH_API_URL;
+  if (USE_SDXL === true) {
+    FETCH_API_URL = "https://stablediffusionapi.com/api/v4/dreambooth/fetch";
+  } else {
+    FETCH_API_URL = "https://stablediffusionapi.com/api/v3/fetch";
+  }
 
   //* Required fields in body: id
   const { id } = req.body;
-  // console.log("id: ", id);
+  console.log("id: ", id);
 
   //* Stable diffusion api option.
-  // const jsonData = {
-  //   key: process.env.NEXT_PUBLIC_STABLE_DIFFUSION_API_KEY,
-  //   id: id,
-  // };
   const jsonData = {
     key: process.env.NEXT_PUBLIC_STABLE_DIFFUSION_API_KEY,
     request_id: id,

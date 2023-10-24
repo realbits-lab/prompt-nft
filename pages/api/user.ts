@@ -37,10 +37,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<User>) {
   let rentPaymentNft = false;
   const result = await rentMarketContract.methods.getAllRentData().call();
   result?.map(function (rentData: any) {
-    console.log("rentData: ", rentData);
-    console.log("publicAddress: ", publicAddress);
-    console.log("PAYMENT_NFT_CONTRACT_ADDRESS: ", PAYMENT_NFT_CONTRACT_ADDRESS);
-    console.log("PAYMENT_NFT_TOKEN_ID: ", PAYMENT_NFT_TOKEN_ID);
+    // console.log("rentData: ", rentData);
+    // console.log("publicAddress: ", publicAddress);
+    // console.log("PAYMENT_NFT_CONTRACT_ADDRESS: ", PAYMENT_NFT_CONTRACT_ADDRESS);
+    // console.log("PAYMENT_NFT_TOKEN_ID: ", PAYMENT_NFT_TOKEN_ID);
 
     //* Find user rent history for payment nft.
     if (
