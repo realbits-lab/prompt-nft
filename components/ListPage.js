@@ -3,7 +3,10 @@ import { isMobile } from "react-device-detect";
 import dynamic from "next/dynamic";
 import Router, { useRouter } from "next/router";
 import PropTypes from "prop-types";
-import { useRecoilStateLoadable, useRecoilValueLoadable } from "recoil";
+import {
+  useRecoilStateLoadable,
+  useRecoilValueLoadable,
+} from "recoil";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
@@ -98,13 +101,14 @@ export default function ListPage(props) {
   const [currentMode, setCurrentMode] = React.useState(DEFAULT_MENU);
   const [newImageCount, setNewImageCount] = React.useState(0);
   const BUTTON_BORDER_RADIUS = 25;
-  const SELECTED_BUTTON_BACKGROUND_COLOR = "#21b6ae";
+  const SELECTED_BUTTON_BACKGROUND_COLOR = "#ef672a";
   const SELECTED_BUTTON_PADDING = "2px 2px";
 
   //*---------------------------------------------------------------------------
   //* Setting menu variables.
   //*---------------------------------------------------------------------------
-  const [settingMenuAnchorEl, setSettingMenuAnchorEl] = React.useState(null);
+  const [settingMenuAnchorEl, setSettingMenuAnchorEl] =
+    React.useState(null);
   const openSettingMenu = Boolean(settingMenuAnchorEl);
   function handleSettingMenuOpen(event) {
     setSettingMenuAnchorEl(event.currentTarget);
@@ -241,12 +245,15 @@ export default function ListPage(props) {
               {user?.isLoggedIn === true && (
                 <Button
                   id="basic-button"
-                  aria-controls={openSettingMenu ? "basic-menu" : undefined}
+                  aria-controls={
+                    openSettingMenu ? "basic-menu" : undefined
+                  }
                   aria-haspopup="true"
                   aria-expanded={openSettingMenu ? "true" : undefined}
                   onClick={(event) => {
                     if (
-                      (user !== undefined && user.isLoggedIn === true) ||
+                      (user !== undefined &&
+                        user.isLoggedIn === true) ||
                       isMobile
                     ) {
                       handleSettingMenuOpen(event);
@@ -358,7 +365,10 @@ export default function ListPage(props) {
                       if (error instanceof FetchError) {
                         console.error(error.data.message);
                       } else {
-                        console.error("An unexpected error happened:", error);
+                        console.error(
+                          "An unexpected error happened:",
+                          error
+                        );
                       }
                     }
                   }}
