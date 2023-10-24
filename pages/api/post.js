@@ -118,9 +118,12 @@ async function handler(req, res) {
     //   resultUploadMoimPost.data.data
     // );
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "uploadMoimPost failed." });
-    return;
+    if (resultPrismaPostCreate) {
+      res.status(200).json({ data: "ok" });
+    } else {
+      console.error("resultPrismaPostCreate: ", resultPrismaPostCreate);
+      res.status(500).json({ message: "data creation failed." });
+    }
   }
 
   //* Return database insert result.

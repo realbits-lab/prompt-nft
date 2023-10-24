@@ -8,6 +8,8 @@ import axios from "axios";
 async function handler(req, res) {
   console.log("call /api/draw");
 
+  const USE_SDXL = true;
+
   //* Check POST method.
   if (req.method !== "POST") {
     console.error("req.method: ", req.method);
@@ -28,8 +30,12 @@ async function handler(req, res) {
 
   // Stable diffusion api url.
   //* TODO: Use v4 dreambooth API after fixing ouput url connectivity error.
-  // const TEXT2IMG_API_URL = "https://stablediffusionapi.com/api/v4/dreambooth";
-  const TEXT2IMG_API_URL = "https://stablediffusionapi.com/api/v3/text2img";
+  let TEXT2IMG_API_URL;
+  if (USE_SDXL === true) {
+    TEXT2IMG_API_URL = "https://stablediffusionapi.com/api/v4/dreambooth";
+  } else {
+    TEXT2IMG_API_URL = "https://stablediffusionapi.com/api/v3/text2img";
+  }
 
   const STABLE_DIFFUSION_API_KEY =
     process.env.NEXT_PUBLIC_STABLE_DIFFUSION_API_KEY;
@@ -49,51 +55,54 @@ async function handler(req, res) {
   // console.log("negativePrompt: ", negativePrompt);
 
   //* Stable diffusion api option.
-  const jsonData = {
-    key: process.env.NEXT_PUBLIC_STABLE_DIFFUSION_API_KEY,
-    prompt: prompt,
-    negative_prompt: negativePrompt,
-    width: "512",
-    height: "512",
-    samples: "1",
-    num_inference_steps: "20",
-    safety_checker: "yes",
-    enhance_prompt: "no",
-    seed: null,
-    guidance_scale: 7.5,
-    webhook: null,
-    track_id: null,
-  };
-
-  //* TODO: Use v4 dreambooth API after fixing ouput url connectivity error.
-  // const jsonData = {
-  //   key: STABLE_DIFFUSION_API_KEY,
-  //   model_id: MODEL_ID,
-  //   prompt: prompt,
-  //   negative_prompt: negativePrompt,
-  //   width: WIDTH,
-  //   height: HEIGHT,
-  //   samples: SAMPLES,
-  //   num_inference_steps: NUM_INFERENCE_STEPS,
-  //   safety_checker: "yes",
-  //   enhance_prompt: "no",
-  //   seed: null,
-  //   guidance_scale: GUIDANCE_SCALE,
-  //   multi_lingual: "no",
-  //   panorama: "no",
-  //   self_attention: "no",
-  //   upscale: "no",
-  //   embeddings_model: null,
-  //   lora_model: null,
-  //   tomesd: "yes",
-  //   use_karras_sigmas: "yes",
-  //   vae: null,
-  //   lora_strength: null,
-  //   scheduler: SCHEDULER,
-  //   clip_skip: CLIP_SKIP,
-  //   webhook: null,
-  //   track_id: null,
-  // };
+  let jsonData;
+  if (USE_SDXL === true) {
+    //* TODO: Use v4 dreambooth API after fixing ouput url connectivity error.
+    jsonData = {
+      key: STABLE_DIFFUSION_API_KEY,
+      model_id: MODEL_ID,
+      prompt: prompt,
+      negative_prompt: negativePrompt,
+      width: WIDTH,
+      height: HEIGHT,
+      samples: SAMPLES,
+      num_inference_steps: NUM_INFERENCE_STEPS,
+      safety_checker: "yes",
+      enhance_prompt: "no",
+      seed: null,
+      guidance_scale: GUIDANCE_SCALE,
+      multi_lingual: "no",
+      panorama: "no",
+      self_attention: "no",
+      upscale: "no",
+      embeddings_model: null,
+      lora_model: null,
+      tomesd: "yes",
+      use_karras_sigmas: "yes",
+      vae: null,
+      lora_strength: null,
+      scheduler: SCHEDULER,
+      clip_skip: CLIP_SKIP,
+      webhook: null,
+      track_id: null,
+    };
+  } else {
+    jsonData = {
+      key: process.env.NEXT_PUBLIC_STABLE_DIFFUSION_API_KEY,
+      prompt: prompt,
+      negative_prompt: negativePrompt,
+      width: "512",
+      height: "512",
+      samples: "1",
+      num_inference_steps: "20",
+      safety_checker: "yes",
+      enhance_prompt: "no",
+      seed: null,
+      guidance_scale: 7.5,
+      webhook: null,
+      track_id: null,
+    };
+  }
 
   //* Fetch image.
   let myHeaders = new Headers();
@@ -132,6 +141,7 @@ async function handler(req, res) {
     //* Processing status case.
     return res.status(200).json({
       status: jsonResponse.status,
+      meta: jsonResponse.meta,
       message: jsonResponse.message,
       eta: jsonResponse.eta,
       fetch_result: jsonResponse.fetch_result,
