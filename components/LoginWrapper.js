@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import useUser from "@/lib/useUser";
-import { useNetwork, useAccount } from "wagmi";
+import { useNetwork, useAccount, useSwitchNetwork } from "wagmi";
 import User from "@/components/User";
 import CircularProgress from "@mui/material/CircularProgress";
 import { BrowserView, MobileView } from "react-device-detect";
-import { Typography } from "@mui/material";
-import { isWalletConnected } from "@/lib/util";
-import { Check } from "@mui/icons-material";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import { isWalletConnected, getChainId } from "@/lib/util";
 
 export default function LoginWrapper({ children }) {
   // console.log("call LoginWrapper()");
@@ -15,6 +15,13 @@ export default function LoginWrapper({ children }) {
   const [isWalletNetworkConnect, setIsWalletNetworkConnect] = useState();
   const { chains, chain: selectedChain } = useNetwork();
   const { address, isConnected } = useAccount();
+  const {
+    chains: useSwitchNetworkChains,
+    error,
+    isLoading: useSwitchNetworkIsLoading,
+    pendingChainId,
+    switchNetwork,
+  } = useSwitchNetwork();
 
   //*----------------------------------------------------------------------------
   //* User hook.
@@ -40,9 +47,20 @@ export default function LoginWrapper({ children }) {
 
   function ChangeWalletButton() {
     return (
-      <Typography color="primary">
-        Change wallet network to {process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}
-      </Typography>
+      <Button
+        variant="outlined"
+        onClick={() => {
+          switchNetwork?.(
+            getChainId({
+              chainName: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
+            })
+          );
+        }}
+      >
+        <Typography color="primary">
+          Change wallet network to {process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}
+        </Typography>
+      </Button>
     );
   }
 

@@ -290,6 +290,7 @@ export default function User({
     <>
       {user?.isLoggedIn !== true && (
         <Button
+          variant="outlined"
           sx={{ my: 2, color: buttonColor, display: "block" }}
           onClick={() => {
             setClickLogin(true);
