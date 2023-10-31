@@ -15,7 +15,6 @@ import ListImage from "@/components/ListImage";
 import ListNft from "@/components/ListNft";
 import ListOwn from "@/components/ListOwn";
 import ListRent from "@/components/ListRent";
-import ThemePage from "@/components/ThemePage";
 import Settings from "@/components/Settings";
 import LoginWrapper from "@/components/LoginWrapper";
 import fetchJson from "@/lib/fetchJson";
@@ -478,10 +477,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
         ) : mode === "settings" ? (
           <div>
             <Settings />
-          </div>
-        ) : mode === "theme" ? (
-          <div>
-            <ThemePage />
           </div>
         ) : mode === "faucet" ? (
           <LoginWrapper>
