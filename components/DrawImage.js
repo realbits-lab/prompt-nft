@@ -53,7 +53,7 @@ export default function DrawImage() {
   const CARD_MAX_WIDTH = 420;
   const IMAGE_PADDING = 450;
   const { user, mutateUser } = useUser();
-  console.log("user: ", user);
+  // console.log("user: ", user);
   const [imageUrl, setImageUrl] = React.useState("");
   const [loadingImage, setLoadingImage] = React.useState(false);
   const [postingImage, setPostingImage] = React.useState(false);
