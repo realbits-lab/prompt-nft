@@ -18,7 +18,6 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
-import CarouselImage from "@/components/CarouselImage";
 import ListImage from "@/components/ListImage";
 import CarouselNft from "@/components/CarouselNft";
 import ListNft from "@/components/ListNft";
