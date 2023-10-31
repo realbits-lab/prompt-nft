@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-import Router from "next/router";
 import useSWR from "swr";
 import { User } from "@/types/user";
 
