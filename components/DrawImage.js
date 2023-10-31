@@ -25,6 +25,7 @@ import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import rentmarketABI from "@/contracts/rentMarket.json";
@@ -923,13 +924,21 @@ export default function DrawImage() {
             ) : paymentNftRentEndTime &&
               currentTimestamp &&
               currentTimestamp < paymentNftRentEndTime ? (
-              <Typography color="primary">
-                You can draw for{" "}
-                {moment
+              <Tooltip
+                title={moment
                   .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                  .humanize()}
-                .
-              </Typography>
+                  .format()}
+                placement="top-start"
+                arrow
+              >
+                <Typography color="primary">
+                  You can draw for{" "}
+                  {moment
+                    .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
+                    .humanize()}
+                  .
+                </Typography>
+              </Tooltip>
             ) : (
               <Typography color="primary">Rent finished</Typography>
             )}
