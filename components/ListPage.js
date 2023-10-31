@@ -60,6 +60,7 @@ HideOnScroll.propTypes = {
 
 export default function ListPage(props) {
   // console.log("call ListPage()");
+
   const MENU_ENUM = {
     draw: "draw",
     faucet: "faucet",
@@ -68,10 +69,9 @@ export default function ListPage(props) {
     own: "own",
     rent: "rent",
     settings: "settings",
-    theme: "theme",
   };
   const { inputMode } = props;
-  console.log("inputMode: ", inputMode);
+  // console.log("inputMode: ", inputMode);
 
   function getMode({ mode }) {
     const result = Object.entries(MENU_ENUM).find(
@@ -81,8 +81,8 @@ export default function ListPage(props) {
     return;
   }
 
-  const DEFAULT_MENU = MENU_ENUM.nft;
-  const BOARD_URL = "https://muve.moim.co/forums/QEUREBYLO";
+  const DEFAULT_MENU = MENU_ENUM.image;
+  const BOARD_URL = "https://muve.moim.co/forums/QN2LGFGTW";
   let MARKET_URL;
   if (process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK === "maticmum") {
     MARKET_URL = "https://test-market.realbits.co";
