@@ -29,7 +29,6 @@ export default function useUser() {
           );
 
           setReturnUserData(user);
-          setIsLoading(false);
         } catch (error) {
           if (error instanceof FetchError) {
             console.error(error.data.message);
@@ -38,6 +37,8 @@ export default function useUser() {
           }
         }
       }
+
+      setIsLoading(false);
     }
 
     postUserLogout();

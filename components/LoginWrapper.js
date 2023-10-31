@@ -10,7 +10,8 @@ export default function LoginWrapper({ children }) {
   //* User hook.
   //*----------------------------------------------------------------------------
   const { user, isLoading } = useUser();
-  // console.log("user: ", user);
+  console.log("user: ", user);
+  console.log("isLoading: ", isLoading);
 
   //*---------------------------------------------------------------------------
   //* Constant variables.
