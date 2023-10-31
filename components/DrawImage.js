@@ -342,31 +342,29 @@ export default function DrawImage() {
     },
   });
 
-  useEffect(
-    function () {
-      // console.log("call useEffect()");
-      // console.log("window.ethereum: ", window.ethereum);
+  useEffect(() => {
+    // console.log("call useEffect()");
+    // console.log("window.ethereum: ", window.ethereum);
+    async function checkCurrentTime() {
+      while (true) {
+        await sleep(1000);
+        const timestamp = Math.floor(Date.now() / 1000);
+        // console.log("timestamp: ", timestamp);
+        setCurrentTimestamp((previousTimestamp) => timestamp);
+      }
+    }
 
-      momentDurationFormatSetup(moment);
+    momentDurationFormatSetup(moment);
 
-      setImageHeight(window.innerHeight - IMAGE_PADDING);
-      window.addEventListener("resize", handleResize);
+    setImageHeight(window.innerHeight - IMAGE_PADDING);
+    window.addEventListener("resize", handleResize);
 
-      return () => {
-        window.removeEventListener("resize", handleResize);
-      };
-    },
-    [user]
-  );
+    checkCurrentTime();
 
-  //* TODO: No reload.
-  // useInterval(() => {
-  //   console.log("call useInterval()");
-
-  //   const timestamp = Math.floor(Date.now() / 1000);
-  //   // console.log("timestamp: ", timestamp);
-  //   setCurrentTimestamp((previousTimestamp) => timestamp);
-  // }, 1000);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [user]);
 
   async function updateUserData() {
     console.log("call updateUserData()");
@@ -521,7 +519,7 @@ export default function DrawImage() {
 
       setImageFetchEndTime(eta);
       while (fetchStatus !== 200) {
-        //* TODO: Add elapsed time to screen.
+        //* Add elapsed time to screen.
         const timestamp = Math.floor(Date.now() / 1000);
 
         await sleep((eta + 1) * 1000);
@@ -919,17 +917,21 @@ export default function DrawImage() {
             {isLoadingRentData ||
             !paymentNftRentEndTime ||
             !currentTimestamp ? (
-              <Typography>Remaining time is ...</Typography>
+              <Typography color="primary">
+                Calculating remaining time ...
+              </Typography>
             ) : paymentNftRentEndTime &&
               currentTimestamp &&
               currentTimestamp < paymentNftRentEndTime ? (
-              <Typography color="black">
+              <Typography color="primary">
+                You can draw for{" "}
                 {moment
                   .duration((paymentNftRentEndTime - currentTimestamp) * 1000)
-                  .format()}
+                  .humanize()}
+                .
               </Typography>
             ) : (
-              <Typography>Rent finished</Typography>
+              <Typography color="primary">Rent finished</Typography>
             )}
 
             {/*//* Prompt input.                                             */}
@@ -977,7 +979,8 @@ export default function DrawImage() {
           >
             {imageFetchEndTime && (
               <Typography color="black">
-                {moment.duration(imageFetchEndTime * 1000).humanize()}
+                Wait for {moment.duration(imageFetchEndTime * 1000).humanize()}{" "}
+                ...
               </Typography>
             )}
 
