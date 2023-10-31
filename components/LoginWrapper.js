@@ -35,7 +35,7 @@ export default function LoginWrapper({ children }) {
     } else {
       setIsWalletNetworkConnect(false);
     }
-  });
+  }, [isConnected, selectedChain]);
 
   if (isLoading === false && user?.isLoggedIn === true) {
     return (

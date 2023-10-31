@@ -6,12 +6,11 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import DialogTitle from "@mui/material/DialogTitle";
 import Dialog from "@mui/material/Dialog";
-import Link from "@mui/material/Link";
 import { useRecoilStateLoadable } from "recoil";
 import useUser from "@/lib/useUser";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
 import { AlertSeverity, writeToastMessageState } from "@/lib/util";
-import { handleChangeNetwork } from "@/lib/util";
+import { handleChangeNetwork, isWalletConnected } from "@/lib/util";
 import { Typography } from "@mui/material";
 
 const targetNetWorkName = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
@@ -157,6 +156,7 @@ export default function User({
   const { user, mutateUser } = useUser();
   // console.log("user: ", user);
   const [clickLogin, setClickLogin] = useState(false);
+  const [isWalletNetworkConnect, setIsWalletNetworkConnect] = useState();
 
   //*---------------------------------------------------------------------------
   //* Snackbar.
@@ -170,61 +170,14 @@ export default function User({
   const [openConnectorsDialog, setOpenConnectorsDialog] = useState(false);
 
   useEffect(() => {
-    window.ethereum?.on("chainChanged", async () => {
-      try {
-        await mutateUser(
-          await fetchJson({ url: "/api/logout" }, { method: "POST" }),
-          false
-        );
-      } catch (error) {
-        if (error instanceof FetchError) {
-          console.error(error.data.message);
-        } else {
-          console.error("An unexpected error happened:", error);
-        }
-      }
-    });
-  }, []);
-
-  //* Listen account change.
-  useEffect(() => {
     // console.log("call useEffect()");
-    // console.log("activeConnector: ", activeConnector);
-    // console.log("user: ", user);
 
-    async function handleConnectorUpdate({ account, chain }) {
-      // console.log("call handleConnectorUpdate()");
-      // console.log("account: ", account);
-      // console.log("chain: ", chain);
-      // console.log("user: ", user);
-      // console.log("selectedChain?.id: ", selectedChain?.id);
-
-      if (user?.isLoggedIn === true) {
-        try {
-          await mutateUser(
-            await fetchJson({ url: "/api/logout" }, { method: "POST" }),
-            false
-          );
-        } catch (error) {
-          if (error instanceof FetchError) {
-            console.error(error.data.message);
-          } else {
-            console.error("An unexpected error happened:", error);
-          }
-        }
-      }
+    if (isWalletConnected({ isConnected, selectedChain }) === true) {
+      setIsWalletNetworkConnect(true);
+    } else {
+      setIsWalletNetworkConnect(false);
     }
-
-    if (activeConnector) {
-      activeConnector.on("change", handleConnectorUpdate);
-    }
-
-    return () => {
-      // console.log("call activeConnector?.off()");
-
-      activeConnector?.off("change", handleConnectorUpdate);
-    };
-  }, []);
+  }, [isConnected, selectedChain]);
 
   //* Handle login click.
   async function handleLoginClick({ chainId, walletClient, mutateUser }) {
@@ -320,6 +273,16 @@ export default function User({
 
   if (hidden === true) {
     return null;
+  }
+
+  if (isWalletNetworkConnect === false) {
+    return (
+      <>
+        <Button sx={{ my: 2, color: buttonColor, display: "block" }}>
+          N/A
+        </Button>
+      </>
+    );
   }
 
   //* Render.
