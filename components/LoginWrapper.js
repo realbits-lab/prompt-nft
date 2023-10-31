@@ -1,5 +1,7 @@
 import Box from "@mui/material/Box";
 import useUser from "@/lib/useUser";
+import Typography from "@mui/material/Typography";
+import User from "@/components/User";
 
 export default function LoginWrapper({ children }) {
   // console.log("call LoginWrapper()");
@@ -7,7 +9,7 @@ export default function LoginWrapper({ children }) {
   //*----------------------------------------------------------------------------
   //* User hook.
   //*----------------------------------------------------------------------------
-  const { user, mutateUser } = useUser();
+  const { user } = useUser();
   // console.log("user: ", user);
 
   //*---------------------------------------------------------------------------
@@ -23,13 +25,17 @@ export default function LoginWrapper({ children }) {
 
   return (
     <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="100vh"
       sx={{
         minWidth: CARD_MIN_WIDTH,
         maxWidth: CARD_MAX_WIDTH,
         marginTop: CARD_MARGIN_TOP,
       }}
     >
-      Click the LOGIN button.
+      <User title="Click for login" buttonColor="primary" />
     </Box>
   );
 }

@@ -100,7 +100,11 @@ export async function handleLogout({ mutateUser }) {
   }
 }
 
-export default function User({ hidden = false }) {
+export default function User({
+  hidden = false,
+  title = "LOGIN",
+  buttonColor = "white",
+}) {
   //*----------------------------------------------------------------------------
   //* Wagmi.
   //*----------------------------------------------------------------------------
@@ -323,7 +327,7 @@ export default function User({ hidden = false }) {
     <>
       {user?.isLoggedIn !== true && (
         <Button
-          sx={{ my: 2, color: "white", display: "block" }}
+          sx={{ my: 2, color: buttonColor, display: "block" }}
           onClick={() => {
             setClickLogin(true);
 
@@ -334,7 +338,7 @@ export default function User({ hidden = false }) {
             });
           }}
         >
-          Login
+          {title}
         </Button>
       )}
 

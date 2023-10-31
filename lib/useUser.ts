@@ -9,15 +9,16 @@ export default function useUser() {
 
   //* Call useWalletConnect for checking the safe wallet connection.
   const walletConnectionStatus: Boolean = useWalletConnect();
-  console.log("walletConnectionStatus: ", walletConnectionStatus);
+  // console.log("walletConnectionStatus: ", walletConnectionStatus);
 
   const { data: user, mutate: mutateUser } = useSWR<User>({ url: "/api/user" });
-  console.log("user: ", user);
+  // console.log("user: ", user);
 
   const [returnUserData, setReturnUserData] = useState(user);
 
   useEffect(() => {
     async function postUserLogout() {
+      console.log("call postUserLogout()");
       if (walletConnectionStatus === false && user?.isLoggedIn === true) {
         try {
           await mutateUser(
