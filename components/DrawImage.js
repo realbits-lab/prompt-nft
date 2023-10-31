@@ -550,7 +550,7 @@ export default function DrawImage() {
       let fetchResultResponse;
 
       while (fetchStatus !== 200) {
-      	//* TODO: Add elapsed time to screen.
+        //* TODO: Add elapsed time to screen.
         const timestamp = Math.floor(Date.now() / 1000);
         setImageFetchEndTime(timestamp + eta);
 
@@ -729,7 +729,7 @@ export default function DrawImage() {
         flexDirection="column"
         justifyContent="center"
         alignItems="center"
-        sx={{ marginTop: "50px" }}
+        sx={{ marginTop: CARD_MARGIN_TOP }}
       >
         <Card
           sx={{
