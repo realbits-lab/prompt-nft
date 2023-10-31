@@ -9,9 +9,8 @@ import Dialog from "@mui/material/Dialog";
 import { useRecoilStateLoadable } from "recoil";
 import useUser from "@/lib/useUser";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
-import { AlertSeverity, writeToastMessageState } from "@/lib/util";
-import { handleChangeNetwork, isWalletConnected } from "@/lib/util";
-import { Typography } from "@mui/material";
+import { writeToastMessageState } from "@/lib/util";
+import { isWalletConnected } from "@/lib/util";
 
 const targetNetWorkName = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
 
@@ -68,7 +67,6 @@ export async function handleAuthenticate({
     );
   } catch (error) {
     console.log("error: ", error);
-    handleChangeNetwork({ networkName: targetNetWorkName });
   }
 
   console.log("userData: ", userData);
@@ -206,11 +204,16 @@ export default function User({
 
     // Popup MetaMask confirmation modal to sign message with nonce data.
     //* TODO: Should check the chain id.
-    const signMessageResult = await handleSignMessage({
-      account: publicAddress,
-      chainId,
-      walletClient,
-    });
+    let signMessageResult;
+    try {
+      signMessageResult = await handleSignMessage({
+        account: publicAddress,
+        chainId,
+        walletClient,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+    }
     // console.log("signMessageResult: ", signMessageResult);
 
     // Send signature to back-end on the /auth route.
