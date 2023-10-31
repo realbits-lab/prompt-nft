@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import useUser from "@/lib/useUser";
 import User from "@/components/User";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function LoginWrapper({ children }) {
   // console.log("call LoginWrapper()");
@@ -8,7 +9,7 @@ export default function LoginWrapper({ children }) {
   //*----------------------------------------------------------------------------
   //* User hook.
   //*----------------------------------------------------------------------------
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
   // console.log("user: ", user);
 
   //*---------------------------------------------------------------------------
@@ -34,7 +35,11 @@ export default function LoginWrapper({ children }) {
         marginTop: CARD_MARGIN_TOP,
       }}
     >
-      <User title="Click for login" buttonColor="primary" />
+      {isLoading === true ? (
+        <CircularProgress size={50} color="primary" />
+      ) : (
+        <User title="Click for login" buttonColor="primary" />
+      )}
     </Box>
   );
 }

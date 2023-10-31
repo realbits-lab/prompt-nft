@@ -7,6 +7,8 @@ import fetchJson, { FetchError } from "@/lib/fetchJson";
 export default function useUser() {
   console.log("call useUser()");
 
+  const [isLoading, setIsLoading] = useState(true);
+
   //* Call useWalletConnect for checking the safe wallet connection.
   const walletConnectionStatus: Boolean = useWalletConnect();
   // console.log("walletConnectionStatus: ", walletConnectionStatus);
@@ -27,6 +29,7 @@ export default function useUser() {
           );
 
           setReturnUserData(user);
+          setIsLoading(false);
         } catch (error) {
           if (error instanceof FetchError) {
             console.error(error.data.message);
@@ -41,5 +44,5 @@ export default function useUser() {
   }, [user]);
 
   console.log("user: ", user);
-  return { user, mutateUser };
+  return { user, mutateUser, isLoading };
 }
