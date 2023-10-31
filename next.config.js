@@ -1,14 +1,5 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
-  // async redirects() {
-  //   return [
-  //     {
-  //       source: "/",
-  //       destination: "/list/image",
-  //       permanent: false,
-  //     },
-  //   ];
-  // },
   reactStrictMode: false,
   productionBrowserSourceMaps: true,
   // webpack: (config) => {
