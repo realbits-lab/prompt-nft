@@ -13,10 +13,8 @@ import {
   usePrepareContractWrite,
   useWaitForTransaction,
   useWatchPendingTransactions,
-  useWalletClient,
 } from "wagmi";
 import { getContract } from "@wagmi/core";
-import { polygon, polygonMumbai, localhost } from "wagmi/chains";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
@@ -99,31 +97,8 @@ export default function DrawImage() {
   const PAYMENT_NFT_TOKEN_ID = process.env.NEXT_PUBLIC_PAYMENT_NFT_TOKEN;
   const SERVICE_ACCOUNT_ADDRESS =
     process.env.NEXT_PUBLIC_SERVICE_ACCOUNT_ADDRESS;
-  const BLOCKCHAIN_NETWORK = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
   const { address, isConnected } = useAccount();
   const { chains, chain } = useNetwork();
-
-  const { data: walletClient } = useWalletClient({
-    onSuccess(data) {
-      // console.log("call onSuccess()");
-      // console.log("data: ", data);
-
-      switch (BLOCKCHAIN_NETWORK) {
-        case "localhost":
-        default:
-          data.addChain({ chain: localhost });
-          break;
-
-        case "matic":
-          data.addChain({ chain: polygon });
-          break;
-
-        case "maticmum":
-          data.addChain({ chain: polygonMumbai });
-          break;
-      }
-    },
-  });
 
   const [currentTimestamp, setCurrentTimestamp] = React.useState();
   const [imageFetchEndTime, setImageFetchEndTime] = React.useState();
