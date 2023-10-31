@@ -7,6 +7,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { BrowserView, MobileView } from "react-device-detect";
 import { Typography } from "@mui/material";
 import { isWalletConnected } from "@/lib/util";
+import { Check } from "@mui/icons-material";
 
 export default function LoginWrapper({ children }) {
   // console.log("call LoginWrapper()");
@@ -37,6 +38,18 @@ export default function LoginWrapper({ children }) {
     }
   }, [isConnected, selectedChain]);
 
+  function ChangeWalletButton() {
+    return (
+      <Typography color="primary">
+        Change wallet network to {process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}
+      </Typography>
+    );
+  }
+
+  function CheckingWalletMessage() {
+    return <Typography color="primary">Checking wallet network</Typography>;
+  }
+
   if (isLoading === false && user?.isLoggedIn === true) {
     return (
       <>
@@ -44,12 +57,9 @@ export default function LoginWrapper({ children }) {
           {isWalletNetworkConnect === true ? (
             children
           ) : isWalletNetworkConnect === false ? (
-            <Typography color="primary">
-              Change wallet network to{" "}
-              {process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}
-            </Typography>
+            <ChangeWalletButton />
           ) : (
-            <Typography color="primary">Checking wallet network</Typography>
+            <CheckingWalletMessage />
           )}
         </BrowserView>
         <MobileView>
@@ -89,12 +99,9 @@ export default function LoginWrapper({ children }) {
         ) : isWalletNetworkConnect === true ? (
           <User title="Click for login" buttonColor="primary" />
         ) : isWalletNetworkConnect === false ? (
-          <Typography color="primary">
-            Change wallet network to{" "}
-            {process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}
-          </Typography>
+          <ChangeWalletButton />
         ) : (
-          <Typography color="primary">Checking wallet network</Typography>
+          <CheckingWalletMessage />
         )}
       </Box>
     );
