@@ -18,6 +18,18 @@ Generative image consists of image and prompt data. This platform transform imag
 git clone https://github.com/realbits-lab/prompt-nft.git
 ```
 
+#### Install packages
+
+```bash
+yarn install
+```
+
+#### Start development server
+
+```bash
+yarn dev
+```
+
 ## Contributing
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
