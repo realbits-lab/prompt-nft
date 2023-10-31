@@ -96,8 +96,10 @@ export default function ListPage(props) {
   // console.log("queryUpdated: ", queryUpdated);
   // console.log("queryMode: ", queryMode);
 
+  //* User login data.
   const { user, mutateUser } = useUser();
-  // const [currentMode, setCurrentMode] = React.useState(DEFAULT_MENU);
+  console.log("user: ", user);
+
   const [currentMode, setCurrentMode] = React.useState(
     inputMode || DEFAULT_MENU
   );
@@ -172,15 +174,15 @@ export default function ListPage(props) {
 
   React.useEffect(
     function () {
-      // console.log("call useEffect()");
-      // console.log("queryMode: ", queryMode);
+      console.log("call useEffect()");
+      console.log("queryMode: ", queryMode);
 
       const mode = getMode({ mode: queryMode?.[0] || inputMode });
       // console.log("mode: ", mode);
 
       setCurrentMode(mode || DEFAULT_MENU);
     },
-    [queryMode]
+    [queryMode, user]
   );
 
   function AppBarButton({ buttonMode }) {

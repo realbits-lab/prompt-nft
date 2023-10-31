@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import Router from "next/router";
 import useSWR from "swr";
-import { User } from "@/pages/api/user";
+import { User } from "@/types/user";
 
 export default function useUser() {
   // console.log("call useUser()");
