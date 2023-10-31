@@ -519,13 +519,12 @@ export default function DrawImage() {
       let fetchStatus = 500;
       let fetchResultResponse;
 
+      setImageFetchEndTime(eta);
       while (fetchStatus !== 200) {
         //* TODO: Add elapsed time to screen.
         const timestamp = Math.floor(Date.now() / 1000);
-        setImageFetchEndTime(timestamp + eta);
 
         await sleep((eta + 1) * 1000);
-        setImageFetchEndTime(undefined);
 
         const fetchJsonData = {
           id: jsonResponse.id,
@@ -542,6 +541,7 @@ export default function DrawImage() {
         // Add 2 seconds for fetch wait.
         eta = 2;
       }
+      setImageFetchEndTime(undefined);
 
       //* Get the stable diffusion api result by json.
       const jsonFetchResultResponse = await fetchResultResponse.json();
@@ -569,7 +569,9 @@ export default function DrawImage() {
     inputModelName = meta.model;
 
     //* TODO: Check imageUrlResponse is valid. If invalid, wait for 3-5 seconds and try again.
+    await sleep(1000);
     setImageUrl(imageUrlResponse);
+
     setLoadingImage(false);
     setIsImagePosted(false);
     setIsImageDrawn(true);
@@ -579,34 +581,6 @@ export default function DrawImage() {
 
   async function postImage({ postImageUrl, inputPrompt, inputNegativePrompt }) {
     setPostingImage(true);
-
-    // //* Check the duplicate prompt.
-    // const postedResponse = await fetch(POSTED_API_URL, {
-    //   method: "POST",
-    //   headers: {
-    //     Accept: "application/json",
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     prompt: inputPrompt,
-    //   }),
-    // });
-
-    // if (postedResponse.status === 200) {
-    //   console.error("postedResponse: ", postedResponse);
-
-    //   setWriteToastMessage({
-    //     snackbarSeverity: AlertSeverity.warning,
-    //     snackbarMessage: "Prompt is already posted.",
-    //     snackbarTime: new Date(),
-    //     snackbarOpen: true,
-    //   });
-
-    //   setIsImagePosted(false);
-    //   setPostingImage(false);
-
-    //   return;
-    // }
 
     //* Upload image to S3.
     const uploadImageJsonData = {
@@ -1001,26 +975,11 @@ export default function DrawImage() {
               width: "100%",
             }}
           >
-            {/*//*TODO: Show image fetch time. */}
-            {/* {imageFetchEndTime && (
-            <Typography color="black">
-              {moment
-                .duration((imageFetchEndTime - currentTimestamp) * 1000)
-                .hours()}
-              :
-              {moment
-                .duration((imageFetchEndTime - currentTimestamp) * 1000)
-                .minutes()}
-              :
-              {moment
-                .duration((imageFetchEndTime - currentTimestamp) * 1000)
-                .seconds()}{" "}
-              /
-              {moment
-                .duration((imageFetchEndTime - currentTimestamp) * 1000)
-                .humanize()}
-            </Typography>
-          )} */}
+            {imageFetchEndTime && (
+              <Typography color="black">
+                {moment.duration(imageFetchEndTime * 1000).humanize()}
+              </Typography>
+            )}
 
             {/*//* Show action step for draw, post, and mint.                */}
             <Box sx={{ width: "100%" }}>
