@@ -1,22 +1,14 @@
-import {
-  useAccount,
-  useConnect,
-  useDisconnect,
-  useEnsAvatar,
-  useEnsName,
-} from "wagmi";
-import { useEffect } from "react";
 import Box from "@mui/material/Box";
 import useUser from "@/lib/useUser";
 
 export default function LoginWrapper({ children }) {
-  console.log("call LoginWrapper()");
+  // console.log("call LoginWrapper()");
 
   //*----------------------------------------------------------------------------
   //* User hook.
   //*----------------------------------------------------------------------------
   const { user, mutateUser } = useUser();
-  console.log("user: ", user);
+  // console.log("user: ", user);
 
   //*---------------------------------------------------------------------------
   //* Constant variables.
