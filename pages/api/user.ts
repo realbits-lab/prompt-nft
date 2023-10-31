@@ -11,12 +11,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<User>) {
 
   //* Check user login.
   if (!req.session.user) {
-    res.json({
+    return res.json({
       isLoggedIn: false,
       publicAddress: "",
       rentPaymentNft: false,
     });
-    return;
   }
 
   const publicAddress = req.session.user.publicAddress;

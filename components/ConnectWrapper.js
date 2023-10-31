@@ -8,10 +8,14 @@ import {
 import Box from "@mui/material/Box";
 
 export default function ConnectWrapper({ children }) {
+  console.log("call ConnectWrapper()");
+
   //*---------------------------------------------------------------------------
   //* Wagmi.
   //*---------------------------------------------------------------------------
   const { address, connector, isConnected } = useAccount();
+  console.log("isConnected: ", isConnected);
+
   const { data: ensAvatar } = useEnsAvatar({ address });
   const { data: ensName } = useEnsName({ address });
   const { connect, connectors, error, isLoading, pendingConnector } =
