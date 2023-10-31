@@ -127,8 +127,8 @@ async function handler(req, res) {
     const user = await getUserData({ publicAddress });
     req.session.user = user;
     await req.session.save();
-    // console.log("save req.session.user data");
-    // console.log("req.session.user: ", req.session.user);
+    console.log("save req.session.user data");
+    console.log("req.session.user: ", req.session.user);
 
     return res.status(200).json(user);
   } else {

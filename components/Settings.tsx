@@ -8,8 +8,10 @@ import Paper from "@mui/material/Paper";
 import { shortenAddress } from "@/lib/util";
 
 export default function Settings() {
+  const CARD_MARGIN_TOP = "60px";
+
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} sx={{ mt: CARD_MARGIN_TOP }}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>

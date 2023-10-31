@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  useAccount,
-  useWalletClient,
-  useNetwork,
-  useConnect,
-} from "wagmi";
+import { useAccount, useWalletClient, useNetwork, useConnect } from "wagmi";
 import Button from "@mui/material/Button";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -21,11 +16,7 @@ import { Typography } from "@mui/material";
 
 const targetNetWorkName = process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK;
 
-export async function handleSignMessage({
-  account,
-  chainId,
-  walletClient,
-}) {
+export async function handleSignMessage({ account, chainId, walletClient }) {
   // console.log("call handleSignMessage()");
   // console.log("account: ", account);
   // console.log("chainId: ", chainId);
@@ -63,7 +54,7 @@ export async function handleAuthenticate({
   signature,
   mutateUser,
 }) {
-  // console.log("call handleAuthenticate()");
+  console.log("call handleAuthenticate()");
 
   const body = { publicAddress, signature };
   let userData;
@@ -77,10 +68,11 @@ export async function handleAuthenticate({
       }
     );
   } catch (error) {
+    console.log("error: ", error);
     handleChangeNetwork({ networkName: targetNetWorkName });
   }
 
-  // console.log("userData: ", userData);
+  console.log("userData: ", userData);
 
   try {
     mutateUser(userData);
@@ -108,17 +100,17 @@ export async function handleLogout({ mutateUser }) {
   }
 }
 
-export default function User({ hidden = false }) {
+export default function User({
+  hidden = false,
+  title = "LOGIN",
+  buttonColor = "white",
+}) {
   //*----------------------------------------------------------------------------
   //* Wagmi.
   //*----------------------------------------------------------------------------
   const { chains, chain: selectedChain } = useNetwork();
   // console.log("selectedChain: ", selectedChain);
-  const {
-    connector: activeConnector,
-    address,
-    isConnected,
-  } = useAccount();
+  const { connector: activeConnector, address, isConnected } = useAccount();
   // console.log("address: ", address);
   // console.log("isConnected: ", isConnected);
 
@@ -175,8 +167,7 @@ export default function User({ hidden = false }) {
   //*---------------------------------------------------------------------------
   //* Connectors select dialog.
   //*---------------------------------------------------------------------------
-  const [openConnectorsDialog, setOpenConnectorsDialog] =
-    useState(false);
+  const [openConnectorsDialog, setOpenConnectorsDialog] = useState(false);
 
   useEffect(() => {
     window.ethereum?.on("chainChanged", async () => {
@@ -211,10 +202,7 @@ export default function User({ hidden = false }) {
       if (user?.isLoggedIn === true) {
         try {
           await mutateUser(
-            await fetchJson(
-              { url: "/api/logout" },
-              { method: "POST" }
-            ),
+            await fetchJson({ url: "/api/logout" }, { method: "POST" }),
             false
           );
         } catch (error) {
@@ -239,11 +227,7 @@ export default function User({ hidden = false }) {
   }, []);
 
   //* Handle login click.
-  async function handleLoginClick({
-    chainId,
-    walletClient,
-    mutateUser,
-  }) {
+  async function handleLoginClick({ chainId, walletClient, mutateUser }) {
     // console.log("call handleLoginClick()");
     // console.log("chainId: ", chainId);
     // console.log("walletClient: ", walletClient);
@@ -343,7 +327,7 @@ export default function User({ hidden = false }) {
     <>
       {user?.isLoggedIn !== true && (
         <Button
-          sx={{ my: 2, color: "white", display: "block" }}
+          sx={{ my: 2, color: buttonColor, display: "block" }}
           onClick={() => {
             setClickLogin(true);
 
@@ -354,7 +338,7 @@ export default function User({ hidden = false }) {
             });
           }}
         >
-          Login
+          {title}
         </Button>
       )}
 

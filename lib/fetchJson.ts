@@ -209,13 +209,13 @@ export default async function fetchJson<JSON = unknown>(
     renterAddress,
   }: {
     url: RequestInfo;
-    command: string;
-    promptNftContract: any;
-    rentMarketContract: any;
-    signer: any;
-    tokenId: any;
-    ownerAddress: any;
-    renterAddress: any;
+    command?: string;
+    promptNftContract?: any;
+    rentMarketContract?: any;
+    signer?: any;
+    tokenId?: any;
+    ownerAddress?: any;
+    renterAddress?: any;
   },
   init?: RequestInit
 ): Promise<any> {

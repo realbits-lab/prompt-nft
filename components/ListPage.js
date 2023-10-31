@@ -3,10 +3,7 @@ import { isMobile } from "react-device-detect";
 import dynamic from "next/dynamic";
 import Router, { useRouter } from "next/router";
 import PropTypes from "prop-types";
-import {
-  useRecoilStateLoadable,
-  useRecoilValueLoadable,
-} from "recoil";
+import { useRecoilStateLoadable, useRecoilValueLoadable } from "recoil";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
@@ -63,6 +60,7 @@ HideOnScroll.propTypes = {
 
 export default function ListPage(props) {
   // console.log("call ListPage()");
+
   const MENU_ENUM = {
     draw: "draw",
     faucet: "faucet",
@@ -71,8 +69,9 @@ export default function ListPage(props) {
     own: "own",
     rent: "rent",
     settings: "settings",
-    theme: "theme",
   };
+  const { inputMode } = props;
+  // console.log("inputMode: ", inputMode);
 
   function getMode({ mode }) {
     const result = Object.entries(MENU_ENUM).find(
@@ -82,8 +81,8 @@ export default function ListPage(props) {
     return;
   }
 
-  const DEFAULT_MENU = MENU_ENUM.nft;
-  const BOARD_URL = "https://muve.moim.co/forums/QEUREBYLO";
+  const DEFAULT_MENU = MENU_ENUM.image;
+  const BOARD_URL = "https://muve.moim.co/forums/QN2LGFGTW";
   let MARKET_URL;
   if (process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK === "maticmum") {
     MARKET_URL = "https://test-market.realbits.co";
@@ -97,8 +96,13 @@ export default function ListPage(props) {
   // console.log("queryUpdated: ", queryUpdated);
   // console.log("queryMode: ", queryMode);
 
+  //* User login data.
   const { user, mutateUser } = useUser();
-  const [currentMode, setCurrentMode] = React.useState(DEFAULT_MENU);
+  console.log("user: ", user);
+
+  const [currentMode, setCurrentMode] = React.useState(
+    inputMode || DEFAULT_MENU
+  );
   const [newImageCount, setNewImageCount] = React.useState(0);
   const BUTTON_BORDER_RADIUS = 25;
   const SELECTED_BUTTON_BACKGROUND_COLOR = "#ef672a";
@@ -107,8 +111,7 @@ export default function ListPage(props) {
   //*---------------------------------------------------------------------------
   //* Setting menu variables.
   //*---------------------------------------------------------------------------
-  const [settingMenuAnchorEl, setSettingMenuAnchorEl] =
-    React.useState(null);
+  const [settingMenuAnchorEl, setSettingMenuAnchorEl] = React.useState(null);
   const openSettingMenu = Boolean(settingMenuAnchorEl);
   function handleSettingMenuOpen(event) {
     setSettingMenuAnchorEl(event.currentTarget);
@@ -171,45 +174,35 @@ export default function ListPage(props) {
 
   React.useEffect(
     function () {
-      // console.log("call useEffect()");
-      // console.log("readDialogMessage: ", readDialogMessage);
-      // console.log("queryMode: ", queryMode);
+      console.log("call useEffect()");
+      console.log("queryMode: ", queryMode);
 
-      const mode = getMode({ mode: queryMode?.[0] || DEFAULT_MENU });
+      const mode = getMode({ mode: queryMode?.[0] || inputMode });
+      // console.log("mode: ", mode);
 
       setCurrentMode(mode || DEFAULT_MENU);
     },
-    [queryMode]
+    [queryMode, user]
   );
 
   function AppBarButton({ buttonMode }) {
     return (
-      <Button
-        key={buttonMode}
-        style={{
-          borderRadius: BUTTON_BORDER_RADIUS,
-          backgroundColor:
-            buttonMode === currentMode
-              ? SELECTED_BUTTON_BACKGROUND_COLOR
-              : null,
-          padding: SELECTED_BUTTON_PADDING,
-        }}
-        sx={{ my: 2, color: "white" }}
-        onClick={(e) => {
-          // console.log("call onClick()");
-          // console.log("buttonMode: ", buttonMode);
-          // console.log("newImageCount: ", newImageCount);
-
-          if (buttonMode === MENU_ENUM.image && newImageCount > 0) {
-            // console.log("route to /list/image?updated=true");
-            Router.reload("/list/image?updated=true");
-          }
-
-          setCurrentMode(buttonMode);
-        }}
-      >
-        {buttonMode.toUpperCase()}
-      </Button>
+      <Link href={`/${buttonMode}`}>
+        <Button
+          key={buttonMode}
+          style={{
+            borderRadius: BUTTON_BORDER_RADIUS,
+            backgroundColor:
+              buttonMode === currentMode
+                ? SELECTED_BUTTON_BACKGROUND_COLOR
+                : null,
+            padding: SELECTED_BUTTON_PADDING,
+          }}
+          sx={{ my: 2, color: "white" }}
+        >
+          {buttonMode.toUpperCase()}
+        </Button>
+      </Link>
     );
   }
 
@@ -238,6 +231,9 @@ export default function ListPage(props) {
               </Badge>
               <AppBarButton buttonMode="nft" />
               <AppBarButton buttonMode="faucet" />
+              <AppBarButton buttonMode="own" />
+              <AppBarButton buttonMode="rent" />
+              <AppBarButton buttonMode="settings" />
             </Box>
 
             <Box>
@@ -245,15 +241,12 @@ export default function ListPage(props) {
               {user?.isLoggedIn === true && (
                 <Button
                   id="basic-button"
-                  aria-controls={
-                    openSettingMenu ? "basic-menu" : undefined
-                  }
+                  aria-controls={openSettingMenu ? "basic-menu" : undefined}
                   aria-haspopup="true"
                   aria-expanded={openSettingMenu ? "true" : undefined}
                   onClick={(event) => {
                     if (
-                      (user !== undefined &&
-                        user.isLoggedIn === true) ||
+                      (user !== undefined && user.isLoggedIn === true) ||
                       isMobile
                     ) {
                       handleSettingMenuOpen(event);
@@ -278,24 +271,6 @@ export default function ListPage(props) {
                   "aria-labelledby": "basic-button",
                 }}
               >
-                <MenuItem
-                  onClick={() => {
-                    setCurrentMode(MENU_ENUM.own);
-                    handleSettingMenuClose();
-                  }}
-                >
-                  OWN
-                </MenuItem>
-
-                <MenuItem
-                  onClick={() => {
-                    setCurrentMode(MENU_ENUM.rent);
-                    handleSettingMenuClose();
-                  }}
-                >
-                  RENT
-                </MenuItem>
-
                 <Link
                   href={MARKET_URL}
                   target="_blank"
@@ -331,24 +306,6 @@ export default function ListPage(props) {
                 </Link>
 
                 <MenuItem
-                  onClick={() => {
-                    setCurrentMode(MENU_ENUM.settings);
-                    handleSettingMenuClose();
-                  }}
-                >
-                  SETTINGS
-                </MenuItem>
-
-                {/* <MenuItem
-                  onClick={() => {
-                    setCurrentMode(MENU_ENUM.theme);
-                    handleSettingMenuClose();
-                  }}
-                >
-                  THEME
-                </MenuItem> */}
-
-                <MenuItem
                   onClick={async () => {
                     setCurrentMode(MENU_ENUM.image);
                     handleSettingMenuClose();
@@ -365,10 +322,7 @@ export default function ListPage(props) {
                       if (error instanceof FetchError) {
                         console.error(error.data.message);
                       } else {
-                        console.error(
-                          "An unexpected error happened:",
-                          error
-                        );
+                        console.error("An unexpected error happened:", error);
                       }
                     }
                   }}

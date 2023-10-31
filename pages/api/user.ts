@@ -6,17 +6,16 @@ import { sessionOptions } from "@/lib/session";
 import { User } from "@/types/user";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<User>) {
-  // console.log("call /api/user");
-  // console.log("req.session.user: ", req.session.user);
+  console.log("call /api/user");
+  console.log("req.session.user: ", req.session.user);
 
   //* Check user login.
   if (!req.session.user) {
-    res.json({
+    return res.json({
       isLoggedIn: false,
       publicAddress: "",
       rentPaymentNft: false,
     });
-    return;
   }
 
   const publicAddress = req.session.user.publicAddress;

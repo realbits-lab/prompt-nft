@@ -10,31 +10,18 @@ import {
 import { getContract } from "wagmi/actions";
 import useSWR from "swr";
 import dynamic from "next/dynamic";
-import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
-import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
-import Typography from "@mui/material/Typography";
-import CarouselImage from "@/components/CarouselImage";
 import ListImage from "@/components/ListImage";
-import CarouselNft from "@/components/CarouselNft";
 import ListNft from "@/components/ListNft";
 import ListOwn from "@/components/ListOwn";
-import CarouselOwn from "@/components/CarouselOwn";
 import ListRent from "@/components/ListRent";
-import ThemePage from "@/components/ThemePage";
 import Settings from "@/components/Settings";
-import ConnectWrapper from "@/components/ConnectWrapper";
 import LoginWrapper from "@/components/LoginWrapper";
 import fetchJson from "@/lib/fetchJson";
-import { getChainId, isWalletConnected } from "@/lib/util";
+import { getChainId } from "@/lib/util";
 import promptNFTABI from "@/contracts/promptNFT.json";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import ListFaucet from "./faucet/ListFaucet";
-
 const DrawImage = dynamic(() => import("./DrawImage"), {
   ssr: false,
 });
@@ -490,10 +477,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
         ) : mode === "settings" ? (
           <div>
             <Settings />
-          </div>
-        ) : mode === "theme" ? (
-          <div>
-            <ThemePage />
           </div>
         ) : mode === "faucet" ? (
           <LoginWrapper>

@@ -1,19 +1,15 @@
-import {
-  useAccount,
-  useConnect,
-  useDisconnect,
-  useEnsAvatar,
-  useEnsName,
-} from "wagmi";
-import { useEffect } from "react";
 import Box from "@mui/material/Box";
 import useUser from "@/lib/useUser";
+import User from "@/components/User";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function LoginWrapper({ children }) {
+  // console.log("call LoginWrapper()");
+
   //*----------------------------------------------------------------------------
   //* User hook.
   //*----------------------------------------------------------------------------
-  const { user, mutateUser } = useUser();
+  const { user, isLoading } = useUser();
   // console.log("user: ", user);
 
   //*---------------------------------------------------------------------------
@@ -29,13 +25,21 @@ export default function LoginWrapper({ children }) {
 
   return (
     <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="100vh"
       sx={{
         minWidth: CARD_MIN_WIDTH,
         maxWidth: CARD_MAX_WIDTH,
         marginTop: CARD_MARGIN_TOP,
       }}
     >
-      Click the LOGIN button.
+      {isLoading === true ? (
+        <CircularProgress size={50} color="primary" />
+      ) : (
+        <User title="Click for login" buttonColor="primary" />
+      )}
     </Box>
   );
 }
