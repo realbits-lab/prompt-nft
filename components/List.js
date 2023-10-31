@@ -39,15 +39,11 @@ function List({ mode, updated, setNewImageCountFunc }) {
   //* Image refresh interval time by milli-second unit.
   const IMAGE_REFRESH_INTERVAL_TIME = 60000;
 
-  const PLACEHOLDER_IMAGE_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL;
   const RENT_MARKET_CONTRACT_ADDRES =
     process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
   // console.log("RENT_MARKET_CONTRACT_ADDRES: ", RENT_MARKET_CONTRACT_ADDRES);
   const PROMPT_NFT_CONTRACT_ADDRESS =
     process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS;
-
-  const CARD_MAX_WIDTH = 420;
-  const CARD_MIN_WIDTH = 375;
 
   //* After the image fetching, remove updated flag.
   const imageFetchFinished = React.useRef(false);
@@ -55,21 +51,8 @@ function List({ mode, updated, setNewImageCountFunc }) {
   //*---------------------------------------------------------------------------
   //* Wagmi.
   //*---------------------------------------------------------------------------
-  //* Handle a new useNetwork instead of useWeb3ModalNetwork hook.
-  const { chains, chain: selectedChain } = useNetwork();
-  // console.log("selectedChain: ", selectedChain);
-  // console.log("chains: ", chains);
-
   const { address, isConnected } = useAccount();
   // console.log("address: ", address);
-  // console.log("isConnected: ", isConnected);
-
-  const {
-    data: dataWalletClient,
-    isError: isErrorWalletClient,
-    isLoading: isLoadingWalletClient,
-  } = useWalletClient();
-  // console.log("dataWalletClient: ", dataWalletClient);
 
   //* promptNftContract is used for useSWR params, so use useMemo.
   const promptNftContract = React.useMemo(
@@ -81,15 +64,6 @@ function List({ mode, updated, setNewImageCountFunc }) {
     [PROMPT_NFT_CONTRACT_ADDRESS, promptNFTABI["abi"]]
   );
   // console.log("promptNftContract: ", promptNftContract);
-  const rentMarketContract = React.useMemo(
-    () =>
-      getContract({
-        address: RENT_MARKET_CONTRACT_ADDRES,
-        abi: rentmarketABI["abi"],
-      }),
-    [RENT_MARKET_CONTRACT_ADDRES, rentmarketABI["abi"]]
-  );
-  // console.log("rentMarketContract: ", rentMarketContract);
 
   //* Listen contract event.
   useContractEvent({
@@ -260,59 +234,22 @@ function List({ mode, updated, setNewImageCountFunc }) {
   const [allOwnDataArray, setAllOwnDataArray] = React.useState();
   const [allMyRentDataArray, setAllMyRentDataArray] = React.useState();
 
-  //*---------------------------------------------------------------------------
-  //* Define signature data.
-  //*---------------------------------------------------------------------------
-  const domain = {
-    chainId: getChainId({
-      chainName: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
-    }),
-    name: "Realbits",
-  };
+  React.useEffect(() => {
+    // console.log("call useEffect()");
+    // console.log("dataImage: ", dataImage);
+    // console.log(
+    //   "dataImage?.newlyUpdatedData?.length: ",
+    //   dataImage?.newlyUpdatedData?.length
+    // );
 
-  const types = {
-    EIP712Domain: [
-      { name: "name", type: "string" },
-      { name: "chainId", type: "uint256" },
-    ],
-    //* Refer to PrimaryType
-    Login: [{ name: "contents", type: "string" }],
-  };
+    if ((dataImage?.newlyUpdatedData?.length || 0) > 0) {
+      setNewImageCountFunc({
+        newImageCount: dataImage.newlyUpdatedData.length,
+      });
+    }
 
-  const value = {
-    contents: process.env.NEXT_PUBLIC_LOGIN_SIGN_MESSAGE,
-  };
-
-  const { signTypedDataAsync } = useSignTypedData({
-    domain: domain,
-    types: types,
-    value: value,
-  });
-  // console.log("dataSignTypedData: ", dataSignTypedData);
-  // console.log("isErrorSignTypedData: ", isErrorSignTypedData);
-  // console.log("isLoadingSignTypedData: ", isLoadingSignTypedData);
-  // console.log("isSuccessSignTypedData: ", isSuccessSignTypedData);
-  // console.log("signTypedDataAsync: ", signTypedDataAsync);
-
-  React.useEffect(
-    function () {
-      // console.log("call useEffect()");
-      // console.log("dataImage: ", dataImage);
-      // console.log(
-      //   "dataImage?.newlyUpdatedData?.length: ",
-      //   dataImage?.newlyUpdatedData?.length
-      // );
-
-      if ((dataImage?.newlyUpdatedData?.length || 0) > 0) {
-        setNewImageCountFunc({
-          newImageCount: dataImage.newlyUpdatedData.length,
-        });
-      }
-
-      initialize();
-    },
-    [dataAllMyOwnData]
-  );
+    initialize();
+  }, [dataAllMyOwnData]);
 
   function initialize() {
     // console.log("call initialize()");

@@ -17,8 +17,6 @@ function ListNft() {
     process.env.NEXT_PUBLIC_RENT_MARKET_CONTRACT_ADDRESS;
   const PROMPT_NFT_CONTRACT_ADDRESS =
     process.env.NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS;
-  const { chains, chain } = useNetwork();
-  const { address, isConnected } = useAccount();
 
   const {
     data: dataAllRegisterData,
