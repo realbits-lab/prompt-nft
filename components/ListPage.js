@@ -231,6 +231,9 @@ export default function ListPage(props) {
               </Badge>
               <AppBarButton buttonMode="nft" />
               <AppBarButton buttonMode="faucet" />
+              <AppBarButton buttonMode="own" />
+              <AppBarButton buttonMode="rent" />
+              <AppBarButton buttonMode="settings" />
             </Box>
 
             <Box>
@@ -269,40 +272,6 @@ export default function ListPage(props) {
                 }}
               >
                 <Link
-                  href={"/own"}
-                  style={{
-                    color: "inherit",
-                    textDecoration: "inherit",
-                  }}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      setCurrentMode(MENU_ENUM.own);
-                      handleSettingMenuClose();
-                    }}
-                  >
-                    OWN
-                  </MenuItem>
-                </Link>
-
-                <Link
-                  href={"/rent"}
-                  style={{
-                    color: "inherit",
-                    textDecoration: "inherit",
-                  }}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      setCurrentMode(MENU_ENUM.rent);
-                      handleSettingMenuClose();
-                    }}
-                  >
-                    RENT
-                  </MenuItem>
-                </Link>
-
-                <Link
                   href={MARKET_URL}
                   target="_blank"
                   style={{
@@ -335,32 +304,6 @@ export default function ListPage(props) {
                     BOARD
                   </MenuItem>
                 </Link>
-
-                <Link
-                  href={"/settings"}
-                  style={{
-                    color: "inherit",
-                    textDecoration: "inherit",
-                  }}
-                >
-                  <MenuItem
-                  // onClick={() => {
-                  //   setCurrentMode(MENU_ENUM.settings);
-                  //   handleSettingMenuClose();
-                  // }}
-                  >
-                    SETTINGS
-                  </MenuItem>
-                </Link>
-
-                {/* <MenuItem
-                  onClick={() => {
-                    setCurrentMode(MENU_ENUM.theme);
-                    handleSettingMenuClose();
-                  }}
-                >
-                  THEME
-                </MenuItem> */}
 
                 <MenuItem
                   onClick={async () => {
