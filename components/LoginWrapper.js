@@ -1,6 +1,5 @@
 import Box from "@mui/material/Box";
 import useUser from "@/lib/useUser";
-import Typography from "@mui/material/Typography";
 import User from "@/components/User";
 
 export default function LoginWrapper({ children }) {
