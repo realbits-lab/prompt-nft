@@ -297,11 +297,6 @@ export default function DrawImage() {
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI?.abi,
     functionName: "rentNFTByToken",
-    // args: [
-    //   PAYMENT_NFT_CONTRACT_ADDRESS,
-    //   PAYMENT_NFT_TOKEN_ID,
-    //   SERVICE_ACCOUNT_ADDRESS,
-    // ],
     onSuccess(data) {
       // console.log("call onSuccess()");
       // console.log("data: ", data);
@@ -757,7 +752,7 @@ export default function DrawImage() {
                     address: dataRentData.feeTokenAddress,
                     abi: faucetTokenABI.abi,
                   });
-                  // console.log("contract: ", contract);
+                  console.log("contract: ", contract);
 
                   const { r, s, v, deadline } = await erc20PermitSignature({
                     owner: address,
@@ -766,9 +761,12 @@ export default function DrawImage() {
                     contract,
                     chain,
                   });
+                  console.log("r: ", r);
+                  console.log("s: ", s);
+                  console.log("v: ", v);
+                  console.log("deadline: ", deadline);
 
                   writeRentNFTByToken?.({
-                    // value: dataRentData.rentFeeByToken,
                     args: [
                       PAYMENT_NFT_CONTRACT_ADDRESS,
                       PAYMENT_NFT_TOKEN_ID,
@@ -904,7 +902,7 @@ export default function DrawImage() {
         owner,
         spender,
         value: amount.toString(),
-        nonce: nonce.toString(16),
+        nonce: nonce.toString(),
         deadline: transactionDeadline,
       };
       const msgParams = JSON.stringify({
@@ -916,6 +914,7 @@ export default function DrawImage() {
         primaryType: "Permit",
         message,
       });
+      // console.log("msgParams: ", msgParams);
 
       const params = [address, msgParams];
       const method = "eth_signTypedData_v4";
