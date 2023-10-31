@@ -38,6 +38,10 @@ export default function LoginWrapper({ children }) {
   const CARD_MIN_WIDTH = 375;
 
   useEffect(() => {
+    // console.log("call useEffect()");
+    // console.log("selectedChain: ", selectedChain);
+    // console.log("isConnected: ", isConnected);
+
     if (isWalletConnected({ isConnected, selectedChain }) === true) {
       setIsWalletNetworkConnect(true);
     } else {
@@ -65,7 +69,11 @@ export default function LoginWrapper({ children }) {
   }
 
   function CheckingWalletMessage() {
-    return <Typography color="primary">Checking wallet network</Typography>;
+    return (
+      <Box sx={{ mt: CARD_MARGIN_TOP }}>
+        <CircularProgress size={5} />
+      </Box>
+    );
   }
 
   if (isLoading === false && user?.isLoggedIn === true) {

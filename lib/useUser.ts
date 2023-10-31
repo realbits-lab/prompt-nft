@@ -16,19 +16,15 @@ export default function useUser() {
   const { data: user, mutate: mutateUser } = useSWR<User>({ url: "/api/user" });
   // console.log("user: ", user);
 
-  const [returnUserData, setReturnUserData] = useState(user);
-
   useEffect(() => {
     async function postUserLogout() {
-      console.log("call postUserLogout()");
+      // console.log("call postUserLogout()");
       if (walletConnectionStatus === false && user?.isLoggedIn === true) {
         try {
           await mutateUser(
             await fetchJson({ url: "/api/logout" }, { method: "POST" }),
             false
           );
-
-          setReturnUserData(user);
         } catch (error) {
           if (error instanceof FetchError) {
             console.error(error.data.message);
@@ -42,8 +38,8 @@ export default function useUser() {
     }
 
     postUserLogout();
-  }, [user]);
+  }, [user, walletConnectionStatus]);
 
-  console.log("user: ", user);
+  // console.log("user: ", user);
   return { user, mutateUser, isLoading };
 }
