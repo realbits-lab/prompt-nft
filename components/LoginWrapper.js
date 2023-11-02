@@ -76,6 +76,26 @@ export default function LoginWrapper({ children }) {
     );
   }
 
+  function MobileMessage() {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+        sx={{
+          mt: CARD_MARGIN_TOP,
+          mx: CARD_MARGIN_TOP,
+        }}
+      >
+        <Typography variant="h6" color="primary">
+          No support for mobile device now. Sorry for that. Please use desktop
+          chrome browser for this fictures service.
+        </Typography>
+      </Box>
+    );
+  }
+
   if (isLoading === false && user?.isLoggedIn === true) {
     return (
       <>
@@ -89,47 +109,40 @@ export default function LoginWrapper({ children }) {
           )}
         </BrowserView>
         <MobileView>
+          <MobileMessage />
+        </MobileView>
+      </>
+    );
+  } else {
+    return (
+      <>
+        <BrowserView>
           <Box
             display="flex"
             justifyContent="center"
             alignItems="center"
             minHeight="100vh"
             sx={{
-              mt: CARD_MARGIN_TOP,
-              mx: CARD_MARGIN_TOP,
+              minWidth: CARD_MIN_WIDTH,
+              maxWidth: CARD_MAX_WIDTH,
+              marginTop: CARD_MARGIN_TOP,
             }}
           >
-            <Typography variant="h6" color="primary">
-              No support for mobile device now. Sorry for that. Please use
-              desktop chrome browser for this fictures service.
-            </Typography>
+            {isLoading === true ? (
+              <CircularProgress size={50} color="primary" />
+            ) : isWalletNetworkConnect === true ? (
+              <User title="Click for login" buttonColor="primary" />
+            ) : isWalletNetworkConnect === false ? (
+              <ChangeWalletButton />
+            ) : (
+              <CheckingWalletMessage />
+            )}
           </Box>
+        </BrowserView>
+        <MobileView>
+          <MobileMessage />
         </MobileView>
       </>
-    );
-  } else {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
-        sx={{
-          minWidth: CARD_MIN_WIDTH,
-          maxWidth: CARD_MAX_WIDTH,
-          marginTop: CARD_MARGIN_TOP,
-        }}
-      >
-        {isLoading === true ? (
-          <CircularProgress size={50} color="primary" />
-        ) : isWalletNetworkConnect === true ? (
-          <User title="Click for login" buttonColor="primary" />
-        ) : isWalletNetworkConnect === false ? (
-          <ChangeWalletButton />
-        ) : (
-          <CheckingWalletMessage />
-        )}
-      </Box>
     );
   }
 }
