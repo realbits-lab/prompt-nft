@@ -156,11 +156,11 @@ export default function ListItemNft({ registerData }) {
     args: [registerData?.nftAddress, registerData?.tokenId],
     watch: true,
     onSuccess(data) {
-      console.log("call onSuccess()");
-      console.log("data: ", data);
-      console.log("data.renteeAddress: ", data.renteeAddress);
-      console.log("registerData?.tokenId: ", registerData?.tokenId);
-      console.log("address: ", address);
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+      // console.log("data.renteeAddress: ", data.renteeAddress);
+      // console.log("registerData?.tokenId: ", registerData?.tokenId);
+      // console.log("address: ", address);
 
       //* Check renter.
       if (data.renteeAddress.toLowerCase() === address?.toLowerCase()) {
