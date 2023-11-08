@@ -544,7 +544,9 @@ export default function CardNft({ nftData, isRent = false }) {
                   <StyledTableCell align="left">
                     <Button
                       size="small"
-                      disabled={isRenting}
+                      disabled={
+                        isRenting || isLoadingRentData || isLoadingOwnerOf
+                      }
                       variant="outlined"
                       onClick={handleRentPayment}
                     >
