@@ -85,7 +85,9 @@ export default function ListRent({ data, isLoading }) {
             <Typography>Rented NFT list</Typography>
 
             {data.map((nftData, idx) => {
-              return <CardNft nftData={nftData} isRent={true} key={idx} />;
+              return (
+                <CardNft nftData={nftData} showRentButton={true} key={idx} />
+              );
             })}
           </Box>
         </>
