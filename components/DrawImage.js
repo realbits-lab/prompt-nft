@@ -711,6 +711,7 @@ export default function DrawImage() {
                     owner: address,
                     spender: RENT_MARKET_CONTRACT_ADDRESS,
                     amount: dataRentData.rentFeeByToken,
+                    address,
                     contract,
                     chain,
                   });
