@@ -34,6 +34,7 @@ import CardActions from "@mui/material/CardActions";
 import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
 import promptNFTABI from "@/contracts/promptNFT.json";
+import faucetTokenABI from "@/contracts/faucetToken.json";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import {
   isWalletConnected,
@@ -43,6 +44,7 @@ import {
   handleCheckPrompt,
   shortenAddress,
   getChainId,
+  erc20PermitSignature,
 } from "@/lib/util";
 import useUser from "@/lib/useUser";
 
@@ -498,7 +500,36 @@ export default function ListItemNft({ registerData }) {
       return;
     }
 
-    writeRentNFTByToken?.();
+    const contract = getContract({
+      address: registerData.feeTokenAddress,
+      abi: faucetTokenABI.abi,
+    });
+    console.log("contract: ", contract);
+
+    const { r, s, v, deadline } = await erc20PermitSignature({
+      owner: address,
+      spender: RENT_MARKET_CONTRACT_ADDRESS,
+      amount: registerData.rentFeeByToken,
+      contract,
+      selectedChain,
+    });
+    console.log("r: ", r);
+    console.log("s: ", s);
+    console.log("v: ", v);
+    console.log("deadline: ", deadline);
+
+    writeRentNFTByToken?.({
+      args: [
+        registerData.nftAddress,
+        registerData.tokenId,
+        SERVICE_ACCOUNT_ADDRESS,
+        deadline,
+        v,
+        r,
+        s,
+      ],
+    });
+
     setIsRentingByToken(true);
   }
 
@@ -572,7 +603,7 @@ export default function ListItemNft({ registerData }) {
               disabled={
                 isRentingByToken || isLoadingRentData || isLoadingOwnerOf
               }
-              onClick={handleRentPayment}
+              onClick={handleRentPaymentByToken}
             >
               {isOwner === undefined && isRentee === undefined ? (
                 <>Loading...</>
