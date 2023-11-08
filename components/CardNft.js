@@ -40,7 +40,7 @@ import rentmarketABI from "@/contracts/rentMarket.json";
 import promptNFTABI from "@/contracts/promptNFT.json";
 import { TextField } from "@mui/material";
 
-export default function CardNft({ nftData, showRentButton = false }) {
+export default function CardNft({ nftData, hideRentButton = false }) {
   // console.log("call CardNft()");
   // console.log("nftData: ", nftData);
 
@@ -713,7 +713,7 @@ export default function CardNft({ nftData, showRentButton = false }) {
                     </StyledTableCell>
                   </StyledTableRow>
                 ) : null}
-                {showRentButton ? (
+                {hideRentButton ? (
                   <></>
                 ) : (
                   <StyledTableRow>

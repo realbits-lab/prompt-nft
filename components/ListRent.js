@@ -86,7 +86,7 @@ export default function ListRent({ data, isLoading }) {
 
             {data.map((nftData, idx) => {
               return (
-                <CardNft nftData={nftData} showRentButton={true} key={idx} />
+                <CardNft nftData={nftData} hideRentButton={true} key={idx} />
               );
             })}
           </Box>
