@@ -98,7 +98,7 @@ export default function ListPage(props) {
 
   //* User login data.
   const { user, mutateUser } = useUser();
-  console.log("user: ", user);
+  // console.log("user: ", user);
 
   const [currentMode, setCurrentMode] = React.useState(
     inputMode || DEFAULT_MENU
@@ -174,8 +174,8 @@ export default function ListPage(props) {
 
   React.useEffect(
     function () {
-      console.log("call useEffect()");
-      console.log("queryMode: ", queryMode);
+      // console.log("call useEffect()");
+      // console.log("queryMode: ", queryMode);
 
       const mode = getMode({ mode: queryMode?.[0] || inputMode });
       // console.log("mode: ", mode);
