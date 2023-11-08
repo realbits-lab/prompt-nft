@@ -3,15 +3,15 @@ import { getAccount } from "@wagmi/core";
 import { getChainId } from "@/lib/util";
 
 export default function useWalletConnect(): Boolean {
-  console.log("call useWalletConnect()");
+  // console.log("call useWalletConnect()");
 
   //* Check wallet connect.
   //* - Should connect to wallet.
   const { connector, isConnected } = useAccount();
-  console.log("isConnected: ", isConnected);
+  // console.log("isConnected: ", isConnected);
 
   const account = getAccount();
-  console.log("account: ", account);
+  // console.log("account: ", account);
 
   // if (isConnected === false) {
   //   return false;
@@ -20,12 +20,12 @@ export default function useWalletConnect(): Boolean {
   //* Check network setting.
   //* - Should use the configured network.
   const { chain, chains } = useNetwork();
-  console.log("chain: ", chain);
+  // console.log("chain: ", chain);
 
   const configuredChainId = getChainId({
     chainName: process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK,
   });
-  console.log("configuredChainId: ", configuredChainId);
+  // console.log("configuredChainId: ", configuredChainId);
 
   if (chain?.id !== configuredChainId) {
     return false;

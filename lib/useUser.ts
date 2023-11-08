@@ -5,7 +5,7 @@ import useWalletConnect from "@/lib/useWalletConnect";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
 
 export default function useUser() {
-  console.log("call useUser()");
+  // console.log("call useUser()");
 
   const [isLoading, setIsLoading] = useState(true);
 

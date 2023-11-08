@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
-import { utils } from "ethers";
 import { formatEther } from "viem";
 import moment from "moment";
 import momentDurationFormatSetup from "moment-duration-format";
@@ -31,7 +30,12 @@ import Typography from "@mui/material/Typography";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import fetchJson, { FetchError } from "@/lib/fetchJson";
 import useUser from "@/lib/useUser";
-import { sleep, writeToastMessageState, AlertSeverity } from "@/lib/util";
+import {
+  sleep,
+  writeToastMessageState,
+  AlertSeverity,
+  erc20PermitSignature,
+} from "@/lib/util";
 import faucetTokenABI from "@/contracts/faucetToken.json";
 import WalletProfile from "@/components/WalletProfile";
 
@@ -706,6 +710,7 @@ export default function DrawImage() {
                     owner: address,
                     spender: RENT_MARKET_CONTRACT_ADDRESS,
                     amount: dataRentData.rentFeeByToken,
+                    address,
                     contract,
                     chain,
                   });
@@ -801,96 +806,6 @@ export default function DrawImage() {
         </Card>
       </Box>
     );
-  }
-
-  async function erc20PermitSignature({
-    owner,
-    spender,
-    amount,
-    contract,
-    chain,
-  }) {
-    // console.log("call erc20PermitSignature()");
-    // console.log("owner: ", owner);
-    // console.log("spender: ", spender);
-    // console.log("amount: ", amount);
-    // console.log("contract: ", contract);
-    // console.log("chain: ", chain);
-
-    try {
-      //* Deadline is 20 minutes later from current timestamp.
-      const transactionDeadline = Date.now() + 20 * 60;
-      // console.log("transactionDeadline: ", transactionDeadline);
-      const nonce = await contract.read.nonces({ args: [owner] });
-      // console.log("nonce: ", nonce);
-      const contractName = await contract.read.name();
-      // console.log("contractName: ", contractName);
-
-      const EIP712Domain = [
-        { name: "name", type: "string" },
-        { name: "version", type: "string" },
-        { name: "chainId", type: "uint256" },
-        { name: "verifyingContract", type: "address" },
-      ];
-      // console.log("chain: ", chain);
-      const domain = {
-        name: contractName,
-        version: "1",
-        chainId: chain.id,
-        verifyingContract: contract.address,
-      };
-      const Permit = [
-        { name: "owner", type: "address" },
-        { name: "spender", type: "address" },
-        { name: "value", type: "uint256" },
-        { name: "nonce", type: "uint256" },
-        { name: "deadline", type: "uint256" },
-      ];
-      const message = {
-        owner,
-        spender,
-        value: amount.toString(),
-        nonce: nonce.toString(),
-        deadline: transactionDeadline,
-      };
-      const msgParams = JSON.stringify({
-        types: {
-          EIP712Domain,
-          Permit,
-        },
-        domain,
-        primaryType: "Permit",
-        message,
-      });
-      // console.log("msgParams: ", msgParams);
-
-      const params = [address, msgParams];
-      const method = "eth_signTypedData_v4";
-      // console.log("params: ", params);
-      // console.log("method: ", method);
-
-      const signature = await ethereum.request({
-        method,
-        params,
-      });
-      // console.log("signature: ", signature);
-
-      // console.log("utils: ", utils);
-      //* TODO: In ethers ^5.7.2 version. In ethers version 6, got error.
-      const signData = utils.splitSignature(signature);
-      // console.log("signData: ", signData);
-
-      const { r, s, v } = signData;
-      return {
-        r,
-        s,
-        v,
-        deadline: transactionDeadline,
-      };
-    } catch (error) {
-      console.error("error: ", error);
-      return error;
-    }
   }
 
   //* Fix mui textfield problem about focus.
