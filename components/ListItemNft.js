@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  isAddressEqual,
-  createWalletClient,
-  custom,
-  encodeFunctionData,
-  parseEther,
-} from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+import { isAddressEqual } from "viem";
 import { isMobile } from "react-device-detect";
 import {
   useAccount,
@@ -15,14 +8,10 @@ import {
   useWalletClient,
   useContractRead,
   useSignTypedData,
-  useContractEvent,
   useContractWrite,
-  usePrepareContractWrite,
   useWaitForTransaction,
-  useWatchPendingTransactions,
 } from "wagmi";
 import { getContract } from "wagmi/actions";
-import { polygonMumbai, polygon } from "wagmi/chains";
 import { useRecoilStateLoadable } from "recoil";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -510,8 +499,9 @@ export default function ListItemNft({ registerData }) {
       owner: address,
       spender: RENT_MARKET_CONTRACT_ADDRESS,
       amount: registerData.rentFeeByToken,
+      address,
       contract,
-      selectedChain,
+      chain: selectedChain,
     });
     console.log("r: ", r);
     console.log("s: ", s);
