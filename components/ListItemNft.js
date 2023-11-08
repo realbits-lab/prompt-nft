@@ -63,7 +63,6 @@ export default function ListItemNft({ registerData }) {
   const [metadata, setMetadata] = React.useState();
   const { chains, chain: selectedChain } = useNetwork();
   const { address, isConnected } = useAccount();
-  const publicClient = usePublicClient();
 
   const {
     data: dataWalletClient,
@@ -319,7 +318,7 @@ export default function ListItemNft({ registerData }) {
       setWriteToastMessage({
         snackbarSeverity: AlertSeverity.info,
         snackbarMessage:
-          "Rent transaction is just started and wait a moment...",
+          "Rent by token transaction is just started and wait a moment...",
         snackbarTime: new Date(),
         snackbarOpen: true,
       });
@@ -366,7 +365,7 @@ export default function ListItemNft({ registerData }) {
 
       setWriteToastMessage({
         snackbarSeverity: AlertSeverity.info,
-        snackbarMessage: "Renting is finished.",
+        snackbarMessage: "Renting by token is finished.",
         snackbarTime: new Date(),
         snackbarOpen: true,
       });
@@ -403,7 +402,6 @@ export default function ListItemNft({ registerData }) {
 
   React.useEffect(() => {
     // console.log("address: ", address);
-    // console.log("publicClient: ", publicClient);
     // console.log("dataWalletClient: ", dataWalletClient);
     // console.log("isErrorWalletClient: ", isErrorWalletClient);
     // console.log("isLoadingWalletClient: ", isLoadingWalletClient);
