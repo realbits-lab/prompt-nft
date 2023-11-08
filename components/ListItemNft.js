@@ -4,7 +4,6 @@ import { isMobile } from "react-device-detect";
 import {
   useAccount,
   useNetwork,
-  usePublicClient,
   useWalletClient,
   useContractRead,
   useSignTypedData,
@@ -157,10 +156,12 @@ export default function ListItemNft({ registerData }) {
     args: [registerData?.nftAddress, registerData?.tokenId],
     watch: true,
     onSuccess(data) {
-      // console.log("call onSuccess()");
-      // console.log("data.renteeAddress: ", data.renteeAddress);
-      // console.log("registerData?.tokenId: ", registerData?.tokenId);
-      // console.log("address: ", address);
+      console.log("call onSuccess()");
+      console.log("data: ", data);
+      console.log("data.renteeAddress: ", data.renteeAddress);
+      console.log("registerData?.tokenId: ", registerData?.tokenId);
+      console.log("address: ", address);
+
       //* Check renter.
       if (data.renteeAddress.toLowerCase() === address?.toLowerCase()) {
         setIsRentee(true);
@@ -584,32 +585,34 @@ export default function ListItemNft({ registerData }) {
             )}
           </Button>
           {isAddressEqual(registerData?.feeTokenAddress, ZERO_ADDRESS) ===
-            false && (
-            <Button
-              size="small"
-              variant="outlined"
-              disabled={
-                isRentingByToken || isLoadingRentData || isLoadingOwnerOf
-              }
-              onClick={handleRentPaymentByToken}
-            >
-              {isOwner === undefined && isRentee === undefined ? (
-                <>Loading...</>
-              ) : isRentingByToken ? (
-                <>Renting...</>
-              ) : (
-                <>
-                  Rent{" "}
-                  {(
-                    Number(
-                      (registerData?.rentFeeByToken * 1000000n) / 10n ** 18n
-                    ) / 1000000
-                  ).toString()}{" "}
-                  token
-                </>
-              )}
-            </Button>
-          )}
+            false &&
+            isOwner !== true &&
+            isRentee !== true && (
+              <Button
+                size="small"
+                variant="outlined"
+                disabled={
+                  isRentingByToken || isLoadingRentData || isLoadingOwnerOf
+                }
+                onClick={handleRentPaymentByToken}
+              >
+                {isOwner === undefined && isRentee === undefined ? (
+                  <>Loading...</>
+                ) : isRentingByToken ? (
+                  <>Renting...</>
+                ) : (
+                  <>
+                    Rent{" "}
+                    {(
+                      Number(
+                        (registerData?.rentFeeByToken * 1000000n) / 10n ** 18n
+                      ) / 1000000
+                    ).toString()}{" "}
+                    token
+                  </>
+                )}
+              </Button>
+            )}
         </CardActions>
       </Card>
     </Box>
