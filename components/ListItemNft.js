@@ -55,6 +55,7 @@ export default function ListItemNft({ registerData }) {
   const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
   const [isRenting, setIsRenting] = React.useState(false);
+  const [isRentingByToken, setIsRentingByToken] = React.useState(false);
   const [isOwner, setIsOwner] = React.useState();
   const [isRentee, setIsRentee] = React.useState();
   const { user, mutateUser } = useUser();
@@ -306,13 +307,80 @@ export default function ListItemNft({ registerData }) {
       });
     },
   });
+  const {
+    data: dataRentNFTByToken,
+    error: errorRentNFTByToken,
+    isError: isErrorRentNFTByToken,
+    isIdle: isIdleRentNFTByToken,
+    isLoading: isLoadingRentNFTByToken,
+    isSuccess: isSuccessRentNFTByToken,
+    write: writeRentNFTByToken,
+    status: statusRentNFTByToken,
+  } = useContractWrite({
+    address: RENT_MARKET_CONTRACT_ADDRESS,
+    abi: rentmarketABI.abi,
+    functionName: "rentNFTByToken",
 
-  //* Get pending transactions.
-  // useWatchPendingTransactions({
-  //   listener: function (tx) {
-  //     // console.log("tx: ", tx);
-  //   },
-  // });
+    onSuccess(data) {
+      console.log("call onSuccess()");
+      console.log("data: ", data);
+
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.info,
+        snackbarMessage:
+          "Rent transaction is just started and wait a moment...",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+    onError(error) {
+      console.log("call onError()");
+      console.log("error: ", error);
+
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.error,
+        snackbarMessage: `${error}`,
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+    onSettled(data, error) {
+      console.log("call onSettled()");
+      console.log("data: ", data);
+      console.log("error: ", error);
+
+      setIsRentingByToken(false);
+    },
+  });
+
+  const {
+    data: dataTransactionRentNFTByToken,
+    isError: isErrorTransactionRentNFTByToken,
+    isLoading: isLoadingTransactionRentNFTByToken,
+  } = useWaitForTransaction({
+    hash: dataRentNFT?.hash,
+
+    onSuccess(data) {
+      // console.log("call onSuccess()");
+      // console.log("data: ", data);
+    },
+    onError(error) {
+      // console.log("call onError()");
+      // console.log("error: ", error);
+    },
+    onSettled(data, error) {
+      console.log("call onSettled()");
+      console.log("data: ", data);
+      console.log("error: ", error);
+
+      setWriteToastMessage({
+        snackbarSeverity: AlertSeverity.info,
+        snackbarMessage: "Renting is finished.",
+        snackbarTime: new Date(),
+        snackbarOpen: true,
+      });
+    },
+  });
 
   //*---------------------------------------------------------------------------
   //* Snackbar variables.
@@ -391,13 +459,18 @@ export default function ListItemNft({ registerData }) {
       return;
     }
 
-    //* Check write function error.
-    if (!writeRentNFT) {
-      console.error(`rentNFT function is invalid.`);
+    writeRentNFT?.();
+    setIsRenting(true);
+  }
+
+  async function handleRentPaymentByToken() {
+    //* Network is invalid.
+    if (isWalletConnected({ isConnected, selectedChain }) === false) {
+      console.error(`${selectedChain} is invalid.`);
 
       setWriteToastMessage({
-        snackbarSeverity: AlertSeverity.error,
-        snackbarMessage: `rentNFT contract function is not ready yet.`,
+        snackbarSeverity: AlertSeverity.warning,
+        snackbarMessage: `Change blockchain network to ${process.env.NEXT_PUBLIC_BLOCKCHAIN_NETWORK}`,
         snackbarTime: new Date(),
         snackbarOpen: true,
       });
@@ -405,9 +478,28 @@ export default function ListItemNft({ registerData }) {
       return;
     }
 
-    setIsRenting(true);
+    //* If user is owner or renter.
+    if (isOwner === true || isRentee === true) {
+      await handleCheckPrompt({
+        setWriteToastMessage: setWriteToastMessage,
+        setWriteDialogMessage: setWriteDialogMessage,
+        isMobile: isMobile,
+        user: user,
+        nftData: registerData,
+        promptNftContract: promptNftContract,
+        dataWalletClient: dataWalletClient,
+        isConnected: isConnected,
+        selectedChain: selectedChain,
+        address: address,
+        mutateUser: mutateUser,
+        signTypedDataAsync: signTypedDataAsync,
+      });
 
-    writeRentNFT?.();
+      return;
+    }
+
+    writeRentNFTByToken?.();
+    setIsRentingByToken(true);
   }
 
   if (!metadata) {
@@ -477,12 +569,14 @@ export default function ListItemNft({ registerData }) {
             <Button
               size="small"
               variant="outlined"
-              disabled={isRenting || isLoadingRentData || isLoadingOwnerOf}
+              disabled={
+                isRentingByToken || isLoadingRentData || isLoadingOwnerOf
+              }
               onClick={handleRentPayment}
             >
               {isOwner === undefined && isRentee === undefined ? (
                 <>Loading...</>
-              ) : isRenting ? (
+              ) : isRentingByToken ? (
                 <>Renting...</>
               ) : (
                 <>
