@@ -1,17 +1,23 @@
 import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import useUser from "@/lib/useUser";
-import { useNetwork, useAccount, useSwitchNetwork } from "wagmi";
+import { useNetwork, useAccount, useSwitchNetwork, useConnect } from "wagmi";
 import User from "@/components/User";
 import CircularProgress from "@mui/material/CircularProgress";
 import { BrowserView, MobileView } from "react-device-detect";
 import Button from "@mui/material/Button";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
 import Typography from "@mui/material/Typography";
 import { isWalletConnected, getChainId } from "@/lib/util";
 
 export default function LoginWrapper({ children }) {
   // console.log("call LoginWrapper()");
 
+  const [openConnectorsDialog, setOpenConnectorsDialog] = useState(false);
   const [isWalletNetworkConnect, setIsWalletNetworkConnect] = useState();
   const { chains, chain: selectedChain } = useNetwork();
   const { address, isConnected } = useAccount();
@@ -22,6 +28,13 @@ export default function LoginWrapper({ children }) {
     pendingChainId,
     switchNetwork,
   } = useSwitchNetwork();
+  const {
+    connect,
+    connectors,
+    error: errorConnect,
+    isLoading: isLoadingConnect,
+    pendingConnector,
+  } = useConnect();
 
   //*----------------------------------------------------------------------------
   //* User hook.
@@ -38,9 +51,9 @@ export default function LoginWrapper({ children }) {
   const CARD_MIN_WIDTH = 375;
 
   useEffect(() => {
-    // console.log("call useEffect()");
-    // console.log("selectedChain: ", selectedChain);
-    // console.log("isConnected: ", isConnected);
+    console.log("call useEffect()");
+    console.log("selectedChain: ", selectedChain);
+    console.log("isConnected: ", isConnected);
 
     if (isWalletConnected({ isConnected, selectedChain }) === true) {
       setIsWalletNetworkConnect(true);
@@ -76,6 +89,55 @@ export default function LoginWrapper({ children }) {
     );
   }
 
+  function CheckingConnection() {
+    return (
+      <>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="100vh"
+        >
+          <Button
+            variant="contained"
+            onClick={() => {
+              setOpenConnectorsDialog(true);
+            }}
+          >
+            CONNECT
+          </Button>
+        </Box>
+
+        <Dialog
+          onClose={() => setOpenConnectorsDialog(false)}
+          open={openConnectorsDialog}
+        >
+          <DialogTitle>Select connectors</DialogTitle>
+          <List sx={{ pt: 0 }}>
+            {connectors.map((connector, idx) => (
+              <ListItem disableGutters key={connector.id}>
+                <ListItemButton
+                  disabled={!connector.ready}
+                  key={connector.id}
+                  onClick={() => {
+                    connect({ connector });
+                    setOpenConnectorsDialog(false);
+                  }}
+                >
+                  {connector.name}
+                  {!connector.ready && " (unsupported)"}
+                  {isLoadingConnect &&
+                    connector.id === pendingConnector?.id &&
+                    " (connecting)"}
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </Dialog>
+      </>
+    );
+  }
+
   function MobileMessage() {
     return (
       <Box
@@ -96,7 +158,9 @@ export default function LoginWrapper({ children }) {
     );
   }
 
-  if (isLoading === false && user?.isLoggedIn === true) {
+  if (isConnected === false) {
+    return <CheckingConnection />;
+  } else if (isLoading === false && user?.isLoggedIn === true) {
     return (
       <>
         <BrowserView>

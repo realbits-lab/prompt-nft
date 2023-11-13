@@ -52,7 +52,7 @@ function List({ mode, updated, setNewImageCountFunc }) {
   //* Wagmi.
   //*---------------------------------------------------------------------------
   const { address, isConnected } = useAccount();
-  // console.log("address: ", address);
+  console.log("address: ", address);
 
   //* promptNftContract is used for useSWR params, so use useMemo.
   const promptNftContract = React.useMemo(
