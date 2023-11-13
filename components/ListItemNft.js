@@ -153,7 +153,7 @@ export default function ListItemNft({ registerData }) {
     address: RENT_MARKET_CONTRACT_ADDRESS,
     abi: rentmarketABI.abi,
     functionName: "getRentData",
-    args: [registerData?.nftAddress, registerData?.tokenId],
+    args: [registerData?.nftAddress, registerData?.tokenId, address],
     watch: true,
     onSuccess(data) {
       // console.log("call onSuccess()");

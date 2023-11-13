@@ -185,7 +185,7 @@ export default function CardNft({ nftData, hideRentButton = false }) {
     address: RENT_MARKET_CONTRACT_ADDRES,
     abi: rentmarketABI.abi,
     functionName: "getRentData",
-    args: [nftData?.nftAddress, nftData?.tokenId],
+    args: [nftData?.nftAddress, nftData?.tokenId, nftData?.renteeAddress],
     // watch: true,
     onSuccess(data) {
       console.log("call onSuccess()");
