@@ -37,8 +37,8 @@ import {
 import useUser from "@/lib/useUser";
 
 export default function ListItemNft({ registerData }) {
-  // console.log("call ListItemNft()");
-  // console.log("registerData: ", registerData);
+  console.log("call ListItemNft()");
+  console.log("registerData: ", registerData);
 
   const CARD_MAX_WIDTH = 420;
   const CARD_MIN_WIDTH = 375;
@@ -161,22 +161,22 @@ export default function ListItemNft({ registerData }) {
       // console.log("data.renteeAddress: ", data.renteeAddress);
       // console.log("registerData?.tokenId: ", registerData?.tokenId);
       // console.log("address: ", address);
-
-      //* Check renter.
-      if (data.renteeAddress.toLowerCase() === address?.toLowerCase()) {
-        setIsRentee(true);
-      } else {
-        setIsRentee(false);
-      }
     },
     onError(error) {
       // console.log("call onError()");
       // console.log("error: ", error);
     },
     onSettled(data, error) {
-      // console.log("call onSettled()");
-      // console.log("data: ", data);
-      // console.log("error: ", error);
+      console.log("call onSettled()");
+      console.log("data: ", data);
+      console.log("error: ", error);
+
+      //* Check renter.
+      if (data?.renteeAddress.toLowerCase() === address?.toLowerCase()) {
+        setIsRentee(true);
+      } else {
+        setIsRentee(false);
+      }
     },
   });
   // console.log("isLoadingRentData: ", isLoadingRentData);
