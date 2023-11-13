@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "cacheDirectories": [
-    ".next/cache"
+    ".next/cache",
+    "./node_modules"
   ],
   "engines": {
     "npm": ">=9.5.0 <9.6.0",
