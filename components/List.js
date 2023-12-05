@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  useAccount,
-  useNetwork,
-  useWalletClient,
-  useContractRead,
-  useSignTypedData,
-  useContractEvent,
-} from "wagmi";
+import { useAccount, useContractRead, useContractEvent } from "wagmi";
 import { getContract } from "wagmi/actions";
 import useSWR from "swr";
 import dynamic from "next/dynamic";
@@ -16,15 +9,14 @@ import ListNft from "@/components/ListNft";
 import ListOwn from "@/components/ListOwn";
 import ListRent from "@/components/ListRent";
 import Settings from "@/components/Settings";
-import LoginWrapper from "@/components/LoginWrapper";
 import fetchJson from "@/lib/fetchJson";
-import { getChainId } from "@/lib/util";
 import promptNFTABI from "@/contracts/promptNFT.json";
 import rentmarketABI from "@/contracts/rentMarket.json";
 import ListFaucet from "./faucet/ListFaucet";
 const DrawImage = dynamic(() => import("./DrawImage"), {
   ssr: false,
 });
+const LoginWrapper = dynamic(() => import("./LoginWrapper"), { ssr: false });
 
 function List({ mode, updated, setNewImageCountFunc }) {
   // console.log("call List()");
