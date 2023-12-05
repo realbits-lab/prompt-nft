@@ -32,6 +32,7 @@ yarn dev
 
 ## Change prompt NFT contract
 - Change NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS in .env
+- Register nft address to rent market
 
 ## Contributing
 

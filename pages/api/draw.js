@@ -1,14 +1,12 @@
 import { withIronSessionApiRoute } from "iron-session/next";
 import { sessionOptions } from "@/lib/session";
-import { v4 as uuidv4, v1 } from "uuid";
 import fs from "fs";
-import path from "path";
 import axios from "axios";
 
 async function handler(req, res) {
   console.log("call /api/draw");
 
-  const USE_SDXL = true;
+  const USE_SDXL = process.env.USE_SDXL;
 
   //* Check POST method.
   if (req.method !== "POST") {
