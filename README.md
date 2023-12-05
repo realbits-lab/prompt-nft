@@ -30,6 +30,9 @@ yarn install
 yarn dev
 ```
 
+## Change prompt NFT contract
+- Change NEXT_PUBLIC_PROMPT_NFT_CONTRACT_ADDRESS in .env
+
 ## Contributing
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
